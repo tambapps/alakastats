@@ -6,7 +6,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import com.example.ui.theme.AppTypography
+import com.tambapps.pokemon.alakastats.ui.theme.AppTypography
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -257,7 +257,7 @@ fun AppTheme(
 
   MaterialTheme(
     colorScheme = colorScheme,
-    typography = AppTypography,
+    typography = AppTypography(colorScheme),
     content = content
   )
 }
