@@ -1,4 +1,5 @@
-package com.example.compose
+package com.tambapps.pokemon.alakastats.ui.theme
+
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF6D5E0F)

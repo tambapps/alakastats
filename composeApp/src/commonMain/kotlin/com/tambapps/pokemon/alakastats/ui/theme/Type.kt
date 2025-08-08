@@ -15,7 +15,7 @@ import org.jetbrains.compose.resources.Font
 val baseline = Typography()
 
 @Composable
-fun AppTypography(colorScheme: ColorScheme): Typography  {
+fun appTypography(colorScheme: ColorScheme): Typography  {
         val interRegular = Font(Res.font.Inter_18pt_Regular, FontWeight.Normal)
         val interBold = Font(Res.font.Inter_18pt_Bold, FontWeight.Bold)
 
