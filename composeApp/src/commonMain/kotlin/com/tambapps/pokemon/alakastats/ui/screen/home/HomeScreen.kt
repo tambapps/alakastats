@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen
+package com.tambapps.pokemon.alakastats.ui.screen.home
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
@@ -42,16 +42,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.koinScreenModel
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.ui.theme.isCompact
 import org.jetbrains.compose.resources.painterResource
 
 object HomeScreen : Screen {
     @Composable
     override fun Content() {
+        val viewModel = koinScreenModel<HomeViewModel>()
         val isDarkTheme = isSystemInDarkTheme()
-        
         BoxWithConstraints {
-            val isCompact = maxWidth < 600.dp
+            val isCompact = isCompact()
             Column(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.background)
@@ -61,7 +63,7 @@ object HomeScreen : Screen {
                 if (isCompact) {
                     MobileScreen(isDarkTheme)
                 } else {
-                    LargeScreen(isDarkTheme)
+                    LargeScreen(isDarkTheme, viewModel)
                 }
             }
         }
@@ -74,7 +76,7 @@ private fun ColumnScope.MobileScreen(isDarkTheme: Boolean) {
 }
 
 @Composable
-private fun ColumnScope.LargeScreen(isDarkTheme: Boolean) {
+private fun ColumnScope.LargeScreen(isDarkTheme: Boolean, viewModel: HomeViewModel) {
     AlakastatsLabel(isDarkTheme)
     Text("Think like Alakazam. Play like a pro.", style = MaterialTheme.typography.headlineMedium)
     Spacer(Modifier.height(8.dp))
@@ -84,7 +86,7 @@ private fun ColumnScope.LargeScreen(isDarkTheme: Boolean) {
     ) {
         ButtonBarContent()
     }
-    TeamCardGrid(emptyList(), 3)
+    TeamCardGrid(viewModel.teamlyticsList, 3)
 }
 
 @Composable
