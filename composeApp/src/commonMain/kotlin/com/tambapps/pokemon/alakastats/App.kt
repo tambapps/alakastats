@@ -48,27 +48,33 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.di.appModule
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.theme.AppTheme
+import org.koin.compose.KoinApplication
 
 @Composable
 @Preview
 fun App() {
-    val isDarkTheme = isSystemInDarkTheme()
+    KoinApplication(application = {
+        modules(appModule)
+    }) {
+        val isDarkTheme = isSystemInDarkTheme()
 
-    AppTheme(darkTheme = isDarkTheme) {
-        BoxWithConstraints {
-            val isCompact = maxWidth < 600.dp
-            Column(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
-                    .safeContentPadding()
-                    .fillMaxSize(),
-            ) {
-                if (isCompact) {
-                    MobileScreen(isDarkTheme)
-                } else {
-                    LargeScreen(isDarkTheme)
+        AppTheme(darkTheme = isDarkTheme) {
+            BoxWithConstraints {
+                val isCompact = maxWidth < 600.dp
+                Column(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.background)
+                        .safeContentPadding()
+                        .fillMaxSize(),
+                ) {
+                    if (isCompact) {
+                        MobileScreen(isDarkTheme)
+                    } else {
+                        LargeScreen(isDarkTheme)
+                    }
                 }
             }
         }
