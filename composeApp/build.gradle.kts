@@ -56,7 +56,6 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
-            implementation(libs.material.icons.extended)
             implementation(libs.pokemon.sdReplayParser)
             implementation(libs.pokemon.pokepasteParser)
             implementation(compose.runtime)
