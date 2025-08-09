@@ -17,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -76,7 +77,7 @@ object CreateTeamScreen : Screen {
                     label = { Text("Team Name") },
                     placeholder = { Text("Enter a name for your team") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
                 
                 Text(
@@ -93,7 +94,11 @@ object CreateTeamScreen : Screen {
                         .fillMaxWidth()
                         .height(200.dp),
                     minLines = 8,
-                    maxLines = 12
+                    maxLines = 12,
+                    isError = viewModel.pokepasteError != null,
+                    supportingText = viewModel.pokepasteError?.let { error ->
+                        { Text(text = error) }
+                    }
                 )
                 
                 Spacer(modifier = Modifier.weight(1f))
@@ -112,9 +117,13 @@ object CreateTeamScreen : Screen {
                     Button(
                         onClick = { viewModel.createTeam(navigator) },
                         modifier = Modifier.weight(1f),
-                        enabled = viewModel.isFormValid
+                        enabled = viewModel.isFormValid,
                     ) {
-                        Text("Create Team")
+                        Text(
+                            "Create Team",
+                            // important
+                            color = LocalContentColor.current
+                        )
                     }
                 }
             }

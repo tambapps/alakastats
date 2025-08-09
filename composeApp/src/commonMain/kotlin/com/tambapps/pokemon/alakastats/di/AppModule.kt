@@ -12,5 +12,5 @@ val appModule = module {
     single<PokemonImageService> { PokemonImageService(get()) }
     single<PokepasteParser> { PokepasteParser() }
     factory { HomeViewModel(get()) }
-    factory { CreateTeamViewModel() }
+    factory { CreateTeamViewModel(get()) }
 }
