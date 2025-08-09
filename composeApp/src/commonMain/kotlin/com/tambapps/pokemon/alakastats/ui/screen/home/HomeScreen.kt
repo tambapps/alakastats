@@ -43,7 +43,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.ui.screen.createteam.CreateTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.isCompact
 import org.jetbrains.compose.resources.painterResource
 
@@ -91,10 +94,11 @@ private fun ColumnScope.LargeScreen(isDarkTheme: Boolean, viewModel: HomeViewMod
 
 @Composable
 private fun ButtonBarContent() {
+    val navigator = LocalNavigator.currentOrThrow
     val textStyle = MaterialTheme.typography.labelLarge.copy(
         fontWeight = FontWeight.Bold
     )
-    Button(onClick = {  }) {
+    Button(onClick = { navigator.push(CreateTeamScreen) }) {
         Icon(
             painter = painterResource(Res.drawable.add),
             contentDescription = "Add",
