@@ -4,8 +4,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 
-class HomeViewModel : ScreenModel {
+class HomeViewModel(
+    val imageService: PokemonImageService
+): ScreenModel {
     
     val teamlyticsList: SnapshotStateList<Teamlytics> = mutableStateListOf()
 

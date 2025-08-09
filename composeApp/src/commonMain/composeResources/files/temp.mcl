@@ -1,0 +1,12 @@
+import marcel.json.*
+import marcel.yaml.*
+
+
+
+String filename = args[0]
+
+File file = new File(filename)
+dynobj content = DynamicYaml.instance.read(file)
+
+File outputFile = new File(filename.replaceAll('yaml', 'json'))
+DynamicJson.instance.write(content, outputFile)

@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -9,6 +8,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -56,8 +56,6 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
-            implementation(libs.pokemon.sdReplayParser)
-            implementation(libs.pokemon.pokepasteParser)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -66,8 +64,12 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.kamel.image.default)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
+            implementation(libs.pokemon.sdReplayParser)
+            implementation(libs.pokemon.pokepasteParser)
+            implementation(libs.serialization.json)
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.screenmodel)
             implementation(libs.voyager.koin)

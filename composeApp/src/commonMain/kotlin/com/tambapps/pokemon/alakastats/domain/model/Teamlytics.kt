@@ -11,6 +11,7 @@ data class Teamlytics(
     val sdNames: List<String>
 )
 
+@Serializable
 data class ReplayAnalytics(
     val replay: SdReplay
 )

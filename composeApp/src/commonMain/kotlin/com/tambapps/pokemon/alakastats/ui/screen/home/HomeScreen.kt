@@ -86,7 +86,7 @@ private fun ColumnScope.LargeScreen(isDarkTheme: Boolean, viewModel: HomeViewMod
     ) {
         ButtonBarContent()
     }
-    TeamCardGrid(viewModel.teamlyticsList, 3)
+    TeamCardGrid(viewModel, 3)
 }
 
 @Composable
@@ -118,7 +118,7 @@ private fun ButtonBarContent() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TeamCardGrid(
-    teams: List<Teamlytics>,
+    viewModel: HomeViewModel,
     columns: Int,
     modifier: Modifier = Modifier
 ) {
@@ -129,15 +129,18 @@ fun TeamCardGrid(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            /*
             teams.forEach { team ->
                 item(key = team) {
                     TeamCard(team = team)
                 }
             }
+
+             */
             // TODO delete me
             repeat(25) {
                 item {
-                    TeamCard()
+                    TeamCard(viewModel)
                 }
             }
         }
@@ -145,17 +148,25 @@ fun TeamCardGrid(
 }
 
 @Composable
-private fun TeamCard(team: Teamlytics? = null) {
+private fun TeamCard(viewModel: HomeViewModel, team: Teamlytics? = null) {
     Card(
         modifier = Modifier,
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(),
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text("Chuppa Cross Five", style = MaterialTheme.typography.titleMedium)
-            HorizontalDivider(thickness = 2.dp)
-            Text("25 replays")
-            Text("60% winrate")
+            Text("Chuppa Cross Five", style = MaterialTheme.typography.titleLarge)
+            Row {
+                repeat(6) {
+                    viewModel.imageService.PokemonSprite("charizard", modifier = Modifier.weight(1f))
+                }
+            }
+            HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
+            Row {
+                Text("25 replays")
+                Spacer(Modifier.weight(1f))
+                Text("60% winrate")
+            }
         }
     }
 }
