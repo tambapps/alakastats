@@ -53,23 +53,7 @@ import org.jetbrains.compose.resources.painterResource
 object HomeScreen : Screen {
     @Composable
     override fun Content() {
-        val viewModel = koinScreenModel<HomeViewModel>()
-        val isDarkTheme = isSystemInDarkTheme()
-        BoxWithConstraints {
-            val isCompact = isCompact()
-            Column(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
-                    .safeContentPadding()
-                    .fillMaxSize(),
-            ) {
-                if (isCompact) {
-                    MobileScreen(isDarkTheme)
-                } else {
-                    LargeScreen(isDarkTheme, viewModel)
-                }
-            }
-        }
+        DatabaseTestScreen()
     }
 }
 
