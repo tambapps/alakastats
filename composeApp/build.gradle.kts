@@ -106,16 +106,19 @@ kotlin {
             implementation(libs.voyager.screenmodel)
             implementation(libs.voyager.koin)
             implementation(libs.kotlinx.datetime)
+            implementation("app.cash.sqldelight:async-extensions:${libs.versions.sqldelight.get()}")
         }
         sourceSets.jsMain.dependencies {
             implementation(libs.sqldelight.web.worker.driver)
             implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.1.0"))
             implementation(npm("sql.js", "1.10.3"))
+            implementation(devNpm("path-browserify", "1.0.1"))
         }
         sourceSets.wasmJsMain.dependencies {
             implementation(libs.sqldelight.web.worker.driver)
             implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.1.0"))
             implementation(npm("sql.js", "1.10.3"))
+            implementation(devNpm("path-browserify", "1.0.1"))
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
