@@ -82,7 +82,9 @@ kotlin {
             implementation(libs.voyager.koin)
         }
         sourceSets.jsMain.dependencies {
-            // wa-sqlite dependency will be added when we implement IndexedDB integration
+            implementation(libs.sqldelight.web.worker.driver)
+            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.1.0"))
+            implementation(npm("sql.js", "1.10.3"))
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

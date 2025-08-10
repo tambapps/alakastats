@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@cashapp/sqldelight-sqljs-worker@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@cashapp/sqldelight-sqljs-worker/-/sqldelight-sqljs-worker-2.1.0.tgz#4ab898698aca9487f47fc9a42107c606c3ce81c5"
+  integrity sha512-odvBljb1rUOCk3UUZgjdiAChEohYI4Fy6Tj3NUy3l6u3WV/we+tjDTJ/kC25CJKD4pv0ZlH5AL1sKsZ5clKCew==
+
 "@colors/colors@1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
@@ -2537,6 +2542,11 @@ spdy@^4.0.2:
     http-deceiver "^1.2.7"
     select-hose "^2.0.0"
     spdy-transport "^3.0.0"
+
+sql.js@1.10.3:
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/sql.js/-/sql.js-1.10.3.tgz#cd05043a9e2667010cd0520180577c90df8dd990"
+  integrity sha512-H46aWtQkdyjZwFQgraUruy5h/DyJBbAK3EA/WEMqiqF6PGPfKBSKBj/er3dVyYqVIoYfRf5TFM/loEjtQIrqJg==
 
 statuses@2.0.1:
   version "2.0.1"
