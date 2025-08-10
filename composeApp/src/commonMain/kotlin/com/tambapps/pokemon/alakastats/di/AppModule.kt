@@ -14,3 +14,10 @@ val appModule = module {
     factory { HomeViewModel(get()) }
     factory { CreateTeamViewModel(get()) }
 }
+
+// Combined module that includes all modules
+val allModules = listOf(
+    appModule,
+    databaseModule,
+    platformModule
+)

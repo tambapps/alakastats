@@ -82,6 +82,7 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.sqldelight.android.driver)
+            implementation("io.insert-koin:koin-android:${libs.versions.koin.get()}")
         }
         sourceSets.nativeMain.dependencies {
             implementation(libs.sqldelight.native.driver)
@@ -104,6 +105,7 @@ kotlin {
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.screenmodel)
             implementation(libs.voyager.koin)
+            implementation(libs.kotlinx.datetime)
         }
         sourceSets.jsMain.dependencies {
             implementation(libs.sqldelight.web.worker.driver)

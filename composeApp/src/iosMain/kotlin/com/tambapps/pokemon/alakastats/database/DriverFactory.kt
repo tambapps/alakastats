@@ -5,6 +5,10 @@ import app.cash.sqldelight.driver.native.NativeSqliteDriver
 
 actual class DriverFactory {
     actual suspend fun createDriver(): SqlDriver {
-        return NativeSqliteDriver(AlakastatsDatabase.Schema, "alakastats.db")
+        return NativeSqliteDriver(
+            schema = AlakastatsDatabase.Schema,
+            name = "alakastats.db"
+        )
     }
 }
+EOF < /dev/null
