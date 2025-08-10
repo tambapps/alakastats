@@ -1,0 +1,20 @@
+CREATE TABLE TeamPreviewPokemon (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    level INTEGER,
+    FOREIGN KEY (player_id) REFERENCES Player(id) ON DELETE CASCADE
+);
+
+-- Insert team preview pokemon
+insertTeamPreviewPokemon:
+INSERT INTO TeamPreviewPokemon (player_id, name, level)
+VALUES (?, ?, ?);
+
+-- Get team preview pokemon by player id
+selectTeamPreviewPokemonByPlayerId:
+SELECT * FROM TeamPreviewPokemon WHERE player_id = ?;
+
+-- Delete team preview pokemon
+deleteTeamPreviewPokemon:
+DELETE FROM TeamPreviewPokemon WHERE id = ?;

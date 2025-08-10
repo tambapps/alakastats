@@ -1,0 +1,28 @@
+CREATE TABLE Player (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    replay_url TEXT NOT NULL,
+    name TEXT NOT NULL,
+    selection TEXT NOT NULL, -- JSON array of selected pokemon names
+    before_elo INTEGER,
+    after_elo INTEGER,
+    terastallization TEXT, -- pokemon|type
+    moves_usage TEXT, -- JSON object with moves usage map
+    FOREIGN KEY (replay_url) REFERENCES SdReplay(url) ON DELETE CASCADE
+);
+
+-- Insert a new player
+insertPlayer:
+INSERT INTO Player (replay_url, name, selection, before_elo, after_elo, terastallization, moves_usage)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- Get players by replay url
+selectPlayersByReplayUrl:
+SELECT * FROM Player WHERE replay_url = ?;
+
+-- Get player by id
+selectPlayerById:
+SELECT * FROM Player WHERE id = ?;
+
+-- Delete player
+deletePlayer:
+DELETE FROM Player WHERE id = ?;

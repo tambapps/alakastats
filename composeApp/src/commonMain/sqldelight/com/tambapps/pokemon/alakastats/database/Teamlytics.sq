@@ -1,0 +1,30 @@
+CREATE TABLE Teamlytics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    poke_paste TEXT NOT NULL,
+    sd_names TEXT, -- line-return-separated values
+    notes TEXT,
+    last_updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+);
+
+-- Insert a new teamlytics
+insertTeamlytics:
+INSERT INTO Teamlytics (name, poke_paste, sd_names, notes, last_updated_at)
+VALUES (?, ?, ?, ?, ?);
+
+-- Get all teamlytics
+selectAllTeamlytics:
+SELECT * FROM Teamlytics ORDER BY last_updated_at DESC;
+
+-- Get teamlytics by id
+selectTeamlyticsById:
+SELECT * FROM Teamlytics WHERE id = ?;
+
+-- Update teamlytics
+updateTeamlytics:
+UPDATE Teamlytics SET name = ?, poke_paste = ?, sd_names = ?, notes = ?, last_updated_at = ?
+WHERE id = ?;
+
+-- Delete teamlytics
+deleteTeamlytics:
+DELETE FROM Teamlytics WHERE id = ?;

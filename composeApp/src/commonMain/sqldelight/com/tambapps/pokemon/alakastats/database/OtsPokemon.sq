@@ -1,0 +1,24 @@
+CREATE TABLE OtsPokemon (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    item TEXT NOT NULL,
+    ability TEXT NOT NULL,
+    moves TEXT NOT NULL, -- JSON array of move names
+    level INTEGER NOT NULL,
+    tera_type TEXT,
+    FOREIGN KEY (player_id) REFERENCES Player(id) ON DELETE CASCADE
+);
+
+-- Insert OTS pokemon
+insertOtsPokemon:
+INSERT INTO OtsPokemon (player_id, name, item, ability, moves, level, tera_type)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- Get OTS pokemon by player id
+selectOtsPokemonByPlayerId:
+SELECT * FROM OtsPokemon WHERE player_id = ?;
+
+-- Delete OTS pokemon
+deleteOtsPokemon:
+DELETE FROM OtsPokemon WHERE id = ?;

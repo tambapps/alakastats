@@ -7,11 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Teamlytics(
     val pokePaste: PokePaste,
-    val replays: List<ReplayAnalytics>,
+    val replays: List<SdReplay>,
     val sdNames: List<String>
 )
 
-@Serializable
-data class ReplayAnalytics(
-    val replay: SdReplay
-)

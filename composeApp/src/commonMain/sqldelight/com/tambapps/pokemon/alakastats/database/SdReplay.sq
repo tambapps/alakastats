@@ -1,0 +1,30 @@
+CREATE TABLE SdReplay (
+    url TEXT PRIMARY KEY,
+    upload_time INTEGER NOT NULL,
+    format TEXT NOT NULL,
+    rating INTEGER,
+    parser_version TEXT,
+    winner TEXT,
+    next_battle TEXT
+);
+
+-- Insert a new replay
+insertReplay:
+INSERT INTO SdReplay (url, upload_time, format, rating, parser_version, winner, next_battle)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- Get all replays
+selectAllReplays:
+SELECT * FROM SdReplay ORDER BY upload_time DESC;
+
+-- Get replay by url
+selectReplayByUrl:
+SELECT * FROM SdReplay WHERE url = ?;
+
+-- Delete replay
+deleteReplay:
+DELETE FROM SdReplay WHERE url = ?;
+
+-- Get replays by format
+selectReplaysByFormat:
+SELECT * FROM SdReplay WHERE format = ? ORDER BY upload_time DESC;
