@@ -42,7 +42,6 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
 import org.jetbrains.compose.resources.painterResource
 
 object CreateTeamScreen : Screen {
@@ -88,7 +87,7 @@ object CreateTeamScreen : Screen {
             }
         }
         
-        if (viewModel.showAddNameDialog) {
+        if (viewModel.isShowAddNameDialog) {
             ShowdownNameDialog(viewModel)
         }
     }
@@ -150,7 +149,7 @@ private fun ShowdownNamesInput(viewModel: CreateTeamViewModel) {
             )
             Spacer(Modifier.width(16.dp))
             IconButton(
-                onClick = { viewModel.showAddNameDialog() }
+                onClick = { viewModel.openAddNameDialog() }
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.add),

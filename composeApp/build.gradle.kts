@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
@@ -31,9 +30,7 @@ kotlin {
         }
     }
     
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        outputModuleName.set("composeApp")
+    js(IR) {
         browser {
             val rootDirPath = project.rootDir.path
             val projectDirPath = project.projectDir.path
@@ -45,6 +42,11 @@ kotlin {
                         add(rootDirPath)
                         add(projectDirPath)
                     }
+                }
+                
+                // Configure for Skiko and IndexedDB
+                cssSupport {
+                    enabled.set(true)
                 }
             }
         }
@@ -79,8 +81,8 @@ kotlin {
             implementation(libs.voyager.screenmodel)
             implementation(libs.voyager.koin)
         }
-        sourceSets.wasmJsMain.dependencies {
-            implementation(libs.sqldelight.sqlite.driver)
+        sourceSets.jsMain.dependencies {
+            // wa-sqlite dependency will be added when we implement IndexedDB integration
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

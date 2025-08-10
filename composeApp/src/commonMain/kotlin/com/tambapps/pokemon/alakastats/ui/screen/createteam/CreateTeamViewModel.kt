@@ -24,7 +24,7 @@ class CreateTeamViewModel(
     
     val showdownNames = mutableStateListOf<String>()
     
-    var showAddNameDialog by mutableStateOf(false)
+    var isShowAddNameDialog by mutableStateOf(false)
         private set
     var newNameInput by mutableStateOf("")
         private set
@@ -59,13 +59,13 @@ class CreateTeamViewModel(
                 !newNameInput.contains('/') && 
                 newNameInput.length <= 30
     
-    fun showAddNameDialog() {
-        showAddNameDialog = true
+    fun openAddNameDialog() {
+        isShowAddNameDialog = true
         newNameInput = ""
     }
     
     fun hideAddNameDialog() {
-        showAddNameDialog = false
+        isShowAddNameDialog = false
         newNameInput = ""
     }
     
