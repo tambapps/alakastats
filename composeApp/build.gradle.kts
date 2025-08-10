@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
@@ -18,7 +19,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -29,7 +30,7 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     js(IR) {
         browser {
             val rootDirPath = project.rootDir.path
@@ -43,7 +44,6 @@ kotlin {
                         add(projectDirPath)
                     }
                 }
-                
                 // Configure for Skiko and IndexedDB
                 cssSupport {
                     enabled.set(true)
@@ -51,8 +51,33 @@ kotlin {
             }
         }
         binaries.executable()
+        useEsModules()
     }
-    
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            val rootDirPath = project.rootDir.path
+            val projectDirPath = project.projectDir.path
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                    static = (static ?: mutableListOf()).apply {
+                        // Serve sources to debug inside browser
+                        add(rootDirPath)
+                        add(projectDirPath)
+                    }
+                }
+
+                cssSupport {
+                    enabled.set(true)
+                }
+            }
+        }
+        binaries.executable()
+        useEsModules()
+    }
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -82,6 +107,11 @@ kotlin {
             implementation(libs.voyager.koin)
         }
         sourceSets.jsMain.dependencies {
+            implementation(libs.sqldelight.web.worker.driver)
+            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.1.0"))
+            implementation(npm("sql.js", "1.10.3"))
+        }
+        sourceSets.wasmJsMain.dependencies {
             implementation(libs.sqldelight.web.worker.driver)
             implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.1.0"))
             implementation(npm("sql.js", "1.10.3"))
