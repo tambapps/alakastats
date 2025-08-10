@@ -44,7 +44,6 @@ kotlin {
                         add(projectDirPath)
                     }
                 }
-                // Configure for Skiko and IndexedDB
                 cssSupport {
                     enabled.set(true)
                 }
