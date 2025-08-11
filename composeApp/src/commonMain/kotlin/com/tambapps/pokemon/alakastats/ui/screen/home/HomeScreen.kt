@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.screen.createteam.CreateTeamScreen
@@ -68,9 +70,9 @@ object HomeScreen : Screen {
                     .fillMaxSize(),
             ) {
                 if (isCompact) {
-                    MobileScreen(isDarkTheme)
+                    HomeScreenMobile(isDarkTheme, viewModel)
                 } else {
-                    LargeScreen(isDarkTheme, viewModel)
+                    HomeScreenDesktop(isDarkTheme, viewModel)
                 }
             }
         }
@@ -78,86 +80,17 @@ object HomeScreen : Screen {
 }
 
 @Composable
-private fun ColumnScope.MobileScreen(isDarkTheme: Boolean) {
-    AlakastatsLabel(isDarkTheme, Modifier.align(Alignment.CenterHorizontally))
+internal fun CatchPhrase(skipLine: Boolean = false, textAlign: TextAlign = TextAlign.Unspecified) {
+    val text = buildString {
+        append("Think like Alakazam.")
+        append(if (skipLine) '\n' else ' ')
+        append("Play like a pro.")
+    }
+    Text(text, style = MaterialTheme.typography.headlineMedium, textAlign = textAlign)
 }
 
 @Composable
-private fun ColumnScope.LargeScreen(isDarkTheme: Boolean, viewModel: HomeViewModel) {
-    AlakastatsLabel(isDarkTheme)
-    Text("Think like Alakazam. Play like a pro.", style = MaterialTheme.typography.headlineMedium)
-    Spacer(Modifier.height(8.dp))
-    Row(
-        modifier = Modifier,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        ButtonBarContent()
-    }
-    TeamCardGrid(viewModel, 3)
-}
-
-@Composable
-private fun ButtonBarContent() {
-    val navigator = LocalNavigator.currentOrThrow
-    val textStyle = MaterialTheme.typography.labelLarge.copy(
-        fontWeight = FontWeight.Bold
-    )
-    Button(onClick = { navigator.push(CreateTeamScreen) }) {
-        Icon(
-            painter = painterResource(Res.drawable.add),
-            contentDescription = "Add",
-            modifier = Modifier.size(ButtonDefaults.IconSize)
-        )
-        Spacer(Modifier.width(8.dp))
-        Text("New Team", style = MaterialTheme.typography.labelLarge.copy(
-            color = LocalContentColor.current
-        ))
-    }
-
-    OutlinedButton(onClick = {  }) {
-        Text("Import", style = textStyle)
-    }
-
-    OutlinedButton(onClick = {  }) {
-        Text("Sample", style = textStyle)
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun TeamCardGrid(
-    viewModel: HomeViewModel,
-    columns: Int,
-    modifier: Modifier = Modifier
-) {
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(columns),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            viewModel.teamlyticsList.forEach { team ->
-                item(key = team.id) {
-                    TeamCard(viewModel = viewModel, team = team)
-                }
-            }
-
-            /*
-            // TODO delete me
-            repeat(25) {
-                item {
-                    TeamCard(viewModel)
-                }
-            }
-             */
-
-        }
-    }
-}
-
-@Composable
-private fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview) {
+fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview) {
     Card(
         modifier = Modifier,
         shape = RoundedCornerShape(12.dp),
@@ -181,17 +114,38 @@ private fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview) {
 }
 
 @Composable
-private fun AlakastatsLabel(isDarkTheme: Boolean, modifier: Modifier = Modifier) {
-    Row(
+internal fun NewTeamButton(modifier: Modifier = Modifier) {
+    val navigator = LocalNavigator.currentOrThrow
+    Button(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
+        onClick = { navigator.push(CreateTeamScreen) }
     ) {
-        Image(
-            painter = painterResource(if (isDarkTheme) Res.drawable.alakastats_dark else Res.drawable.alakastats),
-            contentDescription = "Alakastats logo",
-            modifier = Modifier.size(80.dp),
-            contentScale = ContentScale.Fit
+        Icon(
+            painter = painterResource(Res.drawable.add),
+            contentDescription = "Add",
+            modifier = Modifier.size(ButtonDefaults.IconSize)
         )
-        Text("Alakastats", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Spacer(Modifier.width(8.dp))
+        Text("New Team", style = MaterialTheme.typography.labelLarge.copy(
+            color = LocalContentColor.current
+        ))
+    }
+}
+
+
+internal val buttonTextStyle  @Composable get() = MaterialTheme.typography.labelLarge.copy(
+    fontWeight = FontWeight.Bold
+)
+
+@Composable
+internal fun ImportTeamButton(modifier: Modifier = Modifier) {
+    OutlinedButton(onClick = {  }, modifier = modifier) {
+        Text("Import", style = buttonTextStyle)
+    }
+}
+@Composable
+internal fun SampleTeamButton(modifier: Modifier = Modifier) {
+    OutlinedButton(onClick = {  }, modifier = modifier) {
+        Text("Sample", style = buttonTextStyle)
     }
 }
