@@ -18,7 +18,6 @@ import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransf
 import com.tambapps.pokemon.alakastats.domain.usecase.CreateTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ListTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
-import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.AbstractTeamlyticsKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
