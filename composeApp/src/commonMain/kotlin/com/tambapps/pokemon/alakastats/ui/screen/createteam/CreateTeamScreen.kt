@@ -42,6 +42,8 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.PlatformType
+import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
 import org.jetbrains.compose.resources.painterResource
 
@@ -113,11 +115,28 @@ private fun TeamNameInput(viewModel: CreateTeamViewModel) {
 
 @Composable
 private fun PokePasteInput(viewModel: CreateTeamViewModel) {
-    Text(
-        text = "Pokepaste",
-        style = MaterialTheme.typography.titleLarge,
-        fontWeight = FontWeight.Medium
-    )
+    if (getPlatform().type == PlatformType.Web) {
+        Text(
+            text = "Pokepaste",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Medium
+        )
+    } else {
+      Row(
+          verticalAlignment = Alignment.CenterVertically
+      ) {
+          Text(
+              text = "Pokepaste",
+              style = MaterialTheme.typography.titleLarge,
+              fontWeight = FontWeight.Medium
+          )
+          Spacer(Modifier.width(16.dp))
+          OutlinedButton(onClick = {}) {
+              Text("Load from URL")
+          }
+      }
+    }
+
     OutlinedTextField(
         value = viewModel.pokepaste,
         onValueChange = viewModel::updatePokepaste,
