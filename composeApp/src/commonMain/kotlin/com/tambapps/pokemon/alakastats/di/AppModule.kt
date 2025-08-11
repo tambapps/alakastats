@@ -27,9 +27,19 @@ import kotlinx.serialization.json.Json
 import kotlin.uuid.Uuid
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
 
 private val appModule = module {
     single { Json { ignoreUnknownKeys = true } }
+    single<HttpClient> {
+        HttpClient {
+            install(ContentNegotiation) {
+                json(get<Json>())
+            }
+        }
+    }
     single<PokemonImageService> { PokemonImageService(get()) }
     single<PokepasteParser> { PokepasteParser() }
     // need to name them as they have both the same signature after generic type erasure
@@ -46,7 +56,7 @@ private val appModule = module {
     single<CreateTeamlyticsUseCase> { CreateTeamlyticsUseCase(get()) }
     single<ListTeamlyticsUseCase> { ListTeamlyticsUseCase(get()) }
     factory { HomeViewModel(get(), get()) }
-    factory { CreateTeamViewModel(get(), get()) }
+    factory { CreateTeamViewModel(get(), get(), get()) }
 }
 
 private val transformerModule = module {

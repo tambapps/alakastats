@@ -13,10 +13,15 @@ import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.withContext
 
 class CreateTeamViewModel(
     private val pokepasteParser: PokepasteParser,
-    private val createTeamlyticsUseCase: CreateTeamlyticsUseCase
+    private val createTeamlyticsUseCase: CreateTeamlyticsUseCase,
+    private val httpClient: HttpClient
 ) : ScreenModel {
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -39,6 +44,11 @@ class CreateTeamViewModel(
     var showPokePasteUrlDialog by mutableStateOf(false)
         private set
     var pokePasteUrlInput by mutableStateOf("")
+        private set
+    
+    var isLoadingUrl by mutableStateOf(false)
+        private set
+    var urlError by mutableStateOf<String?>(null)
         private set
     
     val isFormValid: Boolean
@@ -112,11 +122,14 @@ class CreateTeamViewModel(
     fun showUrlDialog() {
         showPokePasteUrlDialog = true
         pokePasteUrlInput = ""
+        urlError = null
     }
     
     fun hideUrlDialog() {
         showPokePasteUrlDialog = false
         pokePasteUrlInput = ""
+        urlError = null
+        isLoadingUrl = false
     }
     
     fun updateUrlInput(input: String) {
@@ -124,10 +137,30 @@ class CreateTeamViewModel(
     }
     
     fun loadFromUrl() {
-        if (isUrlValid) {
-            // For now, just close the dialog as requested
-            // TODO: Implement actual URL loading functionality
-            hideUrlDialog()
+        if (isUrlValid && !isLoadingUrl) {
+            isLoadingUrl = true
+            urlError = null
+            
+            scope.launch {
+                try {
+                    var url = pokePasteUrlInput
+                    if (!url.endsWith("/raw")) {
+                      if (!url.endsWith("/")) url = "$url/"
+                        url += "raw"
+                    }
+                    val response = httpClient.get(url)
+                    val content = response.bodyAsText()
+
+                    withContext(Dispatchers.Main) {
+                        updatePokepaste(content)
+                        hideUrlDialog()
+                    }
+                } catch (e: Exception) {
+                    urlError = "Failed to load URL: ${e.message}"
+                } finally {
+                    isLoadingUrl = false
+                }
+            }
         }
     }
 

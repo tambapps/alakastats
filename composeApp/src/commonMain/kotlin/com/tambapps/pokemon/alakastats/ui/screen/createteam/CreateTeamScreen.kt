@@ -304,27 +304,30 @@ private fun UrlLoadDialog(viewModel: CreateTeamViewModel) {
                     value = url,
                     onValueChange = viewModel::updateUrlInput,
                     label = { Text("URL") },
-                  //  placeholder = { Text("https://pokepast.es/...") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    isError = url.isNotBlank() && !viewModel.isUrlValid,
-                    supportingText = if (url.isNotBlank() && !viewModel.isUrlValid) {
-                        { Text("Please enter a valid URL starting with http:// or https://") }
-                    } else null
+                    enabled = !viewModel.isLoadingUrl,
+                    isError = (url.isNotBlank() && !viewModel.isUrlValid) || viewModel.urlError != null,
+                    supportingText = when {
+                        viewModel.urlError != null -> { { Text(viewModel.urlError!!) } }
+                        url.isNotBlank() && !viewModel.isUrlValid -> { { Text("Please enter a valid URL starting with http:// or https://") } }
+                        else -> null
+                    }
                 )
             }
         },
         confirmButton = {
             TextButton(
                 onClick = { viewModel.loadFromUrl() },
-                enabled = viewModel.isUrlValid
+                enabled = viewModel.isUrlValid && !viewModel.isLoadingUrl
             ) {
-                Text("Load")
+                Text(if (viewModel.isLoadingUrl) "Loading..." else "Load")
             }
         },
         dismissButton = {
             TextButton(
-                onClick = { viewModel.hideUrlDialog() }
+                onClick = { viewModel.hideUrlDialog() },
+                enabled = !viewModel.isLoadingUrl
             ) {
                 Text("Cancel")
             }
