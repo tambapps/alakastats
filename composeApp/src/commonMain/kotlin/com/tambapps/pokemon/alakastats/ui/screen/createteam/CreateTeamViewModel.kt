@@ -6,13 +6,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
+import com.tambapps.pokemon.alakastats.domain.usecase.CreateTeamlyticsUseCase
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import com.tambapps.pokemon.pokepaste.parser.PokePasteParseException
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class CreateTeamViewModel(
-    private val pokepasteParser: PokepasteParser
+    private val pokepasteParser: PokepasteParser,
+    private val createTeamlyticsUseCase: CreateTeamlyticsUseCase
 ) : ScreenModel {
+
+    private val scope = CoroutineScope(Dispatchers.Default)
 
     var teamName by mutableStateOf("")
         private set
@@ -86,9 +93,15 @@ class CreateTeamViewModel(
 
     fun createTeam(navigator: Navigator) {
         if (isFormValid) {
-            // TODO: Process the team creation with pokepaste parsing and showdown names
-            // For now, just navigate back
-            navigator.pop()
+            val pokepaste = pokepasteParser.tryParse(pokepaste) ?: return
+            scope.launch {
+                createTeamlyticsUseCase.create(
+                    name = teamName,
+                    sdNames = showdownNames,
+                    pokePaste = pokepaste
+                )
+                navigator.pop()
+            }
         }
     }
 }

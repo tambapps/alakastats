@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -35,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -45,7 +47,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.screen.createteam.CreateTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.isCompact
 import org.jetbrains.compose.resources.painterResource
@@ -54,6 +56,9 @@ object HomeScreen : Screen {
     @Composable
     override fun Content() {
         val viewModel = koinScreenModel<HomeViewModel>()
+        LaunchedEffect(Unit) {
+            viewModel.loadTeams()
+        }
         val isDarkTheme = isSystemInDarkTheme()
         BoxWithConstraints {
             val isCompact = isCompact()
@@ -133,33 +138,34 @@ fun TeamCardGrid(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            /*
-            teams.forEach { team ->
+            viewModel.teamlyticsList.forEach { team ->
                 item(key = team) {
-                    TeamCard(team = team)
+                    TeamCard(viewModel = viewModel, team = team)
                 }
             }
 
-             */
+            /*
             // TODO delete me
             repeat(25) {
                 item {
                     TeamCard(viewModel)
                 }
             }
+             */
+
         }
     }
 }
 
 @Composable
-private fun TeamCard(viewModel: HomeViewModel, team: Teamlytics? = null) {
+private fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview) {
     Card(
         modifier = Modifier,
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(),
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text("Chuppa Cross Five", style = MaterialTheme.typography.titleLarge)
+            Text(team.name, style = MaterialTheme.typography.titleLarge)
             Row {
                 repeat(6) {
                     viewModel.imageService.PokemonSprite("charizard", modifier = Modifier.weight(1f))

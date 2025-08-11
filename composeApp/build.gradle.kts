@@ -12,8 +12,12 @@ plugins {
 }
 
 kotlin {
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
+    }
+    
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -54,6 +58,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.kstore.file)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -67,6 +72,7 @@ kotlin {
             implementation(libs.kamel.image.default)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
+            implementation(libs.kstore)
             implementation(libs.pokemon.sdReplayParser)
             implementation(libs.pokemon.pokepasteParser)
             implementation(libs.serialization.json)
@@ -74,8 +80,14 @@ kotlin {
             implementation(libs.voyager.screenmodel)
             implementation(libs.voyager.koin)
         }
+        iosMain.dependencies {
+            implementation(libs.kstore.file)
+        }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.kstore.storage)
         }
     }
 }
