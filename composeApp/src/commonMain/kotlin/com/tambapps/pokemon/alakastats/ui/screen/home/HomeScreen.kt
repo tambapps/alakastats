@@ -2,28 +2,19 @@ package com.tambapps.pokemon.alakastats.ui.screen.home
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
-import alakastats.composeapp.generated.resources.alakastats
-import alakastats.composeapp.generated.resources.alakastats_dark
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
+import alakastats.composeapp.generated.resources.more_horiz
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -31,6 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -39,14 +31,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.screen.createteam.CreateTeamScreen
@@ -97,7 +87,23 @@ fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifi
         elevation = CardDefaults.cardElevation(),
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text(team.name, style = MaterialTheme.typography.titleLarge)
+            Row(
+              //  modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
+            ) {
+                Text(team.name, style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.weight(1f))
+                IconButton(
+                    modifier = Modifier.offset(y = (-12).dp),
+                    onClick = { /* TODO */ }
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.more_horiz),
+                        contentDescription = "More"
+                    )
+                }
+            }
+
             Row {
                 for (pokemon in team.pokemons) {
                     viewModel.imageService.PokemonSprite(pokemon, modifier = Modifier.weight(1f))
