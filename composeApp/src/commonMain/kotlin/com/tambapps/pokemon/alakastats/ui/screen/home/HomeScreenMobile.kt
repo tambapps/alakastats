@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,9 +29,10 @@ import org.jetbrains.compose.resources.painterResource
 
 
 @Composable
-fun ColumnScope.HomeScreenMobile(isDarkTheme: Boolean, viewModel: HomeViewModel) {
+fun HomeScreenMobile(isDarkTheme: Boolean, viewModel: HomeViewModel) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
@@ -40,15 +43,21 @@ fun ColumnScope.HomeScreenMobile(isDarkTheme: Boolean, viewModel: HomeViewModel)
         )
         Text("Alakastats", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         CatchPhrase(skipLine = true, textAlign = TextAlign.Center)
-    }
 
-    Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
-    NewTeamButton(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))
-    Spacer(Modifier.height(4.dp))
-    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
-        ImportTeamButton(Modifier.weight(1f))
-        Spacer(Modifier.width(8.dp))
-        SampleTeamButton(Modifier.weight(1f))
+        NewTeamButton(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))
+        Spacer(Modifier.height(4.dp))
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+            ImportTeamButton(Modifier.weight(1f))
+            Spacer(Modifier.width(8.dp))
+            SampleTeamButton(Modifier.weight(1f))
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        for (team in viewModel.teamlyticsList) {
+            TeamCard(viewModel, team, Modifier.padding(vertical = 8.dp))
+        }
     }
 }

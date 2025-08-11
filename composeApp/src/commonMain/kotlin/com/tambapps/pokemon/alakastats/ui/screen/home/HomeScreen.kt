@@ -90,9 +90,9 @@ internal fun CatchPhrase(skipLine: Boolean = false, textAlign: TextAlign = TextA
 }
 
 @Composable
-fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview) {
+fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier,
+        modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(),
     ) {
