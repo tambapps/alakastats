@@ -12,7 +12,7 @@ import kotlin.uuid.Uuid
 
 class AndroidTeamlyticsKStorage(
     override val pokepasteParser: PokepasteParser,
-    private val context: Context
+    context: Context
 ) : AbstractTeamlyticsKStorage() {
     
     private val repositoriesDir = File(context.filesDir, "repositories").apply {

@@ -9,7 +9,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -47,7 +46,6 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.screen.createteam.CreateTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.isCompact
@@ -168,8 +166,8 @@ private fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview) {
         Column(Modifier.padding(16.dp)) {
             Text(team.name, style = MaterialTheme.typography.titleLarge)
             Row {
-                repeat(6) {
-                    viewModel.imageService.PokemonSprite("charizard", modifier = Modifier.weight(1f))
+                for (pokemon in team.pokemons) {
+                    viewModel.imageService.PokemonSprite(pokemon, modifier = Modifier.weight(1f))
                 }
             }
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))

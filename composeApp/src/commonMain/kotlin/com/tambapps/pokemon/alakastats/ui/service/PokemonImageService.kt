@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.getPlatform
+import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.CoroutineScope
@@ -39,7 +40,7 @@ class PokemonImageService(
 
     @Composable
     fun PokemonSprite(name: String, modifier: Modifier) {
-        val pokemonSpriteData = sprites[name]
+        val pokemonSpriteData = sprites[PokemonNormalizer.normalizeToBase(name)]
         if (pokemonSpriteData != null) {
             // TODO the web part is BAD. This is a hack to avoid CORS, because kmp web rendering uses a canvas instead of a <img>
             val url = if (getPlatform().type == PlatformType.Web)  "https://api.allorigins.win/raw?url=${pokemonSpriteData.sprite.replace("#", "%23").replace("&", "%26").replace("?", "%3F")}"
