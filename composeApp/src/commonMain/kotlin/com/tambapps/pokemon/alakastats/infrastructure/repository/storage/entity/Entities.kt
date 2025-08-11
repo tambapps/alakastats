@@ -1,18 +1,29 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity
 
 import com.tambapps.pokemon.PokeType
+import com.tambapps.pokemon.alakastats.util.Identifiable
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
 @Serializable
 data class TeamlyticsEntity(
-    val id: Uuid,
+    override val id: Uuid,
     val name: String,
     val pokePaste: String,
     val replays: List<ReplayAnalyticsEntity>,
     val sdNames: List<String>
-)
+): Identifiable<Uuid>
+
+@Serializable
+data class TeamlyticsPreviewEntity(
+    override val id: Uuid,
+    val name: String,
+    val sdNames: List<String>,
+    val pokemons: List<String>,
+    val nbReplays: Int,
+    val winrate: Int
+): Identifiable<Uuid>
 
 @Serializable
 data class ReplayAnalyticsEntity(

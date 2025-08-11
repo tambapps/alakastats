@@ -1,17 +1,17 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository.storage
 
+import com.tambapps.pokemon.alakastats.util.Identifiable
 import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.extensions.getOrEmpty
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.Serializable
 
-abstract class AbstractKStorage<ID: @Serializable Any, T : @Serializable Any>: KStorage<ID, T> {
+abstract class AbstractKStorage<ID: @Serializable Any, T : @Serializable Identifiable<ID>>: KStorage<ID, T> {
 
     protected abstract val idsStore: KStore<List<ID>>
 
     protected abstract fun getStore(id: ID): KStore<T>
-    protected abstract fun getId(entity: T): ID
 
     override suspend fun listIds() = idsStore.getOrEmpty()
 
@@ -25,7 +25,7 @@ abstract class AbstractKStorage<ID: @Serializable Any, T : @Serializable Any>: K
 
     override suspend fun save(e: T): T {
         val ids = listIds()
-        val entityId = getId(e)
+        val entityId = e.id
         if (!ids.contains(entityId)) {
             idsStore.update { (it ?: emptyList()) + entityId }
         }
@@ -35,7 +35,7 @@ abstract class AbstractKStorage<ID: @Serializable Any, T : @Serializable Any>: K
 
     override suspend fun delete(e: T) {
         val ids = listIds()
-        val entityId = getId(e)
+        val entityId = e.id
         if (!ids.contains(entityId)) {
             return
         }

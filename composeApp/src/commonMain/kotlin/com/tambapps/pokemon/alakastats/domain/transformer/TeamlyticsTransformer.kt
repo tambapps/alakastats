@@ -2,8 +2,11 @@ package com.tambapps.pokemon.alakastats.domain.transformer
 
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
+import com.tambapps.pokemon.alakastats.domain.model.computeWinRate
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 
@@ -31,7 +34,43 @@ class TeamlyticsTransformer(
             sdNames = entity.sdNames
         )
     }
+
+    fun toPreview(team: TeamlyticsEntity) = TeamlyticsPreviewEntity(
+        id = team.id,
+        name = team.name,
+        sdNames = team.sdNames,
+        pokemons = pokepasteParser.tryParse(team.pokePaste)?.pokemons?.map { it.name } ?: emptyList(),
+        nbReplays = team.replays.size,
+        winrate = computeWinRate(team.sdNames, team.replays.map(replayAnalyticsTransformer::toDomain))
+    )
+
 }
+
+class TeamlyticsPreviewTransformer {
+
+    fun toEntity(domain: TeamlyticsPreview): TeamlyticsPreviewEntity {
+        return TeamlyticsPreviewEntity(
+            id = domain.id,
+            name = domain.name,
+            sdNames = domain.sdNames,
+            pokemons = domain.pokemons,
+            nbReplays = domain.nbReplays,
+            winrate = domain.winrate,
+        )
+    }
+
+    fun toDomain(entity: TeamlyticsPreviewEntity): TeamlyticsPreview {
+        return TeamlyticsPreview(
+            id = entity.id,
+            name = entity.name,
+            sdNames = entity.sdNames,
+            pokemons = entity.pokemons,
+            nbReplays = entity.nbReplays,
+            winrate = entity.winrate,
+        )
+    }
+}
+
 
 class ReplayAnalyticsTransformer(
     private val sdReplayTransformer: SdReplayTransformer

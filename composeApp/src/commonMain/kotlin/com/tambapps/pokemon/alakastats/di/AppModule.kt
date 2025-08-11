@@ -13,23 +13,36 @@ import com.tambapps.pokemon.alakastats.domain.transformer.TeamPreviewTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamPreviewPokemonTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.OpenTeamSheetTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
+import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransformer
 import com.tambapps.pokemon.alakastats.domain.usecase.CreateTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ListTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsPreviewKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import kotlinx.serialization.json.Json
 import kotlin.uuid.Uuid
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 private val appModule = module {
     single { Json { ignoreUnknownKeys = true } }
     single<PokemonImageService> { PokemonImageService(get()) }
     single<PokepasteParser> { PokepasteParser() }
-    single<KStorage<Uuid, TeamlyticsEntity>> { createTeamlyticsKStorage(get()) }
-    single<TeamlyticsRepository> { KStoreTeamlyticsRepository(get(), get(), get(), get()) }
+    // need to name them as they have both the same signature after generic type erasure
+    single<KStorage<Uuid, TeamlyticsEntity>>(named("teamsStorage")) { createTeamlyticsKStorage() }
+    single<KStorage<Uuid, TeamlyticsPreviewEntity>>(named("previewsStorage")) { createTeamlyticsPreviewKStorage() }
+    single<TeamlyticsRepository> { 
+        KStoreTeamlyticsRepository(
+            teamsStorage = get(named("teamsStorage")), 
+            previewsStorage = get(named("previewsStorage")), 
+            teamlyticsTransformer = get(), 
+            previewTransformer = get()
+        ) 
+    }
     single<CreateTeamlyticsUseCase> { CreateTeamlyticsUseCase(get()) }
     single<ListTeamlyticsUseCase> { ListTeamlyticsUseCase(get()) }
     factory { HomeViewModel(get(), get()) }
@@ -46,6 +59,7 @@ private val transformerModule = module {
     single { SdReplayTransformer(get()) }
     single { ReplayAnalyticsTransformer(get()) }
     single { TeamlyticsTransformer(get(), get()) }
+    single { TeamlyticsPreviewTransformer() }
 }
 
 val appModules = listOf(appModule, transformerModule)
