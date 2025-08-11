@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.usecase.ListTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
@@ -15,14 +16,14 @@ class HomeViewModel(
     private val listTeamlyticsUseCase: ListTeamlyticsUseCase
 ): ScreenModel {
     
-    val teamlyticsList: SnapshotStateList<Teamlytics> = mutableStateListOf()
+    val teamlyticsList: SnapshotStateList<TeamlyticsPreview> = mutableStateListOf()
     private val scope = CoroutineScope(Dispatchers.Default)
 
     fun loadTeams() {
         scope.launch {
-            val teamlytics = listTeamlyticsUseCase.list()
+            val previews = listTeamlyticsUseCase.list()
             teamlyticsList.clear()
-            teamlyticsList.addAll(teamlytics)
+            teamlyticsList.addAll(previews)
         }
     }
 }

@@ -48,6 +48,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.screen.createteam.CreateTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.isCompact
 import org.jetbrains.compose.resources.painterResource
@@ -158,7 +159,7 @@ fun TeamCardGrid(
 }
 
 @Composable
-private fun TeamCard(viewModel: HomeViewModel, team: Teamlytics) {
+private fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview) {
     Card(
         modifier = Modifier,
         shape = RoundedCornerShape(12.dp),
@@ -173,10 +174,9 @@ private fun TeamCard(viewModel: HomeViewModel, team: Teamlytics) {
             }
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
             Row {
-                Text("${team.replays.size} replays")
+                Text("${team.nbReplays} replays")
                 Spacer(Modifier.weight(1f))
-                // TODO: Calculate actual winrate
-                Text("--% winrate")
+                Text("${team.winrate}% winrate")
             }
         }
     }

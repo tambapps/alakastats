@@ -29,7 +29,7 @@ private val appModule = module {
     single<PokemonImageService> { PokemonImageService(get()) }
     single<PokepasteParser> { PokepasteParser() }
     single<KStorage<Uuid, TeamlyticsEntity>> { createTeamlyticsKStorage(get()) }
-    single<TeamlyticsRepository> { KStoreTeamlyticsRepository(get(), get()) }
+    single<TeamlyticsRepository> { KStoreTeamlyticsRepository(get(), get(), get(), get()) }
     single<CreateTeamlyticsUseCase> { CreateTeamlyticsUseCase(get()) }
     single<ListTeamlyticsUseCase> { ListTeamlyticsUseCase(get()) }
     factory { HomeViewModel(get(), get()) }

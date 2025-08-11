@@ -9,7 +9,7 @@ import kotlin.uuid.Uuid
 data class TeamlyticsEntity(
     val id: Uuid,
     val name: String,
-    val pokePaste: String?,
+    val pokePaste: String,
     val replays: List<ReplayAnalyticsEntity>,
     val sdNames: List<String>
 )

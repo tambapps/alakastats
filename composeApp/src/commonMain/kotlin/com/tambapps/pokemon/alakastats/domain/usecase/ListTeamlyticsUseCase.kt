@@ -6,5 +6,5 @@ class ListTeamlyticsUseCase(
     private val repository: TeamlyticsRepository
 ) {
 
-    suspend fun list() = repository.list()
+    suspend fun list() = repository.listPreviews()
 }
