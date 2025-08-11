@@ -44,7 +44,6 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.getPlatform
-import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
 import org.jetbrains.compose.resources.painterResource
 
 object CreateTeamScreen : Screen {
@@ -90,8 +89,12 @@ object CreateTeamScreen : Screen {
             }
         }
         
-        if (viewModel.showAddNameDialog) {
+        if (viewModel.showNewSdNameDialog) {
             ShowdownNameDialog(viewModel)
+        }
+        
+        if (viewModel.showPokePasteUrlDialog) {
+            UrlLoadDialog(viewModel)
         }
     }
 }
@@ -131,7 +134,7 @@ private fun PokePasteInput(viewModel: CreateTeamViewModel) {
               fontWeight = FontWeight.Medium
           )
           Spacer(Modifier.width(16.dp))
-          OutlinedButton(onClick = {}) {
+          OutlinedButton(onClick = { viewModel.showUrlDialog() }) {
               Text("Load from URL")
           }
       }
@@ -164,7 +167,7 @@ private fun ShowdownNamesInput(viewModel: CreateTeamViewModel) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Showdown Names (${viewModel.showdownNames.size})",
+                text = "Showdown Names (${viewModel.sdNames.size})",
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.width(16.dp))
@@ -178,7 +181,7 @@ private fun ShowdownNamesInput(viewModel: CreateTeamViewModel) {
             }
         }
 
-        if (viewModel.showdownNames.isEmpty()) {
+        if (viewModel.sdNames.isEmpty()) {
             Text(
                 text = "No Showdown names added yet",
                 style = MaterialTheme.typography.bodySmall,
@@ -191,7 +194,7 @@ private fun ShowdownNamesInput(viewModel: CreateTeamViewModel) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                viewModel.showdownNames.forEach { name ->
+                viewModel.sdNames.forEach { name ->
                     FilterChip(
                         onClick = { viewModel.removeShowdownName(name) },
                         label = { Text(name) },
@@ -238,7 +241,7 @@ private fun ButtonBar(navigator: Navigator, viewModel: CreateTeamViewModel) {
 
 @Composable
 private fun ShowdownNameDialog(viewModel: CreateTeamViewModel) {
-    val newName = viewModel.newNameInput
+    val newName = viewModel.newSdNameInput
     AlertDialog(
         onDismissRequest = { viewModel.hideAddNameDialog() },
         title = { Text("Add Showdown Name") },
@@ -277,6 +280,51 @@ private fun ShowdownNameDialog(viewModel: CreateTeamViewModel) {
         dismissButton = {
             TextButton(
                 onClick = { viewModel.hideAddNameDialog() }
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun UrlLoadDialog(viewModel: CreateTeamViewModel) {
+    val url = viewModel.pokePasteUrlInput
+    AlertDialog(
+        onDismissRequest = { viewModel.hideUrlDialog() },
+        title = { Text("Load from URL") },
+        text = {
+            Column {
+                Text(
+                    text = "Enter a PokePaste URL:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = viewModel::updateUrlInput,
+                    label = { Text("URL") },
+                  //  placeholder = { Text("https://pokepast.es/...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = url.isNotBlank() && !viewModel.isUrlValid,
+                    supportingText = if (url.isNotBlank() && !viewModel.isUrlValid) {
+                        { Text("Please enter a valid URL starting with http:// or https://") }
+                    } else null
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { viewModel.loadFromUrl() },
+                enabled = viewModel.isUrlValid
+            ) {
+                Text("Load")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { viewModel.hideUrlDialog() }
             ) {
                 Text("Cancel")
             }

@@ -29,16 +29,21 @@ class CreateTeamViewModel(
     var pokepasteError by mutableStateOf<String?>(null)
         private set
     
-    val showdownNames = mutableStateListOf<String>()
+    val sdNames = mutableStateListOf<String>()
     
-    var showAddNameDialog by mutableStateOf(false)
+    var showNewSdNameDialog by mutableStateOf(false)
         private set
-    var newNameInput by mutableStateOf("")
+    var newSdNameInput by mutableStateOf("")
+        private set
+    
+    var showPokePasteUrlDialog by mutableStateOf(false)
+        private set
+    var pokePasteUrlInput by mutableStateOf("")
         private set
     
     val isFormValid: Boolean
         get() = teamName.isNotBlank() && pokepaste.isNotBlank() && pokepasteError == null
-                && showdownNames.isNotEmpty()
+                && sdNames.isNotEmpty()
     
     fun updateTeamName(name: String) {
         teamName = name
@@ -62,33 +67,68 @@ class CreateTeamViewModel(
     }
 
     val isNewNameValid: Boolean
-        get() = newNameInput.isNotBlank() && 
-                !newNameInput.contains('/') && 
-                newNameInput.length <= 30
+        get() = newSdNameInput.isNotBlank() &&
+                !newSdNameInput.contains('/') &&
+                newSdNameInput.length <= 30
+    
+    val isUrlValid: Boolean
+        get() = isValidUrl(pokePasteUrlInput)
+    
+    private fun isValidUrl(url: String): Boolean {
+        if (url.isBlank()) return false
+        return try {
+            val trimmedUrl = url.trim()
+            trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")
+        } catch (e: Exception) {
+            false
+        }
+    }
     
     fun showAddNameDialog() {
-        showAddNameDialog = true
-        newNameInput = ""
+        showNewSdNameDialog = true
+        newSdNameInput = ""
     }
     
     fun hideAddNameDialog() {
-        showAddNameDialog = false
-        newNameInput = ""
+        showNewSdNameDialog = false
+        newSdNameInput = ""
     }
     
     fun updateNewNameInput(input: String) {
-        newNameInput = input
+        newSdNameInput = input
     }
     
     fun addShowdownName() {
-        if (isNewNameValid && !showdownNames.contains(newNameInput)) {
-            showdownNames.add(newNameInput)
+        if (isNewNameValid && !sdNames.contains(newSdNameInput)) {
+            sdNames.add(newSdNameInput)
             hideAddNameDialog()
         }
     }
     
     fun removeShowdownName(name: String) {
-        showdownNames.remove(name)
+        sdNames.remove(name)
+    }
+    
+    fun showUrlDialog() {
+        showPokePasteUrlDialog = true
+        pokePasteUrlInput = ""
+    }
+    
+    fun hideUrlDialog() {
+        showPokePasteUrlDialog = false
+        pokePasteUrlInput = ""
+    }
+    
+    fun updateUrlInput(input: String) {
+        pokePasteUrlInput = input
+    }
+    
+    fun loadFromUrl() {
+        if (isUrlValid) {
+            // For now, just close the dialog as requested
+            // TODO: Implement actual URL loading functionality
+            hideUrlDialog()
+        }
     }
 
     fun createTeam(navigator: Navigator) {
@@ -97,7 +137,7 @@ class CreateTeamViewModel(
             scope.launch {
                 createTeamlyticsUseCase.create(
                     name = teamName,
-                    sdNames = showdownNames,
+                    sdNames = sdNames,
                     pokePaste = pokepaste
                 )
                 navigator.pop()
