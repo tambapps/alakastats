@@ -12,6 +12,7 @@ class IosTeamlyticsKStorage(
     override val pokepasteParser: PokepasteParser,
 ) : AbstractTeamlyticsKStorage() {
     override val idsStore: KStore<List<TeamlyticsPreview>> = listStoreOf(
+        // TODO probably doesn't work as the paths specified don't exist (see how it was done for android)
         file = Path("repositories/teamlytics-preview.kstore"),
         enableCache = false
     )
