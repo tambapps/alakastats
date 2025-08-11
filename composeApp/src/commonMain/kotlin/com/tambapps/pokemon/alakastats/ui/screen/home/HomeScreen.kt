@@ -139,7 +139,7 @@ fun TeamCardGrid(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             viewModel.teamlyticsList.forEach { team ->
-                item(key = team) {
+                item(key = team.id) {
                     TeamCard(viewModel = viewModel, team = team)
                 }
             }

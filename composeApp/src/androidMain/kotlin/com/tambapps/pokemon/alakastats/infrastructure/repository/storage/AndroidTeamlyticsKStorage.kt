@@ -8,18 +8,24 @@ import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.file.extensions.listStoreOf
 import io.github.xxfast.kstore.file.extensions.storeOf
 import kotlinx.io.files.Path
+import java.io.File
 
 class AndroidTeamlyticsKStorage(
     override val pokepasteParser: PokepasteParser,
     private val context: Context
 ) : AbstractTeamlyticsKStorage() {
+    
+    private val repositoriesDir = File(context.filesDir, "repositories").apply {
+        mkdirs() // Ensure the directory exists
+    }
+    
     override val idsStore: KStore<List<TeamlyticsPreview>> = listStoreOf(
-        file = Path(context.filesDir.absolutePath, "repositories/teamlytics-preview.kstore"),
+        file = Path(repositoriesDir.absolutePath, "teamlytics-preview.kstore"),
         enableCache = false
     )
 
     override fun getStore(id: TeamlyticsPreview): KStore<TeamlyticsEntity> = storeOf(
-        file = Path(context.filesDir.absolutePath, "repositories/${id.id}.kstore"),
+        file = Path(repositoriesDir.absolutePath, "${id.id}.kstore"),
         enableCache = false,
         version = 0
     )
