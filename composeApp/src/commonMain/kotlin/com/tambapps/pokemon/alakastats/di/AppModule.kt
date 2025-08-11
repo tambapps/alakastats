@@ -1,6 +1,5 @@
 package com.tambapps.pokemon.alakastats.di
 
-import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
@@ -22,13 +21,14 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorag
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import kotlinx.serialization.json.Json
+import kotlin.uuid.Uuid
 import org.koin.dsl.module
 
 private val appModule = module {
     single { Json { ignoreUnknownKeys = true } }
     single<PokemonImageService> { PokemonImageService(get()) }
     single<PokepasteParser> { PokepasteParser() }
-    single<KStorage<TeamlyticsPreview, TeamlyticsEntity>> { createTeamlyticsKStorage(get()) }
+    single<KStorage<Uuid, TeamlyticsEntity>> { createTeamlyticsKStorage(get()) }
     single<TeamlyticsRepository> { KStoreTeamlyticsRepository(get(), get()) }
     single<CreateTeamlyticsUseCase> { CreateTeamlyticsUseCase(get()) }
     single<ListTeamlyticsUseCase> { ListTeamlyticsUseCase(get()) }
