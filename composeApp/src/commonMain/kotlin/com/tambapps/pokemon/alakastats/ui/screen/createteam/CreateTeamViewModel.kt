@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.CreateTeamlyticsUseCase
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import com.tambapps.pokemon.pokepaste.parser.PokePasteParseException
@@ -25,6 +26,7 @@ class CreateTeamViewModel(
 ) : ScreenModel {
 
     private val scope = CoroutineScope(Dispatchers.Default)
+    private var editingTeam: Teamlytics? = null
 
     var teamName by mutableStateOf("")
         private set
@@ -164,17 +166,33 @@ class CreateTeamViewModel(
         }
     }
 
-    fun createTeam(navigator: Navigator) {
+    fun saveTeam(navigator: Navigator) {
         if (isFormValid) {
             val pokepaste = pokepasteParser.tryParse(pokepaste) ?: return
             scope.launch {
-                createTeamlyticsUseCase.create(
-                    name = teamName,
-                    sdNames = sdNames,
-                    pokePaste = pokepaste
-                )
+                if (editingTeam != null) {
+                    createTeamlyticsUseCase.edit(editingTeam!!,
+                        name = teamName,
+                        sdNames = sdNames,
+                        pokePaste = pokepaste)
+                } else {
+                    createTeamlyticsUseCase.create(
+                        name = teamName,
+                        sdNames = sdNames,
+                        pokePaste = pokepaste
+                    )
+                }
                 navigator.pop()
             }
         }
+    }
+    
+    fun prepareEdition(teamlytics: Teamlytics) {
+        editingTeam = teamlytics
+        teamName = teamlytics.name
+        pokepaste = teamlytics.pokePaste.toPokePasteString()
+        validPokepaste()
+        sdNames.clear()
+        sdNames.addAll(teamlytics.sdNames)
     }
 }

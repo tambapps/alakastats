@@ -21,6 +21,8 @@ class KStoreTeamlyticsRepository(
 
     override suspend fun list() = teamsStorage.listEntities().map(teamlyticsTransformer::toDomain)
 
+    override suspend fun get(id: Uuid) = teamsStorage.get(id)?.let(teamlyticsTransformer::toDomain)
+
     override suspend fun save(teamlytics: Teamlytics): Teamlytics = coroutineScope {
         val savedTeam = teamsStorage.save(teamlyticsTransformer.toEntity(teamlytics))
         previewsStorage.save(teamlyticsTransformer.toPreview(savedTeam))

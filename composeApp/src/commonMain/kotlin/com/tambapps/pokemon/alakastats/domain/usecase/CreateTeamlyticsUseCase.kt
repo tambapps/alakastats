@@ -9,6 +9,18 @@ class CreateTeamlyticsUseCase(
     private val teamlyticsRepository: TeamlyticsRepository
 ) {
 
+    // TODO handle lastUpdatedAt
+    suspend fun edit(
+        team: Teamlytics,
+        name: String,
+        pokePaste: PokePaste,
+        sdNames: List<String>
+        ) = teamlyticsRepository.save(team.copy(
+        name = name,
+        pokePaste = pokePaste,
+        sdNames = sdNames
+        ))
+
     suspend fun create(
         name: String,
         pokePaste: PokePaste,

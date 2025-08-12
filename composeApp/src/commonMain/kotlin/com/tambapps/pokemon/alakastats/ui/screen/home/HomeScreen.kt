@@ -133,9 +133,10 @@ fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifi
                         expanded = viewModel.expandedMenuTeamId == team.id,
                         onDismissRequest = { viewModel.hideMenu() }
                     ) {
+                        val navigator = LocalNavigator.currentOrThrow
                         DropdownMenuItem(
                             text = { Text("Edit") },
-                            onClick = { viewModel.editTeam(team.id) }
+                            onClick = { viewModel.editTeam(team, navigator) }
                         )
                         DropdownMenuItem(
                             text = { Text("Delete") },
@@ -165,7 +166,7 @@ internal fun NewTeamButton(modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.currentOrThrow
     Button(
         modifier = modifier,
-        onClick = { navigator.push(CreateTeamScreen) }
+        onClick = { navigator.push(CreateTeamScreen()) }
     ) {
         Icon(
             painter = painterResource(Res.drawable.add),

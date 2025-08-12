@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,20 +44,26 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.PlatformType
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.getPlatform
 import org.jetbrains.compose.resources.painterResource
 
-object CreateTeamScreen : Screen {
+data class CreateTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
     override fun Content() {
         val viewModel = koinScreenModel<CreateTeamViewModel>()
+        LaunchedEffect(Unit) {
+            if (teamlytics != null) {
+                viewModel.prepareEdition(teamlytics)
+            }
+        }
         val navigator = LocalNavigator.currentOrThrow
         
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Create Team") },
+                    title = { Text(if (teamlytics != null) "Edit Team" else "Create Team") },
                     navigationIcon = {
                         IconButton(onClick = { navigator.pop() }) {
                             Icon(
@@ -85,7 +92,7 @@ object CreateTeamScreen : Screen {
                 
                 Spacer(modifier = Modifier.weight(1f))
 
-                ButtonBar(navigator, viewModel)
+                ButtonBar(navigator, viewModel, teamlytics != null)
             }
         }
         
@@ -213,7 +220,7 @@ private fun ShowdownNamesInput(viewModel: CreateTeamViewModel) {
 }
 
 @Composable
-private fun ButtonBar(navigator: Navigator, viewModel: CreateTeamViewModel) {
+private fun ButtonBar(navigator: Navigator, viewModel: CreateTeamViewModel, isEditing: Boolean = false) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -226,12 +233,12 @@ private fun ButtonBar(navigator: Navigator, viewModel: CreateTeamViewModel) {
         }
 
         Button(
-            onClick = { viewModel.createTeam(navigator) },
+            onClick = { viewModel.saveTeam(navigator) },
             modifier = Modifier.weight(1f),
             enabled = viewModel.isFormValid,
         ) {
             Text(
-                "Create Team",
+                if (isEditing) "Update Team" else "Create Team",
                 // important
                 color = LocalContentColor.current
             )

@@ -8,6 +8,8 @@ interface TeamlyticsRepository {
 
     suspend fun list(): List<Teamlytics>
 
+    suspend fun get(id: Uuid): Teamlytics?
+
     suspend fun listPreviews(): List<TeamlyticsPreview>
 
     suspend fun save(teamlytics: Teamlytics): Teamlytics

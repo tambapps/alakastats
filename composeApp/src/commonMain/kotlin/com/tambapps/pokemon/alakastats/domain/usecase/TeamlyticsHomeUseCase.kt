@@ -9,5 +9,7 @@ class TeamlyticsHomeUseCase(
 
     suspend fun list() = repository.listPreviews()
 
+    suspend fun get(id: Uuid) = repository.get(id)
+
     suspend fun delete(id: Uuid) = repository.delete(id)
 }

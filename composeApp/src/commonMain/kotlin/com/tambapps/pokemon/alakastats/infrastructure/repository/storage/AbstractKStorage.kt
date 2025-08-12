@@ -23,6 +23,8 @@ abstract class AbstractKStorage<ID: @Serializable Any, T : @Serializable Identif
         tasks.mapNotNull { it.await() }
     }
 
+    override suspend fun get(id: ID) = getStore(id).get()
+
     override suspend fun save(e: T): T {
         val ids = listIds()
         val entityId = e.id
