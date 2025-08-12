@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.createteam
+package com.tambapps.pokemon.alakastats.ui.screen.editteam
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -51,11 +50,11 @@ import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
 
-data class CreateTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
+data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
     override fun Content() {
-        val viewModel = koinScreenModel<CreateTeamViewModel>()
+        val viewModel = koinScreenModel<EditTeamViewModel>()
         LaunchedEffect(Unit) {
             if (teamlytics != null) {
                 viewModel.prepareEdition(teamlytics)
@@ -112,7 +111,7 @@ data class CreateTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
 }
 
 @Composable
-private fun TeamNameInput(viewModel: CreateTeamViewModel) {
+private fun TeamNameInput(viewModel: EditTeamViewModel) {
     Text(
         text = "Team Name",
         style = MaterialTheme.typography.headlineSmall,
@@ -129,7 +128,7 @@ private fun TeamNameInput(viewModel: CreateTeamViewModel) {
 }
 
 @Composable
-private fun PokePasteInput(viewModel: CreateTeamViewModel) {
+private fun PokePasteInput(viewModel: EditTeamViewModel) {
     if (getPlatform().type == PlatformType.Web) {
         Text(
             text = "Pokepaste",
@@ -169,7 +168,7 @@ private fun PokePasteInput(viewModel: CreateTeamViewModel) {
 }
 
 @Composable
-private fun ShowdownNamesInput(viewModel: CreateTeamViewModel) {
+private fun ShowdownNamesInput(viewModel: EditTeamViewModel) {
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -228,7 +227,7 @@ private fun ShowdownNamesInput(viewModel: CreateTeamViewModel) {
 }
 
 @Composable
-private fun ButtonBar(navigator: Navigator, viewModel: CreateTeamViewModel, isEditing: Boolean = false) {
+private fun ButtonBar(navigator: Navigator, viewModel: EditTeamViewModel, isEditing: Boolean = false) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -255,7 +254,7 @@ private fun ButtonBar(navigator: Navigator, viewModel: CreateTeamViewModel, isEd
 }
 
 @Composable
-private fun ShowdownNameDialog(viewModel: CreateTeamViewModel) {
+private fun ShowdownNameDialog(viewModel: EditTeamViewModel) {
     val newName = viewModel.newSdNameInput
     AlertDialog(
         onDismissRequest = { viewModel.hideAddNameDialog() },
@@ -303,7 +302,7 @@ private fun ShowdownNameDialog(viewModel: CreateTeamViewModel) {
 }
 
 @Composable
-private fun UrlLoadDialog(viewModel: CreateTeamViewModel) {
+private fun UrlLoadDialog(viewModel: EditTeamViewModel) {
     val url = viewModel.pokePasteUrlInput
     AlertDialog(
         onDismissRequest = { viewModel.hideUrlDialog() },

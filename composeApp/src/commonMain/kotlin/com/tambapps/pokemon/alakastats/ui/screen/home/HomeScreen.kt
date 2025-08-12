@@ -6,7 +6,6 @@ import alakastats.composeapp.generated.resources.more_horiz
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -45,7 +44,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
-import com.tambapps.pokemon.alakastats.ui.screen.createteam.CreateTeamScreen
+import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
 
@@ -76,7 +75,7 @@ object HomeScreen : Screen {
             AlertDialog(
                 onDismissRequest = { viewModel.dismissDeleteDialog() },
                 title = { Text("Delete Team") },
-                text = { Text("Are you sure you want to delete team '${teamToDelete.name}'? This action cannot be undone.") },
+                text = { Text("Are you sure you want to delete '${teamToDelete.name}'? This action cannot be undone.") },
                 confirmButton = {
                     TextButton(
                         onClick = { viewModel.confirmDelete() }
@@ -165,7 +164,7 @@ internal fun NewTeamButton(modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.currentOrThrow
     Button(
         modifier = modifier,
-        onClick = { navigator.push(CreateTeamScreen()) }
+        onClick = { navigator.push(EditTeamScreen()) }
     ) {
         Icon(
             painter = painterResource(Res.drawable.add),

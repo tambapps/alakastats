@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.createteam
+package com.tambapps.pokemon.alakastats.ui.screen.editteam
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -19,7 +19,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.withContext
 
-class CreateTeamViewModel(
+class EditTeamViewModel(
     private val pokepasteParser: PokepasteParser,
     private val createTeamlyticsUseCase: CreateTeamlyticsUseCase,
     private val httpClient: HttpClient
