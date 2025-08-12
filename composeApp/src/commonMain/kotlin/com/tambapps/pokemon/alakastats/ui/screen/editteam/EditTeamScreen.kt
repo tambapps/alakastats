@@ -190,7 +190,7 @@ private fun ShowdownNamesInput(viewModel: EditTeamViewModel) {
                 Icon(
                     painter = painterResource(Res.drawable.add),
                     contentDescription = "Add Name",
-                    tint = Color.White
+                    tint = MaterialTheme.typography.labelMedium.color // in order to be white/black
                 )
             }
         }

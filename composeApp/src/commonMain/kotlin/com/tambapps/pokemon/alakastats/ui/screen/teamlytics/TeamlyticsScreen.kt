@@ -2,10 +2,14 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.arrow_back
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,106 +34,90 @@ import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
+const val BACK = "BACK"
+
 data class TeamDetailsScreen(val team: Teamlytics) : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val viewModel = koinScreenModel<TeamlyticsViewModel>()
-        val navigator = LocalNavigator.currentOrThrow
         val isCompact = LocalIsCompact.current
-        val scope = rememberCoroutineScope()
-        
 
-        val tabs = listOf("Overview", "Replay Entries", "Move Usages")
-        val pagerState = rememberPagerState(pageCount = { tabs.size })
-        
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { 
-                        Text(
-                            team.name,
-                            fontWeight = FontWeight.Medium
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navigator.pop() }) {
-                            Icon(
-                                painter = painterResource(Res.drawable.arrow_back),
-                                contentDescription = "Back"
-                            )
-                        }
-                    }
-                )
+        val tabs = listOf(BACK, "Overview", "Replay Entries", "Move Usages")
+        val pagerState = rememberPagerState(pageCount = { tabs.size }, initialPage = 1)
+
+        Column(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .fillMaxSize()
+                .safeContentPadding()
+
+        ) {
+            if (isCompact) {
+                TeamlyticsScreenMobile(viewModel, tabs, pagerState)
+            } else {
+                TeamlyticsScreenDesktop(viewModel, tabs, pagerState)
             }
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                if (isCompact) {
-                    // Mobile: Content first, tabs at bottom
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.weight(1f)
-                    ) { page ->
-                        when (page) {
-                            0 -> OverviewTab(viewModel)
-                            1 -> ReplayEntriesTab(viewModel)
-                            2 -> MoveUsagesTab(viewModel)
-                        }
-                    }
-                    
-                    TabRow(
-                        selectedTabIndex = pagerState.currentPage
-                    ) {
-                        tabs.forEachIndexed { index, title ->
-                            Tab(
-                                selected = pagerState.currentPage == index,
-                                onClick = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(index)
-                                    }
-                                },
-                                text = { Text(title) }
-                            )
-                        }
-                    }
-                } else {
-                    // Desktop: Tabs first, content below
-                    TabRow(
-                        selectedTabIndex = pagerState.currentPage
-                    ) {
-                        tabs.forEachIndexed { index, title ->
-                            Tab(
-                                selected = pagerState.currentPage == index,
-                                onClick = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(index)
-                                    }
-                                },
-                                text = { Text(title) }
-                            )
-                        }
-                    }
-                    
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.weight(1f)
-                    ) { page ->
-                        when (page) {
-                            0 -> OverviewTab(viewModel)
-                            1 -> ReplayEntriesTab(viewModel)
-                            2 -> MoveUsagesTab(viewModel)
-                        }
-                    }
-                }
-            }
+        }
+
+    }
+}
+
+@Composable
+internal fun ColumnScope.Pager(
+    viewModel: TeamlyticsViewModel,
+    pagerState: PagerState
+) {
+    HorizontalPager(
+        state = pagerState,
+        modifier = Modifier.weight(1f)
+    ) { page ->
+        when (page) {
+            1 -> OverviewTab(viewModel)
+            2 -> ReplayEntriesTab(viewModel)
+            3 -> MoveUsagesTab(viewModel)
         }
     }
 }
 
+@Composable
+internal fun TabRow(
+    pagerState: PagerState,
+    tabs: List<String>
+) {
+    val scope = rememberCoroutineScope()
+    val navigator = LocalNavigator.currentOrThrow
+    TabRow(
+        selectedTabIndex = pagerState.currentPage
+    ) {
+        tabs.forEachIndexed { index, title ->
+            if (title == BACK) {
+                Tab(
+                    selected = false,
+                    onClick = { navigator.pop() },
+                    icon = {
+                        Icon(
+                            painter = painterResource(Res.drawable.arrow_back),
+                            contentDescription = "Back",
+                            tint = MaterialTheme.typography.labelMedium.color // in order to be white/black
+                        )
+                    }
+                )
+            } else {
+                Tab(
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    },
+                    text = { Text(title) }
+                )
+            }
+        }
+    }
+
+}
 @Composable
 private fun OverviewTab(viewModel: TeamlyticsViewModel) {
     Column(
