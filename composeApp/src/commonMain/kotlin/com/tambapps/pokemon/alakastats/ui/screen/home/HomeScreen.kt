@@ -45,6 +45,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamDetailsScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
 
@@ -107,10 +108,13 @@ internal fun CatchPhrase(skipLine: Boolean = false, textAlign: TextAlign = TextA
 
 @Composable
 fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifier = Modifier) {
+    val navigator = LocalNavigator.currentOrThrow
+    
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(),
+        onClick = { viewModel.consultTeam(team, navigator) }
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(
@@ -131,7 +135,6 @@ fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifi
                         expanded = viewModel.expandedMenuTeamId == team.id,
                         onDismissRequest = { viewModel.hideMenu() }
                     ) {
-                        val navigator = LocalNavigator.currentOrThrow
                         DropdownMenuItem(
                             text = { Text("Edit") },
                             onClick = { viewModel.editTeam(team, navigator) }

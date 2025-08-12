@@ -10,6 +10,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsHomeUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamDetailsScreen
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,7 +52,16 @@ class HomeViewModel(
     fun hideMenu() {
         expandedMenuTeamId = null
     }
-    
+
+    fun consultTeam(team: TeamlyticsPreview, navigator: Navigator) {
+        scope.launch {
+            val fullTeam = useCase.get(team.id) ?: return@launch
+            withContext(Dispatchers.Main) {
+                navigator.push(TeamDetailsScreen(fullTeam))
+            }
+        }
+
+    }
     fun editTeam(team: TeamlyticsPreview, navigator: Navigator) {
         scope.launch {
             val fullTeam = useCase.get(team.id) ?: return@launch

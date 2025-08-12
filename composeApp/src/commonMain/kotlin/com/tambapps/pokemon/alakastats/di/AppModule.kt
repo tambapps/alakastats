@@ -4,6 +4,7 @@ import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.ReplayAnalyticsTransformer
@@ -57,6 +58,7 @@ private val appModule = module {
     single<TeamlyticsHomeUseCase> { TeamlyticsHomeUseCase(get()) }
     factory { HomeViewModel(get(), get()) }
     factory { EditTeamViewModel(get(), get(), get()) }
+    factory { TeamlyticsViewModel() }
 }
 
 private val transformerModule = module {
