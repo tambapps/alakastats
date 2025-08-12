@@ -5,6 +5,7 @@ import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.more_horiz
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -88,19 +91,32 @@ fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifi
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(
-              //  modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top
             ) {
                 Text(team.name, style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.weight(1f))
-                IconButton(
-                    modifier = Modifier.offset(y = (-12).dp),
-                    onClick = { /* TODO */ }
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.more_horiz),
-                        contentDescription = "More"
-                    )
+                Box(modifier = Modifier.offset(y = (-12).dp)) {
+                    IconButton(
+                        onClick = { viewModel.showMenu(team.id) }
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.more_horiz),
+                            contentDescription = "More"
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = viewModel.expandedMenuTeamId == team.id,
+                        onDismissRequest = { viewModel.hideMenu() }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Edit") },
+                            onClick = { viewModel.editTeam(team.id) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            onClick = { viewModel.deleteTeam(team.id) }
+                        )
+                    }
                 }
             }
 

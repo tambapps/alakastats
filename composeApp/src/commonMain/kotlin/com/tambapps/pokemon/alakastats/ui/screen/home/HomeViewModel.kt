@@ -1,6 +1,9 @@
 package com.tambapps.pokemon.alakastats.ui.screen.home
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
@@ -9,6 +12,7 @@ import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.uuid.Uuid
 
 class HomeViewModel(
     val imageService: PokemonImageService,
@@ -17,6 +21,9 @@ class HomeViewModel(
     
     val teamlyticsList: SnapshotStateList<TeamlyticsPreview> = mutableStateListOf()
     private val scope = CoroutineScope(Dispatchers.Default)
+    
+    var expandedMenuTeamId by mutableStateOf<Uuid?>(null)
+        private set
 
     fun loadTeams() {
         scope.launch {
@@ -24,5 +31,23 @@ class HomeViewModel(
             teamlyticsList.clear()
             teamlyticsList.addAll(previews)
         }
+    }
+    
+    fun showMenu(teamId: Uuid) {
+        expandedMenuTeamId = teamId
+    }
+    
+    fun hideMenu() {
+        expandedMenuTeamId = null
+    }
+    
+    fun editTeam(teamId: Uuid) {
+        // TODO: Navigate to edit screen
+        hideMenu()
+    }
+    
+    fun deleteTeam(teamId: Uuid) {
+        // TODO: Implement delete functionality
+        hideMenu()
     }
 }
