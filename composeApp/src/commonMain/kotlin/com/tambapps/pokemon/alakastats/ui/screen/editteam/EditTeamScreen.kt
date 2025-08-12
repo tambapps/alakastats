@@ -2,7 +2,6 @@ package com.tambapps.pokemon.alakastats.ui.screen.editteam
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
-import alakastats.composeapp.generated.resources.arrow_back
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -23,7 +22,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -47,7 +45,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.getPlatform
+import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
 
 data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
@@ -68,12 +68,7 @@ data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
                 TopAppBar(
                     title = { Text(if (teamlytics != null) "Edit Team" else "Create Team") },
                     navigationIcon = {
-                        IconButton(onClick = { navigator.pop() }) {
-                            Icon(
-                                painter = painterResource(Res.drawable.arrow_back),
-                                contentDescription = "Back"
-                            )
-                        }
+                        BackIconButton(navigator)
                     }
                 )
             }
@@ -190,7 +185,7 @@ private fun ShowdownNamesInput(viewModel: EditTeamViewModel) {
                 Icon(
                     painter = painterResource(Res.drawable.add),
                     contentDescription = "Add Name",
-                    tint = MaterialTheme.typography.labelMedium.color // in order to be white/black
+                    tint = MaterialTheme.colorScheme.defaultIconColor
                 )
             }
         }

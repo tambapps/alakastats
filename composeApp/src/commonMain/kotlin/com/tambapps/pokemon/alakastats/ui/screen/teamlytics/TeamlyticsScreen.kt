@@ -35,8 +35,6 @@ import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
-const val BACK = "BACK"
-
 data class TeamDetailsScreen(val team: Teamlytics) : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -44,7 +42,7 @@ data class TeamDetailsScreen(val team: Teamlytics) : Screen {
         val viewModel = koinScreenModel<TeamlyticsViewModel>()
         val isCompact = LocalIsCompact.current
 
-        val tabs = listOf(BACK, "Overview", "Replay Entries", "Move Usages")
+        val tabs = listOf("Overview", "Replay Entries", "Move Usages")
         // Future tabs for testing scrolling behavior:
         // val tabs = listOf(BACK, "Overview", "Replays", "Moves", "Stats", "Matchups", "Analysis", "Settings")
         val pagerState = rememberPagerState(pageCount = { tabs.size }, initialPage = 1)
@@ -76,9 +74,9 @@ internal fun ColumnScope.Pager(
         modifier = Modifier.weight(1f)
     ) { page ->
         when (page) {
-            1 -> OverviewTab(viewModel)
-            2 -> ReplayEntriesTab(viewModel)
-            3 -> MoveUsagesTab(viewModel)
+            0 -> OverviewTab(viewModel)
+            1 -> ReplayEntriesTab(viewModel)
+            2 -> MoveUsagesTab(viewModel)
         }
     }
 }
@@ -89,31 +87,16 @@ internal fun TabRowContent(
     tabs: List<String>
 ) {
     val scope = rememberCoroutineScope()
-    val navigator = LocalNavigator.currentOrThrow
     tabs.forEachIndexed { index, title ->
-        if (title == BACK) {
-            Tab(
-                selected = false,
-                onClick = { navigator.pop() },
-                icon = {
-                    Icon(
-                        painter = painterResource(Res.drawable.arrow_back),
-                        contentDescription = "Back",
-                        tint = MaterialTheme.typography.labelMedium.color // in order to be white/black
-                    )
+        Tab(
+            selected = pagerState.currentPage == index,
+            onClick = {
+                scope.launch {
+                    pagerState.animateScrollToPage(index)
                 }
-            )
-        } else {
-            Tab(
-                selected = pagerState.currentPage == index,
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
-                },
-                text = { Text(title) }
-            )
-        }
+            },
+            text = { Text(title) }
+        )
     }
 }
 

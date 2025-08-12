@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
@@ -261,4 +262,12 @@ fun AppTheme(
     content = content
   )
 }
+
+/**
+ * Extension property for ColorScheme that provides a default icon color.
+ * This returns the appropriate text color that should be used for icons 
+ * to ensure proper contrast with the current theme.
+ */
+val ColorScheme.defaultIconColor: Color
+  @Composable get() = MaterialTheme.typography.labelMedium.color
 
