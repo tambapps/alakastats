@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -76,18 +78,15 @@ data class CreateTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
                     }
                 )
             }
-        ) { paddingValues ->
-            var columnModifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-            if (isCompact) {
-                columnModifier = columnModifier.padding(start = 16.dp, end = 16.dp)
-            } else {
-                columnModifier = columnModifier.padding(16.dp)
-            }
+        ) { scaffoldPadding ->
+            val paddingValues = if (isCompact) PaddingValues(start = 16.dp, end = 16.dp)
+             else PaddingValues(16.dp)
             Column(
-                modifier = columnModifier,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(scaffoldPadding)
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 TeamNameInput(viewModel)
@@ -184,12 +183,15 @@ private fun ShowdownNamesInput(viewModel: CreateTeamViewModel) {
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.width(16.dp))
-            IconButton(
-                onClick = { viewModel.showAddNameDialog() }
-            ) {
+            OutlinedButton(
+                onClick = { viewModel.showAddNameDialog() },
+                shape = CircleShape,
+                contentPadding = PaddingValues(0.dp),
+                ) {
                 Icon(
                     painter = painterResource(Res.drawable.add),
-                    contentDescription = "Add Name"
+                    contentDescription = "Add Name",
+                    tint = Color.White
                 )
             }
         }
