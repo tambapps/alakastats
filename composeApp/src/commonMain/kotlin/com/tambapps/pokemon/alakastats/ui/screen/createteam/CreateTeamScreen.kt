@@ -46,6 +46,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.getPlatform
+import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
 
 data class CreateTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
@@ -59,7 +60,8 @@ data class CreateTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
             }
         }
         val navigator = LocalNavigator.currentOrThrow
-        
+        val isCompact = LocalIsCompact.current
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -75,13 +77,17 @@ data class CreateTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
                 )
             }
         ) { paddingValues ->
+            var columnModifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+            if (isCompact) {
+                columnModifier = columnModifier.padding(start = 16.dp, end = 16.dp)
+            } else {
+                columnModifier = columnModifier.padding(16.dp)
+            }
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .safeContentPadding()
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
+                modifier = columnModifier,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 TeamNameInput(viewModel)
@@ -222,7 +228,7 @@ private fun ShowdownNamesInput(viewModel: CreateTeamViewModel) {
 @Composable
 private fun ButtonBar(navigator: Navigator, viewModel: CreateTeamViewModel, isEditing: Boolean = false) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         OutlinedButton(
