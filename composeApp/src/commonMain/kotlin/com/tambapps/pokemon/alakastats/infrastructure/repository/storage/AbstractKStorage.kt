@@ -33,13 +33,14 @@ abstract class AbstractKStorage<ID: @Serializable Any, T : @Serializable Identif
         return e
     }
 
-    override suspend fun delete(e: T) {
+    override suspend fun delete(e: T) = delete(e.id)
+
+    override suspend fun delete(id: ID) {
         val ids = listIds()
-        val entityId = e.id
-        if (!ids.contains(entityId)) {
+        if (!ids.contains(id)) {
             return
         }
-        idsStore.update { (it ?: emptyList()) - entityId }
-        getStore(entityId).delete()
+        idsStore.update { (it ?: emptyList()) - id }
+        getStore(id).delete()
     }
 }

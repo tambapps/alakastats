@@ -32,4 +32,9 @@ class KStoreTeamlyticsRepository(
         teamsStorage.delete(entity)
         previewsStorage.delete(teamlyticsTransformer.toPreview(entity))
     }
+
+    override suspend fun delete(id: Uuid) {
+        teamsStorage.delete(id)
+        previewsStorage.delete(id)
+    }
 }

@@ -16,7 +16,7 @@ import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransformer
 import com.tambapps.pokemon.alakastats.domain.usecase.CreateTeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.domain.usecase.ListTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsHomeUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
@@ -54,7 +54,7 @@ private val appModule = module {
         ) 
     }
     single<CreateTeamlyticsUseCase> { CreateTeamlyticsUseCase(get()) }
-    single<ListTeamlyticsUseCase> { ListTeamlyticsUseCase(get()) }
+    single<TeamlyticsHomeUseCase> { TeamlyticsHomeUseCase(get()) }
     factory { HomeViewModel(get(), get()) }
     factory { CreateTeamViewModel(get(), get(), get()) }
 }

@@ -12,4 +12,6 @@ interface KStorage<ID: @Serializable Any, T: @Serializable Identifiable<ID>> {
     suspend fun save(e: T): T
 
     suspend fun delete(e: T)
+
+    suspend fun delete(id: ID)
 }

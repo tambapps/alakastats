@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -30,10 +31,12 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -68,6 +71,28 @@ object HomeScreen : Screen {
                     HomeScreenDesktop(isDarkTheme, viewModel)
                 }
             }
+        }
+        
+        viewModel.teamToDelete?.let { teamToDelete ->
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissDeleteDialog() },
+                title = { Text("Delete Team") },
+                text = { Text("Are you sure you want to delete team '${teamToDelete.name}'? This action cannot be undone.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = { viewModel.confirmDelete() }
+                    ) {
+                        Text("Delete", color = Color.Red)
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { viewModel.dismissDeleteDialog() }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }
@@ -114,7 +139,7 @@ fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifi
                         )
                         DropdownMenuItem(
                             text = { Text("Delete") },
-                            onClick = { viewModel.deleteTeam(team.id) }
+                            onClick = { viewModel.deleteTeamDialog(team) }
                         )
                     }
                 }
