@@ -46,7 +46,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.screen.createteam.CreateTeamScreen
-import com.tambapps.pokemon.alakastats.ui.theme.isCompact
+import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
 
 object HomeScreen : Screen {
@@ -57,19 +57,18 @@ object HomeScreen : Screen {
             viewModel.loadTeams()
         }
         val isDarkTheme = isSystemInDarkTheme()
-        BoxWithConstraints {
-            val isCompact = isCompact()
-            Column(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
-                    .safeContentPadding()
-                    .fillMaxSize(),
-            ) {
-                if (isCompact) {
-                    HomeScreenMobile(isDarkTheme, viewModel)
-                } else {
-                    HomeScreenDesktop(isDarkTheme, viewModel)
-                }
+        val isCompact = LocalIsCompact.current
+        
+        Column(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .safeContentPadding()
+                .fillMaxSize(),
+        ) {
+            if (isCompact) {
+                HomeScreenMobile(isDarkTheme, viewModel)
+            } else {
+                HomeScreenDesktop(isDarkTheme, viewModel)
             }
         }
         
