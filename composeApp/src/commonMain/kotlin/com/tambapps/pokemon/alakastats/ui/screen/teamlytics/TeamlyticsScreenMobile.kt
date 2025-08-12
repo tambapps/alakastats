@@ -2,7 +2,9 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun ColumnScope.TeamlyticsScreenMobile(
@@ -11,5 +13,10 @@ fun ColumnScope.TeamlyticsScreenMobile(
     pagerState: PagerState
 ) {
     Pager(viewModel, pagerState)
-    TabRow(pagerState, tabs)
+    ScrollableTabRow(
+        selectedTabIndex = pagerState.currentPage,
+        edgePadding = 16.dp
+    ) {
+        TabRowContent(pagerState, tabs)
+    }
 }

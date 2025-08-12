@@ -17,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -44,6 +45,8 @@ data class TeamDetailsScreen(val team: Teamlytics) : Screen {
         val isCompact = LocalIsCompact.current
 
         val tabs = listOf(BACK, "Overview", "Replay Entries", "Move Usages")
+        // Future tabs for testing scrolling behavior:
+        // val tabs = listOf(BACK, "Overview", "Replays", "Moves", "Stats", "Matchups", "Analysis", "Settings")
         val pagerState = rememberPagerState(pageCount = { tabs.size }, initialPage = 1)
 
         Column(
@@ -81,43 +84,39 @@ internal fun ColumnScope.Pager(
 }
 
 @Composable
-internal fun TabRow(
+internal fun TabRowContent(
     pagerState: PagerState,
     tabs: List<String>
 ) {
     val scope = rememberCoroutineScope()
     val navigator = LocalNavigator.currentOrThrow
-    TabRow(
-        selectedTabIndex = pagerState.currentPage
-    ) {
-        tabs.forEachIndexed { index, title ->
-            if (title == BACK) {
-                Tab(
-                    selected = false,
-                    onClick = { navigator.pop() },
-                    icon = {
-                        Icon(
-                            painter = painterResource(Res.drawable.arrow_back),
-                            contentDescription = "Back",
-                            tint = MaterialTheme.typography.labelMedium.color // in order to be white/black
-                        )
+    tabs.forEachIndexed { index, title ->
+        if (title == BACK) {
+            Tab(
+                selected = false,
+                onClick = { navigator.pop() },
+                icon = {
+                    Icon(
+                        painter = painterResource(Res.drawable.arrow_back),
+                        contentDescription = "Back",
+                        tint = MaterialTheme.typography.labelMedium.color // in order to be white/black
+                    )
+                }
+            )
+        } else {
+            Tab(
+                selected = pagerState.currentPage == index,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(index)
                     }
-                )
-            } else {
-                Tab(
-                    selected = pagerState.currentPage == index,
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(index)
-                        }
-                    },
-                    text = { Text(title) }
-                )
-            }
+                },
+                text = { Text(title) }
+            )
         }
     }
-
 }
+
 @Composable
 private fun OverviewTab(viewModel: TeamlyticsViewModel) {
     Column(
