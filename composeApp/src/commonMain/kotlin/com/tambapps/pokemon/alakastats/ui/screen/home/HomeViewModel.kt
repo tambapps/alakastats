@@ -8,9 +8,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
-import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsHomeUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamDetailsScreen
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +20,7 @@ import kotlin.uuid.Uuid
 
 class HomeViewModel(
     val imageService: PokemonImageService,
-    private val useCase: TeamlyticsHomeUseCase
+    private val useCase: ManageTeamlyticsListUseCase
 ): ScreenModel {
     
     val teamlyticsList: SnapshotStateList<TeamlyticsPreview> = mutableStateListOf()
@@ -54,14 +54,9 @@ class HomeViewModel(
     }
 
     fun consultTeam(team: TeamlyticsPreview, navigator: Navigator) {
-        scope.launch {
-            val fullTeam = useCase.get(team.id) ?: return@launch
-            withContext(Dispatchers.Main) {
-                navigator.push(TeamDetailsScreen(fullTeam))
-            }
-        }
-
+        navigator.push(TeamlyticsScreen(team.id))
     }
+
     fun editTeam(team: TeamlyticsPreview, navigator: Navigator) {
         scope.launch {
             val fullTeam = useCase.get(team.id) ?: return@launch

@@ -7,7 +7,7 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.domain.usecase.CreateTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import com.tambapps.pokemon.pokepaste.parser.PokePasteParseException
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
@@ -21,7 +21,7 @@ import kotlinx.coroutines.withContext
 
 class EditTeamViewModel(
     private val pokepasteParser: PokepasteParser,
-    private val createTeamlyticsUseCase: CreateTeamlyticsUseCase,
+    private val editTeamlyticsUseCase: EditTeamlyticsUseCase,
     private val httpClient: HttpClient
 ) : ScreenModel {
 
@@ -171,12 +171,12 @@ class EditTeamViewModel(
             val pokepaste = pokepasteParser.tryParse(pokepaste) ?: return
             scope.launch {
                 if (editingTeam != null) {
-                    createTeamlyticsUseCase.edit(editingTeam!!,
+                    editTeamlyticsUseCase.edit(editingTeam!!,
                         name = teamName,
                         sdNames = sdNames,
                         pokePaste = pokepaste)
                 } else {
-                    createTeamlyticsUseCase.create(
+                    editTeamlyticsUseCase.create(
                         name = teamName,
                         sdNames = sdNames,
                         pokePaste = pokepaste

@@ -16,8 +16,9 @@ import com.tambapps.pokemon.alakastats.domain.transformer.OpenTeamSheetTransform
 import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransformer
-import com.tambapps.pokemon.alakastats.domain.usecase.CreateTeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsHomeUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
@@ -54,11 +55,12 @@ private val appModule = module {
             previewTransformer = get()
         ) 
     }
-    single<CreateTeamlyticsUseCase> { CreateTeamlyticsUseCase(get()) }
-    single<TeamlyticsHomeUseCase> { TeamlyticsHomeUseCase(get()) }
+    single<EditTeamlyticsUseCase> { EditTeamlyticsUseCase(get()) }
+    single<ManageTeamlyticsListUseCase> { ManageTeamlyticsListUseCase(get()) }
+    single<TeamlyticsUseCase> { TeamlyticsUseCase(get()) }
     factory { HomeViewModel(get(), get()) }
     factory { EditTeamViewModel(get(), get(), get()) }
-    factory { TeamlyticsViewModel() }
+    factory { TeamlyticsViewModel(get()) }
 }
 
 private val transformerModule = module {

@@ -5,7 +5,7 @@ import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import kotlin.uuid.Uuid
 
-class CreateTeamlyticsUseCase(
+class EditTeamlyticsUseCase(
     private val teamlyticsRepository: TeamlyticsRepository
 ) {
 
