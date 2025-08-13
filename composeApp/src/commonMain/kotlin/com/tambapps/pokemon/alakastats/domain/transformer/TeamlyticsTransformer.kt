@@ -9,6 +9,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
+import kotlin.time.Clock
 
 class TeamlyticsTransformer(
     private val replayAnalyticsTransformer: ReplayAnalyticsTransformer,
@@ -21,7 +22,8 @@ class TeamlyticsTransformer(
             name = domain.name,
             pokePaste = domain.pokePaste.toPokePasteString(),
             replays = domain.replays.map { replayAnalyticsTransformer.toEntity(it) },
-            sdNames = domain.sdNames
+            sdNames = domain.sdNames,
+            lastUpdatedAt = domain.lastUpdatedAt
         )
     }
     
@@ -31,7 +33,8 @@ class TeamlyticsTransformer(
             name = entity.name,
             pokePaste = entity.pokePaste.let(pokepasteParser::tryParse) ?: PokePaste(emptyList()),
             replays = entity.replays.map { replayAnalyticsTransformer.toDomain(it) },
-            sdNames = entity.sdNames
+            sdNames = entity.sdNames,
+            lastUpdatedAt = entity.lastUpdatedAt ?: Clock.System.now()
         )
     }
 

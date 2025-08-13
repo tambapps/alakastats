@@ -3,13 +3,13 @@ package com.tambapps.pokemon.alakastats.domain.usecase
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 class EditTeamlyticsUseCase(
     private val teamlyticsRepository: TeamlyticsRepository
 ) {
 
-    // TODO handle lastUpdatedAt
     suspend fun edit(
         team: Teamlytics,
         name: String,
@@ -18,7 +18,8 @@ class EditTeamlyticsUseCase(
         ) = teamlyticsRepository.save(team.copy(
         name = name,
         pokePaste = pokePaste,
-        sdNames = sdNames
+        sdNames = sdNames,
+        lastUpdatedAt = Clock.System.now()
         ))
 
     suspend fun create(
@@ -31,7 +32,8 @@ class EditTeamlyticsUseCase(
             name = name,
             pokePaste = pokePaste,
             replays = emptyList(),
-            sdNames = sdNames
+            sdNames = sdNames,
+            lastUpdatedAt = Clock.System.now()
         )
         return teamlyticsRepository.save(teamlytics)
     }

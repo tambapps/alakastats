@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.domain.model
 
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import com.tambapps.pokemon.sd.replay.parser.SdReplay
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 data class Teamlytics(
@@ -9,7 +10,8 @@ data class Teamlytics(
     val name: String,
     val pokePaste: PokePaste,
     val replays: List<ReplayAnalytics>,
-    val sdNames: List<String>
+    val sdNames: List<String>,
+    val lastUpdatedAt: Instant
 ) {
     val winRate get() = computeWinRate(sdNames, replays)
 }

@@ -2,7 +2,7 @@ package com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity
 
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.util.Identifiable
-import com.tambapps.pokemon.pokepaste.parser.PokePaste
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
@@ -12,7 +12,8 @@ data class TeamlyticsEntity(
     val name: String,
     val pokePaste: String,
     val replays: List<ReplayAnalyticsEntity>,
-    val sdNames: List<String>
+    val sdNames: List<String>,
+    val lastUpdatedAt: Instant?
 ): Identifiable<Uuid>
 
 @Serializable
