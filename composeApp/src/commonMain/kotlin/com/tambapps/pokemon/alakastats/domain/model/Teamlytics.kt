@@ -22,7 +22,8 @@ data class TeamlyticsPreview(
     val sdNames: List<String>,
     val pokemons: List<String>,
     val nbReplays: Int,
-    val winrate: Int
+    val winrate: Int,
+    val lastUpdatedAt: Instant
 )
 
 fun computeWinRate(sdNames: List<String>, replays: List<ReplayAnalytics>): Int {

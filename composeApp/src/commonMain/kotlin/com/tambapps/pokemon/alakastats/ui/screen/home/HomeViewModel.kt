@@ -41,7 +41,7 @@ class HomeViewModel(
         val previews = useCase.list()
         withContext(Dispatchers.Main) {
             teamlyticsList.clear()
-            teamlyticsList.addAll(previews)
+            teamlyticsList.addAll(previews.sortedWith(compareBy({ - it.lastUpdatedAt.epochSeconds }, { it.name })))
         }
     }
 

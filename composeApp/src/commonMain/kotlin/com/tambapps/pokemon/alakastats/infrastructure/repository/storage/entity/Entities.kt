@@ -23,7 +23,8 @@ data class TeamlyticsPreviewEntity(
     val sdNames: List<String>,
     val pokemons: List<String>,
     val nbReplays: Int,
-    val winrate: Int
+    val winrate: Int,
+    val lastUpdatedAt: Instant?
 ): Identifiable<Uuid>
 
 @Serializable

@@ -44,7 +44,8 @@ class TeamlyticsTransformer(
         sdNames = team.sdNames,
         pokemons = pokepasteParser.tryParse(team.pokePaste)?.pokemons?.map { it.name } ?: emptyList(),
         nbReplays = team.replays.size,
-        winrate = computeWinRate(team.sdNames, team.replays.map(replayAnalyticsTransformer::toDomain))
+        winrate = computeWinRate(team.sdNames, team.replays.map(replayAnalyticsTransformer::toDomain)),
+        lastUpdatedAt = team.lastUpdatedAt
     )
 
 }
@@ -59,6 +60,7 @@ class TeamlyticsPreviewTransformer {
             pokemons = domain.pokemons,
             nbReplays = domain.nbReplays,
             winrate = domain.winrate,
+            lastUpdatedAt = domain.lastUpdatedAt
         )
     }
 
@@ -70,6 +72,7 @@ class TeamlyticsPreviewTransformer {
             pokemons = entity.pokemons,
             nbReplays = entity.nbReplays,
             winrate = entity.winrate,
+            lastUpdatedAt = entity.lastUpdatedAt ?: Clock.System.now()
         )
     }
 }
