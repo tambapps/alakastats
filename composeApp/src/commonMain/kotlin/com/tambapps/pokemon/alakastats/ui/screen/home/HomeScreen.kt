@@ -148,7 +148,13 @@ fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifi
 
             Row {
                 for (pokemon in team.pokemons) {
-                    viewModel.imageService.PokemonSprite(pokemon, modifier = Modifier.weight(1f))
+
+                    viewModel.imageService.PokemonSprite(
+                        name = pokemon,
+                        modifier = Modifier.weight(1f),
+                        // disabling tooltip to allow handling card click listener
+                        disableTooltip = true
+                    )
                 }
             }
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))

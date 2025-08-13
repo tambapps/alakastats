@@ -51,6 +51,8 @@ import androidx.compose.ui.layout.ContentScale
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.getPlatform
+import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
+import com.tambapps.pokemon.alakastats.ui.composables.TooltipIfEnabled
 import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
@@ -85,31 +87,36 @@ class PokemonImageService(
     }
 
     @Composable
-    fun PokemonSprite(name: String, modifier: Modifier = Modifier) = PokemonImage(name, modifier) { it.sprite }
+    fun PokemonSprite(name: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false) = PokemonImage(name, modifier, disableTooltip) { it.sprite }
     @Composable
-    fun PokemonArtwork(name: String, modifier: Modifier = Modifier) = PokemonImage(name, modifier) { it.artwork }
+    fun PokemonArtwork(name: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false) = PokemonImage(name, modifier, disableTooltip) { it.artwork }
 
     @Composable
-    private inline fun PokemonImage(name: String, modifier: Modifier, imageUrlSupplier: (PokemonSpriteData) -> String) {
+    private inline fun PokemonImage(name: String, modifier: Modifier, disableTooltip: Boolean = false, imageUrlSupplier: (PokemonSpriteData) -> String) {
         val pokemonSpriteData = pokemonImages[PokemonNormalizer.normalizeToBase(name)]
-        if (pokemonSpriteData != null) {
-            // TODO the web part is BAD. This is a hack to avoid CORS, because kmp web rendering uses a canvas instead of a <img>
-            val url = if (getPlatform().type == PlatformType.Web)  "https://api.allorigins.win/raw?url=${pokemonSpriteData.sprite.replace("#", "%23").replace("&", "%26").replace("?", "%3F")}"
-            else imageUrlSupplier.invoke(pokemonSpriteData)
-            KamelImage({ asyncPainterResource(data = url) },
-                contentDescription = pokemonSpriteData.name,
-                modifier = modifier
-            )
-        } else {
-            DefaultIcon(
-                contentDescription = name,
-                modifier = modifier
-            )
+        val imageUrl = pokemonSpriteData?.let(imageUrlSupplier)
+
+
+        TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
+            if (imageUrl != null) {
+                // TODO the web part is BAD. This is a hack to avoid CORS, because kmp web rendering uses a canvas instead of a <img>
+                val url = if (getPlatform().type == PlatformType.Web)  "https://api.allorigins.win/raw?url=${imageUrl.replace("#", "%23").replace("&", "%26").replace("?", "%3F")}"
+                else imageUrl
+                KamelImage({ asyncPainterResource(data = url) },
+                    contentDescription = pokemonSpriteData.name,
+                    modifier = mod
+                )
+            } else {
+                DefaultIcon(
+                    contentDescription = name,
+                    modifier = mod
+                )
+            }
         }
     }
 
     @Composable
-    fun TeraTypeImage(type: PokeType) {
+    fun TeraTypeImage(type: PokeType, disableTooltip: Boolean = false) {
         val resource = when(type) {
             PokeType.STEEL -> Res.drawable.tera_type_steel
             PokeType.FIGHTING -> Res.drawable.tera_type_fighting
@@ -133,16 +140,19 @@ class PokemonImageService(
             PokeType.STELLAR -> Res.drawable.tera_type_stellar
             PokeType.UNKNOWN -> Res.drawable.tera_type_normal
         }
-        Image(
-            painter = painterResource(resource),
-            contentDescription = "Tera $type",
-            modifier = Modifier,
-            contentScale = ContentScale.Fit
-        )
+        TooltipIfEnabled(disableTooltip,
+            "Tera " + type.name.let { it[0] + it.substring(1).lowercase() }, Modifier) { modifier ->
+            Image(
+                painter = painterResource(resource),
+                contentDescription = "Tera $type",
+                modifier = modifier,
+                contentScale = ContentScale.Fit
+            )
+        }
     }
 
     @Composable
-    fun MoveTypeImage(type: PokeType) {
+    fun MoveTypeImage(type: PokeType, disableTooltip: Boolean = false) {
         val resource = when(type) {
             PokeType.STEEL -> Res.drawable.move_steel
             PokeType.FIGHTING -> Res.drawable.move_fighting
@@ -165,12 +175,14 @@ class PokemonImageService(
             PokeType.BUG -> Res.drawable.move_bug
             PokeType.UNKNOWN, PokeType.STELLAR -> Res.drawable.move_normal
         }
-        Image(
-            painter = painterResource(resource),
-            contentDescription = "$type",
-            modifier = Modifier,
-            contentScale = ContentScale.Fit
-        )
+        TooltipIfEnabled(disableTooltip, type.name.let { it[0] + it.substring(1).lowercase() }, Modifier) { modifier ->
+            Image(
+                painter = painterResource(resource),
+                contentDescription = "$type",
+                modifier = Modifier,
+                contentScale = ContentScale.Fit
+            )
+        }
     }
 
     @Composable
@@ -203,23 +215,25 @@ class PokemonImageService(
     }
 
     @Composable
-    fun ItemImage(item: String, modifier: Modifier = Modifier) {
-        // lazy loading
-        if (itemsData.isEmpty()) {
-            loadItems()
-            DefaultIcon()
-            return
-        }
-        val data = itemsData[PokemonNormalizer.normalize(item)]
-        if (data == null) {
-            DefaultIcon()
-            return
-        }
+    fun ItemImage(item: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false) {
+        TooltipIfEnabled(disableTooltip, item, modifier) { mod ->
+            // lazy loading
+            if (itemsData.isEmpty()) {
+                loadItems()
+                DefaultIcon()
+                return@TooltipIfEnabled
+            }
+            val data = itemsData[PokemonNormalizer.normalize(item)]
+            if (data == null) {
+                DefaultIcon()
+                return@TooltipIfEnabled
+            }
 
-        KamelImage({ asyncPainterResource(data = data.spriteUrl) },
-            contentDescription = data.name,
-            modifier = modifier
-        )
+            KamelImage({ asyncPainterResource(data = data.spriteUrl) },
+                contentDescription = data.name,
+                modifier = mod
+            )
+        }
     }
 
     @Composable

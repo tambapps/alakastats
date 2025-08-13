@@ -1,9 +1,16 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -60,5 +67,42 @@ private fun DesktopPokemonRow(pokemons: List<Pokemon>, pokemonImageService: Poke
 
 @Composable
 private fun Pokemon(pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
-    pokemonImageService.PokemonSprite(pokemon.name)
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        val scale = 1f
+        Box(
+            modifier = Modifier.graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            pokemonImageService.PokemonArtwork(pokemon.name)
+        }
+        val iconSize = 64.dp
+        val offset = 8.dp
+        pokemon.teraType?.let {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .offset(x = 0.dp, y = offset)
+                    .size(iconSize)
+            ) {
+                pokemonImageService.TeraTypeImage(it)
+            }
+        }
+        // Bottom-right badge
+        pokemon.item?.let {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(iconSize)
+                    .offset(x = 0.dp, y = 0.dp)
+            ) {
+                pokemonImageService.ItemImage(it)
+            }
+        }
+    }
 }
