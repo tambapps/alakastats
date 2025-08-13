@@ -54,6 +54,7 @@ import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.TooltipIfEnabled
 import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
+import com.tambapps.pokemon.alakastats.util.titlecase
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.CoroutineScope
@@ -141,7 +142,7 @@ class PokemonImageService(
             PokeType.UNKNOWN -> Res.drawable.tera_type_normal
         }
         TooltipIfEnabled(disableTooltip,
-            "Tera " + type.name.let { it[0] + it.substring(1).lowercase() }, Modifier) { modifier ->
+            "Tera " + type.name.titlecase(), Modifier) { modifier ->
             Image(
                 painter = painterResource(resource),
                 contentDescription = "Tera $type",
@@ -175,7 +176,7 @@ class PokemonImageService(
             PokeType.BUG -> Res.drawable.move_bug
             PokeType.UNKNOWN, PokeType.STELLAR -> Res.drawable.move_normal
         }
-        TooltipIfEnabled(disableTooltip, type.name.let { it[0] + it.substring(1).lowercase() }, Modifier) { modifier ->
+        TooltipIfEnabled(disableTooltip, type.name.titlecase(), Modifier) { modifier ->
             Image(
                 painter = painterResource(resource),
                 contentDescription = "$type",
