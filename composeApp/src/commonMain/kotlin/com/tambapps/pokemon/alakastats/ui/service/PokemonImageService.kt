@@ -2,11 +2,51 @@ package com.tambapps.pokemon.alakastats.ui.service
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.catching_pokemon
+import alakastats.composeapp.generated.resources.move_bug
+import alakastats.composeapp.generated.resources.move_dark
+import alakastats.composeapp.generated.resources.move_dragon
+import alakastats.composeapp.generated.resources.move_electric
+import alakastats.composeapp.generated.resources.move_fairy
+import alakastats.composeapp.generated.resources.move_fighting
+import alakastats.composeapp.generated.resources.move_fire
+import alakastats.composeapp.generated.resources.move_flying
+import alakastats.composeapp.generated.resources.move_ghost
+import alakastats.composeapp.generated.resources.move_grass
+import alakastats.composeapp.generated.resources.move_ground
+import alakastats.composeapp.generated.resources.move_ice
+import alakastats.composeapp.generated.resources.move_normal
+import alakastats.composeapp.generated.resources.move_poison
+import alakastats.composeapp.generated.resources.move_psychic
+import alakastats.composeapp.generated.resources.move_rock
+import alakastats.composeapp.generated.resources.move_steel
+import alakastats.composeapp.generated.resources.move_water
+import alakastats.composeapp.generated.resources.tera_type_bug
+import alakastats.composeapp.generated.resources.tera_type_dark
+import alakastats.composeapp.generated.resources.tera_type_dragon
+import alakastats.composeapp.generated.resources.tera_type_electric
+import alakastats.composeapp.generated.resources.tera_type_fairy
+import alakastats.composeapp.generated.resources.tera_type_fighting
+import alakastats.composeapp.generated.resources.tera_type_fire
+import alakastats.composeapp.generated.resources.tera_type_flying
+import alakastats.composeapp.generated.resources.tera_type_ghost
+import alakastats.composeapp.generated.resources.tera_type_grass
+import alakastats.composeapp.generated.resources.tera_type_ground
+import alakastats.composeapp.generated.resources.tera_type_ice
+import alakastats.composeapp.generated.resources.tera_type_normal
+import alakastats.composeapp.generated.resources.tera_type_poison
+import alakastats.composeapp.generated.resources.tera_type_psychic
+import alakastats.composeapp.generated.resources.tera_type_rock
+import alakastats.composeapp.generated.resources.tera_type_steel
+import alakastats.composeapp.generated.resources.tera_type_stellar
+import alakastats.composeapp.generated.resources.tera_type_water
+import androidx.compose.foundation.Image
 import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
@@ -15,6 +55,7 @@ import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
@@ -23,11 +64,14 @@ class PokemonImageService(
     private val json: Json
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
-    private val sprites = mutableStateMapOf<String, PokemonSpriteData>()
+    private val pokemonImages = mutableStateMapOf<String, PokemonSpriteData>()
 
     init {
         coroutineScope.launch {
-            sprites.putAll(readMappingFile("pokemon-sprites.json"))
+            val map: Map<String, PokemonSpriteData> = readMappingFile("pokemon-sprites.json")
+            withContext(Dispatchers.Main) {
+                pokemonImages.putAll(map)
+            }
         }
     }
 
@@ -43,7 +87,7 @@ class PokemonImageService(
 
     @Composable
     private inline fun PokemonImage(name: String, modifier: Modifier, imageUrlSupplier: (PokemonSpriteData) -> String) {
-        val pokemonSpriteData = sprites[PokemonNormalizer.normalizeToBase(name)]
+        val pokemonSpriteData = pokemonImages[PokemonNormalizer.normalizeToBase(name)]
         if (pokemonSpriteData != null) {
             // TODO the web part is BAD. This is a hack to avoid CORS, because kmp web rendering uses a canvas instead of a <img>
             val url = if (getPlatform().type == PlatformType.Web)  "https://api.allorigins.win/raw?url=${pokemonSpriteData.sprite.replace("#", "%23").replace("&", "%26").replace("?", "%3F")}"
@@ -59,6 +103,71 @@ class PokemonImageService(
                 modifier = modifier
             )
         }
+    }
+
+    @Composable
+    fun TeraTypeImage(type: PokeType) {
+        val resource = when(type) {
+            PokeType.STEEL -> Res.drawable.tera_type_steel
+            PokeType.FIGHTING -> Res.drawable.tera_type_fighting
+            PokeType.DRAGON -> Res.drawable.tera_type_dragon
+            PokeType.FIRE -> Res.drawable.tera_type_fire
+            PokeType.ICE -> Res.drawable.tera_type_ice
+            PokeType.NORMAL -> Res.drawable.tera_type_normal
+            PokeType.WATER -> Res.drawable.tera_type_water
+            PokeType.GRASS -> Res.drawable.tera_type_grass
+            PokeType.ELECTRIC -> Res.drawable.tera_type_electric
+            PokeType.FAIRY -> Res.drawable.tera_type_fairy
+            PokeType.POISON -> Res.drawable.tera_type_poison
+            PokeType.PSY -> Res.drawable.tera_type_psychic
+            PokeType.ROCK -> Res.drawable.tera_type_rock
+            PokeType.GHOST -> Res.drawable.tera_type_ghost
+            PokeType.DARK -> Res.drawable.tera_type_dark
+            PokeType.GROUND -> Res.drawable.tera_type_ground
+            PokeType.FLYING -> Res.drawable.tera_type_flying
+            PokeType.PSYCHIC -> Res.drawable.tera_type_psychic
+            PokeType.BUG -> Res.drawable.tera_type_bug
+            PokeType.STELLAR -> Res.drawable.tera_type_stellar
+            PokeType.UNKNOWN -> Res.drawable.tera_type_normal
+        }
+        Image(
+            painter = painterResource(resource),
+            contentDescription = "Tera $type",
+            modifier = Modifier,
+            contentScale = ContentScale.Fit
+        )
+    }
+
+    @Composable
+    fun MoveTypeImage(type: PokeType) {
+        val resource = when(type) {
+            PokeType.STEEL -> Res.drawable.move_steel
+            PokeType.FIGHTING -> Res.drawable.move_fighting
+            PokeType.DRAGON -> Res.drawable.move_dragon
+            PokeType.FIRE -> Res.drawable.move_fire
+            PokeType.ICE -> Res.drawable.move_ice
+            PokeType.NORMAL -> Res.drawable.move_normal
+            PokeType.WATER -> Res.drawable.move_water
+            PokeType.GRASS -> Res.drawable.move_grass
+            PokeType.ELECTRIC -> Res.drawable.move_electric
+            PokeType.FAIRY -> Res.drawable.move_fairy
+            PokeType.POISON -> Res.drawable.move_poison
+            PokeType.PSY -> Res.drawable.move_psychic
+            PokeType.ROCK -> Res.drawable.move_rock
+            PokeType.GHOST -> Res.drawable.move_ghost
+            PokeType.DARK -> Res.drawable.move_dark
+            PokeType.GROUND -> Res.drawable.move_ground
+            PokeType.FLYING -> Res.drawable.move_flying
+            PokeType.PSYCHIC -> Res.drawable.move_psychic
+            PokeType.BUG -> Res.drawable.move_bug
+            PokeType.UNKNOWN, PokeType.STELLAR -> Res.drawable.move_normal
+        }
+        Image(
+            painter = painterResource(resource),
+            contentDescription = "$type",
+            modifier = Modifier,
+            contentScale = ContentScale.Fit
+        )
     }
 }
 
