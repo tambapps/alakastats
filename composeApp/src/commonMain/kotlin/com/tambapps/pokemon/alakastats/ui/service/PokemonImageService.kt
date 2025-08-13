@@ -39,7 +39,7 @@ class PokemonImageService(
     }
 
     @Composable
-    fun PokemonSprite(name: String, modifier: Modifier) {
+    fun PokemonSprite(name: String, modifier: Modifier = Modifier) {
         val pokemonSpriteData = sprites[PokemonNormalizer.normalizeToBase(name)]
         if (pokemonSpriteData != null) {
             // TODO the web part is BAD. This is a hack to avoid CORS, because kmp web rendering uses a canvas instead of a <img>

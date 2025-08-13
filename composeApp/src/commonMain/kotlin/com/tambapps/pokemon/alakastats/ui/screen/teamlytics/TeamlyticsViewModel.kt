@@ -17,7 +17,8 @@ class TeamlyticsViewModel(
 ) : ScreenModel {
 
     private val scope = CoroutineScope(Dispatchers.Default)
-    var team: Teamlytics? by mutableStateOf(null)
+    val teamState = mutableStateOf<Teamlytics?>(null)
+    var team: Teamlytics? by teamState
         private set
 
     fun requireTeam() = team!!

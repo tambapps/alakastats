@@ -28,8 +28,11 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
 import kotlin.uuid.Uuid
 
 data class TeamlyticsScreen(val teamId: Uuid) : Screen {
@@ -52,7 +55,6 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
                 .fillMaxSize()
                 .safeContentPadding()
         ) {
-
             if (viewModel.team == null) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -80,8 +82,15 @@ internal fun ColumnScope.Pager(
         state = pagerState,
         modifier = Modifier.weight(1f)
     ) { page ->
+        val team = viewModel.requireTeam()
+        val teamState = viewModel.teamState
         when (page) {
-            0 -> OverviewTab(viewModel)
+            0 -> {
+                val viewModel = koinInject<OverviewViewModel> {
+                    parametersOf(teamState, team)
+                }
+                OverviewTab(viewModel)
+            }
             1 -> ReplayEntriesTab(viewModel)
             2 -> MoveUsagesTab(viewModel)
         }

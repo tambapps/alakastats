@@ -1,5 +1,7 @@
 package com.tambapps.pokemon.alakastats.di
 
+import androidx.compose.runtime.MutableState
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
@@ -25,6 +27,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createT
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsPreviewKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import kotlinx.serialization.json.Json
 import kotlin.uuid.Uuid
 import org.koin.core.qualifier.named
@@ -61,6 +64,9 @@ private val appModule = module {
     factory { HomeViewModel(get(), get()) }
     factory { EditTeamViewModel(get(), get(), get()) }
     factory { TeamlyticsViewModel(get()) }
+    factory { (teamState: MutableState<Teamlytics?>, team: Teamlytics) ->
+        OverviewViewModel(get(), teamState, team)
+    }
 }
 
 private val transformerModule = module {
