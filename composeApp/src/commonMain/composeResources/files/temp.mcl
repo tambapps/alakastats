@@ -8,5 +8,7 @@ String filename = args[0]
 File file = new File(filename)
 dynobj content = DynamicYaml.instance.read(file)
 
+//for (dynobj obj in content.asMap().values()) obj.setProperty('type', obj.type.asString().toUpperCase() as dynobj)
+
 File outputFile = new File(filename.replaceAll('yaml', 'json'))
 DynamicJson.instance.write(content, outputFile)

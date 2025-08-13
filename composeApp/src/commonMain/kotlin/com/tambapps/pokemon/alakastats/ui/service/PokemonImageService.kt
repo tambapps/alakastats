@@ -15,9 +15,11 @@ import alakastats.composeapp.generated.resources.move_grass
 import alakastats.composeapp.generated.resources.move_ground
 import alakastats.composeapp.generated.resources.move_ice
 import alakastats.composeapp.generated.resources.move_normal
+import alakastats.composeapp.generated.resources.move_physical
 import alakastats.composeapp.generated.resources.move_poison
 import alakastats.composeapp.generated.resources.move_psychic
 import alakastats.composeapp.generated.resources.move_rock
+import alakastats.composeapp.generated.resources.move_special
 import alakastats.composeapp.generated.resources.move_steel
 import alakastats.composeapp.generated.resources.move_water
 import alakastats.composeapp.generated.resources.tera_type_bug
@@ -65,6 +67,8 @@ class PokemonImageService(
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
     private val pokemonImages = mutableStateMapOf<String, PokemonSpriteData>()
+    private val movesData = mutableStateMapOf<String, MoveData>()
+    private val itemsData = mutableStateMapOf<String, ItemData>()
 
     init {
         coroutineScope.launch {
@@ -97,8 +101,7 @@ class PokemonImageService(
                 modifier = modifier
             )
         } else {
-            Icon(
-                painter = painterResource(Res.drawable.catching_pokemon),
+            DefaultIcon(
                 contentDescription = name,
                 modifier = modifier
             )
@@ -169,7 +172,99 @@ class PokemonImageService(
             contentScale = ContentScale.Fit
         )
     }
+
+    @Composable
+    fun MoveSpecImages(move: String) {
+        // lazy loading
+        if (movesData.isEmpty()) {
+            loadMoves()
+            DefaultIcon()
+            return
+        }
+        val data = movesData[PokemonNormalizer.normalize(move)]
+        if (data == null) {
+            DefaultIcon()
+            return
+        }
+        val (_, category, type) = data
+
+        val categoryRes = when(category.lowercase()) {
+            "physical" -> Res.drawable.move_physical
+            else -> Res.drawable.move_special
+        }
+
+        MoveTypeImage(type)
+        Image(
+            painter = painterResource(categoryRes),
+            contentDescription = category,
+            modifier = Modifier,
+            contentScale = ContentScale.Fit
+        )
+    }
+
+    @Composable
+    fun ItemImage(item: String, modifier: Modifier = Modifier) {
+        // lazy loading
+        if (itemsData.isEmpty()) {
+            loadItems()
+            DefaultIcon()
+            return
+        }
+        val data = itemsData[PokemonNormalizer.normalize(item)]
+        if (data == null) {
+            DefaultIcon()
+            return
+        }
+
+        KamelImage({ asyncPainterResource(data = data.spriteUrl) },
+            contentDescription = data.name,
+            modifier = modifier
+        )
+    }
+
+    @Composable
+    private fun DefaultIcon(contentDescription: String = "", modifier: Modifier = Modifier) {
+        Icon(
+            painter = painterResource(Res.drawable.catching_pokemon),
+            contentDescription = contentDescription,
+            modifier = modifier
+        )
+    }
+
+    private fun loadMoves() {
+        coroutineScope.launch {
+            val map: Map<String, MoveData> = readMappingFile("moves.json")
+            withContext(Dispatchers.Main) {
+                movesData.clear()
+                movesData.putAll(map)
+            }
+        }
+    }
+
+    private fun loadItems() {
+        coroutineScope.launch {
+            val map: Map<String, ItemData> = readMappingFile("items-mapping.json")
+            withContext(Dispatchers.Main) {
+                itemsData.clear()
+                itemsData.putAll(map)
+            }
+        }
+    }
 }
+
+@Serializable
+data class ItemData(
+    val name: String,
+    val spriteUrl: String
+)
+
+
+@Serializable
+data class MoveData(
+    val name: String,
+    val category: String,
+    val type: PokeType
+)
 
 
 @Serializable
