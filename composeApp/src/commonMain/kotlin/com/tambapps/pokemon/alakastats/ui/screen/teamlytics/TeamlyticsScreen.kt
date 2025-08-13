@@ -27,6 +27,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewTab
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlinx.coroutines.launch
 import kotlin.uuid.Uuid
@@ -43,7 +44,7 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
         val isCompact = LocalIsCompact.current
 
         val tabs = listOf("Overview", "Replay Entries", "Move Usages")
-        val pagerState = rememberPagerState(pageCount = { tabs.size }, initialPage = 1)
+        val pagerState = rememberPagerState(pageCount = { tabs.size })
 
         Column(
             modifier = Modifier
@@ -102,26 +103,6 @@ internal fun TabRowContent(
                 }
             },
             text = { Text(title) }
-        )
-    }
-}
-
-@Composable
-private fun OverviewTab(viewModel: TeamlyticsViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Overview",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "Team overview content will go here",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 16.dp)
         )
     }
 }
