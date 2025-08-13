@@ -26,7 +26,7 @@ data class TeamlyticsPreview(
 )
 
 fun computeWinRate(sdNames: List<String>, replays: List<ReplayAnalytics>): Int {
-    if (replays.size == 0) return 0
+    if (replays.isEmpty()) return 0
     val nbGames = replays.size
     val wonGames = replays.count { replay ->
         replay.replay.winner?.let(sdNames::contains) ?: false
