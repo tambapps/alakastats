@@ -34,7 +34,7 @@ fun TooltipIfEnabled(disabled: Boolean, tooltip: String, modifier: Modifier, com
 
 
 @Composable
-fun Tooltip(tooltip: String, modifier: Modifier, content: @Composable () -> Unit) {
+fun Tooltip(tooltip: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     var show by remember { mutableStateOf(false) }
 
     LaunchedEffect(show) {

@@ -42,12 +42,15 @@ import alakastats.composeapp.generated.resources.tera_type_steel
 import alakastats.composeapp.generated.resources.tera_type_stellar
 import alakastats.composeapp.generated.resources.tera_type_water
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.getPlatform
@@ -153,7 +156,7 @@ class PokemonImageService(
     }
 
     @Composable
-    fun MoveTypeImage(type: PokeType, disableTooltip: Boolean = false) {
+    fun MoveTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier) {
         val resource = when(type) {
             PokeType.STEEL -> Res.drawable.move_steel
             PokeType.FIGHTING -> Res.drawable.move_fighting
@@ -176,27 +179,27 @@ class PokemonImageService(
             PokeType.BUG -> Res.drawable.move_bug
             PokeType.UNKNOWN, PokeType.STELLAR -> Res.drawable.move_normal
         }
-        TooltipIfEnabled(disableTooltip, type.name.titlecase(), Modifier) { modifier ->
+        TooltipIfEnabled(disableTooltip, type.name.titlecase(), modifier) { mod ->
             Image(
                 painter = painterResource(resource),
                 contentDescription = "$type",
-                modifier = Modifier,
+                modifier = mod,
                 contentScale = ContentScale.Fit
             )
         }
     }
 
     @Composable
-    fun MoveSpecImages(move: String) {
+    fun MoveSpecImages(move: String, iconModifier: Modifier = Modifier) {
         // lazy loading
         if (movesData.isEmpty()) {
             loadMoves()
-            DefaultIcon()
+            DefaultIcon(modifier = iconModifier)
             return
         }
         val data = movesData[PokemonNormalizer.normalize(move)]
         if (data == null) {
-            DefaultIcon()
+            DefaultIcon(modifier = iconModifier)
             return
         }
         val (_, category, type) = data
@@ -206,12 +209,13 @@ class PokemonImageService(
             else -> Res.drawable.move_special
         }
 
-        MoveTypeImage(type)
+        MoveTypeImage(type, modifier = iconModifier, disableTooltip = true)
+        Spacer(Modifier.width(8.dp))
         Image(
             painter = painterResource(categoryRes),
             contentDescription = category,
-            modifier = Modifier,
-            contentScale = ContentScale.Fit
+            modifier = iconModifier,
+            contentScale = ContentScale.Fit,
         )
     }
 

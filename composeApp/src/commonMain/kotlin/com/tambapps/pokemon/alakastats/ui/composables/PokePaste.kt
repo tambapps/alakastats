@@ -3,14 +3,19 @@ package com.tambapps.pokemon.alakastats.ui.composables
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
@@ -40,8 +45,11 @@ private fun MobilePokepaste(
     pokemonImageService: PokemonImageService,
     modifier: Modifier) {
     Column(modifier = modifier) {
+        val space = 16.dp
+        Spacer(Modifier.height(space))
         for (pokemon in pokePaste.pokemons) {
             Pokemon(pokePaste.isOts, pokemon, pokemonImageService, Modifier.fillMaxWidth())
+            Spacer(Modifier.height(space))
         }
 
     }
@@ -70,29 +78,49 @@ private fun DesktopPokemonRow(isOts: Boolean, pokemons: List<Pokemon>, pokemonIm
 
 @Composable
 private fun Pokemon(isOts: Boolean, pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
-   if (isOts) {
-       PokemonView(pokemon, pokemonImageService, modifier)
-   } else {
-       Row(modifier) {
-           PokemonView(pokemon, pokemonImageService, Modifier.weight(1f))
-           PokemonDetails(pokemon, pokemonImageService, Modifier.weight(1f))
-       }
-   }
-}
-
-@Composable
-private fun PokemonDetails(pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
-    Column(modifier) {
-        PokemonStatsRow(pokemon)
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PokemonView(pokemon, pokemonImageService, Modifier.weight(0.4f))
+        Spacer(Modifier.width(8.dp))
+        PokemonDetails(isOts, pokemon, pokemonImageService, Modifier.weight(0.6f))
     }
 }
 
+@Composable
+private fun PokemonDetails(isOts: Boolean, pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        if (!isOts) {
+            PokemonStatsRow(pokemon)
+        }
+        PokemonMoves(pokemon, pokemonImageService)
+    }
+}
 
 @Composable
 private fun PokemonStatsRow(pokemon: Pokemon, modifier: Modifier = Modifier) {
     Row(modifier) {
         for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
             PokemonStatColumn(stat, pokemon.ivs, pokemon.evs)
+        }
+    }
+}
+@Composable
+private fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        pokemon.moves.forEach { move ->
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val iconModifier = Modifier.size(32.dp)
+                pokemonImageService.MoveSpecImages(move, iconModifier)
+                Spacer(Modifier.width(8.dp))
+                Tooltip(move) {
+                    Text(move, textAlign = TextAlign.Start, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
         }
     }
 }
