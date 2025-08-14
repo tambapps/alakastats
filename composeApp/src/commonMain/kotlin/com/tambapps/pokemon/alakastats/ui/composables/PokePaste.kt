@@ -83,9 +83,10 @@ private fun Pokemon(isOts: Boolean, pokemon: Pokemon, pokemonImageService: Pokem
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PokemonView(pokemon, pokemonImageService, Modifier.weight(0.35f))
+        val (weightA, weightB) = if (!isOts) Pair(0.35f, 0.65f) else Pair(0.45f, 0.55f)
+        PokemonView(pokemon, pokemonImageService, Modifier.weight(weightA))
         Spacer(Modifier.width(8.dp))
-        PokemonDetails(isOts, pokemon, pokemonImageService, Modifier.weight(0.65f))
+        PokemonDetails(isOts, pokemon, pokemonImageService, Modifier.weight(weightB))
     }
 }
 
