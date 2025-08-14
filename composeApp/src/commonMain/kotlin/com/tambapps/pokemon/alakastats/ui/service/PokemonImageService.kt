@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.getPlatform
-import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.TooltipIfEnabled
 import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.util.titlecase
@@ -68,6 +67,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
 
+// TODO add placeholder for KamelImage because the image has no size when it is loading and it renders
+//   a wierd display
 class PokemonImageService(
     private val json: Json
 ) {
