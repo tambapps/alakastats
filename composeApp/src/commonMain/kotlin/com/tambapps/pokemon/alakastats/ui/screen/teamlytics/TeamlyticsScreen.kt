@@ -27,6 +27,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -88,12 +90,17 @@ internal fun ColumnScope.Pager(
         val team = viewModel.requireTeam()
         val teamState = viewModel.teamState
         when (page) {
-            //        val TABS = listOf("Overview", "Team Notes", "Replays", "Move Usages", "Lead Stats", "Usage Stats", "Match-up Notes")
             0 -> {
                 val viewModel = koinInject<OverviewViewModel> {
                     parametersOf(teamState, team)
                 }
                 OverviewTab(viewModel)
+            }
+            1 -> {
+                val viewModel = koinInject<TeamNotesViewModel> {
+                    parametersOf(teamState, team)
+                }
+                TeamNotesTab(viewModel)
             }
             2 -> ReplaysTab(viewModel)
             3 -> MoveUsagesTab(viewModel)

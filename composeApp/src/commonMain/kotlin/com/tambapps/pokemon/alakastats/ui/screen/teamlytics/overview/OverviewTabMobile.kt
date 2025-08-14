@@ -14,7 +14,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
 
 
 @Composable
-fun OverviewTabMobile(viewModel: OverviewViewModel) {
+internal fun OverviewTabMobile(viewModel: OverviewViewModel) {
     val team = viewModel.team
     Column(
         modifier = Modifier

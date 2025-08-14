@@ -27,6 +27,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createT
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsPreviewKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import kotlinx.serialization.json.Json
 import kotlin.uuid.Uuid
@@ -66,6 +67,9 @@ private val appModule = module {
     factory { TeamlyticsViewModel(get()) }
     factory { (teamState: MutableState<Teamlytics?>, team: Teamlytics) ->
         OverviewViewModel(get(), teamState, team)
+    }
+    factory { (teamState: MutableState<Teamlytics?>, team: Teamlytics) ->
+        TeamNotesViewModel(get(), teamState, team)
     }
 }
 
