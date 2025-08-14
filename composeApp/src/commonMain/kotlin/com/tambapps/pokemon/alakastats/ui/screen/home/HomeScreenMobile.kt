@@ -4,9 +4,7 @@ import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.alakastats
 import alakastats.composeapp.generated.resources.alakastats_dark
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,7 +27,7 @@ import org.jetbrains.compose.resources.painterResource
 
 
 @Composable
-fun HomeScreenMobile(isDarkTheme: Boolean, viewModel: HomeViewModel) {
+internal fun HomeScreenMobile(isDarkTheme: Boolean, viewModel: HomeViewModel) {
     Column(
         modifier = Modifier.fillMaxWidth()
             .verticalScroll(rememberScrollState()),

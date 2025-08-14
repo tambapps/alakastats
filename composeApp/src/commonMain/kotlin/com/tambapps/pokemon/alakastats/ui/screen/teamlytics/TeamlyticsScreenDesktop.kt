@@ -12,7 +12,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 
 @Composable
-fun ColumnScope.TeamlyticsScreenDesktop(
+internal fun ColumnScope.TeamlyticsScreenDesktop(
     viewModel: TeamlyticsViewModel,
     tabs: List<String>,
     pagerState: PagerState

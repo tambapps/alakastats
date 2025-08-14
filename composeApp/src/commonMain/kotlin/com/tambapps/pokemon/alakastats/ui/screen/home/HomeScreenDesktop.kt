@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun ColumnScope.HomeScreenDesktop(isDarkTheme: Boolean, viewModel: HomeViewModel) {
+internal fun ColumnScope.HomeScreenDesktop(isDarkTheme: Boolean, viewModel: HomeViewModel) {
     AlakastatsLabel(isDarkTheme)
     CatchPhrase()
     Spacer(Modifier.height(8.dp))
@@ -67,7 +67,7 @@ private fun ButtonBarContent() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TeamCardGrid(
+internal fun TeamCardGrid(
     viewModel: HomeViewModel,
     columns: Int,
     modifier: Modifier = Modifier

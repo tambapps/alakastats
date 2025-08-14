@@ -106,7 +106,7 @@ internal fun CatchPhrase(skipLine: Boolean = false, textAlign: TextAlign = TextA
 }
 
 @Composable
-fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifier = Modifier) {
+internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.currentOrThrow
     
     Card(
