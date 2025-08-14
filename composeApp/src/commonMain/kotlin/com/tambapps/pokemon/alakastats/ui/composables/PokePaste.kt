@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -82,9 +83,9 @@ private fun Pokemon(isOts: Boolean, pokemon: Pokemon, pokemonImageService: Pokem
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PokemonView(pokemon, pokemonImageService, Modifier.weight(0.4f))
+        PokemonView(pokemon, pokemonImageService, Modifier.weight(0.35f))
         Spacer(Modifier.width(8.dp))
-        PokemonDetails(isOts, pokemon, pokemonImageService, Modifier.weight(0.6f))
+        PokemonDetails(isOts, pokemon, pokemonImageService, Modifier.weight(0.65f))
     }
 }
 
@@ -102,7 +103,7 @@ private fun PokemonDetails(isOts: Boolean, pokemon: Pokemon, pokemonImageService
 private fun PokemonStatsRow(pokemon: Pokemon, modifier: Modifier = Modifier) {
     Row(modifier) {
         for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
-            PokemonStatColumn(stat, pokemon.ivs, pokemon.evs)
+            PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, Modifier.weight(1f))
         }
     }
 }
@@ -127,14 +128,32 @@ private fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageServ
 
 @Composable
 private fun PokemonStatColumn(
+    pokemon: Pokemon,
     stat: Stat,
     ivs: PokeStats,
     evs: PokeStats,
     modifier: Modifier = Modifier) {
-    Column(modifier) {
-        Text("Atk")
-        Text(evs[stat].toString())
-        Text(ivs[stat].toString())
+    Column(
+        modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val txt = when(stat) {
+            Stat.ATTACK -> "Atk"
+            Stat.DEFENSE -> "Def"
+            Stat.SPECIAL_ATTACK -> "SpA"
+            Stat.SPECIAL_DEFENSE -> "SpD"
+            Stat.SPEED -> "Spe"
+            Stat.HP -> "HP"
+        }
+        pokemon.nature?.bonusStat
+        val textColor = when {
+            pokemon.nature?.bonusStat == stat -> Color.Red
+            pokemon.nature?.malusStat == stat -> Color.Cyan
+            else -> Color.Unspecified
+        }
+        Text(txt, color = textColor, textAlign = TextAlign.Center)
+        Text(evs[stat].toString(), color = textColor, textAlign = TextAlign.Center)
+        Text(ivs[stat].toString(), color = textColor, textAlign = TextAlign.Center)
     }
 }
 @Composable
