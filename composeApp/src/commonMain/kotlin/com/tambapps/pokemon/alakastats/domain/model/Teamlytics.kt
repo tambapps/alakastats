@@ -26,6 +26,8 @@ data class TeamlyticsPreview(
     val lastUpdatedAt: Instant
 )
 
+fun Teamlytics.computeWinRate() = computeWinRate(sdNames, replays)
+
 fun computeWinRate(sdNames: List<String>, replays: List<ReplayAnalytics>): Int {
     if (replays.isEmpty()) return 0
     val nbGames = replays.size
