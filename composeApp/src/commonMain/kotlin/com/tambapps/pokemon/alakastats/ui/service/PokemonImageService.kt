@@ -121,7 +121,7 @@ class PokemonImageService(
     }
 
     @Composable
-    fun TeraTypeImage(type: PokeType, disableTooltip: Boolean = false) {
+    fun TeraTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier) {
         val resource = when(type) {
             PokeType.STEEL -> Res.drawable.tera_type_steel
             PokeType.FIGHTING -> Res.drawable.tera_type_fighting
@@ -146,11 +146,11 @@ class PokemonImageService(
             PokeType.UNKNOWN -> Res.drawable.tera_type_normal
         }
         TooltipIfEnabled(disableTooltip,
-            "Tera " + type.name.titlecase(), Modifier) { modifier ->
+            "Tera " + type.name.titlecase(), modifier) { mod ->
             Image(
                 painter = painterResource(resource),
                 contentDescription = "Tera $type",
-                modifier = modifier,
+                modifier = mod,
                 contentScale = ContentScale.Fit
             )
         }

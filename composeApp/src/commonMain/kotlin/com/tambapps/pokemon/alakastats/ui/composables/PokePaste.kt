@@ -163,7 +163,7 @@ private fun PokemonView(pokemon: Pokemon, pokemonImageService: PokemonImageServi
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        val scale = 1f
+        val scale = 0.75f
         Box(
             modifier = Modifier.graphicsLayer {
                 scaleX = scale
@@ -173,28 +173,21 @@ private fun PokemonView(pokemon: Pokemon, pokemonImageService: PokemonImageServi
         ) {
             pokemonImageService.PokemonArtwork(pokemon.name)
         }
-        val iconSize = 64.dp
-        val offset = 8.dp
+        val offset = 16.dp
         pokemon.teraType?.let {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .offset(x = 0.dp, y = offset)
-                    .size(iconSize)
-            ) {
-                pokemonImageService.TeraTypeImage(it)
-            }
+            pokemonImageService.TeraTypeImage(it, modifier = Modifier
+                .align(Alignment.TopStart)
+                .offset(x = 0.dp, y = -offset)
+                .size(50.dp)
+            )
         }
         // Bottom-right badge
         pokemon.item?.let {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .size(iconSize)
-                    .offset(x = 0.dp, y = 0.dp)
-            ) {
-                pokemonImageService.ItemImage(it)
-            }
+            pokemonImageService.ItemImage(it, modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .size(40.dp)
+                .offset(x = 0.dp, y = offset)
+            )
         }
     }
 
