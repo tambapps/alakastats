@@ -36,6 +36,10 @@ import org.koin.core.parameter.parametersOf
 import kotlin.uuid.Uuid
 
 data class TeamlyticsScreen(val teamId: Uuid) : Screen {
+    private companion object {
+        val TABS = listOf("Overview", "Team Notes", "Replays", "Move Usages", "Lead Stats", "Usage Stats", "Match-up Notes")
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
@@ -46,8 +50,7 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
         }
         val isCompact = LocalIsCompact.current
 
-        val tabs = listOf("Overview", "Replay Entries", "Move Usages")
-        val pagerState = rememberPagerState(pageCount = { tabs.size })
+        val pagerState = rememberPagerState(pageCount = { TABS.size })
 
         Column(
             modifier = Modifier
@@ -65,9 +68,9 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
                     )
                 }
             } else if (isCompact) {
-                TeamlyticsScreenMobile(viewModel, tabs, pagerState)
+                TeamlyticsScreenMobile(viewModel, TABS, pagerState)
             } else {
-                TeamlyticsScreenDesktop(viewModel, tabs, pagerState)
+                TeamlyticsScreenDesktop(viewModel, TABS, pagerState)
             }
         }
     }
@@ -85,14 +88,15 @@ internal fun ColumnScope.Pager(
         val team = viewModel.requireTeam()
         val teamState = viewModel.teamState
         when (page) {
+            //        val TABS = listOf("Overview", "Team Notes", "Replays", "Move Usages", "Lead Stats", "Usage Stats", "Match-up Notes")
             0 -> {
                 val viewModel = koinInject<OverviewViewModel> {
                     parametersOf(teamState, team)
                 }
                 OverviewTab(viewModel)
             }
-            1 -> ReplayEntriesTab(viewModel)
-            2 -> MoveUsagesTab(viewModel)
+            2 -> ReplaysTab(viewModel)
+            3 -> MoveUsagesTab(viewModel)
         }
     }
 }
@@ -117,7 +121,7 @@ internal fun TabRowContent(
 }
 
 @Composable
-private fun ReplayEntriesTab(viewModel: TeamlyticsViewModel) {
+private fun ReplaysTab(viewModel: TeamlyticsViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
