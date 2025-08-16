@@ -31,6 +31,8 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -102,7 +104,12 @@ internal fun ColumnScope.Pager(
                 }
                 TeamNotesTab(viewModel)
             }
-            2 -> ReplaysTab(viewModel)
+            2 -> {
+                val viewModel = koinInject<TeamReplayViewModel> {
+                    parametersOf(teamState, team)
+                }
+                TeamReplayTab(viewModel)
+            }
             3 -> MoveUsagesTab(viewModel)
         }
     }
@@ -127,25 +134,6 @@ internal fun TabRowContent(
     }
 }
 
-@Composable
-private fun ReplaysTab(viewModel: TeamlyticsViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Replay Entries",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "Replay entries content will go here",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 16.dp)
-        )
-    }
-}
 
 @Composable
 private fun MoveUsagesTab(viewModel: TeamlyticsViewModel) {

@@ -29,6 +29,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
 import kotlinx.serialization.json.Json
 import kotlin.uuid.Uuid
 import org.koin.core.qualifier.named
@@ -70,6 +71,9 @@ private val appModule = module {
     }
     factory { (teamState: MutableState<Teamlytics?>, team: Teamlytics) ->
         TeamNotesViewModel(get(), teamState, team)
+    }
+    factory { (teamState: MutableState<Teamlytics?>, team: Teamlytics) ->
+        TeamReplayViewModel(get(), teamState, team)
     }
 }
 
