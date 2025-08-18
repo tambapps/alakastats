@@ -147,7 +147,9 @@ class EditTeamViewModel(
                 try {
                     var url = pokePasteUrlInput
                     if (!url.endsWith("/raw")) {
-                      if (!url.endsWith("/")) url = "$url/"
+                      if (!url.endsWith("/")) {
+                          url = "$url/"
+                      }
                         url += "raw"
                     }
                     val response = httpClient.get(url)

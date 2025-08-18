@@ -33,7 +33,11 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
 
 @Composable
 internal fun AddReplayButton(viewModel: TeamReplayViewModel) {
-    OutlinedButton(onClick = { viewModel.showAddReplayDialog() }) {
+    OutlinedButton(onClick = {
+        if (!viewModel.isLoading) {
+            viewModel.showAddReplayDialog()
+        }
+    }) {
         Text("Add Replay")
     }
 }

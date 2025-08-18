@@ -6,10 +6,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.sd.replay.parser.SdReplayParser
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Url
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
 
 class TeamReplayViewModel(
     val pokemonImageService: PokemonImageService,
+    private val httpClient: HttpClient,
     private val teamState: MutableState<Teamlytics?>,
     val team: Teamlytics,
 ) {
@@ -17,12 +27,17 @@ class TeamReplayViewModel(
     private companion object {
         val REPLAYS_SEPARATOR_REGEX = Regex("[,\\s]+")
     }
+    var isLoading by mutableStateOf(false)
+        private set
+
     var showAddReplayDialog by mutableStateOf(false)
         private set
     
     var replayUrlsText by mutableStateOf("")
         private set
-    
+
+    private val scope = CoroutineScope(Dispatchers.Default)
+
     fun showAddReplayDialog() {
         showAddReplayDialog = true
         replayUrlsText = ""
@@ -38,7 +53,26 @@ class TeamReplayViewModel(
     }
     
     fun addReplays() {
+        if (isLoading) {
+            return
+        }
+        isLoading = true
         val urls = parseReplayUrls(replayUrlsText)
+        scope.launch {
+            val results = urls.map { url ->
+                async {
+                    try {
+                        val text = httpClient.get(url)
+                       // TODO call service  sdReplayParser.parse(text.bodyAsText())
+                    } catch (e: Exception) {
+                        // TODO
+                        throw RuntimeException(e)
+                    }
+                }
+            }.awaitAll()
+// TODO update state            teamState.value = team.copy(replays = )
+
+        }
         // TODO: Process the URLs - add them to the team
         // For now, just close the dialog
         hideAddReplayDialog()
