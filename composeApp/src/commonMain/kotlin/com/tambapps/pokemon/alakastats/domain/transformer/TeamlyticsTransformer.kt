@@ -1,11 +1,9 @@
 package com.tambapps.pokemon.alakastats.domain.transformer
 
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.model.computeWinRate
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
-import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
@@ -73,24 +71,6 @@ class TeamlyticsPreviewTransformer {
             nbReplays = entity.nbReplays,
             winrate = entity.winrate,
             lastUpdatedAt = entity.lastUpdatedAt ?: Clock.System.now()
-        )
-    }
-}
-
-
-class ReplayAnalyticsTransformer(
-    private val sdReplayTransformer: SdReplayTransformer
-) {
-    
-    fun toEntity(domain: ReplayAnalytics): ReplayAnalyticsEntity {
-        return ReplayAnalyticsEntity(
-            replay = sdReplayTransformer.toEntity(domain.replay)
-        )
-    }
-    
-    fun toDomain(entity: ReplayAnalyticsEntity): ReplayAnalytics {
-        return ReplayAnalytics(
-            replay = sdReplayTransformer.toDomain(entity.replay)
         )
     }
 }

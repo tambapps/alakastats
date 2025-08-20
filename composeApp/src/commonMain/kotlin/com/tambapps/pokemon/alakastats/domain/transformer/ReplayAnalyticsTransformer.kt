@@ -1,13 +1,13 @@
 package com.tambapps.pokemon.alakastats.domain.transformer
 
-import com.tambapps.pokemon.sd.replay.parser.SdReplay
-import com.tambapps.pokemon.sd.replay.parser.Player
-import com.tambapps.pokemon.sd.replay.parser.TeamPreview
-import com.tambapps.pokemon.sd.replay.parser.TeamPreviewPokemon
-import com.tambapps.pokemon.sd.replay.parser.OpenTeamSheet
-import com.tambapps.pokemon.sd.replay.parser.OtsPokemon
-import com.tambapps.pokemon.sd.replay.parser.Terastallization
-import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.SdReplayEntity
+import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
+import com.tambapps.pokemon.alakastats.domain.model.OtsPokemon
+import com.tambapps.pokemon.alakastats.domain.model.Player
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamPreview
+import com.tambapps.pokemon.alakastats.domain.model.TeamPreviewPokemon
+import com.tambapps.pokemon.alakastats.domain.model.Terastallization
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PlayerEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamPreviewPokemonEntity
@@ -15,12 +15,12 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.OtsPokemonEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TerastallizationEntity
 
-class SdReplayTransformer(
+class ReplayAnalyticsTransformer(
     private val playerTransformer: PlayerTransformer
 ) {
     
-    fun toEntity(domain: SdReplay): SdReplayEntity {
-        return SdReplayEntity(
+    fun toEntity(domain: ReplayAnalytics): ReplayAnalyticsEntity {
+        return ReplayAnalyticsEntity(
             players = domain.players.map { playerTransformer.toEntity(it) },
             uploadTime = domain.uploadTime,
             format = domain.format,
@@ -31,8 +31,8 @@ class SdReplayTransformer(
         )
     }
     
-    fun toDomain(entity: SdReplayEntity): SdReplay {
-        return SdReplay(
+    fun toDomain(entity: ReplayAnalyticsEntity): ReplayAnalytics {
+        return ReplayAnalytics(
             players = entity.players.map { playerTransformer.toDomain(it) },
             uploadTime = entity.uploadTime,
             format = entity.format,

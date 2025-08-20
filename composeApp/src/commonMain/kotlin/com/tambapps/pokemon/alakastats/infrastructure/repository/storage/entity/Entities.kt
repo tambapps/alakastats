@@ -27,10 +27,6 @@ data class TeamlyticsPreviewEntity(
     val lastUpdatedAt: Instant?
 ): Identifiable<Uuid>
 
-@Serializable
-data class ReplayAnalyticsEntity(
-    val replay: SdReplayEntity,
-)
 
 @Serializable
 data class TerastallizationEntity(
@@ -39,7 +35,7 @@ data class TerastallizationEntity(
 )
 
 @Serializable
-data class SdReplayEntity(
+data class ReplayAnalyticsEntity(
     val players: List<PlayerEntity>,
     val uploadTime: Long,
     val format: String,

@@ -10,7 +10,6 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.ReplayAnalyticsTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.SdReplayTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.PlayerTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamPreviewTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamPreviewPokemonTransformer
@@ -21,6 +20,9 @@ import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransf
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
+import com.tambapps.pokemon.alakastats.infrastructure.usecase.TeamlyticsUseCaseImpl
+import com.tambapps.pokemon.alakastats.infrastructure.usecase.EditTeamlyticsUseCaseImpl
+import com.tambapps.pokemon.alakastats.infrastructure.usecase.ManageTeamlyticsListUseCaseImpl
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
@@ -60,9 +62,9 @@ private val appModule = module {
             previewTransformer = get()
         ) 
     }
-    single<EditTeamlyticsUseCase> { EditTeamlyticsUseCase(get()) }
-    single<ManageTeamlyticsListUseCase> { ManageTeamlyticsListUseCase(get()) }
-    single<TeamlyticsUseCase> { TeamlyticsUseCase(get()) }
+    single<EditTeamlyticsUseCase> { EditTeamlyticsUseCaseImpl(get()) }
+    single<ManageTeamlyticsListUseCase> { ManageTeamlyticsListUseCaseImpl(get()) }
+    single<TeamlyticsUseCase> { TeamlyticsUseCaseImpl(get()) }
     factory { HomeViewModel(get(), get()) }
     factory { EditTeamViewModel(get(), get(), get()) }
     factory { TeamlyticsViewModel(get()) }
@@ -84,7 +86,6 @@ private val transformerModule = module {
     single { TeamPreviewTransformer(get()) }
     single { OpenTeamSheetTransformer(get()) }
     single { PlayerTransformer(get(), get(), get()) }
-    single { SdReplayTransformer(get()) }
     single { ReplayAnalyticsTransformer(get()) }
     single { TeamlyticsTransformer(get(), get()) }
     single { TeamlyticsPreviewTransformer() }

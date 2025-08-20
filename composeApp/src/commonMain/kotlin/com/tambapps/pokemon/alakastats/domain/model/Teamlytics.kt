@@ -1,7 +1,6 @@
 package com.tambapps.pokemon.alakastats.domain.model
 
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
-import com.tambapps.pokemon.sd.replay.parser.SdReplay
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -32,11 +31,7 @@ fun computeWinRate(sdNames: List<String>, replays: List<ReplayAnalytics>): Int {
     if (replays.isEmpty()) return 0
     val nbGames = replays.size
     val wonGames = replays.count { replay ->
-        replay.replay.winner?.let(sdNames::contains) ?: false
+        replay.winner?.let(sdNames::contains) ?: false
     }
     return nbGames * 100 / wonGames
 }
-
-data class ReplayAnalytics(
-    val replay: SdReplay,
-)

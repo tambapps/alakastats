@@ -79,7 +79,7 @@ kotlin {
             implementation(libs.kstore)
             implementation(libs.ktor.client.contentNegotiation)
             implementation(libs.ktor.serialization.kotlinxJson)
-            implementation(libs.pokemon.sdReplayParser)
+            implementation(libs.pokemon.sdReplayLogVisitor)
             implementation(libs.pokemon.pokepasteParser)
             implementation(libs.serialization.json)
             implementation(libs.voyager.navigator)
