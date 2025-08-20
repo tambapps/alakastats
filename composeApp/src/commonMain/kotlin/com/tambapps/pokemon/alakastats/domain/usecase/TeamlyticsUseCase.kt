@@ -1,11 +1,8 @@
 package com.tambapps.pokemon.alakastats.domain.usecase
 
-import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import kotlin.uuid.Uuid
 
-class TeamlyticsUseCase(
-    private val repository: TeamlyticsRepository
-) {
-
-    suspend fun get(id: Uuid) = repository.get(id)
+interface TeamlyticsUseCase {
+    suspend fun get(id: Uuid): Teamlytics?
 }
