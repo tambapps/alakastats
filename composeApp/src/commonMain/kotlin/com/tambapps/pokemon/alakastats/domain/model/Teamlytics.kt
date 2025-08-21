@@ -33,5 +33,5 @@ fun computeWinRate(sdNames: List<String>, replays: List<ReplayAnalytics>): Int {
     val wonGames = replays.count { replay ->
         replay.winner?.let(sdNames::contains) ?: false
     }
-    return nbGames * 100 / wonGames
+    return wonGames * 100 / nbGames
 }
