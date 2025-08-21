@@ -1,10 +1,10 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
@@ -12,10 +12,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class TeamReplayViewModel(
     val pokemonImageService: PokemonImageService,
-    private val teamState: MutableState<Teamlytics?>,
+    private val handleReplaysUseCase: HandleTeamReplaysUseCase,
     val team: Teamlytics,
 ) {
 
@@ -57,18 +58,18 @@ class TeamReplayViewModel(
             val results = urls.map { url ->
                 async {
                     try {
-                       // TODO call service  sdReplayParser.parse(text.bodyAsText())
+                        handleReplaysUseCase.parseReplay(url)
                     } catch (e: Exception) {
-                        // TODO
+                        // TODO handle and return null or use Result or arrow Either
                         throw RuntimeException(e)
                     }
                 }
             }.awaitAll()
-// TODO update state            teamState.value = team.copy(replays = )
-
+            handleReplaysUseCase.addReplays(results)
+            withContext(Dispatchers.Main) {
+                isLoading = false
+            }
         }
-        // TODO: Process the URLs - add them to the team
-        // For now, just close the dialog
         hideAddReplayDialog()
     }
     

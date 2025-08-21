@@ -1,7 +1,9 @@
 package com.tambapps.pokemon.alakastats.infrastructure.service
 
 import com.tambapps.pokemon.PokeType
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
+import com.tambapps.pokemon.alakastats.domain.transformer.ReplayAnalyticsTransformer
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.OpenTeamSheetEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PlayerEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
@@ -19,11 +21,12 @@ import kotlinx.serialization.Serializable
 
 class ReplayAnalyticsService(
     private val httpClient: HttpClient,
-    private val otsPokemonTransformer: OtsPokemonTransformer
+    private val otsPokemonTransformer: OtsPokemonTransformer,
+    private val replayAnalyticsTransformer: ReplayAnalyticsTransformer
     ) {
 
     // TODO throw/handle exception
-    suspend fun fetch(sdReplayUrl: String): ReplayAnalyticsEntity {
+    suspend fun fetch(sdReplayUrl: String): ReplayAnalytics {
         val jsonReplayUrl =
             if (sdReplayUrl.endsWith(".json")) sdReplayUrl
         else "$sdReplayUrl.json"
@@ -40,7 +43,7 @@ class ReplayAnalyticsService(
             version = "1.0",
             nextBattleRef = visitor.nextBattleRef,
             winner = visitor.winner
-        )
+        ).let(replayAnalyticsTransformer::toDomain)
     }
 }
 
