@@ -30,6 +30,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createT
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsPreviewKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
+import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
@@ -52,6 +53,8 @@ private val appModule = module {
     }
     single<PokemonImageService> { PokemonImageService(get()) }
     single<PokepasteParser> { PokepasteParser() }
+    single<ReplayAnalyticsService> { ReplayAnalyticsService(get(), get(), get()) }
+
     // need to name them as they have both the same signature after generic type erasure
     single<KStorage<Uuid, TeamlyticsEntity>>(named("teamsStorage")) { createTeamlyticsKStorage() }
     single<KStorage<Uuid, TeamlyticsPreviewEntity>>(named("previewsStorage")) { createTeamlyticsPreviewKStorage() }
@@ -63,12 +66,14 @@ private val appModule = module {
             previewTransformer = get()
         ) 
     }
+
     single<EditTeamlyticsUseCase> { EditTeamlyticsUseCaseImpl(get()) }
     single<ManageTeamlyticsListUseCase> { ManageTeamlyticsListUseCaseImpl(get()) }
     single<TeamlyticsUseCase> { TeamlyticsUseCaseImpl(get()) }
+
     factory { HomeViewModel(get(), get()) }
     factory { EditTeamViewModel(get(), get(), get()) }
-    factory { TeamlyticsViewModel(get()) }
+    factory { TeamlyticsViewModel(get(), get()) }
     factory { (teamState: MutableState<Teamlytics?>, team: Teamlytics) ->
         OverviewViewModel(get(), teamState, team)
     }

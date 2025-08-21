@@ -10,4 +10,6 @@ class TeamlyticsUseCaseImpl(
 ) : TeamlyticsUseCase {
 
     override suspend fun get(id: Uuid): Teamlytics? = repository.get(id)
+
+    override suspend fun save(team: Teamlytics) = repository.save(team)
 }

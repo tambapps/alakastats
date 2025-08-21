@@ -4,7 +4,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 
 interface HandleTeamReplaysUseCase {
 
-    fun parseReplay(url: String): ReplayAnalytics
+    suspend fun parseReplay(url: String): ReplayAnalytics
 
-    fun addReplays(replays: List<ReplayAnalytics>)
+    suspend fun addReplays(replays: List<ReplayAnalytics>)
 }
