@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.domain.transformer
 
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.OtsPokemon
+import com.tambapps.pokemon.sd.replay.log.visitor.OtsPokemon as SdOtsPokemon
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamPreview
@@ -25,9 +26,9 @@ class ReplayAnalyticsTransformer(
             uploadTime = domain.uploadTime,
             format = domain.format,
             rating = domain.rating,
-            parserVersion = domain.parserVersion,
+            version = domain.version,
             winner = domain.winner,
-            nextBattle = domain.nextBattle
+            nextBattleRef = domain.nextBattleRef
         )
     }
     
@@ -37,9 +38,9 @@ class ReplayAnalyticsTransformer(
             uploadTime = entity.uploadTime,
             format = entity.format,
             rating = entity.rating,
-            parserVersion = entity.parserVersion,
+            version = entity.version,
             winner = entity.winner,
-            nextBattle = entity.nextBattle
+            nextBattleRef = entity.nextBattleRef
         )
     }
 }
@@ -120,7 +121,7 @@ class OpenTeamSheetTransformer(
             pokemons = domain.pokemons.map { otsPokemonTransformer.toEntity(it) }
         )
     }
-    
+
     fun toDomain(entity: OpenTeamSheetEntity): OpenTeamSheet {
         return OpenTeamSheet(
             pokemons = entity.pokemons.map { otsPokemonTransformer.toDomain(it) }
@@ -129,7 +130,7 @@ class OpenTeamSheetTransformer(
 }
 
 class OtsPokemonTransformer {
-    
+
     fun toEntity(domain: OtsPokemon): OtsPokemonEntity {
         return OtsPokemonEntity(
             name = domain.name,
@@ -140,7 +141,18 @@ class OtsPokemonTransformer {
             teraType = domain.teraType
         )
     }
-    
+
+    fun toEntity(domain: SdOtsPokemon): OtsPokemonEntity {
+        return OtsPokemonEntity(
+            name = domain.name,
+            item = domain.item,
+            ability = domain.ability,
+            moves = domain.moves,
+            level = domain.level,
+            teraType = domain.teraType
+        )
+    }
+
     fun toDomain(entity: OtsPokemonEntity): OtsPokemon {
         return OtsPokemon(
             name = entity.name,

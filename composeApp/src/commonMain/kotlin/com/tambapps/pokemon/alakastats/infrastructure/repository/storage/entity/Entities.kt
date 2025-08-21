@@ -40,9 +40,9 @@ data class ReplayAnalyticsEntity(
     val uploadTime: Long,
     val format: String,
     val rating: Int?,
-    val parserVersion: String?,
+    val version: String,
     val winner: String?,
-    val nextBattle: String?,
+    val nextBattleRef: String?,
 )
 
 @Serializable

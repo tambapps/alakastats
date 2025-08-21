@@ -7,9 +7,9 @@ data class ReplayAnalytics(
     val uploadTime: Long,
     val format: String,
     val rating: Int?,
-    val parserVersion: String?,
+    val version: String,
     val winner: String?,
-    val nextBattle: String?,
+    val nextBattleRef: String?,
 ) {
     val player1 get() = players[0]
     val player2 get() = players[1]

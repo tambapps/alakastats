@@ -75,7 +75,7 @@ private val appModule = module {
         TeamNotesViewModel(get(), teamState, team)
     }
     factory { (teamState: MutableState<Teamlytics?>, team: Teamlytics) ->
-        TeamReplayViewModel(get(), get(), teamState, team)
+        TeamReplayViewModel(get(), teamState, team)
     }
 }
 

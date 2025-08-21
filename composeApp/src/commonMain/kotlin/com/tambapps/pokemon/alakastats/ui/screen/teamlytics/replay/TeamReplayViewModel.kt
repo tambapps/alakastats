@@ -6,8 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +15,6 @@ import kotlinx.coroutines.launch
 
 class TeamReplayViewModel(
     val pokemonImageService: PokemonImageService,
-    private val httpClient: HttpClient,
     private val teamState: MutableState<Teamlytics?>,
     val team: Teamlytics,
 ) {
@@ -60,7 +57,6 @@ class TeamReplayViewModel(
             val results = urls.map { url ->
                 async {
                     try {
-                        val text = httpClient.get(url)
                        // TODO call service  sdReplayParser.parse(text.bodyAsText())
                     } catch (e: Exception) {
                         // TODO
