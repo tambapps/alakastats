@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -15,6 +17,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,7 +28,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
+import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
@@ -34,7 +43,7 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
     } else {
         TeamReplayTabDesktop(viewModel)
     }
-    
+
     if (viewModel.showAddReplayDialog) {
         AddReplayDialog(viewModel)
     }
@@ -63,14 +72,14 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                
+
                 OutlinedTextField(
                     value = viewModel.replayUrlsText,
                     onValueChange = { viewModel.updateReplayUrlsText(it) },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("https://replay.pokemonshowdown.com/... https://replay.pokemonshowdown.com/...") },
                 )
-                
+
                 viewModel.getValidationMessage()?.let { message ->
                     Spacer(Modifier.height(8.dp))
                     Text(
@@ -110,13 +119,44 @@ internal fun ViewReplayButton(replay: ReplayAnalytics) {
 }
 
 @Composable
-internal fun OtsButton(ots: OpenTeamSheet) {
+internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplayViewModel) {
+    var showDialog by remember { mutableStateOf(false) }
     OutlinedButton(
-        onClick = {},
+        onClick = {showDialog = true },
     ) {
         Text("OTS")
     }
-    // TODO dialog
+    if (!showDialog) {
+        return
+    }
+
+    val pokepaste = remember { ots.toPokepaste() }
+    AlertDialog(
+        onDismissRequest = { showDialog = false },
+        title = { Text("${player.name}'s team") },
+        text = {
+            Column(
+                Modifier.verticalScroll(rememberScrollState())
+            ) {
+                Pokepaste(pokepaste, viewModel.pokemonImageService)
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { showDialog = false }) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            /* TODO copy to clipboard. unfortunately not that simple in KMP */
+            val snackbar = LocalSnackBar.current
+            TextButton(onClick = {
+                showDialog = false
+                snackbar.show("TODO: not implemented yet")
+            }) {
+                Text("Copy")
+            }
+        }
+    )
 }
 
 @Composable

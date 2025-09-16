@@ -113,7 +113,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                 } else {
                     Row(Modifier.fillMaxWidth()
                         .padding(horizontal = 8.dp)) {
-                        OtsButton(opponentPlayer.ots)
+                        OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
                         Spacer(Modifier.weight(1f))
                         ViewReplayButton(replay)
                     }

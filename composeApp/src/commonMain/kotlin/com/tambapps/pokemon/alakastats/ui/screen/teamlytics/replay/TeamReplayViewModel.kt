@@ -28,7 +28,7 @@ class TeamReplayViewModel(
 
     var showAddReplayDialog by mutableStateOf(false)
         private set
-    
+
     var replayUrlsText by mutableStateOf("")
         private set
 
@@ -38,16 +38,16 @@ class TeamReplayViewModel(
         showAddReplayDialog = true
         replayUrlsText = ""
     }
-    
+
     fun hideAddReplayDialog() {
         showAddReplayDialog = false
         replayUrlsText = ""
     }
-    
+
     fun updateReplayUrlsText(text: String) {
         replayUrlsText = text
     }
-    
+
     fun addReplays() {
         if (isLoading) {
             return
@@ -72,14 +72,14 @@ class TeamReplayViewModel(
         }
         hideAddReplayDialog()
     }
-    
+
     private fun parseReplayUrls(text: String): List<String> {
         return text
             .split(REPLAYS_SEPARATOR_REGEX)
             .map { it.trim() }
             .filter { it.isNotBlank() && isValidReplayUrl(it) }
     }
-    
+
     private fun isValidReplayUrl(url: String): Boolean {
         return isValidUrl(url) && url.contains("replay.pokemonshowdown.com")
     }
@@ -92,14 +92,14 @@ class TeamReplayViewModel(
     }
     fun getValidationMessage(): String? {
         if (replayUrlsText.isBlank()) return null
-        
+
         val urls = parseReplayUrls(replayUrlsText)
         val totalUrls = replayUrlsText
             .split(REPLAYS_SEPARATOR_REGEX)
             .map { it.trim() }
             .filter { it.isNotBlank() }
             .size
-        
+
         return when {
             urls.isEmpty() && totalUrls > 0 -> "No valid replay URLs found"
             urls.size < totalUrls -> "${urls.size}/${totalUrls} valid URLs found"

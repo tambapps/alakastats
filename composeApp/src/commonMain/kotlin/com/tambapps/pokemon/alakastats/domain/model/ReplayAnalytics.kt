@@ -1,6 +1,9 @@
 package com.tambapps.pokemon.alakastats.domain.model
 
+import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokeType
+import com.tambapps.pokemon.Pokemon
+import com.tambapps.pokemon.pokepaste.parser.PokePaste
 
 fun Teamlytics.getPlayers(replay: ReplayAnalytics): Pair<Player, Player> =
     if (sdNames.contains(replay.player1.name)) replay.player1 to replay.player2
@@ -42,7 +45,29 @@ data class Terastallization(
 
 data class OpenTeamSheet(
     val pokemons: List<OtsPokemon>,
-)
+) {
+
+    fun toPokepaste(): PokePaste {
+        val pastePokemons = pokemons.map { p ->
+            Pokemon(
+                name = p.name,
+                surname = null,
+                gender = null,
+                nature = null,
+                item = p.item,
+                shiny = false,
+                happiness = 0,
+                ability = p.ability,
+                teraType = p.teraType ?: PokeType.UNKNOWN,
+                level = 50,
+                moves = p.moves,
+                ivs = PokeStats.default(0),
+                evs = PokeStats.default(0),
+            )
+        }
+        return PokePaste(pastePokemons, isOts = true)
+    }
+}
 
 data class OtsPokemon(
     val name: String,
