@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
@@ -109,9 +110,12 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
 
 @Composable
 internal fun ViewReplayButton(replay: ReplayAnalytics) {
-    // TODO open link through chrometabs
+    val uriHandler = LocalUriHandler.current
     OutlinedButton(
-        onClick = {},
+        onClick = {
+            // TODO replay url/ref doesn't seem to be saved
+            uriHandler.openUri("https://replay.pokemonshowdown.com/gen9vgc2025reghbo3-2435645581-bhurtu3rntemqbr7wtt6ofmtowy0urcpw")
+        },
     ) {
         Text("Replay")
     }
