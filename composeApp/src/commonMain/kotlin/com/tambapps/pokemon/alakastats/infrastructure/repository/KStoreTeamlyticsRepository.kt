@@ -1,5 +1,9 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository
 
+import arrow.core.Either
+import com.tambapps.pokemon.alakastats.domain.error.GetTeamlyticsError
+import com.tambapps.pokemon.alakastats.domain.error.TeamlyticsNotFound
+import com.tambapps.pokemon.alakastats.domain.error.StorageError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTransformer
@@ -21,7 +25,15 @@ class KStoreTeamlyticsRepository(
 
     override suspend fun list() = teamsStorage.listEntities().map(teamlyticsTransformer::toDomain)
 
-    override suspend fun get(id: Uuid) = teamsStorage.get(id)?.let(teamlyticsTransformer::toDomain)
+    override suspend fun get(id: Uuid): Either<GetTeamlyticsError, Teamlytics> = Either.catch {
+        teamsStorage.get(id)?.let(teamlyticsTransformer::toDomain)
+            ?: throw NoSuchElementException("Teamlytics with id $id not found")
+    }.mapLeft { 
+        when (it) {
+            is NoSuchElementException -> TeamlyticsNotFound(id, it)
+            else -> StorageError("Failed to get teamlytics: ${it.message}", it)
+        }
+    }
 
     override suspend fun save(teamlytics: Teamlytics): Teamlytics = coroutineScope {
         val savedTeam = teamsStorage.save(teamlyticsTransformer.toEntity(teamlytics))

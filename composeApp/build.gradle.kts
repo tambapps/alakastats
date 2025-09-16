@@ -72,6 +72,8 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.arrow.core)
+            implementation(libs.arrow.fx.coroutines)
             implementation(libs.kamel.image.default)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)

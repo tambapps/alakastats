@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import arrow.core.getOrElse
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
@@ -30,8 +31,8 @@ class TeamlyticsViewModel(
 
     fun initTeam(id: Uuid, navigator: Navigator) {
         scope.launch {
-            val teamlytics = useCase.get(id)
-            if (teamlytics == null) {
+            val teamlyticsResult = useCase.get(id)
+            val teamlytics = teamlyticsResult.getOrElse { 
                 navigator.pop()
                 return@launch
             }

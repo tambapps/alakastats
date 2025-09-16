@@ -1,5 +1,7 @@
 package com.tambapps.pokemon.alakastats.infrastructure.usecase
 
+import arrow.core.Either
+import com.tambapps.pokemon.alakastats.domain.error.GetTeamlyticsError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
@@ -12,7 +14,7 @@ class ManageTeamlyticsListUseCaseImpl(
 
     override suspend fun list(): List<TeamlyticsPreview> = repository.listPreviews()
 
-    override suspend fun get(id: Uuid): Teamlytics? = repository.get(id)
+    override suspend fun get(id: Uuid): Either<GetTeamlyticsError, Teamlytics> = repository.get(id)
 
     override suspend fun delete(id: Uuid) = repository.delete(id)
 }
