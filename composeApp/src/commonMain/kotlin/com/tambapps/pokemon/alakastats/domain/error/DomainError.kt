@@ -11,6 +11,11 @@ sealed interface DomainError {
     val cause: Throwable?
 }
 
+data class NetworkError(
+    override val message: String,
+    override val cause: Throwable?
+) : DomainError
+
 sealed interface GetTeamlyticsError : DomainError
 
 data class TeamlyticsNotFound(val id: Uuid, override val cause: Throwable? = null) : GetTeamlyticsError {

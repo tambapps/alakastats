@@ -4,8 +4,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import arrow.core.Either
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
+import com.tambapps.pokemon.alakastats.domain.error.DomainError
+import com.tambapps.pokemon.alakastats.domain.error.NetworkError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.SnackBar
@@ -140,32 +143,36 @@ class EditTeamViewModel(
         pokePasteUrlInput = input
     }
     
+    private suspend fun fetchUrlContent(url: String): Either<DomainError, String> = Either.catch {
+        var normalizedUrl = url
+        if (!normalizedUrl.endsWith("/raw")) {
+            if (!normalizedUrl.endsWith("/")) {
+                normalizedUrl = "$normalizedUrl/"
+            }
+            normalizedUrl += "raw"
+        }
+        val response = httpClient.get(normalizedUrl)
+        response.bodyAsText()
+    }.mapLeft { error -> NetworkError(error.message ?: "unknown error", error) }
+    
     fun loadFromUrl() {
         if (isUrlValid && !isLoadingUrl) {
             isLoadingUrl = true
             urlError = null
             
             scope.launch {
-                try {
-                    var url = pokePasteUrlInput
-                    if (!url.endsWith("/raw")) {
-                      if (!url.endsWith("/")) {
-                          url = "$url/"
-                      }
-                        url += "raw"
+                fetchUrlContent(pokePasteUrlInput).fold(
+                    ifLeft = { error ->
+                        urlError = "Failed to load URL: ${error.message}"
+                    },
+                    ifRight = { content ->
+                        withContext(Dispatchers.Main) {
+                            updatePokepaste(content)
+                            hideUrlDialog()
+                        }
                     }
-                    val response = httpClient.get(url)
-                    val content = response.bodyAsText()
-
-                    withContext(Dispatchers.Main) {
-                        updatePokepaste(content)
-                        hideUrlDialog()
-                    }
-                } catch (e: Exception) {
-                    urlError = "Failed to load URL: ${e.message}"
-                } finally {
-                    isLoadingUrl = false
-                }
+                )
+                isLoadingUrl = false
             }
         }
     }
