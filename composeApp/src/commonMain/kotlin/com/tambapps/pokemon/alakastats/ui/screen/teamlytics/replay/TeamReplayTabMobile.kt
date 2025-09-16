@@ -2,17 +2,23 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.arrow_forward
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -49,12 +55,13 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
     ) {
         item {
             AddReplayButton(viewModel)
+            Spacer(Modifier.height(32.dp))
         }
         val replays = team.replays
         itemsIndexed(replays) { index, replay ->
             MobileReplay(viewModel, team, replay)
-            if (index > 0 && index < replays.size - 1) {
-                HorizontalDivider(modifier = Modifier.fillMaxWidth().height(1.dp).padding(horizontal = 16.dp))
+            if (index < replays.size - 1) {
+                Spacer(Modifier.height(32.dp))
             }
         }
     }
@@ -63,28 +70,50 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
 @Composable
 private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
-    ExpansionTile(
-        title = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+
+    var isExpanded by remember { mutableStateOf(false) }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(),
+        border = BorderStroke(
+            width = 2.dp,
+            color = MaterialTheme.colorScheme.outline
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        ),
+        onClick = { isExpanded = !isExpanded }
+    ) {
+        Column(Modifier.padding(all = 8.dp)) {
+            Row {
+                // TODO add W/L text
                 Text(
                     text = "VS ${opponentPlayer.name}",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(start = 8.dp)
                 )
-                PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer)
+                Spacer(Modifier.weight(1f))
+                Icon(
+                    painter = painterResource(Res.drawable.arrow_forward),
+                    contentDescription = "Back",
+                    modifier = Modifier.rotate(if (isExpanded) -90f else 90f),
+                    tint = MaterialTheme.colorScheme.defaultIconColor
+                )
+            }
+            PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer)
+
+            if (isExpanded) {
+                Text(
+                    text = "TODO",
+                    modifier = Modifier.padding(start = 32.dp, bottom = 8.dp)
+                )
             }
         }
-    ) {
-        Text(
-            text = "TODO",
-            modifier = Modifier.padding(start = 32.dp, bottom = 8.dp)
-        )
-
-        opponentPlayer
-
     }
+
+
 }
 
 @Composable
