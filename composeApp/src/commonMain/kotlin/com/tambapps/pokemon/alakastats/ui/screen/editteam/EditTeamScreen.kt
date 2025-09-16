@@ -45,6 +45,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.getPlatform
+import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
@@ -234,8 +235,9 @@ private fun ButtonBar(navigator: Navigator, viewModel: EditTeamViewModel, isEdit
             Text("Cancel")
         }
 
+        val snackBar = LocalSnackBar.current
         Button(
-            onClick = { viewModel.saveTeam(navigator) },
+            onClick = { viewModel.saveTeam(navigator, snackBar) },
             modifier = Modifier.weight(1f),
             enabled = viewModel.isFormValid,
         ) {

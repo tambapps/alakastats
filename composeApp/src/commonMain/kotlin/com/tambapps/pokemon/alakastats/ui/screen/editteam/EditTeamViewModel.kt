@@ -8,6 +8,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import com.tambapps.pokemon.pokepaste.parser.PokePasteParseException
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
@@ -27,6 +28,7 @@ class EditTeamViewModel(
 
     private val scope = CoroutineScope(Dispatchers.Default)
     private var editingTeam: Teamlytics? = null
+    val isEditing get() = editingTeam != null
 
     var teamName by mutableStateOf("")
         private set
@@ -168,8 +170,9 @@ class EditTeamViewModel(
         }
     }
 
-    fun saveTeam(navigator: Navigator) {
+    fun saveTeam(navigator: Navigator, snackBar: SnackBar) {
         if (isFormValid) {
+            // TODO migrate to Either and handle errors
             val pokepaste = pokepasteParser.tryParse(pokepaste) ?: return
             scope.launch {
                 if (editingTeam != null) {
@@ -185,6 +188,10 @@ class EditTeamViewModel(
                     )
                 }
                 navigator.pop()
+                snackBar.show(
+                    if (isEditing) "Created team successfully"
+                    else "Updated team successfully", SnackBar.Severity.SUCCESS
+                )
             }
         }
     }
