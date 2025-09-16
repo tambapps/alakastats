@@ -9,16 +9,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 
 @Composable
 internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
@@ -38,7 +38,7 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
         }
         val replays = team.replays
         itemsIndexed(replays) { index, replay ->
-            MobileReplay(viewModel, replay)
+            MobileReplay(viewModel, team, replay)
             if (index > 0 && index < replays.size - 1) {
                 HorizontalDivider(modifier = Modifier.fillMaxWidth().height(1.dp).padding(horizontal = 16.dp))
             }
@@ -47,8 +47,9 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
 }
 
 @Composable
-private fun MobileReplay(viewModel: TeamReplayViewModel, replay: ReplayAnalytics) {
-    Text("Replay")
+private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
+    val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
+    Text("VS ${opponentPlayer.name}", style = MaterialTheme.typography.titleMedium)
 }
 
 @Composable
