@@ -5,13 +5,13 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import arrow.core.getOrElse
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.error.StorageError
 import com.tambapps.pokemon.alakastats.domain.error.TeamlyticsNotFound
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -60,14 +60,13 @@ class HomeViewModel(
         navigator.push(TeamlyticsScreen(team.id))
     }
 
-    fun editTeam(team: TeamlyticsPreview, navigator: Navigator) {
+    fun editTeam(team: TeamlyticsPreview, navigator: Navigator, snackBar: SnackBar) {
         scope.launch {
             useCase.get(team.id).fold(
                 ifLeft =  { error ->
-                    // TODO handle error
                     when(error) {
-                        is StorageError -> TODO()
-                        is TeamlyticsNotFound -> TODO()
+                        is StorageError -> snackBar.show("Storage error: ${error.message}", SnackBar.Severity.ERROR)
+                        is TeamlyticsNotFound -> snackBar.show("The team could not be found", SnackBar.Severity.ERROR)
                     }
                 },
                 ifRight = { fullTeam ->

@@ -44,6 +44,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
+import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
@@ -134,9 +135,10 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
                         expanded = viewModel.expandedMenuTeamId == team.id,
                         onDismissRequest = { viewModel.hideMenu() }
                     ) {
+                        val snackBar = LocalSnackBar.current
                         DropdownMenuItem(
                             text = { Text("Edit") },
-                            onClick = { viewModel.editTeam(team, navigator) }
+                            onClick = { viewModel.editTeam(team, navigator, snackBar) }
                         )
                         DropdownMenuItem(
                             text = { Text("Delete") },
