@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
 
@@ -64,17 +65,24 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
     ExpansionTile(
         title = {
-            Text(
-                text = "VS ${opponentPlayer.name}",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 8.dp)
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "VS ${opponentPlayer.name}",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+                PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer)
+            }
         }
     ) {
         Text(
             text = "TODO",
             modifier = Modifier.padding(start = 32.dp, bottom = 8.dp)
         )
+
+        opponentPlayer
 
     }
 }

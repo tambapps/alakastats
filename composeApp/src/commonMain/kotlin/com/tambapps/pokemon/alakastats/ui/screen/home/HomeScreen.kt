@@ -45,6 +45,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
@@ -148,17 +149,7 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
                 }
             }
 
-            Row {
-                for (pokemon in team.pokemons) {
-
-                    viewModel.imageService.PokemonSprite(
-                        name = pokemon,
-                        modifier = Modifier.weight(1f),
-                        // disabling tooltip to allow handling card click listener
-                        disableTooltip = true
-                    )
-                }
-            }
+            PokemonTeamPreview(viewModel.imageService, team.pokemons)
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
             Row {
                 Text("${team.nbReplays} replays")
