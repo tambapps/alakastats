@@ -2,6 +2,19 @@ package com.tambapps.pokemon.alakastats.domain.model
 
 import com.tambapps.pokemon.PokeType
 
+fun Teamlytics.getPlayers(replay: ReplayAnalytics): Pair<Player, Player> =
+    if (sdNames.contains(replay.player1.name)) replay.player1 to replay.player2
+    else replay.player2 to replay.player1
+
+fun Teamlytics.getGameOutput(replay: ReplayAnalytics) = when {
+    sdNames.contains(replay.winner) -> GameOutput.WIN
+    sdNames.contains(replay.looser) -> GameOutput.LOOSE
+    else -> GameOutput.UNKNOWN
+}
+
+enum class GameOutput {
+    WIN, LOOSE, UNKNOWN
+}
 data class ReplayAnalytics(
     val players: List<Player>,
     val uploadTime: Long,
@@ -11,6 +24,12 @@ data class ReplayAnalytics(
     val winner: String?,
     val nextBattleRef: String?,
 ) {
+    val looser get() = when {
+        winner == player1.name -> player2.name
+        winner == player2.name -> player1.name
+        else -> null
+    }
+
     val player1 get() = players[0]
     val player2 get() = players[1]
 }

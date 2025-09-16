@@ -14,9 +14,6 @@ data class Teamlytics(
 ) {
     val winRate get() = computeWinRate(sdNames, replays)
 
-    fun getPlayers(replay: ReplayAnalytics): Pair<Player, Player> =
-        if (sdNames.contains(replay.player1.name)) replay.player1 to replay.player2
-        else replay.player2 to replay.player1
 }
 
 data class TeamlyticsPreview(

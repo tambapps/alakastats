@@ -3,7 +3,6 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.arrow_forward
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +18,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -33,11 +31,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
+import com.tambapps.pokemon.alakastats.domain.model.getGameOutput
+import com.tambapps.pokemon.alakastats.domain.model.getPlayers
+import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -88,7 +90,8 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
     ) {
         Column(Modifier.padding(all = 8.dp)) {
             Row {
-                // TODO add W/L text
+                val gameOutput = team.getGameOutput(replay)
+                GameOutputCard(gameOutput)
                 Text(
                     text = "VS ${opponentPlayer.name}",
                     style = MaterialTheme.typography.titleLarge,
@@ -105,15 +108,61 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
             PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer)
 
             if (isExpanded) {
-                Text(
-                    text = "TODO",
-                    modifier = Modifier.padding(start = 32.dp, bottom = 8.dp)
-                )
+                if (opponentPlayer.ots == null) {
+                    ViewReplayButton(replay)
+                } else {
+                    Row(Modifier.fillMaxWidth()
+                        .padding(horizontal = 8.dp)) {
+                        OtsButton(opponentPlayer.ots)
+                        Spacer(Modifier.weight(1f))
+                        ViewReplayButton(replay)
+                    }
+                }
+
+                Row(Modifier.fillMaxWidth()) {
+                    MobilePlayer(
+                        modifier = Modifier.weight(1f),
+                        player = currentPlayer,
+                        playerName = "You",
+                        viewModel = viewModel
+                    )
+
+
+                    MobilePlayer(
+                        modifier = Modifier.weight(1f),
+                        player = opponentPlayer,
+                        playerName = "Opponent",
+                        viewModel = viewModel
+                    )
+                }
             }
         }
     }
+}
 
+@Composable
+private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String, viewModel: TeamReplayViewModel) {
+    Column(
+        modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(playerName)
 
+        if (player.beforeElo != null && player.afterElo != null) {
+            Text("Elo: ${player.beforeElo} -> ${player.afterElo}")
+        } else if (player.beforeElo != null) {
+            Text("Elo: ${player.beforeElo}")
+        }
+
+        for (pokemon in player.selection) {
+            val teraType = player.terastallization?.takeIf { PokemonNormalizer.matches(it.pokemon, pokemon) }?.type
+            SelectedPokemon(
+                pokemon = pokemon,
+                teraType = teraType,
+                pokemonImageService = viewModel.pokemonImageService
+            )
+        }
+    }
 }
 
 @Composable

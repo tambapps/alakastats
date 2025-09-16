@@ -46,7 +46,9 @@ object PokemonNormalizer {
         insert("calyrex", "calyrex")
         insert("kyurem", "kyurem")
     }
-    
+
+    fun matches(p1: String, p2: String) = normalizeToBase(p1) == normalizeToBase(p2)
+
     fun normalize(s: String): String = s.lowercase().replace(' ', '-')
     
     fun normalizeToBase(input: String): String {

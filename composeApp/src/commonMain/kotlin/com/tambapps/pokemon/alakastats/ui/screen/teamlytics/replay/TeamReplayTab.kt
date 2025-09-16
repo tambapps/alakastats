@@ -1,10 +1,13 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -12,9 +15,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.PokeType
+import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
 @Composable
@@ -89,3 +98,50 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
     )
 }
 
+@Composable
+internal fun ViewReplayButton(replay: ReplayAnalytics) {
+    // TODO open link through chrometabs
+    OutlinedButton(
+        onClick = {},
+    ) {
+        Text("Replay")
+    }
+
+}
+
+@Composable
+internal fun OtsButton(ots: OpenTeamSheet) {
+    OutlinedButton(
+        onClick = {},
+    ) {
+        Text("OTS")
+    }
+    // TODO dialog
+}
+
+@Composable
+internal fun SelectedPokemon(pokemon: String, teraType: PokeType?, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        val scale = 0.75f
+        Box(
+            modifier = Modifier.graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
+            contentAlignment = Alignment.Center
+        ) {
+            pokemonImageService.PokemonArtwork(pokemon, modifier = Modifier.size(128.dp))
+        }
+        val offset = 16.dp
+        teraType?.let {
+            pokemonImageService.TeraTypeImage(it, modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = 0.dp, y = -offset)
+                .size(50.dp)
+            )
+        }
+    }
+}
