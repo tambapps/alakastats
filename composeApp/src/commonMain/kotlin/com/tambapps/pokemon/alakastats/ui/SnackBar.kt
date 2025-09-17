@@ -1,8 +1,9 @@
 package com.tambapps.pokemon.alakastats.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -12,8 +13,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,23 +62,23 @@ fun SnackBarContext(
     val backgroundColorState = remember { mutableStateOf(Color.Transparent) }
     val snackBar = remember { SnackBar(snackBarHostState, backgroundColorState) }
     CompositionLocalProvider(LocalSnackBar provides snackBar) {
-        Scaffold(
-            snackbarHost = {
-                SnackbarHost(
-                    hostState = snackBarHostState,
-                    snackbar = { data ->
-                        Snackbar(
-                            snackbarData = data,
-                            // apparently only containerColor works. I can't control the text color
-                            containerColor = backgroundColorState.value,
-                            )
-                    }
-                )
-            }
-        ) { paddingValues ->
-            Box(modifier = Modifier.padding(paddingValues)) {
-                content()
-            }
+        Box(modifier = Modifier.fillMaxSize()) {
+            content()
+            
+            SnackbarHost(
+                hostState = snackBarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .safeContentPadding()
+                    .padding(bottom = 16.dp),
+                snackbar = { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        // apparently only containerColor works. I can't control the text color
+                        containerColor = backgroundColorState.value,
+                        )
+                }
+            )
         }
     }
 }
