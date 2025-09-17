@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -98,10 +99,13 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                     modifier = Modifier.padding(start = 8.dp)
                 )
                 Spacer(Modifier.weight(1f))
+                val rotationAngle by animateFloatAsState(
+                    targetValue = if (isExpanded) 270f else 90f
+                )
                 Icon(
                     painter = painterResource(Res.drawable.arrow_forward),
                     contentDescription = "Back",
-                    modifier = Modifier.rotate(if (isExpanded) -90f else 90f),
+                    modifier = Modifier.rotate(rotationAngle),
                     tint = MaterialTheme.colorScheme.defaultIconColor
                 )
             }
