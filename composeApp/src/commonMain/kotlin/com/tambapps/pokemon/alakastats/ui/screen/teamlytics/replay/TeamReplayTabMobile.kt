@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.LinearProgressIndicator
@@ -76,17 +77,23 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
         indicatorAlignment = Alignment.Top
     ) {
         Column {
+            Spacer(Modifier.height(8.dp))
             if (opponentPlayer.ots != null && replay.url != null) {
                 Row(Modifier.fillMaxWidth()
                     .padding(horizontal = 8.dp)) {
-                    OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
                     Spacer(Modifier.weight(1f))
+                    OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
+                    Spacer(Modifier.width(32.dp))
                     ViewReplayButton(replay.url)
+                    Spacer(Modifier.weight(1f))
                 }
+                Spacer(Modifier.height(8.dp))
             } else if (opponentPlayer.ots != null) {
                 OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
-            }  else if (replay.url != null) {
+                Spacer(Modifier.height(8.dp))
+            } else if (replay.url != null) {
                 ViewReplayButton(replay.url)
+                Spacer(Modifier.height(8.dp))
             }
 
             Row(Modifier.fillMaxWidth()) {
