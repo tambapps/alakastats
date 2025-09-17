@@ -93,7 +93,9 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
         onClick = { isExpanded = !isExpanded }
     ) {
         Column(Modifier.padding(all = 8.dp)) {
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 val gameOutput = team.getGameOutput(replay)
                 GameOutputCard(gameOutput)
                 Text(
@@ -108,7 +110,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                 Icon(
                     painter = painterResource(Res.drawable.arrow_forward),
                     contentDescription = "Back",
-                    modifier = Modifier.rotate(rotationAngle),
+                    modifier = Modifier.rotate(rotationAngle).align(Alignment.Top),
                     tint = MaterialTheme.colorScheme.defaultIconColor
                 )
             }
