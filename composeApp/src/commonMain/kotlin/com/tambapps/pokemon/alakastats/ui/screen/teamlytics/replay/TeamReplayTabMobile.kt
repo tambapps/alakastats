@@ -22,7 +22,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -111,33 +114,38 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
             }
             PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer)
 
-            if (isExpanded) {
-                if (opponentPlayer.ots == null) {
-                    ViewReplayButton(replay)
-                } else {
-                    Row(Modifier.fillMaxWidth()
-                        .padding(horizontal = 8.dp)) {
-                        OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
-                        Spacer(Modifier.weight(1f))
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Column {
+                    if (opponentPlayer.ots == null) {
                         ViewReplayButton(replay)
+                    } else {
+                        Row(Modifier.fillMaxWidth()
+                            .padding(horizontal = 8.dp)) {
+                            OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
+                            Spacer(Modifier.weight(1f))
+                            ViewReplayButton(replay)
+                        }
                     }
-                }
 
-                Row(Modifier.fillMaxWidth()) {
-                    MobilePlayer(
-                        modifier = Modifier.weight(1f),
-                        player = currentPlayer,
-                        playerName = "You",
-                        viewModel = viewModel
-                    )
+                    Row(Modifier.fillMaxWidth()) {
+                        MobilePlayer(
+                            modifier = Modifier.weight(1f),
+                            player = currentPlayer,
+                            playerName = "You",
+                            viewModel = viewModel
+                        )
 
-
-                    MobilePlayer(
-                        modifier = Modifier.weight(1f),
-                        player = opponentPlayer,
-                        playerName = "Opponent",
-                        viewModel = viewModel
-                    )
+                        MobilePlayer(
+                            modifier = Modifier.weight(1f),
+                            player = opponentPlayer,
+                            playerName = "Opponent",
+                            viewModel = viewModel
+                        )
+                    }
                 }
             }
         }
