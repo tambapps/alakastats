@@ -122,15 +122,17 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                 exit = shrinkVertically()
             ) {
                 Column {
-                    if (opponentPlayer.ots == null) {
-                        ViewReplayButton(replay)
-                    } else {
+                    if (opponentPlayer.ots != null && replay.url != null) {
                         Row(Modifier.fillMaxWidth()
                             .padding(horizontal = 8.dp)) {
                             OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
                             Spacer(Modifier.weight(1f))
-                            ViewReplayButton(replay)
+                            ViewReplayButton(replay.url)
                         }
+                    } else if (opponentPlayer.ots != null) {
+                        OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
+                    }  else if (replay.url != null) {
+                        ViewReplayButton(replay.url)
                     }
 
                     Row(Modifier.fillMaxWidth()) {

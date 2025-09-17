@@ -109,17 +109,13 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
 }
 
 @Composable
-internal fun ViewReplayButton(replay: ReplayAnalytics) {
+internal fun ViewReplayButton(url: String) {
     val uriHandler = LocalUriHandler.current
     OutlinedButton(
-        onClick = {
-            // TODO replay url/ref doesn't seem to be saved
-            uriHandler.openUri("https://replay.pokemonshowdown.com/gen9vgc2025reghbo3-2435645581-bhurtu3rntemqbr7wtt6ofmtowy0urcpw")
-        },
+        onClick = { uriHandler.openUri(url) },
     ) {
         Text("Replay")
     }
-
 }
 
 @Composable
