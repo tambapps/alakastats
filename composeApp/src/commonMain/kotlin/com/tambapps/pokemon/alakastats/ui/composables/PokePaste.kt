@@ -23,6 +23,7 @@ import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 
 @Composable
@@ -111,19 +112,22 @@ private fun PokemonStatsRow(pokemon: Pokemon, modifier: Modifier = Modifier) {
 @Composable
 private fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
     Column(modifier) {
-        pokemon.moves.forEach { move ->
-
+        pokemon.moves.forEachIndexed { index, move ->
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val iconModifier = Modifier.size(32.dp)
                 pokemonImageService.MoveSpecImages(move, iconModifier)
                 Spacer(Modifier.width(8.dp))
-                Tooltip(move) {
-                    Text(move, textAlign = TextAlign.Start, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                val prettyMove = PokemonNormalizer.pretty(move)
+                Tooltip(prettyMove) {
+                    Text(prettyMove, textAlign = TextAlign.Start, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
-        }
+            if (index < pokemon.moves.lastIndex) {
+                Spacer(Modifier.height(4.dp))
+            }
+         }
     }
 }
 

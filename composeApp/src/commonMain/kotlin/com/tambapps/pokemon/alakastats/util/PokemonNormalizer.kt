@@ -47,6 +47,18 @@ object PokemonNormalizer {
         insert("kyurem", "kyurem")
     }
 
+    fun pretty(s: String) = buildString {
+        val first = s.first()
+        append(if (first.isLetter()) first.uppercase() else first)
+        for (i in 1 until s.length) {
+            val last = s[i - 1]
+            val current = s[i]
+            if (current == '-') {
+                continue
+            }
+            append(if (last == '-') " ${current.uppercase()}" else current.toString())
+        }
+    }
     fun matches(p1: String, p2: String) = normalizeToBase(p1) == normalizeToBase(p2)
 
     fun normalize(s: String): String = s.lowercase().replace(' ', '-')
