@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
-import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -81,7 +80,7 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
                     value = viewModel.replayUrlsText,
                     onValueChange = { viewModel.updateReplayUrlsText(it) },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("https://replay.pokemonshowdown.com/... https://replay.pokemonshowdown.com/...") },
+                    placeholder = { Text("https://replay.pokemonshowdown.com/...") },
                 )
 
                 viewModel.getValidationMessage()?.let { message ->
@@ -96,8 +95,9 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
             }
         },
         confirmButton = {
+            val snackBar = LocalSnackBar.current
             TextButton(
-                onClick = { viewModel.addReplays() },
+                onClick = { viewModel.addReplays(snackBar) },
                 enabled = viewModel.replayUrlsText.isNotBlank() && viewModel.getValidationMessage()?.contains("No valid") != true
             ) {
                 Text("Add Replays")

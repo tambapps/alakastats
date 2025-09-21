@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
@@ -69,13 +70,13 @@ class TeamReplayViewModel(
         replayUrlsText = text
     }
 
-    fun addReplays() {
+    fun addReplays(snackBar: SnackBar) {
         if (isLoading) {
             return
         }
         isLoading = true
-        val urls = parseReplayUrls(replayUrlsText)
         scope.launch {
+            val urls = parseReplayUrls(replayUrlsText)
             val results = urls.map { url ->
                 async {
                     try {
@@ -86,9 +87,16 @@ class TeamReplayViewModel(
                     }
                 }
             }.awaitAll()
-            handleReplaysUseCase.addReplays(results)
+            val duplicates = results.intersect(team.replays)
+            if (duplicates.size < results.size) {
+                handleReplaysUseCase.addReplays(results - duplicates)
+            }
             withContext(Dispatchers.Main) {
                 isLoading = false
+                when {
+                    duplicates.size == results.size -> snackBar.show(if (duplicates.size == 1) "The replay was already added" else "The Replays were already added")
+                    duplicates.isNotEmpty() -> snackBar.show("Some replay(s) were already added")
+                }
             }
         }
         hideAddReplayDialog()
