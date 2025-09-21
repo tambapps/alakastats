@@ -44,7 +44,16 @@ class TeamlyticsViewModel(
 
     override suspend fun addReplays(replays: List<ReplayAnalytics>) {
         val team = this.team!!
-        val updatedTeam = useCase.save(team.copy(replays = team.replays + replays))
+        save(team.copy(replays = team.replays + replays))
+    }
+
+    override suspend fun removeReplay(replay: ReplayAnalytics) {
+        val team = this.team!!
+        save(team.copy(replays = team.replays - replay))
+    }
+
+    private suspend fun save(team: Teamlytics) {
+        val updatedTeam = useCase.save(team)
         withContext(Dispatchers.Main) {
             teamState.value = updatedTeam
         }

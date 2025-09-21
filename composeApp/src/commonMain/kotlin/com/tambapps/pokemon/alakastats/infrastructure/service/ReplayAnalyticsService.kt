@@ -28,6 +28,7 @@ class ReplayAnalyticsService(
     // TODO throw/handle exception
     suspend fun fetch(sdReplayUrl: String): ReplayAnalytics {
         val jsonReplayUrl = jsonReplayUrl(sdReplayUrl)
+        val reference = jsonReplayUrl.substring(jsonReplayUrl.lastIndexOf('/') + 1).removeSuffix(".json")
         val rawReplay = httpClient.get(jsonReplayUrl).body<RawSdReplay>()
 
         val visitor = ReplayAnalyticsBuilderVisitor(otsPokemonTransformer, rawReplay.players)
@@ -42,6 +43,7 @@ class ReplayAnalyticsService(
             nextBattleRef = visitor.nextBattleRef,
             winner = visitor.winner,
             url = jsonReplayUrl,
+            reference = reference,
         ).let(replayAnalyticsTransformer::toDomain)
     }
 

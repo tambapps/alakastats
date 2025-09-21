@@ -43,6 +43,7 @@ data class ReplayAnalyticsEntity(
     val version: String,
     val winner: String?,
     val url: String?,
+    val reference: String,
     val nextBattleRef: String?,
 )
 

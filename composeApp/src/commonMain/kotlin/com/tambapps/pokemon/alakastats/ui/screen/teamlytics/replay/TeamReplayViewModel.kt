@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -32,6 +33,9 @@ class TeamReplayViewModel(
     var replayUrlsText by mutableStateOf("")
         private set
 
+    var replayToRemove by mutableStateOf<ReplayAnalytics?>(null)
+        private set
+
     private val scope = CoroutineScope(Dispatchers.Default)
 
     fun showAddReplayDialog() {
@@ -42,6 +46,23 @@ class TeamReplayViewModel(
     fun hideAddReplayDialog() {
         showAddReplayDialog = false
         replayUrlsText = ""
+    }
+
+    fun showRemoveReplayDialog(replay: ReplayAnalytics) {
+        replayToRemove = replay
+    }
+
+    fun removeReplay() {
+        replayToRemove?.let {
+            scope.launch {
+                handleReplaysUseCase.removeReplay(it)
+            }
+        }
+        replayToRemove = null
+    }
+
+    fun hideRemoveReplayDialog() {
+        replayToRemove = null
     }
 
     fun updateReplayUrlsText(text: String) {

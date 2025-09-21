@@ -48,6 +48,9 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
     if (viewModel.showAddReplayDialog) {
         AddReplayDialog(viewModel)
     }
+    if (viewModel.replayToRemove != null) {
+        RemoveReplayDialog(viewModel)
+    }
 }
 
 @Composable
@@ -107,6 +110,36 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
         }
     )
 }
+
+@Composable
+private fun RemoveReplayDialog(viewModel: TeamReplayViewModel) {
+    AlertDialog(
+        onDismissRequest = { viewModel.hideRemoveReplayDialog() },
+        title = { Text("Remove replay") },
+        text = {
+            Column {
+                Text(
+                    text = "Are you sure you want to remove this replay?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { viewModel.removeReplay() },
+            ) {
+                Text("Remove", color = Color.Red)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { viewModel.hideRemoveReplayDialog() }) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
 
 @Composable
 internal fun ViewReplayButton(url: String) {

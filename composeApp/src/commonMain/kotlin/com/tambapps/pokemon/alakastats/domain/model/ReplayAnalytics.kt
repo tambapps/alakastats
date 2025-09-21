@@ -26,6 +26,7 @@ data class ReplayAnalytics(
     val version: String,
     val winner: String?,
     val url: String?,
+    val reference: String,
     val nextBattleRef: String?,
 ) {
     val looser get() = when {
@@ -36,6 +37,19 @@ data class ReplayAnalytics(
 
     val player1 get() = players[0]
     val player2 get() = players[1]
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as ReplayAnalytics
+
+        return reference == other.reference
+    }
+
+    override fun hashCode(): Int {
+        return reference.hashCode()
+    }
 }
 
 

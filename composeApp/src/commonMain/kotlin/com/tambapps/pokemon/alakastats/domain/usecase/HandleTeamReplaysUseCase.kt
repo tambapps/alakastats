@@ -7,4 +7,7 @@ interface HandleTeamReplaysUseCase {
     suspend fun parseReplay(url: String): ReplayAnalytics
 
     suspend fun addReplays(replays: List<ReplayAnalytics>)
+
+    suspend fun removeReplay(replay: ReplayAnalytics)
+
 }

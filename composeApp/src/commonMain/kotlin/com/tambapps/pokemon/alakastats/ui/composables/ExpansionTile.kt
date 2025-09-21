@@ -10,12 +10,15 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,9 +35,9 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun ExpansionTile(
-    title: @Composable RowScope.() -> Unit,
+    title: @Composable RowScope.(Boolean) -> Unit,
     subtitle: @Composable () -> Unit = {},
-    indicatorAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    onDelete: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -57,16 +60,18 @@ fun ExpansionTile(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                title()
+                title(isExpanded)
                 val rotationAngle by animateFloatAsState(
                     targetValue = if (isExpanded) 270f else 90f
                 )
-                Icon(
-                    painter = painterResource(Res.drawable.arrow_forward),
-                    contentDescription = "Expand/Shrink",
-                    modifier = Modifier.rotate(rotationAngle).align(indicatorAlignment),
-                    tint = MaterialTheme.colorScheme.defaultIconColor
-                )
+                IconButton(onClick = { isExpanded = !isExpanded }) {
+                    Icon(
+                        painter = painterResource(Res.drawable.arrow_forward),
+                        contentDescription = "Expand/Shrink",
+                        modifier = Modifier.rotate(rotationAngle),
+                        tint = MaterialTheme.colorScheme.defaultIconColor
+                    )
+                }
             }
             subtitle()
             AnimatedVisibility(
@@ -78,5 +83,12 @@ fun ExpansionTile(
             }
         }
     }
+}
+
+@Composable
+private fun ExpandButton(
+    rotationAngle: Float,
+    modifier: Modifier = Modifier
+    ) {
 
 }
