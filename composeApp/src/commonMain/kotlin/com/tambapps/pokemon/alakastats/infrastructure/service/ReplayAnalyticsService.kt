@@ -176,8 +176,8 @@ private class ReplayAnalyticsBuilderVisitor(
 private data class PlayerBuilderEntityBuilder(
     var name: String = "<none>",
     var selection: MutableList<String> = mutableListOf(),
-    var beforeElo: Int? = 0,
-    var afterElo: Int? = 0,
+    var beforeElo: Int? = null,
+    var afterElo: Int? = null,
     var terastallization: TerastallizationEntity? = null,
     var ots: OpenTeamSheetEntity? = null,
     val movesUsage: MutableMap<String, MutableMap<String, Int>> = mutableMapOf(),
