@@ -78,30 +78,10 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(start = 8.dp)
             )
-            Spacer(Modifier.weight(1f))
-
-            val alpha by animateFloatAsState(
-                targetValue = if (isExpanded) 1f else 0f
-            )
-            if (isExpanded) {
-                IconButton(
-                    modifier = Modifier.alpha(alpha),
-                    onClick = { viewModel.showRemoveReplayDialog(replay) },
-                    enabled = isExpanded
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.arrow_forward),
-                        contentDescription = "Delete replay",
-                        tint = MaterialTheme.colorScheme.defaultIconColor,
-                    )
-                }
-            }
         },
         subtitle = {
             PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer)
         },
-        onDelete = {},
-       // indicatorAlignment = Alignment.Top
     ) {
         Column {
             Spacer(Modifier.height(8.dp))
