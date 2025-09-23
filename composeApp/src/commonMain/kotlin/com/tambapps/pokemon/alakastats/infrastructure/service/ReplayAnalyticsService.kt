@@ -44,6 +44,7 @@ class ReplayAnalyticsService(
             winner = visitor.winner,
             url = jsonReplayUrl,
             reference = reference,
+            notes = null,
         ).let(replayAnalyticsTransformer::toDomain)
     }
 

@@ -28,6 +28,7 @@ data class ReplayAnalytics(
     val url: String?,
     val reference: String,
     val nextBattleRef: String?,
+    val notes: String?,
 ) {
     val looser get() = when {
         winner == player1.name -> player2.name

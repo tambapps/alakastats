@@ -34,7 +34,12 @@ class TeamReplayViewModel(
     var replayUrlsText by mutableStateOf("")
         private set
 
+    var replayNotesText by mutableStateOf("")
+
     var replayToRemove by mutableStateOf<ReplayAnalytics?>(null)
+        private set
+
+    var replayToNote by mutableStateOf<ReplayAnalytics?>(null)
         private set
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -49,8 +54,18 @@ class TeamReplayViewModel(
         replayUrlsText = ""
     }
 
+    fun hideNoteReplayDialog() {
+        replayToNote = null
+        replayNotesText = ""
+    }
+
+
     fun showRemoveReplayDialog(replay: ReplayAnalytics) {
         replayToRemove = replay
+    }
+
+    fun showNoteReplayDialog(replay: ReplayAnalytics) {
+        replayToNote = replay
     }
 
     fun removeReplay() {
@@ -68,6 +83,18 @@ class TeamReplayViewModel(
 
     fun updateReplayUrlsText(text: String) {
         replayUrlsText = text
+    }
+
+    fun editNotes(notes: String?) {
+        val replayToNote = this.replayToNote ?: return
+        editNotes(replayToNote, notes)
+    }
+
+    fun editNotes(replayToNote: ReplayAnalytics, notes: String?) {
+        scope.launch {
+            handleReplaysUseCase.replaceReplay(replayToNote.copy(notes = notes))
+        }
+        hideNoteReplayDialog()
     }
 
     fun addReplays(snackBar: SnackBar) {

@@ -49,6 +49,9 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
     if (viewModel.showAddReplayDialog) {
         AddReplayDialog(viewModel)
     }
+    viewModel.replayToNote?.let {
+        NotesDialog(viewModel, it)
+    }
     if (viewModel.replayToRemove != null) {
         RemoveReplayDialog(viewModel)
     }
@@ -107,6 +110,38 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
         },
         dismissButton = {
             TextButton(onClick = { viewModel.hideAddReplayDialog() }) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun NotesDialog(viewModel: TeamReplayViewModel, replay: ReplayAnalytics) {
+    val alreadyHasNotes = !replay.notes.isNullOrBlank()
+
+    AlertDialog(
+        onDismissRequest = { viewModel.hideNoteReplayDialog() },
+        title = { Text("Note Replay") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = viewModel.replayNotesText,
+                    onValueChange = { viewModel.replayNotesText = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Notes") },
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { viewModel.editNotes(viewModel.replayNotesText) },
+            ) {
+                Text(if (alreadyHasNotes) "Edit Notes" else "Add Notes")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { viewModel.hideNoteReplayDialog() }) {
                 Text("Cancel")
             }
         }

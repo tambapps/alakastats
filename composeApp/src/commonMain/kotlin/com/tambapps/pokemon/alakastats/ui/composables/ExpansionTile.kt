@@ -71,14 +71,11 @@ fun ExpansionTile(
         content = content,
         expandButton = { isCardExpandedState ->
             Box {
-                ExpandButton(isCardExpandedState)
-
                 val expandButtonScale by animateFloatAsState(
                     targetValue = if (isCardExpandedState.value) 1f else 0f
                 )
-
                 val isMenuExpanded = remember { mutableStateOf(false) }
-                IconButton(onClick = { isMenuExpanded.value = !isMenuExpanded.value }) {
+                IconButton(onClick = { isMenuExpanded.value = !isMenuExpanded.value }, enabled = isCardExpandedState.value) {
                     Icon(
                         modifier = Modifier.scale(expandButtonScale),
                         painter = painterResource(Res.drawable.more_vert),
@@ -86,6 +83,9 @@ fun ExpansionTile(
                         tint = MaterialTheme.colorScheme.defaultIconColor
                     )
                 }
+
+
+                ExpandButton(isCardExpandedState)
                 menu(isMenuExpanded)
             }
         }

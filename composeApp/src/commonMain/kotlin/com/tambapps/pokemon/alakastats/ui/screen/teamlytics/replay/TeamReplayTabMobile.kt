@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
@@ -77,9 +78,33 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                 expanded = isMenuExpandedState.value,
                 onDismissRequest = { isMenuExpandedState.value = false }
             ) {
+                val alreadyHasNotes = !replay.notes.isNullOrBlank()
+                DropdownMenuItem(
+                    text = { Text(
+                        if (!alreadyHasNotes) "Add notes" else "Edit notes"
+                    ) },
+                    onClick = {
+                        viewModel.showNoteReplayDialog(replay)
+                        isMenuExpandedState.value = false
+                    }
+                )
+
+                if (alreadyHasNotes) {
+                    DropdownMenuItem(
+                        text = { Text("Remove notes") },
+                        onClick = {
+                            viewModel.editNotes(replay, null)
+                            isMenuExpandedState.value = false
+                        }
+                    )
+                }
+
                 DropdownMenuItem(
                     text = { Text("Delete") },
-                    onClick = { viewModel.showRemoveReplayDialog(replay) }
+                    onClick = {
+                        viewModel.showRemoveReplayDialog(replay)
+                        isMenuExpandedState.value = false
+                    }
                 )
             }
         },
@@ -120,6 +145,15 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                     player = opponentPlayer,
                     playerName = "Opponent",
                     viewModel = viewModel
+                )
+            }
+
+            if (!replay.notes.isNullOrBlank()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    replay.notes,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
                 )
             }
         }

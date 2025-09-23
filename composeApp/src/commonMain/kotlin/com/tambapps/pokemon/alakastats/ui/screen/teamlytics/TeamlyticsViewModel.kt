@@ -52,6 +52,16 @@ class TeamlyticsViewModel(
         save(team.copy(replays = team.replays - replay))
     }
 
+    // TODO updating note doesn't seem to trigger re-composition
+    override suspend fun replaceReplay(replay: ReplayAnalytics) {
+        val team = this.team!!
+        val replayIndex = team.replays.indexOf(replay)
+        val replays = team.replays.mapIndexed { index, r ->
+            if (index == replayIndex) replay else r
+        }
+        save(team.copy(replays = replays))
+    }
+
     private suspend fun save(team: Teamlytics) {
         val updatedTeam = useCase.save(team)
         withContext(Dispatchers.Main) {

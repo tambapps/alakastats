@@ -45,6 +45,8 @@ data class ReplayAnalyticsEntity(
     val url: String?,
     val reference: String,
     val nextBattleRef: String?,
+    // need default values for fields added after having saved some entities in previous version
+    val notes: String? = null,
 )
 
 @Serializable

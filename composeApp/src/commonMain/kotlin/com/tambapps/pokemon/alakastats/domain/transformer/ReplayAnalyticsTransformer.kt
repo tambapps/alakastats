@@ -30,7 +30,8 @@ class ReplayAnalyticsTransformer(
             winner = domain.winner,
             url = domain.url,
             reference = domain.reference,
-            nextBattleRef = domain.nextBattleRef
+            nextBattleRef = domain.nextBattleRef,
+            notes = domain.notes
         )
     }
     
@@ -44,7 +45,8 @@ class ReplayAnalyticsTransformer(
             winner = entity.winner,
             url = entity.url,
             reference = entity.reference,
-            nextBattleRef = entity.nextBattleRef
+            nextBattleRef = entity.nextBattleRef,
+            notes = entity.notes
         )
     }
 }
