@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -142,7 +144,11 @@ private fun RemoveReplayDialog(viewModel: TeamReplayViewModel) {
 
 
 @Composable
-internal fun ViewReplayButton(url: String) {
+internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: String) {
+    var url = url.removeSuffix(".json")
+    if (!team.sdNames.contains(replay.player1.name)) {
+        url += "?p2"
+    }
     val uriHandler = LocalUriHandler.current
     OutlinedButton(
         onClick = { uriHandler.openUri(url) },

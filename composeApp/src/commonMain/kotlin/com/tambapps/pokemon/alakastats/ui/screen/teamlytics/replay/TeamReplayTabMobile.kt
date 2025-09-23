@@ -79,7 +79,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
             ) {
                 DropdownMenuItem(
                     text = { Text("Delete") },
-                    onClick = { /* TODO */ }
+                    onClick = { viewModel.showRemoveReplayDialog(replay) }
                 )
             }
         },
@@ -95,7 +95,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                     Spacer(Modifier.weight(1f))
                     OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
                     Spacer(Modifier.width(32.dp))
-                    ViewReplayButton(replay.url)
+                    ViewReplayButton(team, replay, replay.url)
                     Spacer(Modifier.weight(1f))
                 }
                 Spacer(Modifier.height(8.dp))
@@ -103,7 +103,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                 OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
                 Spacer(Modifier.height(8.dp))
             } else if (replay.url != null) {
-                ViewReplayButton(replay.url)
+                ViewReplayButton(team, replay, replay.url)
                 Spacer(Modifier.height(8.dp))
             }
 

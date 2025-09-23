@@ -75,8 +75,9 @@ class TeamReplayViewModel(
             return
         }
         isLoading = true
+        // need to be here because after we're clearing the text
+        val urls = parseReplayUrls(replayUrlsText)
         scope.launch {
-            val urls = parseReplayUrls(replayUrlsText)
             val results = urls.map { url ->
                 async {
                     try {
@@ -104,9 +105,11 @@ class TeamReplayViewModel(
 
     private fun parseReplayUrls(text: String): List<String> {
         return text
-            .split(REPLAYS_SEPARATOR_REGEX)
+            .splitToSequence(REPLAYS_SEPARATOR_REGEX)
             .map { it.trim() }
+            .map { if (it.contains("?")) it.substringBefore("?") else it }
             .filter { it.isNotBlank() && isValidReplayUrl(it) }
+            .toList()
     }
 
     private fun isValidReplayUrl(url: String): Boolean {
