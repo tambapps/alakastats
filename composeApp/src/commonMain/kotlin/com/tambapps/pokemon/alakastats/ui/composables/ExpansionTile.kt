@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,10 +45,61 @@ import org.jetbrains.compose.resources.painterResource
 fun ExpansionTile(
     title: @Composable RowScope.(Boolean) -> Unit,
     subtitle: @Composable () -> Unit = {},
-    onDelete: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
-    var isCardExpanded by remember { mutableStateOf(false) }
+    AbstractExpansionTile(
+        title = title,
+        subtitle = subtitle,
+        content = content,
+        expandButton = { isCardExpandedState ->
+            ExpandButton(isCardExpandedState)
+        }
+    )
+}
+
+
+@Composable
+fun ExpansionTile(
+    title: @Composable RowScope.(Boolean) -> Unit,
+    menu: @Composable (MutableState<Boolean>) -> Unit,
+    subtitle: @Composable () -> Unit = {},
+    content: @Composable () -> Unit,
+) {
+    AbstractExpansionTile(
+        title = title,
+        subtitle = subtitle,
+        content = content,
+        expandButton = { isCardExpandedState ->
+            Box {
+                ExpandButton(isCardExpandedState)
+
+                val expandButtonScale by animateFloatAsState(
+                    targetValue = if (isCardExpandedState.value) 1f else 0f
+                )
+
+                val isMenuExpanded = remember { mutableStateOf(false) }
+                IconButton(onClick = { isMenuExpanded.value = !isMenuExpanded.value }) {
+                    Icon(
+                        modifier = Modifier.scale(expandButtonScale),
+                        painter = painterResource(Res.drawable.more_vert),
+                        contentDescription = "More",
+                        tint = MaterialTheme.colorScheme.defaultIconColor
+                    )
+                }
+                menu(isMenuExpanded)
+            }
+        }
+    )
+}
+
+@Composable
+private fun AbstractExpansionTile(
+    title: @Composable RowScope.(Boolean) -> Unit,
+    subtitle: @Composable () -> Unit = {},
+    expandButton: @Composable (MutableState<Boolean>) -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val isCardExpandedState = remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -61,63 +113,19 @@ fun ExpansionTile(
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
-        onClick = { isCardExpanded = !isCardExpanded }
+        onClick = { isCardExpandedState.value = !isCardExpandedState.value }
     ) {
         Column(Modifier.padding(all = 8.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                title(isCardExpanded)
+                title(isCardExpandedState.value)
                 Spacer(Modifier.weight(1f))
-
-                val buttonOffset by animateDpAsState(
-                    targetValue = if (isCardExpanded) (-48).dp else 0.dp
-                )
-
-                Box {
-                    IconButton(
-                        onClick = { isCardExpanded = !isCardExpanded },
-                        modifier = Modifier.offset(x = buttonOffset)
-                    ) {
-                        val rotationAngle by animateFloatAsState(
-                            targetValue = if (isCardExpanded) 270f else 90f
-                        )
-                        Icon(
-                            painter = painterResource(Res.drawable.arrow_forward),
-                            contentDescription = "Expand/Shrink",
-                            modifier = Modifier.rotate(rotationAngle),
-                            tint = MaterialTheme.colorScheme.defaultIconColor
-                        )
-                    }
-
-
-                    val expandButtonScale by animateFloatAsState(
-                        targetValue = if (isCardExpanded) 1f else 0f
-                    )
-
-                    var isMenuExpanded by remember { mutableStateOf(false) }
-                    IconButton(onClick = { isMenuExpanded = !isMenuExpanded }) {
-                        Icon(
-                            modifier = Modifier.scale(expandButtonScale),
-                            painter = painterResource(Res.drawable.more_vert),
-                            contentDescription = "More",
-                            tint = MaterialTheme.colorScheme.defaultIconColor
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = isMenuExpanded,
-                        onDismissRequest = { isMenuExpanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Delete") },
-                            onClick = { /* TODO */ }
-                        )
-                    }
-                }
+                expandButton(isCardExpandedState)
             }
             subtitle()
             AnimatedVisibility(
-                visible = isCardExpanded,
+                visible = isCardExpandedState.value,
                 enter = expandVertically(),
                 exit = shrinkVertically()
             ) {
@@ -129,8 +137,23 @@ fun ExpansionTile(
 
 @Composable
 private fun ExpandButton(
-    rotationAngle: Float,
-    modifier: Modifier = Modifier
+    isCardExpandedState: MutableState<Boolean>
     ) {
-
+    val buttonOffset by animateDpAsState(
+        targetValue = if (isCardExpandedState.value) (-48).dp else 0.dp
+    )
+    IconButton(
+        onClick = { isCardExpandedState.value = !isCardExpandedState.value },
+        modifier = Modifier.offset(x = buttonOffset)
+    ) {
+        val rotationAngle by animateFloatAsState(
+            targetValue = if (isCardExpandedState.value) 270f else 90f
+        )
+        Icon(
+            painter = painterResource(Res.drawable.arrow_forward),
+            contentDescription = "Expand/Shrink",
+            modifier = Modifier.rotate(rotationAngle),
+            tint = MaterialTheme.colorScheme.defaultIconColor
+        )
+    }
 }

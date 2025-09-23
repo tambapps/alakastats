@@ -1,8 +1,5 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 
-import alakastats.composeapp.generated.resources.Res
-import alakastats.composeapp.generated.resources.arrow_forward
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,16 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
@@ -34,9 +29,7 @@ import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
-import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
-import org.jetbrains.compose.resources.painterResource
 
 @Composable
 internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
@@ -78,6 +71,17 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(start = 8.dp)
             )
+        },
+        menu = { isMenuExpandedState ->
+            DropdownMenu(
+                expanded = isMenuExpandedState.value,
+                onDismissRequest = { isMenuExpandedState.value = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Delete") },
+                    onClick = { /* TODO */ }
+                )
+            }
         },
         subtitle = {
             PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer)
