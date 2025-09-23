@@ -10,6 +10,6 @@ interface HandleTeamReplaysUseCase {
 
     suspend fun removeReplay(replay: ReplayAnalytics)
 
-    suspend fun replaceReplay(replay: ReplayAnalytics)
+    suspend fun replaceReplay(original: ReplayAnalytics, replay: ReplayAnalytics)
 
 }

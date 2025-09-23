@@ -92,7 +92,7 @@ class TeamReplayViewModel(
 
     fun editNotes(replayToNote: ReplayAnalytics, notes: String?) {
         scope.launch {
-            handleReplaysUseCase.replaceReplay(replayToNote.copy(notes = notes))
+            handleReplaysUseCase.replaceReplay(replayToNote, replayToNote.copy(notes = notes))
         }
         hideNoteReplayDialog()
     }

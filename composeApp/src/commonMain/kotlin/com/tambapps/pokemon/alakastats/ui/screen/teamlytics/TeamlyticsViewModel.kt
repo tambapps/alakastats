@@ -43,19 +43,18 @@ class TeamlyticsViewModel(
     override suspend fun parseReplay(url: String) = replayService.fetch(url)
 
     override suspend fun addReplays(replays: List<ReplayAnalytics>) {
-        val team = this.team!!
+        val team = requireTeam()
         save(team.copy(replays = team.replays + replays))
     }
 
     override suspend fun removeReplay(replay: ReplayAnalytics) {
-        val team = this.team!!
+        val team = requireTeam()
         save(team.copy(replays = team.replays - replay))
     }
 
-    // TODO updating note doesn't seem to trigger re-composition
-    override suspend fun replaceReplay(replay: ReplayAnalytics) {
-        val team = this.team!!
-        val replayIndex = team.replays.indexOf(replay)
+    override suspend fun replaceReplay(original: ReplayAnalytics, replay: ReplayAnalytics) {
+        val team = requireTeam()
+        val replayIndex = team.replays.indexOf(original)
         val replays = team.replays.mapIndexed { index, r ->
             if (index == replayIndex) replay else r
         }
