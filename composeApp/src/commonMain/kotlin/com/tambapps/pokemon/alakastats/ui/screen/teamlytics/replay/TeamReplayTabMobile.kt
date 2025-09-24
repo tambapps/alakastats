@@ -186,7 +186,7 @@ private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String,
 }
 
 @Composable
-internal fun NoReplaysMobile(viewModel: TeamReplayViewModel) {
+private fun NoReplaysMobile(viewModel: TeamReplayViewModel) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -206,13 +206,4 @@ internal fun NoReplaysMobile(viewModel: TeamReplayViewModel) {
             )
         }
     }
-}
-
-@Composable
-private fun ProgressBar(modifier: Modifier = Modifier) {
-    LinearProgressIndicator(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(4.dp)  // thickness
-    )
 }

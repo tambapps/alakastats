@@ -44,6 +44,7 @@ class TeamlyticsViewModel(
 
     override suspend fun addReplays(replays: List<ReplayAnalytics>) {
         val team = requireTeam()
+        // TODO try set elo for non final games
         save(team.copy(replays = team.replays + replays))
     }
 
