@@ -71,9 +71,11 @@ private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonI
 
 @Composable
 private fun DesktopPokemonRow(isOts: Boolean, pokemons: List<Pokemon>, pokemonImageService: PokemonImageService) {
-    Row {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         pokemons.forEach { pokemon ->
-            Pokemon(isOts, pokemon, pokemonImageService, Modifier)
+            Pokemon(isOts, pokemon, pokemonImageService, Modifier.weight(1f))
         }
     }
 }
