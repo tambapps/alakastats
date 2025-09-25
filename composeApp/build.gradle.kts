@@ -62,6 +62,7 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.kstore.file)
+            implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -74,7 +75,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.arrow.core)
             implementation(libs.arrow.fx.coroutines)
-            implementation(libs.kamel.image.default)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.kotlinx.datetime)
@@ -91,12 +93,14 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.kstore.file)
+            implementation(libs.ktor.client.darwin)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
         wasmJsMain.dependencies {
             implementation(libs.kstore.storage)
+            implementation(libs.ktor.client.js)
         }
     }
 }

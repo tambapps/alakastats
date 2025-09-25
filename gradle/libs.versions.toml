@@ -1,5 +1,5 @@
 [versions]
-agp = "8.12.2"
+agp = "8.12.3"
 android-compileSdk = "35"
 android-minSdk = "24"
 android-targetSdk = "35"
@@ -18,9 +18,9 @@ kotlinxDatetime = "0.7.1"
 tambappsPokemon = "1.0-SNAPSHOT"
 voyager = "1.1.0-beta03"
 serialization = "1.9.0"
-kamel = "1.0.7"
+coil = "3.3.0"
 kstore = "1.0.0"
-ktor = "3.2.3"
+ktor = "3.3.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -45,11 +45,15 @@ kstore-storage = { module = "io.github.xxfast:kstore-storage", version.ref = "ks
 pokemon-sdReplayLogVisitor = { module = "com.tambapps.pokemon:pokemon-sd-replay-log-visitor", version.ref = "tambappsPokemon" }
 pokemon-pokepasteParser = { module = "com.tambapps.pokemon:pokepaste-parser", version.ref = "tambappsPokemon" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
-kamel-image-default = { module = "media.kamel:kamel-image-default", version.ref = "kamel" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
 voyager-screenmodel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
 voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyager" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinxJson = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 

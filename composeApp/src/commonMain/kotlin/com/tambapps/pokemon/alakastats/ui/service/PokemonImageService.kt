@@ -1,7 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.service
 
 import alakastats.composeapp.generated.resources.Res
-import alakastats.composeapp.generated.resources.catching_pokemon
 import alakastats.composeapp.generated.resources.move_bug
 import alakastats.composeapp.generated.resources.move_dark
 import alakastats.composeapp.generated.resources.move_dragon
@@ -22,6 +21,7 @@ import alakastats.composeapp.generated.resources.move_rock
 import alakastats.composeapp.generated.resources.move_special
 import alakastats.composeapp.generated.resources.move_steel
 import alakastats.composeapp.generated.resources.move_water
+import alakastats.composeapp.generated.resources.pokeball
 import alakastats.composeapp.generated.resources.tera_type_bug
 import alakastats.composeapp.generated.resources.tera_type_dark
 import alakastats.composeapp.generated.resources.tera_type_dragon
@@ -51,14 +51,13 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.composables.TooltipIfEnabled
 import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.util.titlecase
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -67,8 +66,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
 
-// TODO add placeholder for KamelImage because the image has no size when it is loading and it renders
-//   a wierd display
+private val placeHolderDrawable = Res.drawable.pokeball
+
 class PokemonImageService(
     private val json: Json
 ) {
@@ -107,9 +106,9 @@ class PokemonImageService(
                 // TODO the web part is BAD. This is a hack to avoid CORS, because kmp web rendering uses a canvas instead of a <img>
                 val url = if (getPlatform().type == PlatformType.Web)  "https://api.allorigins.win/raw?url=${imageUrl.replace("#", "%23").replace("&", "%26").replace("?", "%3F")}"
                 else imageUrl
-                KamelImage({ asyncPainterResource(data = url) },
+                MyImage(url = url,
                     contentDescription = pokemonSpriteData.name,
-                    modifier = mod
+                    modifier = mod,
                 )
             } else {
                 DefaultIcon(
@@ -235,17 +234,28 @@ class PokemonImageService(
                 return@TooltipIfEnabled
             }
 
-            KamelImage({ asyncPainterResource(data = data.spriteUrl) },
+            MyImage(
+                url = data.spriteUrl,
                 contentDescription = data.name,
-                modifier = mod
-            )
+                modifier = mod,
+                )
         }
+    }
+
+    @Composable
+    private fun MyImage(url: String, contentDescription: String = "", modifier: Modifier = Modifier) {
+        AsyncImage(
+            model = url,
+            contentDescription = contentDescription,
+            modifier = modifier,
+            placeholder = painterResource(placeHolderDrawable),
+        )
     }
 
     @Composable
     private fun DefaultIcon(contentDescription: String = "", modifier: Modifier = Modifier) {
         Icon(
-            painter = painterResource(Res.drawable.catching_pokemon),
+            painter = painterResource(placeHolderDrawable),
             contentDescription = contentDescription,
             modifier = modifier
         )
