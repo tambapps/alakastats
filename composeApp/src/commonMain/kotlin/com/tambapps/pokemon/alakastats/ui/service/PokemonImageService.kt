@@ -68,9 +68,29 @@ import org.jetbrains.compose.resources.painterResource
 
 private val placeHolderDrawable = Res.drawable.pokeball
 
+interface IPokemonImageService {
+    @Composable
+    fun PokemonSprite(name: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
+
+    @Composable
+    fun PokemonArtwork(name: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
+
+    @Composable
+    fun TeraTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier)
+
+    @Composable
+    fun MoveTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier)
+
+    @Composable
+    fun MoveSpecImages(move: String, iconModifier: Modifier = Modifier)
+
+    @Composable
+    fun ItemImage(item: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
+}
+
 class PokemonImageService(
     private val json: Json
-) {
+) : IPokemonImageService {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
     private val pokemonImages = mutableStateMapOf<String, PokemonSpriteData>()
     private val movesData = mutableStateMapOf<String, MoveData>()
@@ -91,9 +111,31 @@ class PokemonImageService(
     }
 
     @Composable
-    fun PokemonSprite(name: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false) = PokemonImage(name, modifier, disableTooltip) { it.sprite }
+    override fun PokemonSprite(name: String, modifier: Modifier, disableTooltip: Boolean) {
+        if (getPlatform().type == PlatformType.Web) {
+            WebPokemonImage("sprite", name, modifier)
+        } else {
+            PokemonImage(name, modifier, disableTooltip) { it.sprite }
+        }
+    }
     @Composable
-    fun PokemonArtwork(name: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false) = PokemonImage(name, modifier, disableTooltip) { it.artwork }
+    override fun PokemonArtwork(name: String, modifier: Modifier, disableTooltip: Boolean) {
+        if (getPlatform().type == PlatformType.Web) {
+            WebPokemonImage("artwork", name, modifier)
+        } else {
+            PokemonImage(name, modifier, disableTooltip) { it.artwork }
+        }
+    }
+
+    @Composable
+    private fun WebPokemonImage(type: String, name: String, modifier: Modifier, disableTooltip: Boolean = false) {
+        TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
+            MyImage(url = "http://localhost:8080/images/pokemons/$type/$name.png",
+                contentDescription = name,
+                modifier = mod,
+            )
+        }
+    }
 
     @Composable
     private inline fun PokemonImage(name: String, modifier: Modifier, disableTooltip: Boolean = false, imageUrlSupplier: (PokemonSpriteData) -> String) {
@@ -103,10 +145,7 @@ class PokemonImageService(
 
         TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
             if (imageUrl != null) {
-                // TODO the web part is BAD. This is a hack to avoid CORS, because kmp web rendering uses a canvas instead of a <img>
-                val url = if (getPlatform().type == PlatformType.Web)  "https://api.allorigins.win/raw?url=${imageUrl.replace("#", "%23").replace("&", "%26").replace("?", "%3F")}"
-                else imageUrl
-                MyImage(url = url,
+                MyImage(url = imageUrl,
                     contentDescription = pokemonSpriteData.name,
                     modifier = mod,
                 )
@@ -120,7 +159,7 @@ class PokemonImageService(
     }
 
     @Composable
-    fun TeraTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier) {
+    override fun TeraTypeImage(type: PokeType, disableTooltip: Boolean, modifier: Modifier) {
         val resource = when(type) {
             PokeType.STEEL -> Res.drawable.tera_type_steel
             PokeType.FIGHTING -> Res.drawable.tera_type_fighting
@@ -156,7 +195,7 @@ class PokemonImageService(
     }
 
     @Composable
-    fun MoveTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier) {
+    override fun MoveTypeImage(type: PokeType, disableTooltip: Boolean, modifier: Modifier) {
         val resource = when(type) {
             PokeType.STEEL -> Res.drawable.move_steel
             PokeType.FIGHTING -> Res.drawable.move_fighting
@@ -190,7 +229,7 @@ class PokemonImageService(
     }
 
     @Composable
-    fun MoveSpecImages(move: String, iconModifier: Modifier = Modifier) {
+    override fun MoveSpecImages(move: String, iconModifier: Modifier) {
         // lazy loading
         if (movesData.isEmpty()) {
             loadMoves()
@@ -220,7 +259,7 @@ class PokemonImageService(
     }
 
     @Composable
-    fun ItemImage(item: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false) {
+    override fun ItemImage(item: String, modifier: Modifier, disableTooltip: Boolean) {
         TooltipIfEnabled(disableTooltip, item, modifier) { mod ->
             // lazy loading
             if (itemsData.isEmpty()) {

@@ -35,7 +35,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.IPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
 @Composable
@@ -235,7 +235,7 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplay
 }
 
 @Composable
-internal fun SelectedPokemon(pokemon: String, teraType: PokeType?, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+internal fun SelectedPokemon(pokemon: String, teraType: PokeType?, pokemonImageService: IPokemonImageService, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center

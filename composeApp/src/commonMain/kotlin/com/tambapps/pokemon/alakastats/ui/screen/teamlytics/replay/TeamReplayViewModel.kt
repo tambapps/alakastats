@@ -7,7 +7,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.SnackBar
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.IPokemonImageService
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TeamReplayViewModel(
-    val pokemonImageService: PokemonImageService,
+    val pokemonImageService: IPokemonImageService,
     private val handleReplaysUseCase: HandleTeamReplaysUseCase,
     val team: Teamlytics,
 ) {

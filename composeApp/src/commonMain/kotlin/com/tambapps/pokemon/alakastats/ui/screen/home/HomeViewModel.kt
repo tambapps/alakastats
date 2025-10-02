@@ -14,7 +14,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCas
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.IPokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,7 +22,7 @@ import kotlinx.coroutines.withContext
 import kotlin.uuid.Uuid
 
 class HomeViewModel(
-    val imageService: PokemonImageService,
+    val imageService: IPokemonImageService,
     private val useCase: ManageTeamlyticsListUseCase
 ): ScreenModel {
     

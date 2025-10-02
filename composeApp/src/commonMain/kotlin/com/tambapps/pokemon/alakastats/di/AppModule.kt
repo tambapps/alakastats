@@ -7,6 +7,7 @@ import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsViewModel
+import com.tambapps.pokemon.alakastats.ui.service.IPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.ReplayAnalyticsTransformer
@@ -51,7 +52,7 @@ private val appModule = module {
             }
         }
     }
-    single<PokemonImageService> { PokemonImageService(get()) }
+    single<IPokemonImageService> { PokemonImageService(get()) }
     single<PokepasteParser> { PokepasteParser() }
     single<ReplayAnalyticsService> { ReplayAnalyticsService(get(), get(), get()) }
 
