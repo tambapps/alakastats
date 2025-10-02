@@ -239,24 +239,19 @@ class PokemonUrlImageService(
         modifier: Modifier,
         disableTooltip: Boolean
     ) {
-        TooltipIfEnabled(disableTooltip, item, modifier) { mod ->
-            // TODO
-            MyImage(url = "http://localhost:8080/images/pokemons/artowrk/abomasnow.png",
-                contentDescription = item,
-                modifier = mod,
-            )
-        }
-
+        // TODO
+        MyImage(url = "http://localhost:8080/images/pokemons/artowrk/abomasnow.png",
+            contentDescription = item,
+            modifier = modifier,
+        )
     }
 
     @Composable
-    private fun WebPokemonImage(type: String, name: String, modifier: Modifier, disableTooltip: Boolean = false) {
-        TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
-            MyImage(url = "$baseUrl/images/pokemons/$type/$name.png",
-                contentDescription = name,
-                modifier = mod,
-            )
-        }
+    private fun WebPokemonImage(type: String, name: String, modifier: Modifier) {
+        MyImage(url = "$baseUrl/images/pokemons/$type/$name.png",
+            contentDescription = name,
+            modifier = modifier,
+        )
     }
 }
 

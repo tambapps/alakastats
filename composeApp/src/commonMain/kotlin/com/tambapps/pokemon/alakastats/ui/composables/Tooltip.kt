@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import kotlin.time.Duration.Companion.seconds
 
+// Tooltip only works for Mobile
 @Composable
 fun TooltipIfEnabled(disabled: Boolean, tooltip: String, modifier: Modifier, composer: @Composable (Modifier) -> Unit) {
     if (disabled) {
