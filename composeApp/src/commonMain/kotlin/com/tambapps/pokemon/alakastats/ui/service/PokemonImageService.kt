@@ -88,75 +88,11 @@ interface IPokemonImageService {
     fun ItemImage(item: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
 }
 
-class PokemonImageService(
-    private val json: Json
-) : IPokemonImageService {
-    private val coroutineScope = CoroutineScope(Dispatchers.Default)
-    private val pokemonImages = mutableStateMapOf<String, PokemonSpriteData>()
+abstract class AbstractPokemonImageService(
+    protected val json: Json
+): IPokemonImageService {
+    protected val coroutineScope = CoroutineScope(Dispatchers.Default)
     private val movesData = mutableStateMapOf<String, MoveData>()
-    private val itemsData = mutableStateMapOf<String, ItemData>()
-
-    init {
-        coroutineScope.launch {
-            val map: Map<String, PokemonSpriteData> = readMappingFile("pokemon-sprites.json")
-            withContext(Dispatchers.Main) {
-                pokemonImages.putAll(map)
-            }
-        }
-    }
-
-    private suspend inline fun <reified T> readMappingFile(filename: String): T {
-        val text = Res.readBytes("files/$filename").decodeToString()
-        return json.decodeFromString<T>(text)
-    }
-
-    @Composable
-    override fun PokemonSprite(name: String, modifier: Modifier, disableTooltip: Boolean) {
-        if (getPlatform().type == PlatformType.Web) {
-            WebPokemonImage("sprite", name, modifier)
-        } else {
-            PokemonImage(name, modifier, disableTooltip) { it.sprite }
-        }
-    }
-    @Composable
-    override fun PokemonArtwork(name: String, modifier: Modifier, disableTooltip: Boolean) {
-        if (getPlatform().type == PlatformType.Web) {
-            WebPokemonImage("artwork", name, modifier)
-        } else {
-            PokemonImage(name, modifier, disableTooltip) { it.artwork }
-        }
-    }
-
-    @Composable
-    private fun WebPokemonImage(type: String, name: String, modifier: Modifier, disableTooltip: Boolean = false) {
-        TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
-            MyImage(url = "http://localhost:8080/images/pokemons/$type/$name.png",
-                contentDescription = name,
-                modifier = mod,
-            )
-        }
-    }
-
-    @Composable
-    private inline fun PokemonImage(name: String, modifier: Modifier, disableTooltip: Boolean = false, imageUrlSupplier: (PokemonSpriteData) -> String) {
-        val pokemonSpriteData = pokemonImages[PokemonNormalizer.normalizeToBase(name)]
-        val imageUrl = pokemonSpriteData?.let(imageUrlSupplier)
-
-
-        TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
-            if (imageUrl != null) {
-                MyImage(url = imageUrl,
-                    contentDescription = pokemonSpriteData.name,
-                    modifier = mod,
-                )
-            } else {
-                DefaultIcon(
-                    contentDescription = name,
-                    modifier = mod
-                )
-            }
-        }
-    }
 
     @Composable
     override fun TeraTypeImage(type: PokeType, disableTooltip: Boolean, modifier: Modifier) {
@@ -259,6 +195,111 @@ class PokemonImageService(
     }
 
     @Composable
+    protected fun DefaultIcon(contentDescription: String = "", modifier: Modifier = Modifier) {
+        Icon(
+            painter = painterResource(placeHolderDrawable),
+            contentDescription = contentDescription,
+            modifier = modifier
+        )
+    }
+
+
+    private fun loadMoves() {
+        coroutineScope.launch {
+            val map: Map<String, MoveData> = readMappingFile(json, "moves.json")
+            withContext(Dispatchers.Main) {
+                movesData.clear()
+                movesData.putAll(map)
+            }
+        }
+    }
+}
+
+class PokemonUrlImageService(
+    json: Json,
+    private val baseUrl: String
+): AbstractPokemonImageService(json) {
+    @Composable
+    override fun PokemonSprite(
+        name: String,
+        modifier: Modifier,
+        disableTooltip: Boolean
+    ) = WebPokemonImage("sprite", name, modifier)
+
+    @Composable
+    override fun PokemonArtwork(
+        name: String,
+        modifier: Modifier,
+        disableTooltip: Boolean
+    ) = WebPokemonImage("artwork", name, modifier)
+
+    @Composable
+    override fun ItemImage(
+        item: String,
+        modifier: Modifier,
+        disableTooltip: Boolean
+    ) {
+        TooltipIfEnabled(disableTooltip, item, modifier) { mod ->
+            // TODO
+            MyImage(url = "http://localhost:8080/images/pokemons/artowrk/abomasnow.png",
+                contentDescription = item,
+                modifier = mod,
+            )
+        }
+
+    }
+
+    @Composable
+    private fun WebPokemonImage(type: String, name: String, modifier: Modifier, disableTooltip: Boolean = false) {
+        TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
+            MyImage(url = "$baseUrl/images/pokemons/$type/$name.png",
+                contentDescription = name,
+                modifier = mod,
+            )
+        }
+    }
+}
+
+class PokemonImageService(json: Json) : AbstractPokemonImageService(json) {
+    private val pokemonImages = mutableStateMapOf<String, PokemonSpriteData>()
+    private val itemsData = mutableStateMapOf<String, ItemData>()
+
+    init {
+        coroutineScope.launch {
+            val map: Map<String, PokemonSpriteData> = readMappingFile(json, "pokemon-sprites.json")
+            withContext(Dispatchers.Main) {
+                pokemonImages.putAll(map)
+            }
+        }
+    }
+
+    @Composable
+    override fun PokemonSprite(name: String, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name, modifier, disableTooltip) { it.sprite }
+    @Composable
+    override fun PokemonArtwork(name: String, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name, modifier, disableTooltip) { it.artwork }
+
+    @Composable
+    private inline fun PokemonImage(name: String, modifier: Modifier, disableTooltip: Boolean = false, imageUrlSupplier: (PokemonSpriteData) -> String) {
+        val pokemonSpriteData = pokemonImages[PokemonNormalizer.normalizeToBase(name)]
+        val imageUrl = pokemonSpriteData?.let(imageUrlSupplier)
+
+
+        TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
+            if (imageUrl != null) {
+                MyImage(url = imageUrl,
+                    contentDescription = pokemonSpriteData.name,
+                    modifier = mod,
+                )
+            } else {
+                DefaultIcon(
+                    contentDescription = name,
+                    modifier = mod
+                )
+            }
+        }
+    }
+
+    @Composable
     override fun ItemImage(item: String, modifier: Modifier, disableTooltip: Boolean) {
         TooltipIfEnabled(disableTooltip, item, modifier) { mod ->
             // lazy loading
@@ -281,44 +322,30 @@ class PokemonImageService(
         }
     }
 
-    @Composable
-    private fun MyImage(url: String, contentDescription: String = "", modifier: Modifier = Modifier) {
-        AsyncImage(
-            model = url,
-            contentDescription = contentDescription,
-            modifier = modifier,
-            placeholder = painterResource(placeHolderDrawable),
-        )
-    }
-
-    @Composable
-    private fun DefaultIcon(contentDescription: String = "", modifier: Modifier = Modifier) {
-        Icon(
-            painter = painterResource(placeHolderDrawable),
-            contentDescription = contentDescription,
-            modifier = modifier
-        )
-    }
-
-    private fun loadMoves() {
-        coroutineScope.launch {
-            val map: Map<String, MoveData> = readMappingFile("moves.json")
-            withContext(Dispatchers.Main) {
-                movesData.clear()
-                movesData.putAll(map)
-            }
-        }
-    }
-
     private fun loadItems() {
         coroutineScope.launch {
-            val map: Map<String, ItemData> = readMappingFile("items-mapping.json")
+            val map: Map<String, ItemData> = readMappingFile(json, "items-mapping.json")
             withContext(Dispatchers.Main) {
                 itemsData.clear()
                 itemsData.putAll(map)
             }
         }
     }
+}
+
+@Composable
+private fun MyImage(url: String, contentDescription: String = "", modifier: Modifier = Modifier) {
+    AsyncImage(
+        model = url,
+        contentDescription = contentDescription,
+        modifier = modifier,
+        placeholder = painterResource(placeHolderDrawable),
+    )
+}
+
+private suspend inline fun <reified T> readMappingFile(json: Json, filename: String): T {
+    val text = Res.readBytes("files/$filename").decodeToString()
+    return json.decodeFromString<T>(text)
 }
 
 @Serializable
