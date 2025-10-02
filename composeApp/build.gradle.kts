@@ -101,6 +101,7 @@ kotlin {
         wasmJsMain.dependencies {
             implementation(libs.kstore.storage)
             implementation(libs.ktor.client.js)
+            implementation(libs.kotlinx.browser)
         }
     }
 }
