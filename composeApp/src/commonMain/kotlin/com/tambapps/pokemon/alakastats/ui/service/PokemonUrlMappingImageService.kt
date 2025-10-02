@@ -53,8 +53,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.tambapps.pokemon.PokeType
-import com.tambapps.pokemon.alakastats.PlatformType
-import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.composables.TooltipIfEnabled
 import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.util.titlecase
@@ -68,7 +66,7 @@ import org.jetbrains.compose.resources.painterResource
 
 private val placeHolderDrawable = Res.drawable.pokeball
 
-interface IPokemonImageService {
+interface PokemonImageService {
     @Composable
     fun PokemonSprite(name: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
 
@@ -90,7 +88,7 @@ interface IPokemonImageService {
 
 abstract class AbstractPokemonImageService(
     protected val json: Json
-): IPokemonImageService {
+): PokemonImageService {
     protected val coroutineScope = CoroutineScope(Dispatchers.Default)
     private val movesData = mutableStateMapOf<String, MoveData>()
 
@@ -215,7 +213,7 @@ abstract class AbstractPokemonImageService(
     }
 }
 
-class PokemonUrlImageService(
+class PokemonLocalUrlImageService(
     json: Json,
     private val baseUrl: String
 ): AbstractPokemonImageService(json) {
@@ -255,7 +253,7 @@ class PokemonUrlImageService(
     }
 }
 
-class PokemonImageService(json: Json) : AbstractPokemonImageService(json) {
+class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(json) {
     private val pokemonImages = mutableStateMapOf<String, PokemonSpriteData>()
     private val itemsData = mutableStateMapOf<String, ItemData>()
 

@@ -4,15 +4,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.tambapps.pokemon.alakastats.domain.model.Player
-import com.tambapps.pokemon.alakastats.ui.service.IPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 
 @Composable
-fun PokemonTeamPreview(imageService: IPokemonImageService, player: Player) {
+fun PokemonTeamPreview(imageService: PokemonImageService, player: Player) {
     PokemonTeamPreview(imageService, player.teamPreview.pokemons.map { it.name })
 }
 
 @Composable
-fun PokemonTeamPreview(imageService: IPokemonImageService, pokemons: List<String>) {
+fun PokemonTeamPreview(imageService: PokemonImageService, pokemons: List<String>) {
     Row {
         for (pokemon in pokemons) {
             imageService.PokemonSprite(

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.Stat
-import com.tambapps.pokemon.alakastats.ui.service.IPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
@@ -29,7 +29,7 @@ import com.tambapps.pokemon.pokepaste.parser.PokePaste
 @Composable
 fun Pokepaste(
     pokePaste: PokePaste,
-    pokemonImageService: IPokemonImageService,
+    pokemonImageService: PokemonImageService,
     modifier: Modifier = Modifier
 ) {
     val isCompact = LocalIsCompact.current
@@ -44,7 +44,7 @@ fun Pokepaste(
 @Composable
 private fun MobilePokepaste(
     pokePaste: PokePaste,
-    pokemonImageService: IPokemonImageService,
+    pokemonImageService: PokemonImageService,
     modifier: Modifier) {
     Column(modifier = modifier) {
         val space = 16.dp
@@ -58,7 +58,7 @@ private fun MobilePokepaste(
 }
 
 @Composable
-private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: IPokemonImageService, modifier: Modifier) {
+private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonImageService, modifier: Modifier) {
     Column(modifier = modifier) {
         val firstRow = pokePaste.pokemons.take(3)
         DesktopPokemonRow(pokePaste.isOts, firstRow, pokemonImageService)
@@ -70,7 +70,7 @@ private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: IPokemon
 }
 
 @Composable
-private fun DesktopPokemonRow(isOts: Boolean, pokemons: List<Pokemon>, pokemonImageService: IPokemonImageService) {
+private fun DesktopPokemonRow(isOts: Boolean, pokemons: List<Pokemon>, pokemonImageService: PokemonImageService) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -81,7 +81,7 @@ private fun DesktopPokemonRow(isOts: Boolean, pokemons: List<Pokemon>, pokemonIm
 }
 
 @Composable
-private fun Pokemon(isOts: Boolean, pokemon: Pokemon, pokemonImageService: IPokemonImageService, modifier: Modifier = Modifier) {
+private fun Pokemon(isOts: Boolean, pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
@@ -94,7 +94,7 @@ private fun Pokemon(isOts: Boolean, pokemon: Pokemon, pokemonImageService: IPoke
 }
 
 @Composable
-private fun PokemonDetails(isOts: Boolean, pokemon: Pokemon, pokemonImageService: IPokemonImageService, modifier: Modifier = Modifier) {
+private fun PokemonDetails(isOts: Boolean, pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
     Column(modifier) {
         if (!isOts) {
             PokemonStatsRow(pokemon)
@@ -112,7 +112,7 @@ private fun PokemonStatsRow(pokemon: Pokemon, modifier: Modifier = Modifier) {
     }
 }
 @Composable
-private fun PokemonMoves(pokemon: Pokemon, pokemonImageService: IPokemonImageService, modifier: Modifier = Modifier) {
+private fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
     Column(modifier) {
         pokemon.moves.forEachIndexed { index, move ->
             Row(
@@ -164,7 +164,7 @@ private fun PokemonStatColumn(
     }
 }
 @Composable
-private fun PokemonView(pokemon: Pokemon, pokemonImageService: IPokemonImageService, modifier: Modifier = Modifier) {
+private fun PokemonView(pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
