@@ -238,7 +238,7 @@ class PokemonLocalUrlImageService(
         disableTooltip: Boolean
     ) {
         // TODO
-        MyImage(url = "http://localhost:8080/images/pokemons/artowrk/abomasnow.png",
+        MyImage(url = "$baseUrl/images/pokemons/artwork/abomasnow.png",
             contentDescription = item,
             modifier = modifier,
         )
