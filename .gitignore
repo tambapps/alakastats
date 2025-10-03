@@ -24,3 +24,4 @@ moves.yaml
 items-mapping.yaml
 
 composeApp/src/wasmJsMain/resources/images/pokemons/
+composeApp/src/wasmJsMain/resources/images/items/

@@ -237,8 +237,8 @@ class PokemonLocalUrlImageService(
         modifier: Modifier,
         disableTooltip: Boolean
     ) {
-        // TODO
-        MyImage(url = "$baseUrl/images/pokemons/artwork/abomasnow.png",
+        val formattedItemName = PokemonNormalizer.normalize(item)
+        MyImage(url = "$baseUrl/images/items/$formattedItemName.png",
             contentDescription = item,
             modifier = modifier,
         )
