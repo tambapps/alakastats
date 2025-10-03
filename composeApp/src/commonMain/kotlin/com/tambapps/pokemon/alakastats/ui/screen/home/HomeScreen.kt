@@ -173,7 +173,7 @@ internal fun NewTeamButton(modifier: Modifier = Modifier) {
             modifier = Modifier.size(ButtonDefaults.IconSize)
         )
         Spacer(Modifier.width(8.dp))
-        Text("New Team", style = MaterialTheme.typography.labelLarge.copy(
+        Text("New Team", style = buttonTextStyle.copy(
             color = LocalContentColor.current
         ))
     }
