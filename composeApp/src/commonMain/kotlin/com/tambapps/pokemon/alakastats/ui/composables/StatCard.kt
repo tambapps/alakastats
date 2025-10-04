@@ -43,11 +43,13 @@ internal fun <T> MobileStatCard(
             )
         },
         content = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column {
                 data.forEach {
-                    rowContent.invoke(this, it)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        rowContent.invoke(this, it)
+                    }
                 }
             }
         }
@@ -66,10 +68,10 @@ internal fun <T> DesktopStatCard(
             text = title,
             style = MaterialTheme.typography.titleLarge,
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            data.forEach {
+        data.forEach {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 rowContent.invoke(this, it)
             }
         }

@@ -1,6 +1,9 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
@@ -19,13 +22,23 @@ class LeadStatsViewModel(
     val duoStatsMap: SnapshotStateMap<List<String>, WinStats> = mutableStateMapOf()
     val pokemonStats: SnapshotStateMap<String, WinStats> = mutableStateMapOf()
 
+    var isLoading by mutableStateOf(false)
+        private set
+
     private val scope = CoroutineScope(Dispatchers.Default)
 
-    fun loadStats() = scope.launch {
-        team.withContext {
-            val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
-            loadDuoStats(replays)
-            loadIndividualStats(replays)
+    fun loadStats() {
+        if (isLoading) {
+            return
+        }
+        isLoading = true
+        scope.launch {
+            team.withContext {
+                val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
+                loadDuoStats(replays)
+                loadIndividualStats(replays)
+            }
+            isLoading = false
         }
     }
 

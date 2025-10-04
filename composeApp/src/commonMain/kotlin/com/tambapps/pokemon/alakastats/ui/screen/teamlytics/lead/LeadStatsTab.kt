@@ -20,7 +20,7 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
     LaunchedEffect(Unit) {
         viewModel.loadStats()
     }
-    // TODO handle no stats and not loading case
+    // TODO handle no stats case
     if (isCompact) {
         LeadStatsTabMobile(viewModel)
     } else {
@@ -32,26 +32,37 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
 internal fun MostCommonLeadCard(viewModel: LeadStatsViewModel) {
     LeadCard(
         viewModel = viewModel,
+        data = viewModel.duoStatsMap.entries.map { it.key to it.value }.sortedBy { (_, stats) -> - stats.total },
         title = "Most Common Lead"
-    ) { (_, stats) -> - stats.total }
+    )
 }
 
 @Composable
 internal fun MostEffectiveLeadCard(viewModel: LeadStatsViewModel) {
     LeadCard(
         viewModel = viewModel,
-        title = "Most Effective Lead"
-    ) { (_, stats) -> - stats.winRate }
+        data = viewModel.duoStatsMap.entries.map { it.key to it.value }.sortedBy { (_, stats) -> - stats.winRate },
+        title = "Most Effective Lead",
+    )
 }
 
 @Composable
-private inline fun <R : Comparable<R>> LeadCard(
+internal fun LeadAndWin(viewModel: LeadStatsViewModel) {
+    LeadCard(
+        viewModel = viewModel,
+        data = viewModel.pokemonStats.entries.map { listOf(it.key) to it.value }.sortedBy { (_, stats) -> - stats.winRate },
+        title = "Lead And Win",
+    )
+}
+
+@Composable
+private fun LeadCard(
     viewModel: LeadStatsViewModel,
-    title: String,
-    crossinline sortCriteria: (Map.Entry<List<String>, WinStats>) -> R?) {
+    data: List<Pair<List<String>, WinStats>>,
+    title: String) {
     StatCard(
         title = title,
-        viewModel.duoStatsMap.entries.sortedBy(sortCriteria)
+        data
     ) { (lead, stats) ->
         Spacer(Modifier.width(8.dp))
         lead.forEach { pokemon ->
