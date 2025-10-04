@@ -102,6 +102,7 @@ private fun PokemonDetails(isOts: Boolean, pokemon: Pokemon, pokemonImageService
     ) {
         if (!isOts) {
             PokemonStatsRow(pokemon)
+            Spacer(Modifier.height(4.dp))
         }
         PokemonMoves(pokemon, pokemonImageService)
     }
