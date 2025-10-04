@@ -83,7 +83,7 @@ private val appModule = module {
         TeamReplayViewModel(get(), useCase, team)
     }
     factory { (team: Teamlytics) ->
-        LeadStatsViewModel(team)
+        LeadStatsViewModel(team, get())
     }
 }
 

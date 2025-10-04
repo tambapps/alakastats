@@ -7,12 +7,14 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class LeadStatsViewModel(
     val team: Teamlytics,
+    val pokemonImageService: PokemonImageService,
     ) {
     val duoStatsMap: SnapshotStateMap<List<String>, WinStats> = mutableStateMapOf()
     val pokemonStats: SnapshotStateMap<String, WinStats> = mutableStateMapOf()

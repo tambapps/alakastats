@@ -8,6 +8,8 @@ import androidx.compose.ui.unit.dp
 
 val LocalIsCompact = compositionLocalOf { false }
 
+val statCardPokemonSpriteSize = 64.dp
+
 @Composable
 fun ProvideIsCompact(
     content: @Composable () -> Unit

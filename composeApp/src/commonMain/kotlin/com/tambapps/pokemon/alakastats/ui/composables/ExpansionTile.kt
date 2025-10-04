@@ -53,7 +53,7 @@ fun ExpansionTile(
         subtitle = subtitle,
         content = content,
         expandButton = { isCardExpandedState ->
-            ExpandButton(isCardExpandedState)
+            ExpandButton(isCardExpandedState, translateX = false)
         }
     )
 }
@@ -88,7 +88,7 @@ fun ExpansionTile(
                 }
 
 
-                ExpandButton(isCardExpandedState)
+                ExpandButton(isCardExpandedState, translateX = true)
                 menu(isMenuExpanded)
             }
         }
@@ -141,14 +141,18 @@ private fun AbstractExpansionTile(
 
 @Composable
 private fun ExpandButton(
-    isCardExpandedState: MutableState<Boolean>
+    isCardExpandedState: MutableState<Boolean>,
+    translateX: Boolean
     ) {
-    val buttonOffset by animateDpAsState(
-        targetValue = if (isCardExpandedState.value) (-48).dp else 0.dp
-    )
+    val modifier = if (translateX) {
+        val buttonOffset by animateDpAsState(
+            targetValue = if (isCardExpandedState.value) (-48).dp else 0.dp
+        )
+        Modifier.offset(x = buttonOffset)
+    } else Modifier
     IconButton(
         onClick = { isCardExpandedState.value = !isCardExpandedState.value },
-        modifier = Modifier.offset(x = buttonOffset)
+        modifier = modifier
     ) {
         val rotationAngle by animateFloatAsState(
             targetValue = if (isCardExpandedState.value) 270f else 90f
