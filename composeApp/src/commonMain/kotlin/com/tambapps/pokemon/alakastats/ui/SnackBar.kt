@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.ui.theme.surfaceDark
+import com.tambapps.pokemon.alakastats.ui.theme.surfaceVariantDark
+import com.tambapps.pokemon.alakastats.ui.theme.surfaceVariantLight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,9 +29,13 @@ val LocalSnackBar = compositionLocalOf<SnackBar> {
     error("SnackBar not provided")
 }
 
+private val darkErrorColor = Color(0xFFA80000)
+private val darkSuccessColor = Color(0xFF059600)
+
 class SnackBar(
     private val state: SnackbarHostState,
-    private val backgroundColorState: MutableState<Color>
+    private val backgroundColorState: MutableState<Color>,
+    private val isDarkTheme: Boolean
 ) {
     enum class Severity {
         INFO,
@@ -45,12 +53,21 @@ class SnackBar(
 
     // not thread safe because it changes color
     suspend fun showNow(message: String, type: Severity = Severity.INFO) {
-        backgroundColorState.value = when(type) {
-            Severity.INFO -> Color.White
-            Severity.ERROR -> Color.Red
-            Severity.SUCCESS -> Color.Green
-        }
+        backgroundColorState.value = backgroundColor(type)
         state.showSnackbar(message)
+    }
+
+
+    private fun backgroundColor(type: Severity) = if(isDarkTheme)
+        when(type) {
+            Severity.INFO -> surfaceVariantDark
+            Severity.ERROR -> darkErrorColor
+            Severity.SUCCESS -> darkSuccessColor
+        }
+    else when(type) {
+        Severity.INFO -> surfaceVariantLight
+        Severity.ERROR -> Color.Red
+        Severity.SUCCESS -> Color.Green
     }
 }
 
@@ -60,7 +77,8 @@ fun SnackBarContext(
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
     val backgroundColorState = remember { mutableStateOf(Color.Transparent) }
-    val snackBar = remember { SnackBar(snackBarHostState, backgroundColorState) }
+    val isDarkTheme = isSystemInDarkTheme()
+    val snackBar = remember { SnackBar(snackBarHostState, backgroundColorState, isDarkTheme) }
     CompositionLocalProvider(LocalSnackBar provides snackBar) {
         Box(modifier = Modifier.fillMaxSize()) {
             content()
