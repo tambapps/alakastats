@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
@@ -95,7 +96,10 @@ private fun Pokemon(isOts: Boolean, pokemon: Pokemon, pokemonImageService: Pokem
 
 @Composable
 private fun PokemonDetails(isOts: Boolean, pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
-    Column(modifier) {
+    Column(
+        modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         if (!isOts) {
             PokemonStatsRow(pokemon)
         }
@@ -107,7 +111,8 @@ private fun PokemonDetails(isOts: Boolean, pokemon: Pokemon, pokemonImageService
 private fun PokemonStatsRow(pokemon: Pokemon, modifier: Modifier = Modifier) {
     Row(modifier) {
         for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
-            PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, Modifier.weight(1f))
+            val modifier = if (LocalIsCompact.current) Modifier.weight(1f) else Modifier.padding(horizontal = 4.dp)
+            PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, modifier)
         }
     }
 }
