@@ -35,7 +35,7 @@ fun Pokepaste(
 ) {
     val isCompact = LocalIsCompact.current
     if (isCompact) {
-        MobilePokepaste(pokePaste, pokemonImageService, modifier)
+        VerticalPokepaste(pokePaste, pokemonImageService, modifier)
     } else {
         DesktopPokepaste(pokePaste, pokemonImageService, modifier)
     }
@@ -43,10 +43,10 @@ fun Pokepaste(
 
 
 @Composable
-private fun MobilePokepaste(
+fun VerticalPokepaste(
     pokePaste: PokePaste,
     pokemonImageService: PokemonImageService,
-    modifier: Modifier) {
+    modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         val space = 16.dp
         Spacer(Modifier.height(space))

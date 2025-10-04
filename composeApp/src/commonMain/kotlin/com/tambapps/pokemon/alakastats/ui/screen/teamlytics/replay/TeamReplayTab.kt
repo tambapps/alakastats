@@ -47,8 +47,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
-import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
-import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
+import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -256,9 +255,11 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplay
         title = { Text("${player.name}'s team") },
         text = {
             Column(
-                Modifier.verticalScroll(rememberScrollState())
+                Modifier.verticalScroll(rememberScrollState()),
             ) {
-                Pokepaste(pokepaste, viewModel.pokemonImageService)
+                // Mobile on purpose because we want a vertical pokepaste display on desktop too, as
+                // for some mysterious reason the dialog can't have full screen width
+                VerticalPokepaste(pokepaste, viewModel.pokemonImageService,)
             }
         },
         confirmButton = {

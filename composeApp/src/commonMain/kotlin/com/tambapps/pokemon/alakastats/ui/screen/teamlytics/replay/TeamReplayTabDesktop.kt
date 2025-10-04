@@ -38,7 +38,6 @@ import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import org.jetbrains.compose.resources.painterResource
 
-
 @Composable
 internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
     val team = viewModel.team
