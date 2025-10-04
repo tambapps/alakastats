@@ -23,6 +23,21 @@ fun Teamlytics.getGameOutput(replay: ReplayAnalytics) = when {
     else -> GameOutput.UNKNOWN
 }
 
+class TeamlyticsContext(val team: Teamlytics) {
+    val ReplayAnalytics.gameOutput: GameOutput
+        get() = team.getGameOutput(this)
+
+    val ReplayAnalytics.youPlayer: Player
+        get() = team.getYouPlayer(this)
+
+    val ReplayAnalytics.opponentPlayer: Player
+        get() = team.getOpponentPlayer(this)
+}
+
+inline fun <R> Teamlytics.withContext(block: TeamlyticsContext.() -> R): R {
+    return TeamlyticsContext(this).block()
+}
+
 enum class GameOutput {
     WIN, LOOSE, UNKNOWN
 }
@@ -108,5 +123,6 @@ data class Player(
     val ots: OpenTeamSheet?,
     val movesUsage: Map<String, Map<String, Int>>
 ) {
-    val lead get() = selection.take(2)
+    // sorted to always have the same order
+    val lead get() = selection.take(2).sorted()
 }
