@@ -149,7 +149,7 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
                 }
             }
 
-            PokemonTeamPreview(viewModel.imageService, team.pokemons)
+            PokemonTeamPreview(viewModel.imageService, team.pokemons, fillWidth = true)
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
             Row {
                 Text("${team.nbReplays} replays")

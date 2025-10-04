@@ -7,17 +7,26 @@ import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 
 @Composable
-fun PokemonTeamPreview(imageService: PokemonImageService, player: Player) {
-    PokemonTeamPreview(imageService, player.teamPreview.pokemons.map { it.name })
+fun PokemonTeamPreview(
+    imageService: PokemonImageService,
+    player: Player,
+    childModifier: Modifier = Modifier,
+    fillWidth: Boolean = false) {
+    PokemonTeamPreview(imageService, player.teamPreview.pokemons.map { it.name }, childModifier, fillWidth)
 }
 
 @Composable
-fun PokemonTeamPreview(imageService: PokemonImageService, pokemons: List<String>) {
+fun PokemonTeamPreview(
+    imageService: PokemonImageService,
+    pokemons: List<String>,
+    childModifier: Modifier = Modifier,
+    fillWidth: Boolean = false) {
     Row {
         for (pokemon in pokemons) {
+            val modifier = if (fillWidth) childModifier.weight(1f) else childModifier
             imageService.PokemonSprite(
                 name = pokemon,
-                modifier = Modifier.weight(1f),
+                modifier = modifier,
                 // disabling tooltip to allow handling card click listener
                 disableTooltip = true
             )

@@ -20,7 +20,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
+import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
+import com.tambapps.pokemon.alakastats.getPlatform
+import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
 
@@ -49,20 +52,24 @@ fun GameOutputCard(output: GameOutput) {
         GameOutput.LOOSE -> LOOSE_COLOR
         GameOutput.UNKNOWN -> UNKNOWN_COLOR
     }
+    val isCompact = LocalIsCompact.current
+
+    val (size, textSize) = if (isCompact) 42.dp to 22.sp else 52.dp to 30.sp
     Card(
-        modifier = Modifier.size(42.dp),
+        modifier = Modifier.size(size),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = color
         ),
     ) {
+
         Text(
             modifier = Modifier.padding(all = 8.dp).fillMaxSize(),
             text = output.name[0].toString(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
-            fontSize = 22.sp
+            fontSize = textSize
         )
     }
 }

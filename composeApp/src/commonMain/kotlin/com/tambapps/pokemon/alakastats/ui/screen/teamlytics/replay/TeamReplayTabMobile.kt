@@ -18,6 +18,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -67,49 +68,13 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
         title = { isExpanded ->
             val gameOutput = team.getGameOutput(replay)
             GameOutputCard(gameOutput)
-            Text(
-                text = "VS ${opponentPlayer.name}",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        },
-        menu = { isMenuExpandedState ->
-            DropdownMenu(
-                expanded = isMenuExpandedState.value,
-                onDismissRequest = { isMenuExpandedState.value = false }
-            ) {
-                val alreadyHasNotes = !replay.notes.isNullOrBlank()
-                DropdownMenuItem(
-                    text = { Text(
-                        if (!alreadyHasNotes) "Add notes" else "Edit notes"
-                    ) },
-                    onClick = {
-                        viewModel.showNoteReplayDialog(replay)
-                        isMenuExpandedState.value = false
-                    }
-                )
-
-                if (alreadyHasNotes) {
-                    DropdownMenuItem(
-                        text = { Text("Remove notes") },
-                        onClick = {
-                            viewModel.editNotes(replay, null)
-                            isMenuExpandedState.value = false
-                        }
-                    )
-                }
-
-                DropdownMenuItem(
-                    text = { Text("Delete") },
-                    onClick = {
-                        viewModel.showRemoveReplayDialog(replay)
-                        isMenuExpandedState.value = false
-                    }
-                )
-            }
+            VsText(opponentPlayer)
         },
         subtitle = {
-            PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer)
+            PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer, fillWidth = true)
+        },
+        menu = { isMenuExpandedState ->
+            ReplayDropDownMenu(isMenuExpandedState, viewModel, replay)
         },
     ) {
         Column {

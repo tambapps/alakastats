@@ -1,5 +1,8 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.add
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,16 +11,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,14 +40,19 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeType
+import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
+import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
+import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun TeamReplayTab(viewModel: TeamReplayViewModel) {
@@ -60,12 +76,22 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
 
 @Composable
 internal fun AddReplayButton(viewModel: TeamReplayViewModel) {
-    OutlinedButton(onClick = {
-        if (!viewModel.isLoading) {
-            viewModel.showAddReplayDialog()
+    Button(
+        onClick = {
+            if (!viewModel.isLoading) {
+                viewModel.showAddReplayDialog()
+            }
         }
-    }) {
-        Text("Add Replay")
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.add),
+            contentDescription = "Add",
+            modifier = Modifier.size(ButtonDefaults.IconSize)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text("Add Replay", style = buttonTextStyle.copy(
+            color = LocalContentColor.current
+        ))
     }
 }
 
@@ -186,11 +212,30 @@ internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: St
         url += "?p2"
     }
     val uriHandler = LocalUriHandler.current
-    OutlinedButton(
-        onClick = { uriHandler.openUri(url) },
-    ) {
-        Text("Replay")
+
+    if (getPlatform().type != PlatformType.Web) {
+        OutlinedButton(
+            onClick = { uriHandler.openUri(url) },
+        ) {
+            Text("Replay")
+        }
+    } else {
+        Text(
+            text = "Replay",
+            modifier = Modifier.clickable(onClick = { uriHandler.openUri(url) }),
+            color = remember { Color(0xFF2196F3) },
+            textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+        )
     }
+}
+
+@Composable
+internal fun VsText(opponentPlayer: Player) {
+    Text(
+        text = "VS ${opponentPlayer.name}",
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.padding(start = 8.dp)
+    )
 }
 
 @Composable
@@ -258,6 +303,43 @@ internal fun SelectedPokemon(pokemon: String, teraType: PokeType?, pokemonImageS
                 .size(50.dp)
             )
         }
+    }
+}
+
+@Composable
+internal fun ReplayDropDownMenu(isMenuExpandedState: MutableState<Boolean>, viewModel: TeamReplayViewModel, replay: ReplayAnalytics) {
+    DropdownMenu(
+        expanded = isMenuExpandedState.value,
+        onDismissRequest = { isMenuExpandedState.value = false }
+    ) {
+        val alreadyHasNotes = !replay.notes.isNullOrBlank()
+        DropdownMenuItem(
+            text = { Text(
+                if (!alreadyHasNotes) "Add notes" else "Edit notes"
+            ) },
+            onClick = {
+                viewModel.showNoteReplayDialog(replay)
+                isMenuExpandedState.value = false
+            }
+        )
+
+        if (alreadyHasNotes) {
+            DropdownMenuItem(
+                text = { Text("Remove notes") },
+                onClick = {
+                    viewModel.editNotes(replay, null)
+                    isMenuExpandedState.value = false
+                }
+            )
+        }
+
+        DropdownMenuItem(
+            text = { Text("Delete") },
+            onClick = {
+                viewModel.showRemoveReplayDialog(replay)
+                isMenuExpandedState.value = false
+            }
+        )
     }
 }
 

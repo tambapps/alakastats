@@ -1,21 +1,42 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.more_vert
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.getGameOutput
+import com.tambapps.pokemon.alakastats.domain.model.getPlayers
+import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
+import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
+import org.jetbrains.compose.resources.painterResource
 
 
 @Composable
@@ -39,15 +60,98 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
         itemsIndexed(replays) { index, replay ->
             DesktopReplay(viewModel, team, replay)
             if (index < replays.size - 1) {
-                Spacer(Modifier.height(32.dp))
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Spacer(Modifier.width(64.dp))
+                    HorizontalDivider(Modifier.weight(1f).height(2.dp))
+                    Spacer(Modifier.width(64.dp))
+                }
             }
         }
     }
 }
 
 @Composable
-fun DesktopReplay(x0: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
-    // TODO
+fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
+    val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
+    val gameOutput = team.getGameOutput(replay)
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            GameOutputCard(gameOutput)
+            VsText(opponentPlayer)
+            Spacer(Modifier.width(16.dp))
+            PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer,
+                childModifier = Modifier.size(100.dp).padding(bottom = 16.dp))
+            opponentPlayer.ots?.let { openTeamSheet ->
+                Spacer(Modifier.width(16.dp))
+                OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
+            }
+            replay.url?.let { replayUrl ->
+                Spacer(Modifier.width(20.dp))
+                ViewReplayButton(team, replay, replayUrl)
+            }
+            Spacer(Modifier.weight(1f))
+
+            val isMenuExpandedState = remember { mutableStateOf(false) }
+            IconButton(onClick = { isMenuExpandedState.value = !isMenuExpandedState.value }) {
+                Icon(
+                    modifier = Modifier.size(64.dp),
+                    painter = painterResource(Res.drawable.more_vert),
+                    contentDescription = "More",
+                    tint = MaterialTheme.colorScheme.defaultIconColor
+                )
+                ReplayDropDownMenu(isMenuExpandedState, viewModel, replay)
+            }
+            Spacer(Modifier.width(8.dp))
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            DesktopPlayer(modifier = Modifier.weight(1f), player = currentPlayer, playerName = "You", viewModel = viewModel)
+            Spacer(Modifier.width(8.dp))
+            DesktopPlayer(modifier = Modifier.weight(1f), player = opponentPlayer, playerName = "Opponent", viewModel = viewModel)
+        }
+
+        if (!replay.notes.isNullOrBlank()) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                replay.notes,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String, viewModel: TeamReplayViewModel) {
+    Column(
+        modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(playerName)
+        Spacer(Modifier.height(16.dp))
+
+        if (player.beforeElo != null && player.afterElo != null) {
+            Text("Elo: ${player.beforeElo} -> ${player.afterElo}")
+        } else if (player.beforeElo != null) {
+            Text("Elo: ${player.beforeElo}")
+        }
+
+        Row {
+            for (pokemon in player.selection) {
+                val teraType = player.terastallization?.takeIf { PokemonNormalizer.matches(it.pokemon, pokemon) }?.type
+                SelectedPokemon(
+                    pokemon = pokemon,
+                    teraType = teraType,
+                    pokemonImageService = viewModel.pokemonImageService
+                )
+            }
+        }
+    }
 }
 
 @Composable
