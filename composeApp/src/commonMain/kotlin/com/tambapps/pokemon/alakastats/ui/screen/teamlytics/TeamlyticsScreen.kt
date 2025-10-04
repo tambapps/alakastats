@@ -28,6 +28,8 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewTab
@@ -110,6 +112,12 @@ internal fun ColumnScope.Pager(
                 TeamReplayTab(viewModel)
             }
             3 -> MoveUsagesTab(viewModel)
+            4 -> {
+                val viewModel = koinInject<LeadStatsViewModel> {
+                    parametersOf(team)
+                }
+                LeadStatsTab(viewModel)
+            }
         }
     }
 }

@@ -5,6 +5,14 @@ import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 
+fun Teamlytics.getOpponentPlayer(replay: ReplayAnalytics) =
+    if (sdNames.contains(replay.player1.name)) replay.player2
+    else replay.player1
+
+fun Teamlytics.getYouPlayer(replay: ReplayAnalytics) =
+    if (sdNames.contains(replay.player1.name)) replay.player1
+    else replay.player2
+
 fun Teamlytics.getPlayers(replay: ReplayAnalytics): Pair<Player, Player> =
     if (sdNames.contains(replay.player1.name)) replay.player1 to replay.player2
     else replay.player2 to replay.player1
