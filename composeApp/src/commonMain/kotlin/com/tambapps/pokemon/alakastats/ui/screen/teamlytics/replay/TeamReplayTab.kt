@@ -20,7 +20,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -47,6 +46,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBar
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -342,13 +342,4 @@ internal fun ReplayDropDownMenu(isMenuExpandedState: MutableState<Boolean>, view
             }
         )
     }
-}
-
-@Composable
-internal fun ProgressBar(modifier: Modifier = Modifier) {
-    LinearProgressIndicator(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(4.dp)  // thickness
-    )
 }

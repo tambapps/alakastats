@@ -33,6 +33,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.getGameOutput
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
+import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBar
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
@@ -168,9 +169,9 @@ private fun NoReplaysDesktop(viewModel: TeamReplayViewModel) {
         }
 
         if (viewModel.isLoading) {
-            ProgressBar(
+            LinearProgressBar(
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
+                    .align(Alignment.TopStart)
             )
         }
     }

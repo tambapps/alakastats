@@ -31,7 +31,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -45,9 +44,11 @@ import org.jetbrains.compose.resources.painterResource
 fun ExpansionTile(
     title: @Composable RowScope.(Boolean) -> Unit,
     subtitle: @Composable () -> Unit = {},
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     AbstractExpansionTile(
+        modifier = modifier,
         title = title,
         subtitle = subtitle,
         content = content,
@@ -63,9 +64,11 @@ fun ExpansionTile(
     title: @Composable RowScope.(Boolean) -> Unit,
     menu: @Composable (MutableState<Boolean>) -> Unit,
     subtitle: @Composable () -> Unit = {},
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     AbstractExpansionTile(
+        modifier = modifier,
         title = title,
         subtitle = subtitle,
         content = content,
@@ -94,6 +97,7 @@ fun ExpansionTile(
 
 @Composable
 private fun AbstractExpansionTile(
+    modifier: Modifier,
     title: @Composable RowScope.(Boolean) -> Unit,
     subtitle: @Composable () -> Unit = {},
     expandButton: @Composable (MutableState<Boolean>) -> Unit,
@@ -102,7 +106,7 @@ private fun AbstractExpansionTile(
     val isCardExpandedState = remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(),
