@@ -34,6 +34,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewMo
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsageStatsViewModel
 import kotlinx.serialization.json.Json
 import kotlin.uuid.Uuid
 import org.koin.core.qualifier.named
@@ -84,6 +85,9 @@ private val appModule = module {
     }
     factory { (team: Teamlytics) ->
         LeadStatsViewModel(team, get())
+    }
+    factory { (team: Teamlytics) ->
+        UsageStatsViewModel(team, get())
     }
 }
 

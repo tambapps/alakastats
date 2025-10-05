@@ -36,6 +36,8 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsageStatsTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsageStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -117,6 +119,12 @@ internal fun ColumnScope.Pager(
                     parametersOf(team)
                 }
                 LeadStatsTab(viewModel)
+            }
+            5 -> {
+                val viewModel = koinInject<UsageStatsViewModel> {
+                    parametersOf(team)
+                }
+                UsageStatsTab(viewModel)
             }
         }
     }
