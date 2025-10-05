@@ -54,7 +54,7 @@ class LeadStatsViewModel(
     private fun TeamlyticsContext.loadIndividualStats(replays: List<ReplayAnalytics>) {
         val leadPokemons = replays.asSequence().flatMap { it.youPlayer.lead }.toSet()
         val result = leadPokemons.associateWith { leadPokemon ->
-            val leadPokemonReplays = replays.filter { replay -> replay.youPlayer.lead.contains(leadPokemon) }
+            val leadPokemonReplays = replays.filter { replay -> replay.youPlayer.lead.any { it.matches(leadPokemon) } }
             winStats(leadPokemonReplays)
         }
         pokemonStats.clear()

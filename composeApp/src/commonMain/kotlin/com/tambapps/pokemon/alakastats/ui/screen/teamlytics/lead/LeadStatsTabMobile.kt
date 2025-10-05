@@ -28,10 +28,9 @@ internal fun LeadStatsTabMobile(viewModel: LeadStatsViewModel) {
             }
             Spacer(Modifier.height(128.dp))
             MostCommonLeadCard(viewModel)
-            val spacerModifier = Modifier.height(42.dp)
-            Spacer(spacerModifier)
+            Space()
             MostEffectiveLeadCard(viewModel)
-            Spacer(spacerModifier)
+            Space()
             LeadAndWin(viewModel)
         }
         if (viewModel.isLoading) {
@@ -39,3 +38,7 @@ internal fun LeadStatsTabMobile(viewModel: LeadStatsViewModel) {
         }
     }
 }
+
+@Composable
+private fun Space() = Spacer(Modifier.height(42.dp))
+

@@ -1,8 +1,18 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.ui.composables.StatCard
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.ui.theme.statCardPokemonSpriteSize
 
 @Composable
 fun UsageStatsTab(viewModel: UsageStatsViewModel) {
@@ -18,4 +28,73 @@ fun UsageStatsTab(viewModel: UsageStatsViewModel) {
     }
 }
 
+@Composable
+internal fun UsageCard(
+    viewModel: UsageStatsViewModel,
+    modifier: Modifier = Modifier
+) {
+    StatCard(
+        title = "Usage",
+        modifier = modifier,
+        data = viewModel.pokemonUsageMap.entries.sortedBy { (_, stat) -> - stat.usageRate },
+    ) { (pokemon, stats) ->
+        Spacer(Modifier.width(8.dp))
+        viewModel.pokemonImageService.PokemonSprite(pokemon, modifier = Modifier.size(statCardPokemonSpriteSize))
+        Text(
+            text = if (stats.totalGames == 0) "No usage"
+            else "Participated in\n${stats.usage} out of ${stats.totalGames} games",
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center
+        )
+        Text("${stats.usageRate.times(100).toInt()}%", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.width(8.dp))
+    }
+}
 
+
+@Composable
+internal fun UsageAndWinCard(
+    viewModel: UsageStatsViewModel,
+    modifier: Modifier = Modifier
+) {
+    StatCard(
+        title = "Usage And Win",
+        modifier = modifier,
+        data = viewModel.pokemonUsageAndWinMap.entries.sortedBy { (_, stat) -> - stat.usageRate },
+    ) { (pokemon, stats) ->
+        Spacer(Modifier.width(8.dp))
+        viewModel.pokemonImageService.PokemonSprite(pokemon, modifier = Modifier.size(statCardPokemonSpriteSize))
+        Text(
+            text = if (stats.totalGames == 0) "No usage"
+            else "Participated in\n${stats.usage} out of ${stats.totalGames} games",
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center
+        )
+        Text("${stats.usageRate.times(100).toInt()}%", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.width(8.dp))
+    }
+}
+
+@Composable
+internal fun TeraAndWinCard(
+    viewModel: UsageStatsViewModel,
+    modifier: Modifier = Modifier
+) {
+    StatCard(
+        title = "Tera And Win",
+        modifier = modifier,
+        data = viewModel.teraAndWinMap.entries.sortedBy { (_, stat) -> - stat.usageRate },
+    ) { (pokeTera, stats) ->
+        Spacer(Modifier.width(8.dp))
+        viewModel.pokemonImageService.PokemonSprite(pokeTera.pokemon, modifier = Modifier.size(statCardPokemonSpriteSize))
+        viewModel.pokemonImageService.TeraTypeImage(pokeTera.type, modifier = Modifier.size(statCardPokemonSpriteSize))
+        Text(
+            text = if (stats.totalGames == 0) "Did not tera"
+            else "Participated in\n${stats.usage} out of ${stats.totalGames} games",
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center
+        )
+        Text("${stats.usageRate.times(100).toInt()}%", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.width(8.dp))
+    }
+}

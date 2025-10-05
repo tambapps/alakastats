@@ -19,6 +19,17 @@ internal fun UsageStatsTabMobile(viewModel: UsageStatsViewModel) {
         Modifier.fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // TODO
+        if (viewModel.isLoading) {
+            return@Column
+        }
+        Spacer(Modifier.height(128.dp))
+        UsageCard(viewModel)
+        Space()
+        UsageAndWinCard(viewModel)
+        Space()
+        TeraAndWinCard(viewModel)
     }
 }
+
+@Composable
+private fun Space() = Spacer(Modifier.height(42.dp))

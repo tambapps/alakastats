@@ -74,7 +74,12 @@ private fun LeadCard(
         lead.forEach { pokemon ->
             viewModel.pokemonImageService.PokemonSprite(pokemon, modifier = Modifier.size(statCardPokemonSpriteSize))
         }
-        Text("Won\n${stats.winCount} out of ${stats.total}", modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+        Text(
+            text = if (stats.total == 0) "Did not lead"
+            else "Won\n${stats.winCount} out of ${stats.total}",
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center
+        )
         Text("${stats.winRate.times(100).toInt()}%", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.width(8.dp))
     }
