@@ -72,7 +72,7 @@ fun TeamlyticsContext.winStats(replays: List<ReplayAnalytics>): WinStats {
     )
 }
 
-class WinStats(
+data class WinStats(
     val winCount: Int,
     val total: Int,
     val winRate: Float
