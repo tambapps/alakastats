@@ -31,6 +31,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.MoveUsageViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
@@ -88,6 +89,9 @@ private val appModule = module {
     }
     factory { (team: Teamlytics) ->
         UsageStatsViewModel(team, get())
+    }
+    factory { (team: Teamlytics) ->
+        MoveUsageViewModel(team, get())
     }
 }
 

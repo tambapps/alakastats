@@ -3,9 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -21,7 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -30,6 +27,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.MoveUsageTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.MoveUsageViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewTab
@@ -114,7 +113,12 @@ internal fun Pager(
                 val viewModel = koinInjectUseCase<HandleTeamReplaysUseCase, TeamReplayViewModel>(viewModel)
                 TeamReplayTab(viewModel)
             }
-            3 -> MoveUsagesTab(viewModel)
+            3 -> {
+                val viewModel = koinInject<MoveUsageViewModel> {
+                    parametersOf(team)
+                }
+                MoveUsageTab(viewModel)
+            }
             4 -> {
                 val viewModel = koinInject<LeadStatsViewModel> {
                     parametersOf(team)
@@ -151,27 +155,6 @@ internal fun TabRowContent(
                 }
             },
             text = { Text(title) }
-        )
-    }
-}
-
-
-@Composable
-private fun MoveUsagesTab(viewModel: TeamlyticsViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Move Usages",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "Move usages content will go here",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 16.dp)
         )
     }
 }
