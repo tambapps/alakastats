@@ -1,0 +1,31 @@
+dumbbell 'com.tambapps.http:hyperpoet-marcel:1.4.1-SNAPSHOT'
+
+import com.tambapps.http.hyperpoet.*
+import marcel.json.*
+import marcel.yaml.*
+
+private HttpPoet poet = new HttpPoet("", acceptContentType: ContentType.BINARY)
+
+String filename = args[0]
+
+File file = new File(filename)
+dynobj content = DynamicYaml.instance.read(file)
+
+async {
+  for ((String key, Map value) in content.asMap()) {
+    downloadImage(value['spriteUrl'] as String, "items/$key.png")
+  }
+  await { int completedTasks, int totalTasks -> print("\rTreated $completedTasks pokemons out of $totalTasks") }
+}
+
+async fun void downloadImage(String url, String path) {
+  try {
+    byte[] bytes = poet.get(url).value as byte[]
+    new File("/Users/nfonkoua/workspace/alakastats/composeApp/src/wasmJsMain/resources/images/$path") << bytes
+  } catch(ErrorResponseException e) {
+    println("\nURL $url responded ${e.code}\n")
+  } catch (Exception e) {
+    println(e.message)
+    System.exit(1)
+  }
+}
