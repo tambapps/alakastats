@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.domain.model
 
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -20,7 +21,7 @@ data class TeamlyticsPreview(
     val id: Uuid,
     val name: String,
     val sdNames: List<String>,
-    val pokemons: List<String>,
+    val pokemons: List<PokemonName>,
     val nbReplays: Int,
     val winrate: Int,
     val lastUpdatedAt: Instant

@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.composables.StatCard
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.statCardPokemonSpriteSize
@@ -61,7 +62,7 @@ internal fun LeadAndWin(viewModel: LeadStatsViewModel, modifier: Modifier = Modi
 @Composable
 private fun LeadCard(
     viewModel: LeadStatsViewModel,
-    data: List<Pair<List<String>, WinStats>>,
+    data: List<Pair<List<PokemonName>, WinStats>>,
     title: String,
     modifier: Modifier) {
     StatCard(

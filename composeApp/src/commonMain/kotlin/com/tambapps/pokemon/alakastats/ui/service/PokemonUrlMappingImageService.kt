@@ -53,8 +53,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.tambapps.pokemon.PokeType
+import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.ui.composables.TooltipIfEnabled
-import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.util.titlecase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -68,10 +69,10 @@ private val placeHolderDrawable = Res.drawable.pokeball
 
 interface PokemonImageService {
     @Composable
-    fun PokemonSprite(name: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
+    fun PokemonSprite(name: PokemonName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
 
     @Composable
-    fun PokemonArtwork(name: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
+    fun PokemonArtwork(name: PokemonName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
 
     @Composable
     fun TeraTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier)
@@ -219,17 +220,17 @@ class PokemonLocalUrlImageService(
 ): AbstractPokemonImageService(json) {
     @Composable
     override fun PokemonSprite(
-        name: String,
+        name: PokemonName,
         modifier: Modifier,
         disableTooltip: Boolean
-    ) = WebPokemonImage("sprite", name, modifier)
+    ) = WebPokemonImage("sprite", name.normalized, modifier)
 
     @Composable
     override fun PokemonArtwork(
-        name: String,
+        name: PokemonName,
         modifier: Modifier,
         disableTooltip: Boolean
-    ) = WebPokemonImage("artwork", name, modifier)
+    ) = WebPokemonImage("artwork", name.normalized, modifier)
 
     @Composable
     override fun ItemImage(
@@ -267,9 +268,9 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
     }
 
     @Composable
-    override fun PokemonSprite(name: String, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name, modifier, disableTooltip) { it.sprite }
+    override fun PokemonSprite(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name.normalized, modifier, disableTooltip) { it.sprite }
     @Composable
-    override fun PokemonArtwork(name: String, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name, modifier, disableTooltip) { it.artwork }
+    override fun PokemonArtwork(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name.normalized, modifier, disableTooltip) { it.artwork }
 
     @Composable
     private inline fun PokemonImage(name: String, modifier: Modifier, disableTooltip: Boolean = false, imageUrlSupplier: (PokemonSpriteData) -> String) {

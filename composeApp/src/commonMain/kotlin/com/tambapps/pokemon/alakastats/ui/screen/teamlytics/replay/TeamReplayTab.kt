@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeType
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
@@ -281,7 +282,7 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplay
 }
 
 @Composable
-internal fun SelectedPokemon(pokemon: String, teraType: PokeType?, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+internal fun SelectedPokemon(pokemon: PokemonName, teraType: PokeType?, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center

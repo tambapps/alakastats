@@ -39,7 +39,7 @@ internal fun TeamNotesTabMobile(viewModel: TeamNotesViewModel) {
 
 @Composable
 private fun PokemonMobile(viewModel: TeamNotesViewModel, team: Teamlytics, pokemon: Pokemon) {
-    Text(pokemon.name, style = MaterialTheme.typography.headlineMedium)
+    Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineMedium)
     viewModel.pokemonImageService.PokemonArtwork(pokemon.name)
     Text("This Pokemon does this and that")
 }

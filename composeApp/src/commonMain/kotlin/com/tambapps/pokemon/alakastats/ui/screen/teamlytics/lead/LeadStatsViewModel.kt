@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
@@ -19,8 +20,8 @@ class LeadStatsViewModel(
     val team: Teamlytics,
     val pokemonImageService: PokemonImageService,
     ) {
-    val duoStatsMap: SnapshotStateMap<List<String>, WinStats> = mutableStateMapOf()
-    val pokemonStats: SnapshotStateMap<String, WinStats> = mutableStateMapOf()
+    val duoStatsMap: SnapshotStateMap<List<PokemonName>, WinStats> = mutableStateMapOf()
+    val pokemonStats: SnapshotStateMap<PokemonName, WinStats> = mutableStateMapOf()
 
     var isLoading by mutableStateOf(false)
         private set

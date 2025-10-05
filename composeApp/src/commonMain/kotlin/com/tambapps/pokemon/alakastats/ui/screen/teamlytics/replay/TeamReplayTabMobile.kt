@@ -27,7 +27,6 @@ import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBar
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
-import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 
 @Composable
 internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
@@ -136,7 +135,7 @@ private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String,
         }
 
         for (pokemon in player.selection) {
-            val teraType = player.terastallization?.takeIf { PokemonNormalizer.matches(it.pokemon, pokemon) }?.type
+            val teraType = player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
             SelectedPokemon(
                 pokemon = pokemon,
                 teraType = teraType,

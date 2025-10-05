@@ -1,6 +1,8 @@
 package com.tambapps.pokemon.alakastats.infrastructure.service
 
 import com.tambapps.pokemon.PokeType
+import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.PokemonNormalizer.normalize
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.ReplayAnalyticsTransformer
@@ -10,7 +12,6 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamPreviewPokemonEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TerastallizationEntity
-import com.tambapps.pokemon.alakastats.util.PokemonNormalizer.normalize
 import com.tambapps.pokemon.sd.replay.log.visitor.OtsPokemon
 import com.tambapps.pokemon.sd.replay.log.visitor.SdReplayLogVisitor
 import io.ktor.client.HttpClient

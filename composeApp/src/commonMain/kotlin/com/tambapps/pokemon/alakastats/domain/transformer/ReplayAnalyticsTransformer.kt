@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.domain.transformer
 
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.OtsPokemon
 import com.tambapps.pokemon.sd.replay.log.visitor.OtsPokemon as SdOtsPokemon
@@ -61,12 +62,12 @@ class PlayerTransformer(
         return PlayerEntity(
             name = domain.name,
             teamPreview = teamPreviewTransformer.toEntity(domain.teamPreview),
-            selection = domain.selection,
+            selection = domain.selection.map { it.value },
             beforeElo = domain.beforeElo,
             afterElo = domain.afterElo,
             terastallization = domain.terastallization?.let { terastallizationTransformer.toEntity(it) },
             ots = domain.ots?.let { openTeamSheetTransformer.toEntity(it) },
-            movesUsage = domain.movesUsage
+            movesUsage = domain.movesUsage.mapKeys { (k, _) -> k.value }
         )
     }
     
@@ -74,12 +75,12 @@ class PlayerTransformer(
         return Player(
             name = entity.name,
             teamPreview = teamPreviewTransformer.toDomain(entity.teamPreview),
-            selection = entity.selection,
+            selection = entity.selection.map { PokemonName(it) },
             beforeElo = entity.beforeElo,
             afterElo = entity.afterElo,
             terastallization = entity.terastallization?.let { terastallizationTransformer.toDomain(it) },
             ots = entity.ots?.let { openTeamSheetTransformer.toDomain(it) },
-            movesUsage = entity.movesUsage
+            movesUsage = entity.movesUsage.mapKeys { (k, _) -> PokemonName(k) }
         )
     }
 }
@@ -102,17 +103,17 @@ class TeamPreviewTransformer(
 }
 
 class TeamPreviewPokemonTransformer {
-    
+
     fun toEntity(domain: TeamPreviewPokemon): TeamPreviewPokemonEntity {
         return TeamPreviewPokemonEntity(
-            name = domain.name,
+            name = domain.name.value,
             level = domain.level
         )
     }
-    
+
     fun toDomain(entity: TeamPreviewPokemonEntity): TeamPreviewPokemon {
         return TeamPreviewPokemon(
-            name = entity.name,
+            name = PokemonName(entity.name),
             level = entity.level
         )
     }
@@ -139,7 +140,7 @@ class OtsPokemonTransformer {
 
     fun toEntity(domain: OtsPokemon): OtsPokemonEntity {
         return OtsPokemonEntity(
-            name = domain.name,
+            name = domain.name.value,
             item = domain.item,
             ability = domain.ability,
             moves = domain.moves,
@@ -150,7 +151,7 @@ class OtsPokemonTransformer {
 
     fun toEntity(domain: SdOtsPokemon): OtsPokemonEntity {
         return OtsPokemonEntity(
-            name = domain.name,
+            name = domain.name.value,
             item = domain.item,
             ability = domain.ability,
             moves = domain.moves,
@@ -161,7 +162,7 @@ class OtsPokemonTransformer {
 
     fun toDomain(entity: OtsPokemonEntity): OtsPokemon {
         return OtsPokemon(
-            name = entity.name,
+            name = PokemonName(entity.name),
             item = entity.item,
             ability = entity.ability,
             moves = entity.moves,
@@ -172,17 +173,17 @@ class OtsPokemonTransformer {
 }
 
 class TerastallizationTransformer {
-    
+
     fun toEntity(domain: Terastallization): TerastallizationEntity {
         return TerastallizationEntity(
-            pokemon = domain.pokemon,
+            pokemon = domain.pokemon.value,
             type = domain.type
         )
     }
-    
+
     fun toDomain(entity: TerastallizationEntity): Terastallization {
         return Terastallization(
-            pokemon = entity.pokemon,
+            pokemon = PokemonName(entity.pokemon),
             type = entity.type
         )
     }

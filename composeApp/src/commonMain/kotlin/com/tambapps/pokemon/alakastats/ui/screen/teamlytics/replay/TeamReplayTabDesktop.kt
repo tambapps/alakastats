@@ -36,7 +36,6 @@ import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBar
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
-import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -143,7 +142,7 @@ private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String
 
         Row {
             for (pokemon in player.selection) {
-                val teraType = player.terastallization?.takeIf { PokemonNormalizer.matches(it.pokemon, pokemon) }?.type
+                val teraType = player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
                 SelectedPokemon(
                     pokemon = pokemon,
                     teraType = teraType,

@@ -21,10 +21,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
+import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
-import com.tambapps.pokemon.alakastats.util.PokemonNormalizer
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 
 @Composable

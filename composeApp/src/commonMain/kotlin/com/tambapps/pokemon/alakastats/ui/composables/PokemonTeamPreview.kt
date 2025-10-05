@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.composables
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 
@@ -18,7 +19,7 @@ fun PokemonTeamPreview(
 @Composable
 fun PokemonTeamPreview(
     imageService: PokemonImageService,
-    pokemons: List<String>,
+    pokemons: List<PokemonName>,
     childModifier: Modifier = Modifier,
     fillWidth: Boolean = false) {
     Row {

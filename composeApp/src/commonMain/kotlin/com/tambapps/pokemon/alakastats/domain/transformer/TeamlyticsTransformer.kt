@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.domain.transformer
 
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.model.computeWinRate
@@ -40,7 +41,7 @@ class TeamlyticsTransformer(
         id = team.id,
         name = team.name,
         sdNames = team.sdNames,
-        pokemons = pokepasteParser.tryParse(team.pokePaste)?.pokemons?.map { it.name } ?: emptyList(),
+        pokemons = pokepasteParser.tryParse(team.pokePaste)?.pokemons?.map { it.name.value } ?: emptyList(),
         nbReplays = team.replays.size,
         winrate = computeWinRate(team.sdNames, team.replays.map(replayAnalyticsTransformer::toDomain)),
         lastUpdatedAt = team.lastUpdatedAt
@@ -55,7 +56,7 @@ class TeamlyticsPreviewTransformer {
             id = domain.id,
             name = domain.name,
             sdNames = domain.sdNames,
-            pokemons = domain.pokemons,
+            pokemons = domain.pokemons.map { it.value },
             nbReplays = domain.nbReplays,
             winrate = domain.winrate,
             lastUpdatedAt = domain.lastUpdatedAt
@@ -67,7 +68,7 @@ class TeamlyticsPreviewTransformer {
             id = entity.id,
             name = entity.name,
             sdNames = entity.sdNames,
-            pokemons = entity.pokemons,
+            pokemons = entity.pokemons.map { PokemonName(it) },
             nbReplays = entity.nbReplays,
             winrate = entity.winrate,
             lastUpdatedAt = entity.lastUpdatedAt ?: Clock.System.now()
