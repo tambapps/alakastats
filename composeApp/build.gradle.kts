@@ -74,7 +74,6 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.arrow.core)
-            implementation(libs.arrow.fx.coroutines)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
             implementation(libs.koin.core)
