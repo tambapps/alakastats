@@ -50,7 +50,7 @@ class UsageStatsViewModel(
     private fun TeamlyticsContext.loadUsageStats(replays: List<ReplayAnalytics>) {
         val result = team.pokePaste.pokemons.asSequence().map { it.name }
             .associateWith { pokemonName ->
-                val usage = replays.filter { replay -> replay.youPlayer.selection.any { it.matches(pokemonName) } }.size
+                val usage = replays.filter { replay -> replay.youPlayer.hasSelected(pokemonName) }.size
 
                 val total = replays.size
                 UsageStat(
@@ -66,11 +66,10 @@ class UsageStatsViewModel(
     private fun TeamlyticsContext.loadUsageAndWinStats(replays: List<ReplayAnalytics>) {
         val result = team.pokePaste.pokemons.asSequence().map { it.name }
             .associateWith { pokemonName ->
-                val usageAndWin = replays.filter { replay ->
-                    replay.gameOutput == GameOutput.WIN && replay.youPlayer.selection.any { it.matches(pokemonName) }
-                }.size
+                val pokemonReplays = replays.filter { replay -> replay.youPlayer.hasSelected(pokemonName) }
+                val usageAndWin = pokemonReplays.filter { replay -> replay.gameOutput == GameOutput.WIN }.size
 
-                val total = replays.size
+                val total = pokemonReplays.size
                 UsageStat(
                     usage = usageAndWin,
                     totalGames = total,
@@ -84,18 +83,16 @@ class UsageStatsViewModel(
     private fun TeamlyticsContext.loadTeraAndWinStats(replays: List<ReplayAnalytics>) {
         val teraAndWinPerTera: Map<PokemonName, Map<PokeType, List<ReplayAnalytics>>> = team.pokePaste.pokemons.asSequence().map { it.name }
             .associateWith { pokemonName ->
-                val teraAndWinReplays = replays.filter { replay ->
-                    replay.gameOutput == GameOutput.WIN
-                            && replay.youPlayer.selection.any { it.matches(pokemonName) }
-                            && replay.youPlayer.terastallization?.pokemon?.matches(pokemonName) == true
+                val pokemonTeraReplays = replays.filter { replay ->
+                            replay.youPlayer.hasSelected(pokemonName)
+                            && replay.youPlayer.hasTerastallized(pokemonName)
                 }
-
-                teraAndWinReplays.groupBy { it.youPlayer.terastallization!!.type }
+                pokemonTeraReplays.groupBy { it.youPlayer.terastallization!!.type }
             }
 
-        val result: Map<Terastallization, UsageStat> = teraAndWinPerTera.flatMap { (pokemon, winReplaysPerTera) ->
-            winReplaysPerTera.map { (teraType, winReplays) ->
-                val teraAndWin = winReplays.size
+        val result: Map<Terastallization, UsageStat> = teraAndWinPerTera.flatMap { (pokemon, replaysPerTera) ->
+            replaysPerTera.map { (teraType, teraReplaysReplays) ->
+                val teraAndWin = teraReplaysReplays.filter { it.gameOutput == GameOutput.WIN }.size
                 val total = replays.size
 
                 Terastallization(pokemon, teraType) to UsageStat(
