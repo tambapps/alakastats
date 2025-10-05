@@ -85,6 +85,11 @@ private data class RawSdReplay(
     val logs: String
 )
 
+// doing this because some events pokemon name don't contain forms, it is the base name but I want it to be the name of the selection
+private fun getActualPokemonName(player: PlayerBuilderEntityBuilder, pokemonName: String): String {
+    return player.selection.find { PokemonNormalizer.baseMatches(it, pokemonName) } ?: pokemonName
+}
+
 private class ReplayAnalyticsBuilderVisitor(
     private val otsPokemonTransformer: OtsPokemonTransformer,
     private val playerNames: List<String>
@@ -155,10 +160,8 @@ private class ReplayAnalyticsBuilderVisitor(
 
     override fun visitTerastallizeLog(pokemonSlot: String, pokemonName: String, teraType: String) {
         val player = getPlayer(pokemonSlot)
-        // doing this because the terastallize pokemon name doesn't contain forms, it is the base name but I want it to be the name of the selection
-        val nameToAdd = player.selection.find { PokemonNormalizer.baseMatches(it, pokemonName) } ?: pokemonName
         player.terastallization = TerastallizationEntity(
-            pokemon = nameToAdd,
+            pokemon = getActualPokemonName(player, pokemonName),
             type = PokeType.valueOf(teraType.uppercase())
         )
     }
@@ -214,7 +217,7 @@ private data class PlayerBuilderEntityBuilder(
     }
 
     fun moveUsage(pokemonName: String, moveName: String) {
-        val movesCount = movesUsage.getOrPut(pokemonName) { mutableMapOf() }
+        val movesCount = movesUsage.getOrPut(getActualPokemonName(this, pokemonName)) { mutableMapOf() }
         movesCount[moveName] = movesCount.getOrPut(moveName) { 0 } + 1
     }
 
