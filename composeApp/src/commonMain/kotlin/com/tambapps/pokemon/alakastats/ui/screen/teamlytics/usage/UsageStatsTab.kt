@@ -42,7 +42,7 @@ internal fun UsageCard(
         data = viewModel.pokemonUsageMap.entries.sortedWith(
             compareBy<Map.Entry<PokemonName, UsageStat>> { (_, stat) -> - stat.usageRate }
                 .thenBy { (_, stat) -> - stat.totalGames }
-                .thenBy { (name, _) -> name }
+                .thenBy { (name, _) -> name.value }
         ),
     ) { (pokemon, stats) ->
         Spacer(Modifier.width(8.dp))
@@ -70,7 +70,7 @@ internal fun UsageAndWinCard(
         data = viewModel.pokemonUsageAndWinMap.entries.sortedWith(
             compareBy<Map.Entry<PokemonName, UsageStat>> { (_, stat) -> - stat.usageRate }
                 .thenBy { (_, stat) -> - stat.totalGames }
-                .thenBy { (name, _) -> name }
+                .thenBy { (name, _) -> name.value }
         ),
     ) { (pokemon, stats) ->
         Spacer(Modifier.width(8.dp))
@@ -97,7 +97,7 @@ internal fun TeraAndWinCard(
         data = viewModel.teraAndWinMap.entries.sortedWith(
             compareBy<Map.Entry<Terastallization, UsageStat>> { (_, stat) -> - stat.usageRate }
                 .thenBy { (_, stat) -> - stat.totalGames }
-                .thenBy { (pokeTera, _) -> pokeTera.pokemon }
+                .thenBy { (pokeTera, _) -> pokeTera.pokemon.value }
                 .thenBy { (pokeTera, _) -> pokeTera.type }
 
         ),

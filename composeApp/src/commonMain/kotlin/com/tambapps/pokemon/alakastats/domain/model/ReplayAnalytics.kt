@@ -125,7 +125,7 @@ data class Player(
     val movesUsage: Map<PokemonName, Map<String, Int>>
 ) {
     // sorted to always have the same order
-    val lead get() = selection.take(2).sorted()
+    val lead get() = selection.take(2).sortedBy { it.value }
 
     fun hasSelected(pokemonName: PokemonName) = selection.any { pokemonName.matches(it) }
 
