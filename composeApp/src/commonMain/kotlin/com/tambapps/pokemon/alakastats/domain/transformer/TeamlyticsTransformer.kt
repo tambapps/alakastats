@@ -3,7 +3,7 @@ package com.tambapps.pokemon.alakastats.domain.transformer
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
-import com.tambapps.pokemon.alakastats.domain.model.computeWinRate
+import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
@@ -43,7 +43,7 @@ class TeamlyticsTransformer(
         sdNames = team.sdNames,
         pokemons = pokepasteParser.tryParse(team.pokePaste)?.pokemons?.map { it.name.value } ?: emptyList(),
         nbReplays = team.replays.size,
-        winrate = computeWinRate(team.sdNames, team.replays.map(replayAnalyticsTransformer::toDomain)),
+        winrate = computeWinRatePercentage(team.sdNames, team.replays.map(replayAnalyticsTransformer::toDomain)),
         lastUpdatedAt = team.lastUpdatedAt
     )
 

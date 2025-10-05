@@ -5,6 +5,7 @@ import alakastats.composeapp.generated.resources.add
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -47,7 +48,6 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
-import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBar
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -343,4 +343,29 @@ internal fun ReplayDropDownMenu(isMenuExpandedState: MutableState<Boolean>, view
             }
         )
     }
+}
+
+@Composable
+internal fun Header(viewModel: TeamReplayViewModel, replays: List<ReplayAnalytics>, team: Teamlytics) {
+    val winRatePercentage = remember { team.winRate }
+    Row(Modifier.fillMaxWidth()) {
+        Spacer(Modifier.weight(1f))
+        NbReplaysText(replays)
+        Spacer(Modifier.width(32.dp))
+        WinRateText(winRatePercentage)
+        Spacer(Modifier.weight(1f))
+    }
+
+    Spacer(Modifier.height(32.dp))
+    AddReplayButton(viewModel)
+    Spacer(Modifier.height(32.dp))
+}
+@Composable
+internal fun NbReplaysText(replays: List<ReplayAnalytics>) {
+    Text("${replays.size} replays", style = MaterialTheme.typography.titleLarge)
+}
+
+@Composable
+internal fun WinRateText(winRatePercentage: Int) {
+    Text("$winRatePercentage% winrate", style = MaterialTheme.typography.titleLarge)
 }

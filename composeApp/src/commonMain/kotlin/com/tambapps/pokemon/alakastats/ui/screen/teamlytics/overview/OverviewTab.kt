@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.domain.model.computeWinRate
+import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
@@ -49,7 +49,7 @@ internal fun Header(team: Teamlytics) {
             "${team.replays.size} replays",
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            style = textStyle
+            style = MaterialTheme.typography.titleLarge
         )
         return
     }
@@ -60,7 +60,7 @@ internal fun Header(team: Teamlytics) {
         Spacer(space)
         Text("$replaysCount replays", style = textStyle)
         Spacer(Modifier.weight(1f))
-        val winRate = remember { team.computeWinRate() }
+        val winRate = remember { team.computeWinRatePercentage() }
         Text("$winRate% winrate", style = textStyle)
         Spacer(space)
     }

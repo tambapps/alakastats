@@ -31,8 +31,9 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 @Composable
 internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
     val team = viewModel.team
+    val replays = team.replays
 
-    if (team.replays.isEmpty() && !viewModel.isLoading) {
+    if (replays.isEmpty() && !viewModel.isLoading) {
         NoReplaysMobile(viewModel)
         return
     }
@@ -40,13 +41,12 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                AddReplayButton(viewModel)
-                Spacer(Modifier.height(32.dp))
+                Header(viewModel, replays, team)
             }
-            val replays = team.replays
             itemsIndexed(replays) { index, replay ->
                 MobileReplay(viewModel, team, replay)
                 if (index < replays.size - 1) {

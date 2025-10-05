@@ -42,7 +42,8 @@ import org.jetbrains.compose.resources.painterResource
 internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
     val team = viewModel.team
 
-    if (team.replays.isEmpty() && !viewModel.isLoading) {
+    val replays = team.replays
+    if (replays.isEmpty() && !viewModel.isLoading) {
         NoReplaysDesktop(viewModel)
         return
     }
@@ -53,13 +54,12 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                AddReplayButton(viewModel)
-                Spacer(Modifier.height(32.dp))
+                Header(viewModel, replays, team)
             }
-            val replays = team.replays
             itemsIndexed(replays) { index, replay ->
                 DesktopReplay(viewModel, team, replay)
                 if (index < replays.size - 1) {
