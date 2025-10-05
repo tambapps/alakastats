@@ -10,6 +10,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.Terastallization
 import com.tambapps.pokemon.alakastats.ui.composables.StatCard
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.statCardPercentageWidth
@@ -37,7 +39,11 @@ internal fun UsageCard(
     StatCard(
         title = "Usage",
         modifier = modifier,
-        data = viewModel.pokemonUsageMap.entries.sortedBy { (_, stat) -> - stat.usageRate },
+        data = viewModel.pokemonUsageMap.entries.sortedWith(
+            compareBy<Map.Entry<PokemonName, UsageStat>> { (_, stat) -> - stat.usageRate }
+                .thenBy { (_, stat) -> - stat.totalGames }
+                .thenBy { (name, _) -> name }
+        ),
     ) { (pokemon, stats) ->
         Spacer(Modifier.width(8.dp))
         viewModel.pokemonImageService.PokemonSprite(pokemon, modifier = Modifier.size(statCardPokemonSpriteSize))
@@ -61,7 +67,11 @@ internal fun UsageAndWinCard(
     StatCard(
         title = "Usage And Win",
         modifier = modifier,
-        data = viewModel.pokemonUsageAndWinMap.entries.sortedBy { (_, stat) -> - stat.usageRate },
+        data = viewModel.pokemonUsageAndWinMap.entries.sortedWith(
+            compareBy<Map.Entry<PokemonName, UsageStat>> { (_, stat) -> - stat.usageRate }
+                .thenBy { (_, stat) -> - stat.totalGames }
+                .thenBy { (name, _) -> name }
+        ),
     ) { (pokemon, stats) ->
         Spacer(Modifier.width(8.dp))
         viewModel.pokemonImageService.PokemonSprite(pokemon, modifier = Modifier.size(statCardPokemonSpriteSize))
@@ -84,7 +94,13 @@ internal fun TeraAndWinCard(
     StatCard(
         title = "Tera And Win",
         modifier = modifier,
-        data = viewModel.teraAndWinMap.entries.sortedBy { (_, stat) -> - stat.usageRate },
+        data = viewModel.teraAndWinMap.entries.sortedWith(
+            compareBy<Map.Entry<Terastallization, UsageStat>> { (_, stat) -> - stat.usageRate }
+                .thenBy { (_, stat) -> - stat.totalGames }
+                .thenBy { (pokeTera, _) -> pokeTera.pokemon }
+                .thenBy { (pokeTera, _) -> pokeTera.type }
+
+        ),
     ) { (pokeTera, stats) ->
         Spacer(Modifier.width(8.dp))
         viewModel.pokemonImageService.PokemonSprite(pokeTera.pokemon, modifier = Modifier.size(statCardPokemonSpriteSize))
