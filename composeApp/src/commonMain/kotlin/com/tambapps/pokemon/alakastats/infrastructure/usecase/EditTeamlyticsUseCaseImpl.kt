@@ -11,7 +11,6 @@ class EditTeamlyticsUseCaseImpl(
     private val teamlyticsRepository: TeamlyticsRepository
 ) : EditTeamlyticsUseCase {
 
-    // TODO will need to re-compute win rates, etc if sdNames changed
     override suspend fun edit(
         team: Teamlytics,
         name: String,

@@ -179,7 +179,6 @@ class EditTeamViewModel(
 
     fun saveTeam(navigator: Navigator, snackBar: SnackBar) {
         if (isFormValid) {
-            // TODO migrate to Either and handle errors
             val pokepaste = pokepasteParser.tryParse(pokepaste) ?: return
             scope.launch {
                 if (editingTeam != null) {
