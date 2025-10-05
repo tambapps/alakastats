@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.StatCard
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.ui.theme.statCardPercentageWidth
 import com.tambapps.pokemon.alakastats.ui.theme.statCardPokemonSpriteSize
 
 @Composable
@@ -46,7 +47,7 @@ internal fun UsageCard(
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center
         )
-        Text("${stats.usageRate.times(100).toInt()}%", style = MaterialTheme.typography.titleLarge)
+        PercentageText(stats.usageRate)
         Spacer(Modifier.width(8.dp))
     }
 }
@@ -70,7 +71,7 @@ internal fun UsageAndWinCard(
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center
         )
-        Text("${stats.usageRate.times(100).toInt()}%", style = MaterialTheme.typography.titleLarge)
+        PercentageText(stats.usageRate)
         Spacer(Modifier.width(8.dp))
     }
 }
@@ -94,7 +95,17 @@ internal fun TeraAndWinCard(
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center
         )
-        Text("${stats.usageRate.times(100).toInt()}%", style = MaterialTheme.typography.titleLarge)
+        PercentageText(stats.usageRate)
         Spacer(Modifier.width(8.dp))
     }
+}
+
+@Composable
+fun PercentageText(rate: Float) {
+    Text(
+        "${rate.times(100).toInt()}%",
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.width(statCardPercentageWidth),
+        textAlign = TextAlign.Center,
+    )
 }

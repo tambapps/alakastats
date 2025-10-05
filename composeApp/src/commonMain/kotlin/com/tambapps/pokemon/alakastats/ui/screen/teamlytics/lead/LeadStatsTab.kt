@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.composables.StatCard
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.PercentageText
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.statCardPokemonSpriteSize
 
@@ -80,7 +81,7 @@ private fun LeadCard(
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center
         )
-        Text("${stats.winRate.times(100).toInt()}%", style = MaterialTheme.typography.titleLarge)
+        PercentageText(stats.winRate)
         Spacer(Modifier.width(8.dp))
     }
 }
