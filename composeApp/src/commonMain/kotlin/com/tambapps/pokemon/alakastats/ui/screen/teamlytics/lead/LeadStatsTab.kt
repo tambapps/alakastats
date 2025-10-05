@@ -29,29 +29,32 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
 }
 
 @Composable
-internal fun MostCommonLeadCard(viewModel: LeadStatsViewModel) {
+internal fun MostCommonLeadCard(viewModel: LeadStatsViewModel, modifier: Modifier = Modifier) {
     LeadCard(
         viewModel = viewModel,
         data = viewModel.duoStatsMap.entries.map { it.key to it.value }.sortedBy { (_, stats) -> - stats.total },
-        title = "Most Common Lead"
+        title = "Most Common Lead",
+        modifier = modifier,
     )
 }
 
 @Composable
-internal fun MostEffectiveLeadCard(viewModel: LeadStatsViewModel) {
+internal fun MostEffectiveLeadCard(viewModel: LeadStatsViewModel, modifier: Modifier = Modifier) {
     LeadCard(
         viewModel = viewModel,
         data = viewModel.duoStatsMap.entries.map { it.key to it.value }.sortedBy { (_, stats) -> - stats.winRate },
         title = "Most Effective Lead",
+        modifier = modifier,
     )
 }
 
 @Composable
-internal fun LeadAndWin(viewModel: LeadStatsViewModel) {
+internal fun LeadAndWin(viewModel: LeadStatsViewModel, modifier: Modifier = Modifier) {
     LeadCard(
         viewModel = viewModel,
         data = viewModel.pokemonStats.entries.map { listOf(it.key) to it.value }.sortedBy { (_, stats) -> - stats.winRate },
         title = "Lead And Win",
+        modifier = modifier,
     )
 }
 
@@ -59,10 +62,12 @@ internal fun LeadAndWin(viewModel: LeadStatsViewModel) {
 private fun LeadCard(
     viewModel: LeadStatsViewModel,
     data: List<Pair<List<String>, WinStats>>,
-    title: String) {
+    title: String,
+    modifier: Modifier) {
     StatCard(
         title = title,
-        data
+        modifier = modifier,
+        data = data,
     ) { (lead, stats) ->
         Spacer(Modifier.width(8.dp))
         lead.forEach { pokemon ->
