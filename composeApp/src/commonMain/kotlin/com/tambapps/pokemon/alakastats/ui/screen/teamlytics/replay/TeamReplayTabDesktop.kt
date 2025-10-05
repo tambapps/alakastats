@@ -46,23 +46,28 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
         NoReplaysDesktop(viewModel)
         return
     }
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        item {
-            AddReplayButton(viewModel)
-            Spacer(Modifier.height(32.dp))
+    Column(Modifier.fillMaxSize()) {
+        if (viewModel.isLoading) {
+            LinearProgressBar()
         }
-        val replays = team.replays
-        itemsIndexed(replays) { index, replay ->
-            DesktopReplay(viewModel, team, replay)
-            if (index < replays.size - 1) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Spacer(Modifier.width(64.dp))
-                    HorizontalDivider(Modifier.weight(1f).height(2.dp))
-                    Spacer(Modifier.width(64.dp))
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .padding(16.dp)
+        ) {
+            item {
+                AddReplayButton(viewModel)
+                Spacer(Modifier.height(32.dp))
+            }
+            val replays = team.replays
+            itemsIndexed(replays) { index, replay ->
+                DesktopReplay(viewModel, team, replay)
+                if (index < replays.size - 1) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Spacer(Modifier.width(64.dp))
+                        HorizontalDivider(Modifier.weight(1f).height(2.dp))
+                        Spacer(Modifier.width(64.dp))
+                    }
                 }
             }
         }

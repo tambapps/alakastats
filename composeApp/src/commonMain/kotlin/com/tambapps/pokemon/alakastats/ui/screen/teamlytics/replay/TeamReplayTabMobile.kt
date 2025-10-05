@@ -36,21 +36,26 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
         NoReplaysMobile(viewModel)
         return
     }
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        item {
-            AddReplayButton(viewModel)
-            Spacer(Modifier.height(32.dp))
-        }
-        val replays = team.replays
-        itemsIndexed(replays) { index, replay ->
-            MobileReplay(viewModel, team, replay)
-            if (index < replays.size - 1) {
+    Column(Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .padding(16.dp)
+        ) {
+            item {
+                AddReplayButton(viewModel)
                 Spacer(Modifier.height(32.dp))
             }
+            val replays = team.replays
+            itemsIndexed(replays) { index, replay ->
+                MobileReplay(viewModel, team, replay)
+                if (index < replays.size - 1) {
+                    Spacer(Modifier.height(32.dp))
+                }
+            }
+        }
+        if (viewModel.isLoading) {
+            LinearProgressBar()
         }
     }
 }
