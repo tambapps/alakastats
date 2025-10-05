@@ -32,7 +32,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
     val team = viewModel.team
 
-    if (team.replays.isEmpty()) {
+    if (team.replays.isEmpty() && !viewModel.isLoading) {
         NoReplaysMobile(viewModel)
         return
     }

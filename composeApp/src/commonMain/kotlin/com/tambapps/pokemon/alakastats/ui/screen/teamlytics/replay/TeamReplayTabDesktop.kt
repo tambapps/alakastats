@@ -42,7 +42,7 @@ import org.jetbrains.compose.resources.painterResource
 internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
     val team = viewModel.team
 
-    if (team.replays.isEmpty()) {
+    if (team.replays.isEmpty() && !viewModel.isLoading) {
         NoReplaysDesktop(viewModel)
         return
     }
