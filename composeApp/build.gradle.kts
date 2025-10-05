@@ -89,6 +89,7 @@ kotlin {
             implementation(libs.voyager.screenmodel)
             implementation(libs.voyager.koin)
             implementation(libs.ktor.client.core)
+            implementation(libs.koalaplot.core)
         }
         iosMain.dependencies {
             implementation(libs.kstore.file)
