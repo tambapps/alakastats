@@ -223,14 +223,14 @@ class PokemonLocalUrlImageService(
         name: PokemonName,
         modifier: Modifier,
         disableTooltip: Boolean
-    ) = WebPokemonImage("sprite", name.normalized, modifier)
+    ) = WebPokemonImage("sprite", name.normalized.value, modifier)
 
     @Composable
     override fun PokemonArtwork(
         name: PokemonName,
         modifier: Modifier,
         disableTooltip: Boolean
-    ) = WebPokemonImage("artwork", name.normalized, modifier)
+    ) = WebPokemonImage("artwork", name.normalized.value, modifier)
 
     @Composable
     override fun ItemImage(
@@ -268,9 +268,9 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
     }
 
     @Composable
-    override fun PokemonSprite(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name.normalized, modifier, disableTooltip) { it.sprite }
+    override fun PokemonSprite(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name.normalized.value, modifier, disableTooltip) { it.sprite }
     @Composable
-    override fun PokemonArtwork(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name.normalized, modifier, disableTooltip) { it.artwork }
+    override fun PokemonArtwork(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name.normalized.value, modifier, disableTooltip) { it.artwork }
 
     @Composable
     private inline fun PokemonImage(name: String, modifier: Modifier, disableTooltip: Boolean = false, imageUrlSupplier: (PokemonSpriteData) -> String) {
