@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.infrastructure.service
 
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.PokemonNormalizer.normalize
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
@@ -141,8 +142,11 @@ private class ReplayAnalyticsBuilderVisitor(
         visitDragLog(pokemonSlot, pokemonName, hpPercentage)
 
     override fun visitTerastallizeLog(pokemonSlot: String, pokemonName: String, teraType: String) {
-        getPlayer(pokemonSlot).terastallization = TerastallizationEntity(
-            pokemon = pokemonName,
+        val player = getPlayer(pokemonSlot)
+        // doing this because the terastallize pokemon name doesn't contain forms, it is the base name but I want it to be the name of the selection
+        val nameToAdd = player.selection.find { PokemonNormalizer.baseMatches(it, pokemonName) } ?: pokemonName
+        player.terastallization = TerastallizationEntity(
+            pokemon = nameToAdd,
             type = PokeType.valueOf(teraType.uppercase())
         )
     }
