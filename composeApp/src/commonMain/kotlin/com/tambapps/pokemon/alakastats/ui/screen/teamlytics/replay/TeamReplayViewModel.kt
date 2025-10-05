@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import arrow.core.getOrElse
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
@@ -107,14 +108,15 @@ class TeamReplayViewModel(
         scope.launch {
             val results = urls.map { url ->
                 async {
-                    try {
-                        handleReplaysUseCase.parseReplay(url)
-                    } catch (e: Exception) {
-                        // TODO handle and return null or use Result or arrow Either
-                        throw RuntimeException(e)
+                    handleReplaysUseCase.parseReplay(url).getOrElse { error ->
+                        withContext(Dispatchers.Main) {
+                            snackBar.show("Failed to fetch replay: ${error.message}", SnackBar.Severity.ERROR)
+                        }
+                        null
                     }
                 }
-            }.awaitAll()
+            }.awaitAll().filterNotNull()
+
             val duplicates = results.intersect(team.replays)
             if (duplicates.size < results.size) {
                 handleReplaysUseCase.addReplays(results - duplicates)

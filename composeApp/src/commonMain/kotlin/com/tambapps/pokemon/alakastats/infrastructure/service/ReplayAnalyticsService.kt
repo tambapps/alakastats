@@ -1,9 +1,14 @@
 package com.tambapps.pokemon.alakastats.infrastructure.service
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.PokemonNormalizer.normalize
+import com.tambapps.pokemon.alakastats.domain.error.DomainError
+import com.tambapps.pokemon.alakastats.domain.error.NetworkError
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.ReplayAnalyticsTransformer
@@ -27,27 +32,34 @@ class ReplayAnalyticsService(
     private val replayAnalyticsTransformer: ReplayAnalyticsTransformer
     ) {
 
-    // TODO throw/handle exception
-    suspend fun fetch(sdReplayUrl: String): ReplayAnalytics {
-        val jsonReplayUrl = jsonReplayUrl(sdReplayUrl)
-        val reference = jsonReplayUrl.substring(jsonReplayUrl.lastIndexOf('/') + 1).removeSuffix(".json")
-        val rawReplay = httpClient.get(jsonReplayUrl).body<RawSdReplay>()
+    suspend fun fetch(sdReplayUrl: String): Either<DomainError, ReplayAnalytics> {
+        return try {
+            val jsonReplayUrl = jsonReplayUrl(sdReplayUrl)
+            val reference = jsonReplayUrl.substring(jsonReplayUrl.lastIndexOf('/') + 1).removeSuffix(".json")
+            val rawReplay = httpClient.get(jsonReplayUrl).body<RawSdReplay>()
 
-        val visitor = ReplayAnalyticsBuilderVisitor(otsPokemonTransformer, rawReplay.players)
-        visitor.visitLogs(rawReplay.logs)
-        val players = visitor.players
-        return ReplayAnalyticsEntity(
-            players = players,
-            uploadTime = rawReplay.uploadTime,
-            format = rawReplay.formatId,
-            rating = rawReplay.rating,
-            version = "1.0",
-            nextBattleRef = visitor.nextBattleRef,
-            winner = visitor.winner,
-            url = jsonReplayUrl,
-            reference = reference,
-            notes = null,
-        ).let(replayAnalyticsTransformer::toDomain)
+            val visitor = ReplayAnalyticsBuilderVisitor(otsPokemonTransformer, rawReplay.players)
+            visitor.visitLogs(rawReplay.logs)
+            val players = visitor.players
+            ReplayAnalyticsEntity(
+                players = players,
+                uploadTime = rawReplay.uploadTime,
+                format = rawReplay.formatId,
+                rating = rawReplay.rating,
+                version = "1.0",
+                nextBattleRef = visitor.nextBattleRef,
+                winner = visitor.winner,
+                url = jsonReplayUrl,
+                reference = reference,
+                notes = null,
+            ).let(replayAnalyticsTransformer::toDomain).right()
+        } catch (e: Exception) {
+            // could have better error handling but MEH
+            NetworkError(
+                message = e.message ?: "Failed to fetch replay",
+                cause = e
+            ).left()
+        }
     }
 
     private fun jsonReplayUrl(originUrl: String): String {
