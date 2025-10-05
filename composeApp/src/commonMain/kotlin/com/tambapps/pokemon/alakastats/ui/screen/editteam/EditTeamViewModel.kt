@@ -195,8 +195,8 @@ class EditTeamViewModel(
                 }
                 navigator.pop()
                 snackBar.show(
-                    if (isEditing) "Created team successfully"
-                    else "Updated team successfully", SnackBar.Severity.SUCCESS
+                    if (isEditing) "Updated team successfully"
+                    else "Created team successfully", SnackBar.Severity.SUCCESS
                 )
             }
         }

@@ -19,6 +19,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +28,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
@@ -35,6 +39,7 @@ import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBar
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
+import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
 
@@ -110,12 +115,16 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
             Spacer(Modifier.width(8.dp))
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            DesktopPlayer(modifier = Modifier.weight(1f), player = currentPlayer, playerName = "You", viewModel = viewModel)
-            Spacer(Modifier.width(8.dp))
-            DesktopPlayer(modifier = Modifier.weight(1f), player = opponentPlayer, playerName = "Opponent", viewModel = viewModel)
+        if (gameOutput == GameOutput.UNKNOWN) {
+            DesktopSdNamesWarning(viewModel)
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                DesktopPlayer(modifier = Modifier.weight(1f), player = currentPlayer, playerName = "You", viewModel = viewModel)
+                Spacer(Modifier.width(8.dp))
+                DesktopPlayer(modifier = Modifier.weight(1f), player = opponentPlayer, playerName = "Opponent", viewModel = viewModel)
+            }
         }
 
         if (!replay.notes.isNullOrBlank()) {
@@ -130,6 +139,25 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
     }
 }
 
+@Composable
+private fun DesktopSdNamesWarning(viewModel: TeamReplayViewModel) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text("⚠\uFE0F your showdown names didn't match with any player of this game", style = MaterialTheme.typography.bodyLarge)
+        Spacer(Modifier.width(16.dp))
+        EditSdNamesButton(viewModel)
+    }
+}
+
+@Composable
+internal fun EditSdNamesButton(viewModel: TeamReplayViewModel) {
+    val navigator = LocalNavigator.currentOrThrow
+
+    OutlinedButton(onClick = { navigator.push(EditTeamScreen(viewModel.team))}) {
+        Text("Edit Showdown Names")
+    }
+}
 @Composable
 private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String, viewModel: TeamReplayViewModel) {
     Column(

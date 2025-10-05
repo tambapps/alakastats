@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
@@ -61,12 +63,26 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
 }
 
 @Composable
+private fun MobileSdNamesWarning(viewModel: TeamReplayViewModel) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        Text("⚠\uFE0F\nYour showdown names didn't match with any player of this game",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyLarge)
+        Spacer(Modifier.height(4.dp))
+        EditSdNamesButton(viewModel)
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
 private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
 
+    val gameOutput = team.getGameOutput(replay)
     ExpansionTile(
         title = { isExpanded ->
-            val gameOutput = team.getGameOutput(replay)
             GameOutputCard(gameOutput)
             VsText(opponentPlayer)
         },
@@ -97,20 +113,24 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                 Spacer(Modifier.height(8.dp))
             }
 
-            Row(Modifier.fillMaxWidth()) {
-                MobilePlayer(
-                    modifier = Modifier.weight(1f),
-                    player = currentPlayer,
-                    playerName = "You",
-                    viewModel = viewModel
-                )
+            if (gameOutput == GameOutput.UNKNOWN) {
+                MobileSdNamesWarning(viewModel)
+            } else {
+                Row(Modifier.fillMaxWidth()) {
+                    MobilePlayer(
+                        modifier = Modifier.weight(1f),
+                        player = currentPlayer,
+                        playerName = "You",
+                        viewModel = viewModel
+                    )
 
-                MobilePlayer(
-                    modifier = Modifier.weight(1f),
-                    player = opponentPlayer,
-                    playerName = "Opponent",
-                    viewModel = viewModel
-                )
+                    MobilePlayer(
+                        modifier = Modifier.weight(1f),
+                        player = opponentPlayer,
+                        playerName = "Opponent",
+                        viewModel = viewModel
+                    )
+                }
             }
 
             if (!replay.notes.isNullOrBlank()) {
