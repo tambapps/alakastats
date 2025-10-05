@@ -77,7 +77,7 @@ private fun LeadCard(
         }
         Text(
             text = if (stats.total == 0) "Did not lead"
-            else "Won\n${stats.winCount} out of ${stats.total}",
+            else "Won\n${stats.winCount} out of ${stats.total} games",
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center
         )

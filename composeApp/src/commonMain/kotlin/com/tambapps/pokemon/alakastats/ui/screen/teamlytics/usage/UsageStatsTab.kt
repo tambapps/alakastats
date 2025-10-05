@@ -77,7 +77,7 @@ internal fun UsageAndWinCard(
         viewModel.pokemonImageService.PokemonSprite(pokemon, modifier = Modifier.size(statCardPokemonSpriteSize))
         Text(
             text = if (stats.totalGames == 0) "No usage"
-            else "Participated in\n${stats.usage} out of ${stats.totalGames} games",
+            else "Won in\n${stats.usage} out of ${stats.totalGames} games",
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center
         )
@@ -107,7 +107,7 @@ internal fun TeraAndWinCard(
         viewModel.pokemonImageService.TeraTypeImage(pokeTera.type, modifier = Modifier.size(statCardPokemonSpriteSize))
         Text(
             text = if (stats.totalGames == 0) "Did not tera"
-            else "Participated in\n${stats.usage} out of ${stats.totalGames} games",
+            else "Won \n${stats.usage} out of ${stats.totalGames} games",
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center
         )
