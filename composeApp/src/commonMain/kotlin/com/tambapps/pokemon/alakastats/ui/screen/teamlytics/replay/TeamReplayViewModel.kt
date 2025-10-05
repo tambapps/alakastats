@@ -117,7 +117,7 @@ class TeamReplayViewModel(
                 }
             }.awaitAll().filterNotNull()
 
-            val duplicates = results.intersect(team.replays)
+            val duplicates = results.filter { resultReplay -> team.replays.any { it.reference == resultReplay.reference } }
             if (duplicates.size < results.size) {
                 handleReplaysUseCase.addReplays(results - duplicates)
             }
