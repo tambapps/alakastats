@@ -39,7 +39,9 @@ class LeadStatsViewModel(
                 loadDuoStats(replays)
                 loadIndividualStats(replays)
             }
-            isLoading = false
+            kotlinx.coroutines.withContext(Dispatchers.Main) {
+                isLoading = false
+            }
         }
     }
 

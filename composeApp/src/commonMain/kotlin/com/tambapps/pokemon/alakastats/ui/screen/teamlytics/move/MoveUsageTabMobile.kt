@@ -8,22 +8,33 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBar
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 internal fun MoveUsageTabMobile(viewModel: MoveUsageViewModel) {
-    Column(Modifier.fillMaxWidth()
-        .padding(horizontal = 4.dp)
-        .verticalScroll(rememberScrollState())) {
-        viewModel.pokemonMovesUsage.forEach { (pokemonName, moveUsage) ->
-            PokemonMoveUsageDonut(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                viewModel = viewModel,
-                name = pokemonName,
-                moveUsage = moveUsage
-            )
+    Column(
+        Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.weight(1f)
+            .padding(horizontal = 4.dp)
+            .verticalScroll(rememberScrollState())) {
+            if (viewModel.isLoading) {
+
+            }
+            viewModel.pokemonMovesUsage.forEach { (pokemonName, moveUsage) ->
+                PokemonMoveUsageDonut(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    viewModel = viewModel,
+                    name = pokemonName,
+                    moveUsage = moveUsage
+                )
+            }
+        }
+        if (viewModel.isLoading) {
+            LinearProgressBar()
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,7 +16,6 @@ import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import io.github.koalaplot.core.pie.PieChart
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import kotlin.math.roundToInt
 
 @Composable
 fun MoveUsageTab(viewModel: MoveUsageViewModel) {
@@ -34,6 +32,7 @@ fun MoveUsageTab(viewModel: MoveUsageViewModel) {
     }
 }
 
+private const val MOVE_STRUGGLE = "struggle"
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 internal fun PokemonMoveUsageDonut(
@@ -42,23 +41,26 @@ internal fun PokemonMoveUsageDonut(
     name: PokemonName,
     moveUsage: Map<String, Int>
 ) {
-    val total = remember { moveUsage.entries.sumOf { it.value } }
+    val rawEntries = moveUsage.entries.filter { PokemonNormalizer.normalize(it.key) != MOVE_STRUGGLE }
+    val total = remember { rawEntries.sumOf { it.value } }
     val entries = remember {
-        moveUsage.entries.map {
+        rawEntries.map {
             Triple(PokemonNormalizer.pretty(it.key), it.value, it.value * 100 / total)
         }
     }
+
+    val diameter = if (LocalIsCompact.current) 150.dp else 200.dp
     PieChart(
         entries.map { it.second.toFloat() },
         modifier = modifier,
         label = { i ->
-            val (moveName, _, percentage) = entries[i]
-            Text("$moveName\n$percentage%", textAlign = TextAlign.Center, style = MaterialTheme.typography.labelLarge)
+            val (moveName, count, percentage) = entries[i]
+            Text("$moveName\n$count ($percentage%)", textAlign = TextAlign.Center, style = MaterialTheme.typography.labelLarge)
         },
         holeSize = 0.75F,
         forceCenteredPie = true,
-        minPieDiameter = 150.dp,
-        maxPieDiameter = 150.dp,
+        minPieDiameter = diameter,
+        maxPieDiameter = diameter,
         holeContent = {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -69,6 +71,7 @@ internal fun PokemonMoveUsageDonut(
         }
     )
 }
+
 @Composable
 private fun NoData() {
     Box(Modifier.fillMaxSize()) {

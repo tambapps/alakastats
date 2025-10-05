@@ -43,7 +43,9 @@ class UsageStatsViewModel(
                 loadUsageAndWinStats(replays)
                 loadTeraAndWinStats(replays)
             }
-            isLoading = false
+            kotlinx.coroutines.withContext(Dispatchers.Main) {
+                isLoading = false
+            }
         }
     }
 

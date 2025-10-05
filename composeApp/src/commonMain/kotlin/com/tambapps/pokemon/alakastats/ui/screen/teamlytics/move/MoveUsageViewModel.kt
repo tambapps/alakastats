@@ -26,10 +26,17 @@ class MoveUsageViewModel(
     val pokemonMovesUsage = mutableStateMapOf<PokemonName, Map<String, Int>>()
 
     fun loadStats() {
+        if (isLoading) {
+            return
+        }
+        isLoading = true
         scope.launch {
             team.withContext {
                 val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
                 doLoadStats(replays)
+            }
+            kotlinx.coroutines.withContext(Dispatchers.Main) {
+                isLoading = false
             }
         }
     }
