@@ -89,7 +89,7 @@ internal fun AddReplayButton(viewModel: TeamReplayViewModel) {
             modifier = Modifier.size(ButtonDefaults.IconSize)
         )
         Spacer(Modifier.width(8.dp))
-        Text("Add Replay", style = buttonTextStyle.copy(
+        Text("Add Replay(s)", style = buttonTextStyle.copy(
             color = LocalContentColor.current
         ))
     }
@@ -99,7 +99,7 @@ internal fun AddReplayButton(viewModel: TeamReplayViewModel) {
 private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
     AlertDialog(
         onDismissRequest = { viewModel.hideAddReplayDialog() },
-        title = { Text("Add Replays") },
+        title = { Text("Add Replay(s)") },
         text = {
             Column {
                 Text(
@@ -132,7 +132,7 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
                 onClick = { viewModel.addReplays(snackBar) },
                 enabled = viewModel.replayUrlsText.isNotBlank() && viewModel.getValidationMessage()?.contains("No valid") != true
             ) {
-                Text("Add Replays")
+                Text("Add Replay(s)")
             }
         },
         dismissButton = {
