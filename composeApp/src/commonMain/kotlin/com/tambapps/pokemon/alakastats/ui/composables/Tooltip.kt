@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import com.tambapps.pokemon.alakastats.PlatformType
+import com.tambapps.pokemon.alakastats.getPlatform
 import kotlin.time.Duration.Companion.seconds
 
 // Tooltip only works for Mobile
@@ -46,13 +48,18 @@ fun Tooltip(tooltip: String, modifier: Modifier = Modifier, content: @Composable
     }
 
     Box(modifier) {
-        Box(
-            modifier = Modifier.pointerInput(Unit) {
-                detectTapGestures(
-                    onLongPress = { show = true },
-                )
-            }
-        ) {
+        val modifier = if (getPlatform().type == PlatformType.Web) Modifier.pointerInput(Unit) {
+            detectTapGestures(
+                onTap = { show = true },
+            )
+        }
+         else Modifier.pointerInput(Unit) {
+            detectTapGestures(
+                onLongPress = { show = true },
+            )
+        }
+
+        Box(modifier = modifier) {
             content()
         }
         if (show) {

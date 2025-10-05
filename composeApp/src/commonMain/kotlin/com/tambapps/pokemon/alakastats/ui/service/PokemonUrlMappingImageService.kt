@@ -223,14 +223,14 @@ class PokemonLocalUrlImageService(
         name: PokemonName,
         modifier: Modifier,
         disableTooltip: Boolean
-    ) = WebPokemonImage("sprite", name.normalized.value, modifier)
+    ) = WebPokemonImage("sprite", name.normalized.value, modifier, disableTooltip)
 
     @Composable
     override fun PokemonArtwork(
         name: PokemonName,
         modifier: Modifier,
         disableTooltip: Boolean
-    ) = WebPokemonImage("artwork", name.normalized.value, modifier)
+    ) = WebPokemonImage("artwork", name.normalized.value, modifier, disableTooltip)
 
     @Composable
     override fun ItemImage(
@@ -239,18 +239,28 @@ class PokemonLocalUrlImageService(
         disableTooltip: Boolean
     ) {
         val formattedItemName = PokemonNormalizer.normalize(item)
-        MyImage(url = "$baseUrl/images/items/$formattedItemName.png",
-            contentDescription = item,
-            modifier = modifier,
-        )
+        TooltipIfEnabled(disableTooltip, item, modifier) { mod ->
+            MyImage(url = "$baseUrl/images/items/$formattedItemName.png",
+                contentDescription = item,
+                modifier = modifier,
+            )
+        }
+
     }
 
     @Composable
-    private fun WebPokemonImage(type: String, name: String, modifier: Modifier) {
-        MyImage(url = "$baseUrl/images/pokemons/$type/$name.png",
-            contentDescription = name,
-            modifier = modifier,
-        )
+    private fun WebPokemonImage(
+        type: String,
+        name: String,
+        modifier: Modifier,
+        disableTooltip: Boolean
+    ) {
+        TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
+            MyImage(url = "$baseUrl/images/pokemons/$type/$name.png",
+                contentDescription = name,
+                modifier = mod,
+            )
+        }
     }
 }
 
