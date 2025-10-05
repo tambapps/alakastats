@@ -27,5 +27,5 @@ internal fun ColumnScope.TeamlyticsScreenDesktop(
             TabRowContent(pagerState, tabs)
         }
     }
-    Pager(viewModel, pagerState)
+    Pager(Modifier.weight(1f), viewModel, pagerState)
 }

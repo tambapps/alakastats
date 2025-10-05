@@ -86,13 +86,14 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
 }
 
 @Composable
-internal fun ColumnScope.Pager(
+internal fun Pager(
+    modifier: Modifier,
     viewModel: TeamlyticsViewModel,
     pagerState: PagerState
 ) {
     HorizontalPager(
         state = pagerState,
-        modifier = Modifier.weight(1f)
+        modifier = modifier
     ) { page ->
         val team = viewModel.requireTeam()
         val teamState = viewModel.teamState

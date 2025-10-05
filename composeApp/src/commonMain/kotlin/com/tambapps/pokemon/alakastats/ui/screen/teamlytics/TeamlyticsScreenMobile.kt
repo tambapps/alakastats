@@ -18,7 +18,7 @@ internal fun ColumnScope.TeamlyticsScreenMobile(
     tabs: List<String>,
     pagerState: PagerState
 ) {
-    Pager(viewModel, pagerState)
+    Pager(Modifier.weight(1f), viewModel, pagerState)
     Row(Modifier.fillMaxWidth()) {
         val navigator = LocalNavigator.currentOrThrow
         BackIconButton(navigator)
