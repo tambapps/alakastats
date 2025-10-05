@@ -268,20 +268,21 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
     }
 
     @Composable
-    override fun PokemonSprite(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name.normalized.value, modifier, disableTooltip) { it.sprite }
+    override fun PokemonSprite(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name, modifier, disableTooltip) { it.sprite }
     @Composable
-    override fun PokemonArtwork(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name.normalized.value, modifier, disableTooltip) { it.artwork }
+    override fun PokemonArtwork(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name, modifier, disableTooltip) { it.artwork }
 
     @Composable
-    private inline fun PokemonImage(name: String, modifier: Modifier, disableTooltip: Boolean = false, imageUrlSupplier: (PokemonSpriteData) -> String) {
-        val pokemonSpriteData = pokemonImages[PokemonNormalizer.normalizeToBase(name)]
+    private inline fun PokemonImage(pokemonName: PokemonName, modifier: Modifier, disableTooltip: Boolean = false, imageUrlSupplier: (PokemonSpriteData) -> String) {
+        val name = pokemonName.normalized.value
+        val pokemonSpriteData = pokemonImages[name]
         val imageUrl = pokemonSpriteData?.let(imageUrlSupplier)
 
 
         TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
             if (imageUrl != null) {
                 MyImage(url = imageUrl,
-                    contentDescription = pokemonSpriteData.name,
+                    contentDescription = pokemonName.pretty,
                     modifier = mod,
                 )
             } else {
