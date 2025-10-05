@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<!-- Generated from confidentiality-rules.md: update both files together -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy – Alakastats</title>
+    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <style>
+        :root {
+            color-scheme: light dark;
+            --text: #1c1b1f;
+            --muted: #49454f;
+            --background: #fffbfe;
+            --rule: #e0dce4;
+            --code: #f1edf4;
+            --link: #6750a4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text: #e6e1e5;
+                --muted: #cac4d0;
+                --background: #1c1b1f;
+                --rule: #3a3740;
+                --code: #2b2930;
+                --link: #d0bcff;
+            }
+        }
+        body {
+            margin: 0;
+            padding: 32px 16px 64px;
+            background: var(--background);
+            color: var(--text);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+        }
+        main {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2rem;
+            line-height: 1.25;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid var(--rule);
+            margin: 32px 0;
+        }
+        code {
+            background: var(--code);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        a {
+            color: var(--link);
+        }
+        .updated {
+            color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Privacy Policy – Alakastats (Android/iOS/Web)</h1>
+    <p class="updated"><strong>Last updated: October 22, 2026</strong></p>
+
+    <hr>
+
+    <h2>1. Introduction</h2>
+    <p>Alakastats is an application dedicated to Pokémon team and statistics analysis.<br>
+        Protecting your privacy is a priority.</p>
+    <p>This Privacy Policy transparently explains how the application handles user information.</p>
+
+    <hr>
+
+    <h2>2. Data Collection</h2>
+    <p><strong>Alakastats does not collect any personal data.</strong> The developer has no server and never receives your data.</p>
+    <p>Specifically:</p>
+    <ul>
+        <li>No personal identification data (name, email address, device identifiers)</li>
+        <li>No location data</li>
+        <li>No health data</li>
+        <li>No financial information</li>
+        <li>No usage data sent to external servers</li>
+        <li>No advertising identifiers</li>
+        <li>No cookies</li>
+        <li>No tracking technologies</li>
+    </ul>
+
+    <hr>
+
+    <h2>3. Data Storage</h2>
+    <p>All data you enter into the application (teams, statistics, notes, analyses, etc.):</p>
+    <ul>
+        <li>Is stored <strong>locally on your device</strong> (in your browser for the web version)</li>
+        <li>Is never sent to a server of the developer</li>
+        <li>Is never shared with third parties</li>
+        <li>Is accessible only by you, unless you share a team with other people (see section 4)</li>
+    </ul>
+    <p>If you choose to enable the optional Google Drive sync (see section 4), a copy of this data is also stored in <strong>your own</strong> Google Drive.</p>
+    <p>You may delete the local data at any time by:</p>
+    <ul>
+        <li>Uninstalling the application</li>
+        <li>Clearing the application's data through system settings (or the site's data in your browser)</li>
+    </ul>
+
+    <hr>
+
+    <h2>4. Optional Google Drive Sync</h2>
+    <p>Alakastats lets you sync your teams between your devices through your own Google Drive. <strong>This feature is disabled by default</strong> and only works once you connect your Google account in the application. Without it, the application works entirely locally.</p>
+    <p>When you connect your Google Drive:</p>
+    <ul>
+        <li>The application only asks for the <code>drive.appdata</code> permission: access to a <strong>hidden folder of your Google Drive dedicated to Alakastats</strong>. It cannot see, read or modify any other file of your Drive.</li>
+        <li>Your teams (team, replays analyses, notes, game plans) are saved in this hidden folder, in your own Google account, and count towards your own storage quota.</li>
+        <li>The data goes directly from your device to Google: it never goes through a server of the developer, and the developer has no access to it.</li>
+        <li>Google's sign-in gives the application an access token to your Drive. This token stays on your device (in the system's secure storage on iOS, in the browser's session on the web) and is only used to sync your teams.</li>
+        <li>The application reads the email address of the connected Google account, only to show you which account is connected. It's kept on your device only, never sent anywhere else, and deleted when you disconnect. The application doesn't read your name or any other information of your Google account.</li>
+    </ul>
+
+    <h3>Shared teams</h3>
+    <p>If you choose to, you can share a team with other people through Google Drive:</p>
+    <ul>
+        <li>The application then asks for the <code>drive.file</code> permission: access <strong>only to the files Alakastats created, or that you picked in the application</strong> (Google's file picker). It cannot see, read or modify any other file of your Drive.</li>
+        <li>A team you share is moved to an "Alakastats" folder of your Google Drive. You invite people with the email address of their Google account: the application sends it to Google to share the file, and Google sends them an invitation email. The application doesn't store these addresses: it only shows the people the team is shared with, as Google gives them.</li>
+        <li>The people you invite can see the team (and change it, if you made them editors), as with any file shared through Google Drive. They join it by picking it in the application. You can change their role, remove them or stop sharing at any time; they then keep a copy of the team as it was.</li>
+        <li>A team shared with you stays in its owner's Google Drive. If the owner deletes it, stops sharing it or removes you, you keep a copy of it on your devices.</li>
+    </ul>
+    <p>Alakastats' use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+    <p>You can stop the sync and delete the synced data at any time:</p>
+    <ul>
+        <li><strong>Disconnect</strong> your Google Drive in the application (Sync screen): the sync stops and the application's access is revoked. Your teams stay on your device and in your Drive.</li>
+        <li><strong>Delete the synced data</strong> from Google Drive: Settings → Manage apps → Alakastats → Options → Delete hidden app data. The teams you shared are in the "Alakastats" folder of your Drive, and can be deleted like any file.</li>
+        <li><strong>Revoke the access</strong> from your Google account: Security → Your connections to third-party apps &amp; services → Alakastats.</li>
+    </ul>
+
+    <hr>
+
+    <h2>5. Advertising</h2>
+    <p>Alakastats:</p>
+    <ul>
+        <li>Displays no advertisements</li>
+        <li>Uses no advertising SDKs</li>
+        <li>Shares no data with advertising networks</li>
+    </ul>
+
+    <hr>
+
+    <h2>6. Third-Party Services</h2>
+    <p>The application:</p>
+    <ul>
+        <li>Does not use analytics services</li>
+        <li>Does not use tracking services</li>
+        <li>Downloads public data (battle replays from Pokémon Showdown, Pokémon data from PokéAPI), without sending any personal data</li>
+        <li>Only uses Google services (Google Sign-In and the Google Drive API) if you enable the Google Drive sync. Their use is governed by <a href="https://policies.google.com/privacy">Google's Privacy Policy</a>.</li>
+    </ul>
+
+    <hr>
+
+    <h2>7. Permissions</h2>
+    <p>Alakastats does not request any sensitive permissions.<br>
+        If standard system permissions are required by your device for basic functionality, they are never used to collect or transmit personal data.</p>
+
+    <hr>
+
+    <h2>8. Security</h2>
+    <p>The developer has no server: no data is processed outside of your device, except by Google if you enable the Google Drive sync, in which case the data is sent to your Drive over encrypted (HTTPS) connections.<br>
+        The security of locally stored data depends on your device's protection mechanisms (screen lock, encryption, etc.), and the security of synced data on your Google account's protection.</p>
+
+    <hr>
+
+    <h2>9. Children's Privacy</h2>
+    <p>The application does not collect any data and can be used without providing personal information.<br>
+        No data related to children is collected.</p>
+
+    <hr>
+
+    <h2>10. Changes to This Policy</h2>
+    <p>If this Privacy Policy is updated, the "Last updated" date at the top of this document will be revised accordingly.</p>
+
+    <hr>
+
+    <h2>11. Contact</h2>
+    <p>For any questions regarding this Privacy Policy:</p>
+    <ul>
+        <li>Email: <a href="mailto:tambapps@gmail.com">tambapps@gmail.com</a></li>
+        <li>GitHub issues: <a href="https://github.com/tambapps/alakastats/issues">https://github.com/tambapps/alakastats/issues</a></li>
+    </ul>
+
+    <hr>
+
+    <h3>Summary</h3>
+    <p>Alakastats is a local-first application, with no data collection and no advertising. If you choose to, your teams can be synced through a hidden folder of your own Google Drive, and shared with the people you invite through Google Drive. The developer never has access to any of it.</p>
+</main>
+</body>
+</html>
