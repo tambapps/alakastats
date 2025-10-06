@@ -3,16 +3,13 @@ package com.tambapps.pokemon.alakastats.ui.screen.home
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.more_horiz
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -59,18 +56,11 @@ object HomeScreen : Screen {
         }
         val isDarkTheme = isSystemInDarkTheme()
         val isCompact = LocalIsCompact.current
-        
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .safeContentPadding()
-                .fillMaxSize(),
-        ) {
-            if (isCompact) {
-                HomeScreenMobile(isDarkTheme, viewModel)
-            } else {
-                HomeScreenDesktop(isDarkTheme, viewModel)
-            }
+
+        if (isCompact) {
+            HomeScreenMobile(isDarkTheme, viewModel)
+        } else {
+            HomeScreenDesktop(isDarkTheme, viewModel)
         }
         
         viewModel.teamToDelete?.let { teamToDelete ->

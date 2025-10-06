@@ -5,14 +5,18 @@ import alakastats.composeapp.generated.resources.alakastats
 import alakastats.composeapp.generated.resources.alakastats_dark
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -28,17 +32,24 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-internal fun ColumnScope.HomeScreenDesktop(isDarkTheme: Boolean, viewModel: HomeViewModel) {
-    AlakastatsLabel(isDarkTheme)
-    CatchPhrase()
-    Spacer(Modifier.height(8.dp))
-    Row(
-        modifier = Modifier,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+internal fun HomeScreenDesktop(isDarkTheme: Boolean, viewModel: HomeViewModel) {
+    Column(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .padding(all = 16.dp)
+            .fillMaxSize(),
     ) {
-        ButtonBarContent()
+        AlakastatsLabel(isDarkTheme)
+        CatchPhrase()
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ButtonBarContent()
+        }
+        TeamCardGrid(viewModel, 3)
     }
-    TeamCardGrid(viewModel, 3)
 }
 
 @Composable
