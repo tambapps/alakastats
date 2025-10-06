@@ -231,18 +231,6 @@ internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: St
 }
 
 @Composable
-internal fun VsText(opponentPlayer: Player, gameOutput: GameOutput) {
-    val playerName =
-        if (gameOutput != GameOutput.UNKNOWN) opponentPlayer.name
-        else "???"
-    Text(
-        text = "VS $playerName",
-        style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(start = 8.dp)
-    )
-}
-
-@Composable
 internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplayViewModel) {
     var showDialog by remember { mutableStateOf(false) }
     OutlinedButton(

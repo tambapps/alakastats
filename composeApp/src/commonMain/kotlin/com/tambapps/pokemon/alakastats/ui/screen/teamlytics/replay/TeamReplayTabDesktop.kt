@@ -88,13 +88,16 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
             verticalAlignment = Alignment.CenterVertically
         ) {
             GameOutputCard(gameOutput)
-            VsText(opponentPlayer, gameOutput)
+            VsText(currentPlayer, opponentPlayer, gameOutput)
             Spacer(Modifier.width(16.dp))
-            PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer,
-                childModifier = Modifier.size(100.dp).padding(bottom = 16.dp))
-            opponentPlayer.ots?.let { openTeamSheet ->
-                Spacer(Modifier.width(16.dp))
-                OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
+            if (gameOutput != GameOutput.UNKNOWN) {
+                PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer,
+                    childModifier = Modifier.size(100.dp).padding(bottom = 16.dp))
+
+                opponentPlayer.ots?.let { openTeamSheet ->
+                    Spacer(Modifier.width(16.dp))
+                    OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
+                }
             }
             replay.url?.let { replayUrl ->
                 Spacer(Modifier.width(20.dp))
@@ -207,4 +210,16 @@ private fun NoReplaysDesktop(viewModel: TeamReplayViewModel) {
             )
         }
     }
+}
+
+@Composable
+private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutput: GameOutput) {
+    val text =
+        if (gameOutput != GameOutput.UNKNOWN) "VS ${opponentPlayer.name}"
+        else "${currentPlayer.name} VS ${opponentPlayer.name}"
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.padding(start = 8.dp)
+    )
 }

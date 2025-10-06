@@ -84,10 +84,12 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
     ExpansionTile(
         title = { isExpanded ->
             GameOutputCard(gameOutput)
-            VsText(opponentPlayer, gameOutput)
+            VsText(currentPlayer, opponentPlayer, gameOutput)
         },
         subtitle = {
-            PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer, fillWidth = true)
+            if (gameOutput != GameOutput.UNKNOWN) {
+                PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer, fillWidth = true)
+            }
         },
         menu = { isMenuExpandedState ->
             ReplayDropDownMenu(isMenuExpandedState, viewModel, replay)
@@ -95,7 +97,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
     ) {
         Column {
             Spacer(Modifier.height(8.dp))
-            if (opponentPlayer.ots != null && replay.url != null) {
+            if (gameOutput != GameOutput.UNKNOWN && opponentPlayer.ots != null && replay.url != null) {
                 Row(Modifier.fillMaxWidth()
                     .padding(horizontal = 8.dp)) {
                     Spacer(Modifier.weight(1f))
@@ -105,7 +107,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                     Spacer(Modifier.weight(1f))
                 }
                 Spacer(Modifier.height(8.dp))
-            } else if (opponentPlayer.ots != null) {
+            } else if (gameOutput != GameOutput.UNKNOWN && opponentPlayer.ots != null) {
                 OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
                 Spacer(Modifier.height(8.dp))
             } else if (replay.url != null) {
@@ -191,4 +193,17 @@ private fun NoReplaysMobile(viewModel: TeamReplayViewModel) {
             )
         }
     }
+}
+
+@Composable
+private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutput: GameOutput) {
+    val text =
+        if (gameOutput != GameOutput.UNKNOWN) "VS ${opponentPlayer.name}"
+        else "${currentPlayer.name}\nVS\n${opponentPlayer.name}"
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.padding(start = 8.dp),
+        textAlign = if (gameOutput != GameOutput.UNKNOWN) null else TextAlign.Center
+    )
 }
