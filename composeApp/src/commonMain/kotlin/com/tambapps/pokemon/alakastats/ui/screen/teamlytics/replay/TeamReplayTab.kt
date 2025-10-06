@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.PlatformType
+import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
@@ -230,9 +231,12 @@ internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: St
 }
 
 @Composable
-internal fun VsText(opponentPlayer: Player) {
+internal fun VsText(opponentPlayer: Player, gameOutput: GameOutput) {
+    val playerName =
+        if (gameOutput != GameOutput.UNKNOWN) opponentPlayer.name
+        else "???"
     Text(
-        text = "VS ${opponentPlayer.name}",
+        text = "VS $playerName",
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(start = 8.dp)
     )

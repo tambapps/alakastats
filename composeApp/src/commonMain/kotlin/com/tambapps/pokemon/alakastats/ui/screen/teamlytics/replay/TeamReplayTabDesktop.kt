@@ -88,7 +88,7 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
             verticalAlignment = Alignment.CenterVertically
         ) {
             GameOutputCard(gameOutput)
-            VsText(opponentPlayer)
+            VsText(opponentPlayer, gameOutput)
             Spacer(Modifier.width(16.dp))
             PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer,
                 childModifier = Modifier.size(100.dp).padding(bottom = 16.dp))

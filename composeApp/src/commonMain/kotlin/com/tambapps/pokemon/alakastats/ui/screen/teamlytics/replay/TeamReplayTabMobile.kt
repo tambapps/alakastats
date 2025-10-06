@@ -84,7 +84,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
     ExpansionTile(
         title = { isExpanded ->
             GameOutputCard(gameOutput)
-            VsText(opponentPlayer)
+            VsText(opponentPlayer, gameOutput)
         },
         subtitle = {
             PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer, fillWidth = true)
