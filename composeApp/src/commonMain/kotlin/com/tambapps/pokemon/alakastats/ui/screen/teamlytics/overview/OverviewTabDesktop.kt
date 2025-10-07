@@ -46,17 +46,14 @@ internal fun OverviewTabDesktop(viewModel: OverviewViewModel) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             TeamName(team, modifier = Modifier.weight(1f))
-            Row(
-                Modifier.padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (viewModel.isEditingNotes) {
 
-                 // TODO add save and cancel button
-                }
-                Spacer(Modifier.width(8.dp))
+            if (viewModel.isEditingNotes) {
+
+                // TODO add save and cancel button
+            } else {
                 MoreActionsButton(viewModel)
             }
+            Spacer(Modifier.width(8.dp))
         }
         Header(team)
 

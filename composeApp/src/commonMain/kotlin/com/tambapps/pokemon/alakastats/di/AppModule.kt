@@ -14,6 +14,7 @@ import com.tambapps.pokemon.alakastats.domain.transformer.TeamPreviewTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamPreviewPokemonTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.OpenTeamSheetTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
+import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsNotesTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransformer
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
@@ -44,6 +45,7 @@ import org.koin.dsl.module
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import org.koin.core.module.dsl.singleOf
 
 private val appModule = module {
     single { Json { ignoreUnknownKeys = true } }
@@ -97,15 +99,16 @@ private val appModule = module {
 }
 
 private val transformerModule = module {
-    single { TerastallizationTransformer() }
-    single { TeamPreviewPokemonTransformer() }
-    single { OtsPokemonTransformer() }
-    single { TeamPreviewTransformer(get()) }
-    single { OpenTeamSheetTransformer(get()) }
-    single { PlayerTransformer(get(), get(), get()) }
-    single { ReplayAnalyticsTransformer(get()) }
-    single { TeamlyticsTransformer(get(), get()) }
-    single { TeamlyticsPreviewTransformer() }
+    singleOf(::TerastallizationTransformer)
+    singleOf(::TeamPreviewPokemonTransformer)
+    singleOf(::OtsPokemonTransformer)
+    singleOf(::TeamPreviewTransformer)
+    singleOf(::OpenTeamSheetTransformer)
+    singleOf(::PlayerTransformer)
+    singleOf(::ReplayAnalyticsTransformer)
+    singleOf(::TeamlyticsTransformer)
+    singleOf(::TeamlyticsNotesTransformer)
+    singleOf(::TeamlyticsPreviewTransformer)
 }
 
 val appModules = listOf(appModule, transformerModule)

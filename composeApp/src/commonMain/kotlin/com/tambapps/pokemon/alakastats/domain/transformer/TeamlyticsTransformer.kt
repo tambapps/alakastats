@@ -2,9 +2,11 @@ package com.tambapps.pokemon.alakastats.domain.transformer
 
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsNotesEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
@@ -12,6 +14,7 @@ import kotlin.time.Clock
 
 class TeamlyticsTransformer(
     private val replayAnalyticsTransformer: ReplayAnalyticsTransformer,
+    private val notesTransformer: TeamlyticsNotesTransformer,
     private val pokepasteParser: PokepasteParser
 ) {
     
@@ -22,7 +25,8 @@ class TeamlyticsTransformer(
             pokePaste = domain.pokePaste.toPokePasteString(),
             replays = domain.replays.map { replayAnalyticsTransformer.toEntity(it) },
             sdNames = domain.sdNames,
-            lastUpdatedAt = domain.lastUpdatedAt
+            lastUpdatedAt = domain.lastUpdatedAt,
+            notes = domain.notes?.let(notesTransformer::toEntity)
         )
     }
     
@@ -33,7 +37,8 @@ class TeamlyticsTransformer(
             pokePaste = entity.pokePaste.let(pokepasteParser::tryParse) ?: PokePaste(emptyList()),
             replays = entity.replays.map { replayAnalyticsTransformer.toDomain(it) },
             sdNames = entity.sdNames,
-            lastUpdatedAt = entity.lastUpdatedAt ?: Clock.System.now()
+            lastUpdatedAt = entity.lastUpdatedAt ?: Clock.System.now(),
+            notes = entity.notes?.let(notesTransformer::toDomain)
         )
     }
 
@@ -72,6 +77,24 @@ class TeamlyticsPreviewTransformer {
             nbReplays = entity.nbReplays,
             winrate = entity.winrate,
             lastUpdatedAt = entity.lastUpdatedAt ?: Clock.System.now()
+        )
+    }
+}
+
+
+class TeamlyticsNotesTransformer {
+
+    fun toDomain(entity: TeamlyticsNotesEntity): TeamlyticsNotes {
+        return TeamlyticsNotes(
+            teamNotes = entity.teamNotes,
+            pokemonNotes = entity.pokemonNotes.mapKeys { (key, _) -> PokemonName(key) }
+        )
+    }
+
+    fun toEntity(domain: TeamlyticsNotes): TeamlyticsNotesEntity {
+        return TeamlyticsNotesEntity(
+            teamNotes = domain.teamNotes,
+            pokemonNotes = domain.pokemonNotes.mapKeys { (key, _) -> key.value }
         )
     }
 }

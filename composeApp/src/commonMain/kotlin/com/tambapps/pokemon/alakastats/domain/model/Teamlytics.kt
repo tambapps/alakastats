@@ -11,11 +11,17 @@ data class Teamlytics(
     val pokePaste: PokePaste,
     val replays: List<ReplayAnalytics>,
     val sdNames: List<String>,
-    val lastUpdatedAt: Instant
+    val lastUpdatedAt: Instant,
+    val notes: TeamlyticsNotes?
 ) {
     val winRate get() = computeWinRatePercentage(sdNames, replays)
 
 }
+
+data class TeamlyticsNotes(
+    val teamNotes: String,
+    val pokemonNotes: Map<PokemonName, String>
+)
 
 data class TeamlyticsPreview(
     val id: Uuid,

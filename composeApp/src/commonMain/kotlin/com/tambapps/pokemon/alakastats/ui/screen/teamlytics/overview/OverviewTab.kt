@@ -109,40 +109,39 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
             contentDescription = "More",
             tint = MaterialTheme.colorScheme.defaultIconColor
         )
-    }
-
-    DropdownMenu(
-        expanded = isMenuExpanded,
-        onDismissRequest = { isMenuExpanded = false }
-    ) {
-        DropdownMenuItem(
-            text = { Text("Export") },
-            onClick = {
-                isMenuExpanded = false
-                snackbar.show("TODO (not implemented yet)")
-            }
-        )
-
-        val alreadyHasNotes = false
-        DropdownMenuItem(
-            text = { Text(
-                if (!alreadyHasNotes) "Add notes" else "Edit notes"
-            ) },
-            onClick = {
-                viewModel.editNotes()
-                isMenuExpanded = false
-            }
-        )
-
-        if (alreadyHasNotes) {
+        DropdownMenu(
+            expanded = isMenuExpanded,
+            onDismissRequest = { isMenuExpanded = false }
+        ) {
             DropdownMenuItem(
-                text = { Text("Remove notes") },
+                text = { Text("Export") },
                 onClick = {
-                    viewModel.removeNotes()
+                    isMenuExpanded = false
+                    snackbar.show("TODO (not implemented yet)")
+                }
+            )
+
+            val alreadyHasNotes = false
+            DropdownMenuItem(
+                text = { Text(
+                    if (!alreadyHasNotes) "Add notes" else "Edit notes"
+                ) },
+                onClick = {
+                    viewModel.editNotes()
                     isMenuExpanded = false
                 }
             )
-        }
 
+            if (alreadyHasNotes) {
+                DropdownMenuItem(
+                    text = { Text("Remove notes") },
+                    onClick = {
+                        viewModel.removeNotes()
+                        isMenuExpanded = false
+                    }
+                )
+            }
+
+        }
     }
 }

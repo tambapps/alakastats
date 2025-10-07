@@ -13,8 +13,15 @@ data class TeamlyticsEntity(
     val pokePaste: String,
     val replays: List<ReplayAnalyticsEntity>,
     val sdNames: List<String>,
+    val notes: TeamlyticsNotesEntity? = null,
     val lastUpdatedAt: Instant?
 ): Identifiable<Uuid>
+
+@Serializable
+data class TeamlyticsNotesEntity(
+    val teamNotes: String,
+    val pokemonNotes: Map<String, String>
+)
 
 @Serializable
 data class TeamlyticsPreviewEntity(

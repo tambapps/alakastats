@@ -34,7 +34,8 @@ class EditTeamlyticsUseCaseImpl(
             pokePaste = pokePaste,
             replays = emptyList(),
             sdNames = sdNames,
-            lastUpdatedAt = Clock.System.now()
+            lastUpdatedAt = Clock.System.now(),
+            notes = null
         )
         return teamlyticsRepository.save(teamlytics)
     }
