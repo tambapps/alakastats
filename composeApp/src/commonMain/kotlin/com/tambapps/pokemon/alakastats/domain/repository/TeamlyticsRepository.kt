@@ -20,4 +20,5 @@ interface TeamlyticsRepository {
 
     suspend fun delete(id: Uuid)
 
+    fun exportToJson(teamlytics: Teamlytics): String
 }

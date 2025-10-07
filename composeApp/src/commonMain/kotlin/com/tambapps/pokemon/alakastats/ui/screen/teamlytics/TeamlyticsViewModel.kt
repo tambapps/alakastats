@@ -9,7 +9,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
-import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamNotesUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
@@ -22,7 +22,7 @@ import kotlin.uuid.Uuid
 class TeamlyticsViewModel(
     private val useCase: TeamlyticsUseCase,
     private val replayService: ReplayAnalyticsService
-) : ScreenModel, HandleTeamReplaysUseCase, HandleTeamNotesUseCase {
+) : ScreenModel, HandleTeamReplaysUseCase, HandleTeamOverviewUseCase {
 
     private val scope = CoroutineScope(Dispatchers.Default)
     val teamState = mutableStateOf<Teamlytics?>(null)
@@ -53,6 +53,8 @@ class TeamlyticsViewModel(
         val team = requireTeam()
         save(team.copy(notes = notes))
     }
+
+    override fun exportToJson(team: Teamlytics) = useCase.exportToJson(team)
 
     private fun trySetElo(replays: List<ReplayAnalytics>) = replays.map { replay ->
         if (replay.player1.beforeElo != null) return@map replay

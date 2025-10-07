@@ -24,7 +24,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamNotesUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
@@ -96,7 +96,7 @@ internal fun Pager(
         val team = viewModel.requireTeam()
         when (page) {
             0 -> {
-                val viewModel = koinInjectUseCase<HandleTeamNotesUseCase, OverviewViewModel>(viewModel)
+                val viewModel = koinInjectUseCase<HandleTeamOverviewUseCase, OverviewViewModel>(viewModel)
                 OverviewTab(viewModel)
             }
             1 -> {

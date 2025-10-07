@@ -90,6 +90,10 @@ kotlin {
             implementation(libs.voyager.koin)
             implementation(libs.ktor.client.core)
             implementation(libs.koalaplot.core)
+            implementation(libs.filekit.dialogs)
+            implementation(libs.filekit.core)
+            implementation(libs.filekit.coil)
+            implementation(libs.filekit.dialogs.compose)
         }
         iosMain.dependencies {
             implementation(libs.kstore.file)

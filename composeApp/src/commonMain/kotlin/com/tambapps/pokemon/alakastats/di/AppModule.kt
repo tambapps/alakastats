@@ -18,7 +18,7 @@ import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTrans
 import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransformer
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamNotesUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.usecase.TeamlyticsUseCaseImpl
@@ -65,7 +65,8 @@ private val appModule = module {
             teamsStorage = get(named("teamsStorage")), 
             previewsStorage = get(named("previewsStorage")), 
             teamlyticsTransformer = get(), 
-            previewTransformer = get()
+            previewTransformer = get(),
+            json = get()
         ) 
     }
 
@@ -76,7 +77,7 @@ private val appModule = module {
     factory { HomeViewModel(get(), get()) }
     factory { EditTeamViewModel(get(), get(), get()) }
     factory { TeamlyticsViewModel(get(), get()) }
-    factory { (useCase: HandleTeamNotesUseCase, team: Teamlytics) ->
+    factory { (useCase: HandleTeamOverviewUseCase, team: Teamlytics) ->
         OverviewViewModel(useCase, get(), team)
     }
     factory { (useCase: HandleTeamReplaysUseCase, team: Teamlytics) ->

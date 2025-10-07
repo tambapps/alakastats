@@ -1,6 +1,5 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -8,15 +7,18 @@ import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
-import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamNotesUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamOverviewUseCase
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.downloadToFile
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class OverviewViewModel(
-    private val useCase: HandleTeamNotesUseCase,
+    private val useCase: HandleTeamOverviewUseCase,
     val pokemonImageService: PokemonImageService,
     val team: Teamlytics,
 ) {
@@ -36,6 +38,21 @@ class OverviewViewModel(
     fun editNotes() {
         isEditingNotes = true
         initNotesState()
+    }
+
+    fun exportTeam(snackBar: SnackBar) {
+        isLoading = true
+        scope.launch {
+            val success = downloadToFile("${team.name}.json",
+                useCase.exportToJson(team).toByteArray())
+
+            withContext(Dispatchers.Main) {
+                isLoading = false
+                if (success) {
+                    snackBar.show("Successfully exported team", SnackBar.Severity.SUCCESS)
+                }
+            }
+        }
     }
 
     private fun initNotesState() {

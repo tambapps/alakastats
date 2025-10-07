@@ -14,4 +14,6 @@ class TeamlyticsUseCaseImpl(
     override suspend fun get(id: Uuid): Either<DomainError, Teamlytics> = repository.get(id)
 
     override suspend fun save(team: Teamlytics) = repository.save(team)
+
+    override fun exportToJson(team: Teamlytics) = repository.exportToJson(team)
 }

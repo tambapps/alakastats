@@ -3,6 +3,8 @@ package com.tambapps.pokemon.alakastats.infrastructure.repository.storage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.alakastats.util.Identifiable
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.download
 import io.github.xxfast.kstore.storage.storeOf
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
@@ -10,6 +12,11 @@ import kotlin.uuid.Uuid
 actual fun createTeamlyticsKStorage() = createKStorage<Uuid, TeamlyticsEntity>("teamlytics")
 
 actual fun createTeamlyticsPreviewKStorage() = createKStorage<Uuid, TeamlyticsPreviewEntity>("teamlytics-preview")
+
+actual suspend fun downloadToFile(fileName: String, bytes: ByteArray): Boolean {
+    FileKit.download(bytes, fileName)
+    return true
+}
 
 private inline fun <reified ID: @Serializable Any, reified T: @Serializable Identifiable<ID>> createKStorage(resourceName: String): KStorage<ID, T> {
     return KStorageImpl(

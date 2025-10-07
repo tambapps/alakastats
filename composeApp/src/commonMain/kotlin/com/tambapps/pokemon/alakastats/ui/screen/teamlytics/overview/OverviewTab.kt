@@ -119,7 +119,6 @@ internal fun NoteEditingButtons(viewModel: OverviewViewModel) {
 @Composable
 internal fun MoreActionsButton(viewModel: OverviewViewModel) {
     var isMenuExpanded by remember { mutableStateOf(false) }
-    val snackbar = LocalSnackBar.current
 
 
     OutlinedIconButton(
@@ -136,11 +135,12 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
             expanded = isMenuExpanded,
             onDismissRequest = { isMenuExpanded = false }
         ) {
+            val snackBar = LocalSnackBar.current
             DropdownMenuItem(
-                text = { Text("Export") },
+                text = { Text("Export team") },
                 onClick = {
                     isMenuExpanded = false
-                    snackbar.show("TODO (not implemented yet)")
+                    viewModel.exportTeam(snackBar)
                 }
             )
             val navigator = LocalNavigator.currentOrThrow

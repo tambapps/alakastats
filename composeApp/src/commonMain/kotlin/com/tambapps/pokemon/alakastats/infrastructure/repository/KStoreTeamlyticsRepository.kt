@@ -12,6 +12,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorag
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import kotlinx.coroutines.coroutineScope
+import kotlinx.serialization.json.Json
 import kotlin.uuid.Uuid
 
 class KStoreTeamlyticsRepository(
@@ -19,6 +20,7 @@ class KStoreTeamlyticsRepository(
     private val previewsStorage: KStorage<Uuid, TeamlyticsPreviewEntity>,
     private val teamlyticsTransformer: TeamlyticsTransformer,
     private val previewTransformer: TeamlyticsPreviewTransformer,
+    private val json: Json
 ): TeamlyticsRepository {
 
     override suspend fun listPreviews() = previewsStorage.listEntities().map(previewTransformer::toDomain)
@@ -50,5 +52,10 @@ class KStoreTeamlyticsRepository(
     override suspend fun delete(id: Uuid) {
         teamsStorage.delete(id)
         previewsStorage.delete(id)
+    }
+
+    override fun exportToJson(teamlytics: Teamlytics): String {
+        val entity = teamlyticsTransformer.toEntity(teamlytics)
+        return json.encodeToString(entity)
     }
 }

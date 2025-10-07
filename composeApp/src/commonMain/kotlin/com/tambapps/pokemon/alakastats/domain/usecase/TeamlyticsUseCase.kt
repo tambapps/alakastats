@@ -8,4 +8,6 @@ import kotlin.uuid.Uuid
 interface TeamlyticsUseCase {
     suspend fun get(id: Uuid): Either<DomainError, Teamlytics>
     suspend fun save(team: Teamlytics): Teamlytics
+
+    fun exportToJson(team: Teamlytics): String
 }
