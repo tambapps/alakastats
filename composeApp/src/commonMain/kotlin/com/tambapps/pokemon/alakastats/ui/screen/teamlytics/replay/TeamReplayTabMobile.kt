@@ -27,7 +27,7 @@ import com.tambapps.pokemon.alakastats.domain.model.getGameOutput
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
-import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBar
+import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 
 @Composable
@@ -56,9 +56,7 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
                 }
             }
         }
-        if (viewModel.isLoading) {
-            LinearProgressBar()
-        }
+        LinearProgressBarIfEnabled(viewModel.isLoading)
     }
 }
 
@@ -185,13 +183,8 @@ private fun NoReplaysMobile(viewModel: TeamReplayViewModel) {
             Text("No replays were found")
             AddReplayButton(viewModel)
         }
-
-        if (viewModel.isLoading) {
-            LinearProgressBar(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-            )
-        }
+        LinearProgressBarIfEnabled(viewModel.isLoading, modifier = Modifier
+            .align(Alignment.BottomStart))
     }
 }
 

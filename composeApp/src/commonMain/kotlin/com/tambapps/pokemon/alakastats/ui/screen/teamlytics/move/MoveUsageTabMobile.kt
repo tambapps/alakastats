@@ -8,7 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBar
+import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 
 
@@ -33,8 +33,6 @@ internal fun MoveUsageTabMobile(viewModel: MoveUsageViewModel) {
                 )
             }
         }
-        if (viewModel.isLoading) {
-            LinearProgressBar()
-        }
+        LinearProgressBarIfEnabled(viewModel.isLoading)
     }
 }

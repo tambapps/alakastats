@@ -24,7 +24,7 @@ class OverviewViewModel(
     var teamNotes by mutableStateOf("")
     val pokemonNotes = mutableStateMapOf<Pokemon, String>()
 
-    // TODO use it on UI
+    // TODO use it on mobile UI
     var isLoading by mutableStateOf(false)
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -70,6 +70,7 @@ class OverviewViewModel(
 
     fun cancelEditingNotes() {
         onStopEditingNotes()
+        initNotesState()
     }
 
     private fun onStopEditingNotes() {

@@ -37,7 +37,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.getGameOutput
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
-import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBar
+import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
@@ -53,9 +53,7 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
         return
     }
     Column(Modifier.fillMaxSize()) {
-        if (viewModel.isLoading) {
-            LinearProgressBar()
-        }
+        LinearProgressBarIfEnabled(viewModel.isLoading)
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -203,12 +201,8 @@ private fun NoReplaysDesktop(viewModel: TeamReplayViewModel) {
             AddReplayButton(viewModel)
         }
 
-        if (viewModel.isLoading) {
-            LinearProgressBar(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-            )
-        }
+        LinearProgressBarIfEnabled(viewModel.isLoading, modifier = Modifier
+            .align(Alignment.TopStart))
     }
 }
 

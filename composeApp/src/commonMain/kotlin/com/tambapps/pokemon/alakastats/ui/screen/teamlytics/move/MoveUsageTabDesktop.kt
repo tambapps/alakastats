@@ -12,14 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBar
+import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 
 @Composable
 internal fun MoveUsageTabDesktop(viewModel: MoveUsageViewModel) {
     Column(Modifier.fillMaxSize()) {
-        if (viewModel.isLoading) {
-            LinearProgressBar()
-        }
+        LinearProgressBarIfEnabled(viewModel.isLoading)
         Column(
             Modifier.weight(1f)
                 .padding(8.dp)
