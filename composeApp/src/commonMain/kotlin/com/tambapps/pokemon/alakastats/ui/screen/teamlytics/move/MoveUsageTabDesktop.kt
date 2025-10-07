@@ -24,16 +24,12 @@ internal fun MoveUsageTabDesktop(viewModel: MoveUsageViewModel) {
             Modifier.weight(1f)
                 .padding(8.dp)
         ) {
-            val entries = remember { viewModel.pokemonMovesUsage.entries.toList() }
-            DesktopRow(
-                viewModel,
-                entries.take(3),
-                Modifier.weight(1f)
-            )
-            if (entries.size > 3) {
+            val entryBlocks = remember { viewModel.pokemonMovesUsage.entries.toList().chunked(3) }
+
+            for (entry in entryBlocks) {
                 DesktopRow(
                     viewModel,
-                    entries.subList(3, entries.size),
+                    entry,
                     Modifier.weight(1f)
                 )
             }
