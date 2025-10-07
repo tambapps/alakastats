@@ -1,8 +1,8 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview
 
 import alakastats.composeapp.generated.resources.Res
-import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.more_vert
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,14 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -101,15 +102,6 @@ internal fun PokePasteTitle() {
 }
 
 @Composable
-internal fun EditButton(team: Teamlytics) {
-    val navigator = LocalNavigator.currentOrThrow
-
-    OutlinedButton(onClick = { navigator.push(EditTeamScreen(team))}) {
-        Text("Edit")
-    }
-}
-
-@Composable
 internal fun NoteEditingButtons(viewModel: OverviewViewModel) {
     Button(
         onClick = { viewModel.saveNotes() }
@@ -129,9 +121,13 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
     var isMenuExpanded by remember { mutableStateOf(false) }
     val snackbar = LocalSnackBar.current
 
-    IconButton(onClick = { isMenuExpanded = !isMenuExpanded }) {
+
+    OutlinedIconButton(
+        onClick = { isMenuExpanded = !isMenuExpanded },
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.defaultIconColor)
+    ) {
         Icon(
-            modifier = if (LocalIsCompact.current) Modifier else Modifier.size(40.dp),
+            modifier = Modifier.size(40.dp),
             painter = painterResource(Res.drawable.more_vert),
             contentDescription = "More",
             tint = MaterialTheme.colorScheme.defaultIconColor
