@@ -24,6 +24,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
@@ -104,9 +105,7 @@ internal fun Pager(
                 OverviewTab(viewModel)
             }
             1 -> {
-                val viewModel = koinInject<TeamNotesViewModel> {
-                    parametersOf(teamState, team)
-                }
+                val viewModel = koinInjectUseCase<HandleTeamNotesUseCase, TeamNotesViewModel>(viewModel)
                 TeamNotesTab(viewModel)
             }
             2 -> {

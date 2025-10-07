@@ -8,6 +8,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
@@ -20,7 +21,7 @@ import kotlin.uuid.Uuid
 class TeamlyticsViewModel(
     private val useCase: TeamlyticsUseCase,
     private val replayService: ReplayAnalyticsService
-) : ScreenModel, HandleTeamReplaysUseCase {
+) : ScreenModel, HandleTeamReplaysUseCase, HandleTeamNotesUseCase {
 
     private val scope = CoroutineScope(Dispatchers.Default)
     val teamState = mutableStateOf<Teamlytics?>(null)

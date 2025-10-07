@@ -18,6 +18,7 @@ import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTrans
 import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransformer
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.usecase.TeamlyticsUseCaseImpl
@@ -78,8 +79,8 @@ private val appModule = module {
     factory { (teamState: MutableState<Teamlytics?>, team: Teamlytics) ->
         OverviewViewModel(get(), teamState, team)
     }
-    factory { (teamState: MutableState<Teamlytics?>, team: Teamlytics) ->
-        TeamNotesViewModel(get(), teamState, team)
+    factory { (useCase: HandleTeamNotesUseCase, team: Teamlytics) ->
+        TeamNotesViewModel(get(), useCase, team)
     }
     factory { (useCase: HandleTeamReplaysUseCase, team: Teamlytics) ->
         TeamReplayViewModel(get(), useCase, team)
