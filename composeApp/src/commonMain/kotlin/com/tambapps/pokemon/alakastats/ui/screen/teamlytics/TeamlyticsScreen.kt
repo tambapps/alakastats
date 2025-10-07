@@ -30,8 +30,6 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.MoveUsageTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.MoveUsageViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesTab
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayTab
@@ -46,7 +44,7 @@ import kotlin.uuid.Uuid
 
 data class TeamlyticsScreen(val teamId: Uuid) : Screen {
     private companion object {
-        val TABS = listOf("Overview", "Team Notes", "Replays", "Move Usages", "Lead Stats", "Usage Stats", "Match-up Notes")
+        val TABS = listOf("Overview", "Replays", "Move Usages", "Lead Stats", "Usage Stats", "Match-up Notes")
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -102,26 +100,22 @@ internal fun Pager(
                 OverviewTab(viewModel)
             }
             1 -> {
-                val viewModel = koinInjectUseCase<HandleTeamNotesUseCase, TeamNotesViewModel>(viewModel)
-                TeamNotesTab(viewModel)
-            }
-            2 -> {
                 val viewModel = koinInjectUseCase<HandleTeamReplaysUseCase, TeamReplayViewModel>(viewModel)
                 TeamReplayTab(viewModel)
             }
-            3 -> {
+            2 -> {
                 val viewModel = koinInject<MoveUsageViewModel> {
                     parametersOf(team)
                 }
                 MoveUsageTab(viewModel)
             }
-            4 -> {
+            3 -> {
                 val viewModel = koinInject<LeadStatsViewModel> {
                     parametersOf(team)
                 }
                 LeadStatsTab(viewModel)
             }
-            5 -> {
+            4 -> {
                 val viewModel = koinInject<UsageStatsViewModel> {
                     parametersOf(team)
                 }

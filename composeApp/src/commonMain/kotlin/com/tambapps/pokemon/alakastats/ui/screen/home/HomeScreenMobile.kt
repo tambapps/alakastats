@@ -59,7 +59,8 @@ internal fun HomeScreenMobile(isDarkTheme: Boolean, viewModel: HomeViewModel) {
         Spacer(Modifier.height(16.dp))
 
         for (team in viewModel.teamlyticsList) {
-            TeamCard(viewModel, team, Modifier.padding(vertical = 8.dp))
+            TeamCard(viewModel, team, Modifier.padding(all = 8.dp))
         }
+        Spacer(Modifier.height(16.dp))
     }
 }

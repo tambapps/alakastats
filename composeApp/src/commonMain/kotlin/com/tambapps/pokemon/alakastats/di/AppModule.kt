@@ -1,6 +1,5 @@
 package com.tambapps.pokemon.alakastats.di
 
-import androidx.compose.runtime.MutableState
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
@@ -34,7 +33,6 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.MoveUsageViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.notes.TeamNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsageStatsViewModel
@@ -80,9 +78,6 @@ private val appModule = module {
     factory { TeamlyticsViewModel(get(), get()) }
     factory { (useCase: HandleTeamNotesUseCase, team: Teamlytics) ->
         OverviewViewModel(useCase, get(), team)
-    }
-    factory { (useCase: HandleTeamNotesUseCase, team: Teamlytics) ->
-        TeamNotesViewModel(get(), useCase, team)
     }
     factory { (useCase: HandleTeamReplaysUseCase, team: Teamlytics) ->
         TeamReplayViewModel(get(), useCase, team)
