@@ -51,7 +51,7 @@ fun VerticalPokepaste(
         val space = 16.dp
         Spacer(Modifier.height(space))
         for (pokemon in pokePaste.pokemons) {
-            Pokemon(pokePaste.isOts, pokemon, pokemonImageService, Modifier.fillMaxWidth())
+            PokepastePokemon(pokePaste.isOts, pokemon, pokemonImageService, Modifier.fillMaxWidth())
             Spacer(Modifier.height(space))
         }
 
@@ -61,11 +61,8 @@ fun VerticalPokepaste(
 @Composable
 private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonImageService, modifier: Modifier) {
     Column(modifier = modifier) {
-        val firstRow = pokePaste.pokemons.take(3)
-        DesktopPokemonRow(pokePaste.isOts, firstRow, pokemonImageService)
-        if (pokePaste.pokemons.size > 3) {
-            val secondRow = pokePaste.pokemons.subList(3, pokePaste.pokemons.size)
-            DesktopPokemonRow(pokePaste.isOts, secondRow, pokemonImageService)
+        for (pokemonBlock in pokePaste.pokemons.chunked(3)) {
+            DesktopPokemonRow(pokePaste.isOts, pokemonBlock, pokemonImageService)
         }
     }
 }
@@ -76,13 +73,13 @@ private fun DesktopPokemonRow(isOts: Boolean, pokemons: List<Pokemon>, pokemonIm
         verticalAlignment = Alignment.CenterVertically
     ) {
         pokemons.forEach { pokemon ->
-            Pokemon(isOts, pokemon, pokemonImageService, Modifier.weight(1f))
+            PokepastePokemon(isOts, pokemon, pokemonImageService, Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-private fun Pokemon(isOts: Boolean, pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+fun PokepastePokemon(isOts: Boolean, pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically

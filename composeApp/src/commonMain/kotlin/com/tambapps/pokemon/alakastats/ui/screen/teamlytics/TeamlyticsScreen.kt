@@ -96,12 +96,9 @@ internal fun Pager(
         modifier = modifier
     ) { page ->
         val team = viewModel.requireTeam()
-        val teamState = viewModel.teamState
         when (page) {
             0 -> {
-                val viewModel = koinInject<OverviewViewModel> {
-                    parametersOf(teamState, team)
-                }
+                val viewModel = koinInjectUseCase<HandleTeamNotesUseCase, OverviewViewModel>(viewModel)
                 OverviewTab(viewModel)
             }
             1 -> {

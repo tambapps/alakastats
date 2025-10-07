@@ -31,6 +31,7 @@ class TeamlyticsTransformer(
     }
     
     fun toDomain(entity: TeamlyticsEntity): Teamlytics {
+        val pokepaste = entity.pokePaste.let(pokepasteParser::tryParse) ?: PokePaste(emptyList())
         return Teamlytics(
             id = entity.id,
             name = entity.name,
@@ -38,7 +39,7 @@ class TeamlyticsTransformer(
             replays = entity.replays.map { replayAnalyticsTransformer.toDomain(it) },
             sdNames = entity.sdNames,
             lastUpdatedAt = entity.lastUpdatedAt ?: Clock.System.now(),
-            notes = entity.notes?.let(notesTransformer::toDomain)
+            notes = entity.notes?.let { notesTransformer.toDomain(pokepaste, it) }
         )
     }
 
@@ -84,10 +85,19 @@ class TeamlyticsPreviewTransformer {
 
 class TeamlyticsNotesTransformer {
 
-    fun toDomain(entity: TeamlyticsNotesEntity): TeamlyticsNotes {
+    fun toDomain(pokePaste: PokePaste, entity: TeamlyticsNotesEntity): TeamlyticsNotes {
+        val map = buildMap {
+            entity.pokemonNotes.forEach { (key, value) -> put(PokemonName(key), value) }
+            // add missing pokemons from pokepaste if any
+            for (pokemon in pokePaste.pokemons) {
+                if (!containsKey(pokemon.name)) {
+                    put(pokemon.name, "")
+                }
+            }
+        }
         return TeamlyticsNotes(
             teamNotes = entity.teamNotes,
-            pokemonNotes = entity.pokemonNotes.mapKeys { (key, _) -> PokemonName(key) }
+            pokemonNotes = map
         )
     }
 

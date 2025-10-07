@@ -8,6 +8,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
@@ -46,6 +47,11 @@ class TeamlyticsViewModel(
     override suspend fun addReplays(replays: List<ReplayAnalytics>) {
         val team = requireTeam()
         save(team.copy(replays = trySetElo(team.replays + replays)))
+    }
+
+    override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?) {
+        val team = requireTeam()
+        save(team.copy(notes = notes))
     }
 
     private fun trySetElo(replays: List<ReplayAnalytics>) = replays.map { replay ->
