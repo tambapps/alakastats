@@ -147,6 +147,14 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
                     snackbar.show("TODO (not implemented yet)")
                 }
             )
+            val navigator = LocalNavigator.currentOrThrow
+            DropdownMenuItem(
+                text = { Text("Edit team") },
+                onClick = {
+                    isMenuExpanded = false
+                    navigator.push(EditTeamScreen(viewModel.team))
+                }
+            )
 
             val alreadyHasNotes = viewModel.team.notes != null
             DropdownMenuItem(
