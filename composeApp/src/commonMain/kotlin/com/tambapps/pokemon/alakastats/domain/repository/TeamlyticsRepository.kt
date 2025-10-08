@@ -19,6 +19,4 @@ interface TeamlyticsRepository {
     suspend fun delete(teamlytics: Teamlytics)
 
     suspend fun delete(id: Uuid)
-
-    fun exportToJson(teamlytics: Teamlytics): String
 }

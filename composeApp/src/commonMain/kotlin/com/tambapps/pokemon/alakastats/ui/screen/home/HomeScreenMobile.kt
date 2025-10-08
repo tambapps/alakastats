@@ -51,9 +51,9 @@ internal fun HomeScreenMobile(isDarkTheme: Boolean, viewModel: HomeViewModel) {
         NewTeamButton(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))
         Spacer(Modifier.height(4.dp))
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
-            ImportTeamButton(Modifier.weight(1f))
+            ImportTeamButton(viewModel, Modifier.weight(1f))
             Spacer(Modifier.width(8.dp))
-            SampleTeamButton(Modifier.weight(1f))
+            SampleTeamButton(viewModel, Modifier.weight(1f))
         }
 
         Spacer(Modifier.height(16.dp))

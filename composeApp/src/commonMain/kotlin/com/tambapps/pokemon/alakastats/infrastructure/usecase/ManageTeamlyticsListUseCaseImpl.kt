@@ -9,7 +9,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCas
 import kotlin.uuid.Uuid
 
 class ManageTeamlyticsListUseCaseImpl(
-    private val repository: TeamlyticsRepository
+    private val repository: TeamlyticsRepository,
 ) : ManageTeamlyticsListUseCase {
 
     override suspend fun list(): List<TeamlyticsPreview> = repository.listPreviews()

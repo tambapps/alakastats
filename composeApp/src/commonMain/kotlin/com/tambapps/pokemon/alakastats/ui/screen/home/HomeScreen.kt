@@ -175,14 +175,14 @@ internal val buttonTextStyle  @Composable get() = MaterialTheme.typography.label
 )
 
 @Composable
-internal fun ImportTeamButton(modifier: Modifier = Modifier) {
-    OutlinedButton(onClick = {  }, modifier = modifier) {
+internal fun ImportTeamButton(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
+    OutlinedButton(onClick = { viewModel.importTeam() }, modifier = modifier) {
         Text("Import", style = buttonTextStyle)
     }
 }
 @Composable
-internal fun SampleTeamButton(modifier: Modifier = Modifier) {
-    OutlinedButton(onClick = {  }, modifier = modifier) {
+internal fun SampleTeamButton(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
+    OutlinedButton(onClick = { viewModel.showSamplesDialog() }, modifier = modifier) {
         Text("Sample", style = buttonTextStyle)
     }
 }

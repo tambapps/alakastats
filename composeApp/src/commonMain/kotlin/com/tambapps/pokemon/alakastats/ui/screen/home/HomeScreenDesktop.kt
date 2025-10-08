@@ -46,7 +46,7 @@ internal fun HomeScreenDesktop(isDarkTheme: Boolean, viewModel: HomeViewModel) {
             modifier = Modifier,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            ButtonBarContent()
+            ButtonBarContent(viewModel)
         }
         TeamCardGrid(viewModel, 3)
     }
@@ -70,10 +70,10 @@ private fun AlakastatsLabel(isDarkTheme: Boolean) {
 
 
 @Composable
-private fun ButtonBarContent() {
+private fun ButtonBarContent(viewModel: HomeViewModel) {
     NewTeamButton()
-    ImportTeamButton()
-    SampleTeamButton()
+    ImportTeamButton(viewModel)
+    SampleTeamButton(viewModel)
 }
 
 @OptIn(ExperimentalFoundationApi::class)

@@ -66,12 +66,11 @@ private val appModule = module {
             previewsStorage = get(named("previewsStorage")), 
             teamlyticsTransformer = get(), 
             previewTransformer = get(),
-            json = get()
-        ) 
+        )
     }
 
     single<EditTeamlyticsUseCase> { EditTeamlyticsUseCaseImpl(get()) }
-    single<ManageTeamlyticsListUseCase> { ManageTeamlyticsListUseCaseImpl(get()) }
+    single<ManageTeamlyticsListUseCase> { ManageTeamlyticsListUseCaseImpl( get()) }
     single<TeamlyticsUseCase> { TeamlyticsUseCaseImpl(get()) }
 
     factory { HomeViewModel(get(), get()) }

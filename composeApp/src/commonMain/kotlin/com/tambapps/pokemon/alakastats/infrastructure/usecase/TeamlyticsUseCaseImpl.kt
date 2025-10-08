@@ -15,5 +15,5 @@ class TeamlyticsUseCaseImpl(
 
     override suspend fun save(team: Teamlytics) = repository.save(team)
 
-    override fun exportToJson(team: Teamlytics) = repository.exportToJson(team)
+    override fun exportToJson(team: Teamlytics) = TODO("create new service")
 }

@@ -15,6 +15,10 @@ import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.openFilePicker
+import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,10 +38,26 @@ class HomeViewModel(
     
     var teamToDelete by mutableStateOf<TeamlyticsPreview?>(null)
         private set
-    
 
     fun loadTeams() {
         scope.launch { doLoadTeams() }
+    }
+
+    fun importTeam() {
+        // TODO add loading, as it may take time to load pokeShowStats saves
+        scope.launch {
+            val file = FileKit.openFilePicker(
+                title = "Pick Alakastats or PokeShowStats team",
+                type = FileKitType.File("json"),
+            ) ?: return@launch
+            // TODO show dialog with team name and TeamPreview for confirmation before actully
+            val bytes = file.readBytes()
+        }
+
+    }
+
+    fun showSamplesDialog() {
+        // TODO
     }
 
     private suspend fun doLoadTeams() {
