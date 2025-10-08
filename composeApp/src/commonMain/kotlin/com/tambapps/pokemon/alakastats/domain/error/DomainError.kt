@@ -18,6 +18,16 @@ data class NetworkError(
 
 sealed interface GetTeamlyticsError : DomainError
 
+data class LoadTeamError(
+    override val message: String,
+    override val cause: Throwable?
+) : DomainError
+
+data class JsonError(
+    override val message: String,
+    override val cause: Throwable?
+): DomainError
+
 data class TeamlyticsNotFound(val id: Uuid, override val cause: Throwable? = null) : GetTeamlyticsError {
     override val message: String = "Teamlytics with id $id not found"
 }

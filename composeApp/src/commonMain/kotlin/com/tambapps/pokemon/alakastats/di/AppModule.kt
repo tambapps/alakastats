@@ -31,6 +31,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createT
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
+import com.tambapps.pokemon.alakastats.infrastructure.service.TeamlyticsSerializer
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.MoveUsageViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
@@ -71,7 +72,8 @@ private val appModule = module {
 
     single<EditTeamlyticsUseCase> { EditTeamlyticsUseCaseImpl(get()) }
     single<ManageTeamlyticsListUseCase> { ManageTeamlyticsListUseCaseImpl( get()) }
-    single<TeamlyticsUseCase> { TeamlyticsUseCaseImpl(get()) }
+    single<TeamlyticsUseCase> { TeamlyticsUseCaseImpl(get(), get()) }
+    singleOf(::TeamlyticsSerializer)
 
     factory { HomeViewModel(get(), get()) }
     factory { EditTeamViewModel(get(), get(), get()) }

@@ -6,5 +6,5 @@ import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 interface HandleTeamOverviewUseCase {
     suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?)
 
-    fun exportToJson(team: Teamlytics): String
+    fun export(team: Teamlytics): ByteArray
 }

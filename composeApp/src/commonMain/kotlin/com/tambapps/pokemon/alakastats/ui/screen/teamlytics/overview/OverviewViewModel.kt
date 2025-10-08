@@ -26,7 +26,6 @@ class OverviewViewModel(
     var teamNotes by mutableStateOf("")
     val pokemonNotes = mutableStateMapOf<Pokemon, String>()
 
-    // TODO use it on mobile UI
     var isLoading by mutableStateOf(false)
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -44,7 +43,7 @@ class OverviewViewModel(
         isLoading = true
         scope.launch {
             val success = downloadToFile("${team.name}.json",
-                useCase.exportToJson(team).toByteArray())
+                useCase.export(team))
 
             withContext(Dispatchers.Main) {
                 isLoading = false

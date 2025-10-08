@@ -54,7 +54,7 @@ class TeamlyticsViewModel(
         save(team.copy(notes = notes))
     }
 
-    override fun exportToJson(team: Teamlytics) = useCase.exportToJson(team)
+    override fun export(team: Teamlytics) = useCase.export(team)
 
     private fun trySetElo(replays: List<ReplayAnalytics>) = replays.map { replay ->
         if (replay.player1.beforeElo != null) return@map replay
