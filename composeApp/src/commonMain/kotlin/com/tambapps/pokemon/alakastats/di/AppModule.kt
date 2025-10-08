@@ -16,14 +16,11 @@ import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsNotesTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransformer
-import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
-import com.tambapps.pokemon.alakastats.infrastructure.usecase.TeamlyticsUseCaseImpl
-import com.tambapps.pokemon.alakastats.infrastructure.usecase.EditTeamlyticsUseCaseImpl
-import com.tambapps.pokemon.alakastats.infrastructure.usecase.ManageTeamlyticsListUseCaseImpl
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
@@ -70,9 +67,9 @@ private val appModule = module {
         )
     }
 
-    single<EditTeamlyticsUseCase> { EditTeamlyticsUseCaseImpl(get()) }
-    single<ManageTeamlyticsListUseCase> { ManageTeamlyticsListUseCaseImpl( get()) }
-    single<TeamlyticsUseCase> { TeamlyticsUseCaseImpl(get(), get()) }
+    singleOf(::EditTeamlyticsUseCase)
+    singleOf(::ManageTeamlyticsListUseCase)
+    singleOf(::TeamlyticsUseCase)
     singleOf(::TeamlyticsSerializer)
 
     factory { HomeViewModel(get(), get()) }
