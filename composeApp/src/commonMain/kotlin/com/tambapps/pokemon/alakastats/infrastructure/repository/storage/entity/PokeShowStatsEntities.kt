@@ -8,7 +8,9 @@ data class PssTeamlytics(
     val saveName: String,
     val teamNotes: String? = null,
     val sdNames: List<String>,
-    )
+    val pokepaste: PssPokepaste? = null,
+    val replays: List<PssReplay>? = null,
+)
 
 @Serializable
 data class PssReplay(

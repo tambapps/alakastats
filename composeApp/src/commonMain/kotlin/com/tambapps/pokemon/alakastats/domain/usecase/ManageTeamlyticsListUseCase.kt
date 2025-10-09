@@ -21,7 +21,7 @@ class ManageTeamlyticsListUseCase(
     suspend fun delete(id: Uuid) = repository.delete(id)
 
     suspend fun loadTeam(byteArray: ByteArray): Either<LoadTeamError, Teamlytics> =
-        serializer.load(byteArray)
+        serializer.loadTeam(byteArray)
 
     suspend fun saveNewTeam(team: Teamlytics) = repository.save(team.copy(id = Uuid.random()))
 
