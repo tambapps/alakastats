@@ -95,7 +95,7 @@ class UsageStatsViewModel(
         val result: Map<Terastallization, UsageStat> = teraAndWinPerTera.flatMap { (pokemon, replaysPerTera) ->
             replaysPerTera.map { (teraType, teraReplaysReplays) ->
                 val teraAndWin = teraReplaysReplays.filter { it.gameOutput == GameOutput.WIN }.size
-                val total = replays.size
+                val total = teraReplaysReplays.size
 
                 Terastallization(pokemon, teraType) to UsageStat(
                     usage = teraAndWin,
