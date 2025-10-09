@@ -42,8 +42,7 @@ class OverviewViewModel(
     fun exportTeam(snackBar: SnackBar) {
         isLoading = true
         scope.launch {
-            val success = downloadToFile("${team.name}.json",
-                useCase.export(team))
+            val success = downloadToFile(team.name, "json", useCase.export(team))
 
             withContext(Dispatchers.Main) {
                 isLoading = false

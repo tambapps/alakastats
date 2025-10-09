@@ -16,8 +16,8 @@ actual fun createTeamlyticsKStorage() = createKStorage<Uuid, TeamlyticsEntity>("
 
 actual fun createTeamlyticsPreviewKStorage() = createKStorage<Uuid, TeamlyticsPreviewEntity>("teamlytics-previews")
 
-actual suspend fun downloadToFile(fileName: String, bytes: ByteArray): Boolean {
-    val file = FileKit.openFileSaver(fileName) ?: return false
+actual suspend fun downloadToFile(fileName: String, extension: String, bytes: ByteArray): Boolean {
+    val file = FileKit.openFileSaver(suggestedName = fileName, extension = extension) ?: return false
     file.write(bytes)
     return true
 }

@@ -13,8 +13,8 @@ actual fun createTeamlyticsKStorage() = createKStorage<Uuid, TeamlyticsEntity>("
 
 actual fun createTeamlyticsPreviewKStorage() = createKStorage<Uuid, TeamlyticsPreviewEntity>("teamlytics-preview")
 
-actual suspend fun downloadToFile(fileName: String, bytes: ByteArray): Boolean {
-    FileKit.download(bytes, fileName)
+actual suspend fun downloadToFile(fileName: String, extension: String, bytes: ByteArray): Boolean {
+    FileKit.download(bytes, "$fileName.$extension")
     return true
 }
 

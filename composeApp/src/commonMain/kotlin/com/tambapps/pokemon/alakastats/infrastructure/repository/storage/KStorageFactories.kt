@@ -8,4 +8,4 @@ expect fun createTeamlyticsKStorage(): KStorage<Uuid, TeamlyticsEntity>
 
 expect fun createTeamlyticsPreviewKStorage(): KStorage<Uuid, TeamlyticsPreviewEntity>
 
-expect suspend fun downloadToFile(fileName: String, bytes: ByteArray): Boolean
+expect suspend fun downloadToFile(fileName: String, extension: String, bytes: ByteArray): Boolean

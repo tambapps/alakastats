@@ -9,6 +9,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.error.StorageError
 import com.tambapps.pokemon.alakastats.domain.error.TeamlyticsNotFound
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.ui.SnackBar
@@ -39,21 +40,60 @@ class HomeViewModel(
     var teamToDelete by mutableStateOf<TeamlyticsPreview?>(null)
         private set
 
+    var isLoading by mutableStateOf(false)
+        private set
+
+    var teamToImport by mutableStateOf<Teamlytics?>(null)
+        private set
+
     fun loadTeams() {
         scope.launch { doLoadTeams() }
     }
 
-    fun importTeam() {
-        // TODO add loading, as it may take time to load pokeShowStats saves
+    fun importTeam(snackBar: SnackBar) {
         scope.launch {
             val file = FileKit.openFilePicker(
                 title = "Pick Alakastats or PokeShowStats team",
                 type = FileKitType.File("json"),
-            ) ?: return@launch
-            // TODO show dialog with team name and TeamPreview for confirmation before actully
-            val bytes = file.readBytes()
+            )
+            if (file == null) {
+                return@launch
+            }
+            withContext(Dispatchers.Main) {
+                isLoading = true
+            }
+            val eitherTeam = useCase.loadTeam(file.readBytes())
+            withContext(Dispatchers.Main) {
+                isLoading = false
+                eitherTeam.fold(
+                    ifLeft = {
+                        snackBar.show("Couldn't import team: ${it.message}", SnackBar.Severity.ERROR)
+                    },
+                    ifRight = {
+                        teamToImport = it
+                    }
+                )
+            }
         }
+    }
 
+    fun confirmImport() {
+        val team = teamToImport ?: return
+        isLoading = true
+        scope.launch {
+            useCase.saveNewTeam(team)
+            val previews = useCase.list()
+            withContext(Dispatchers.Main) {
+                teamlyticsList.clear()
+                teamlyticsList.addAll(previews.sortedWith(compareBy({ - it.lastUpdatedAt.epochSeconds }, { it.name })))
+                isLoading = false
+                teamToImport = null
+            }
+        }
+    }
+
+    fun dismissImportTeamDialog() {
+        teamToImport = null
     }
 
     fun showSamplesDialog() {
@@ -107,7 +147,7 @@ class HomeViewModel(
     fun dismissDeleteDialog() {
         teamToDelete = null
     }
-    
+
     fun confirmDelete() {
         teamToDelete?.let { team ->
             scope.launch {

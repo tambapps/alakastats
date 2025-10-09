@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -30,16 +32,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
@@ -62,24 +67,49 @@ object HomeScreen : Screen {
         } else {
             HomeScreenDesktop(isDarkTheme, viewModel)
         }
-        
+
+        if (viewModel.isLoading) {
+            Dialog(
+                onDismissRequest = {},
+                content = {
+                    CircularProgressIndicator()
+                }
+            )
+        }
+        viewModel.teamToImport?.let { teamToImport ->
+            TeamActionDialog(
+                viewModel = viewModel,
+                teamName = teamToImport.name,
+                pokemons = remember { teamToImport.pokePaste.pokemons.map { it.name } },
+                winRatePercentage = remember { teamToImport.winRate },
+                nbReplays = teamToImport.replays.size,
+                title = "Load Team",
+                onDismissRequest = { viewModel.dismissImportTeamDialog() },
+                confirmButton = {
+                    TextButton(
+                        onClick = { viewModel.confirmImport() }
+                    ) {
+                        Text("Load")
+                    }
+                }
+            )
+
+        }
         viewModel.teamToDelete?.let { teamToDelete ->
-            AlertDialog(
+            TeamActionDialog(
+                viewModel = viewModel,
+                teamName = teamToDelete.name,
+                pokemons = teamToDelete.pokemons,
+                winRatePercentage = teamToDelete.winrate,
+                nbReplays = teamToDelete.nbReplays,
+                title = "Delete Team",
+                text = "This action cannot be undone.",
                 onDismissRequest = { viewModel.dismissDeleteDialog() },
-                title = { Text("Delete Team") },
-                text = { Text("Are you sure you want to delete '${teamToDelete.name}'? This action cannot be undone.") },
                 confirmButton = {
                     TextButton(
                         onClick = { viewModel.confirmDelete() }
                     ) {
                         Text("Delete", color = Color.Red)
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = { viewModel.dismissDeleteDialog() }
-                    ) {
-                        Text("Cancel")
                     }
                 }
             )
@@ -176,7 +206,8 @@ internal val buttonTextStyle  @Composable get() = MaterialTheme.typography.label
 
 @Composable
 internal fun ImportTeamButton(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
-    OutlinedButton(onClick = { viewModel.importTeam() }, modifier = modifier) {
+    val snackbar = LocalSnackBar.current
+    OutlinedButton(onClick = { viewModel.importTeam(snackbar) }, modifier = modifier) {
         Text("Import", style = buttonTextStyle)
     }
 }
@@ -185,4 +216,45 @@ internal fun SampleTeamButton(viewModel: HomeViewModel, modifier: Modifier = Mod
     OutlinedButton(onClick = { viewModel.showSamplesDialog() }, modifier = modifier) {
         Text("Sample", style = buttonTextStyle)
     }
+}
+
+@Composable
+private fun TeamActionDialog(
+    viewModel: HomeViewModel,
+    pokemons: List<PokemonName>,
+    nbReplays: Int,
+    winRatePercentage: Int,
+    teamName: String,
+    title: String,
+    text: String? = null,
+    onDismissRequest: () -> Unit,
+    confirmButton: @Composable () -> Unit,
+    ) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(title) },
+        text = { Column {
+            text?.let {
+                Text(it)
+                Spacer(Modifier.height(16.dp))
+            }
+
+            Text(teamName, style = MaterialTheme.typography.titleMedium)
+            PokemonTeamPreview(viewModel.imageService, pokemons, fillWidth = true)
+            Spacer(Modifier.height(4.dp))
+            Row {
+                Text("$nbReplays replays")
+                Spacer(Modifier.weight(1f))
+                Text("$winRatePercentage% winrate")
+            }
+        } },
+        confirmButton = confirmButton,
+        dismissButton = {
+            TextButton(
+                onClick = onDismissRequest
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
 }
