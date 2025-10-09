@@ -213,7 +213,8 @@ internal fun ImportTeamButton(viewModel: HomeViewModel, modifier: Modifier = Mod
 }
 @Composable
 internal fun SampleTeamButton(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
-    OutlinedButton(onClick = { viewModel.showSamplesDialog() }, modifier = modifier) {
+    val snackBar = LocalSnackBar.current
+    OutlinedButton(onClick = { snackBar.show("Coming Soon"); viewModel.showSamplesDialog() }, modifier = modifier) {
         Text("Sample", style = buttonTextStyle)
     }
 }
