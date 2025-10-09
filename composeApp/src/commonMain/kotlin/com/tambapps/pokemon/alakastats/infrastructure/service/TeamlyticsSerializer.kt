@@ -9,6 +9,7 @@ import com.tambapps.pokemon.alakastats.domain.error.LoadTeamError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.transformer.ReplayAnalyticsTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsTransformer
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PssTeamlytics
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsNotesEntity
@@ -17,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -42,11 +44,12 @@ class TeamlyticsSerializer(
     suspend fun load(byteArray: ByteArray): Either<LoadTeamError, Teamlytics> = either {
         val jsonObject = decode(byteArray).mapLeft { LoadTeamError("Invalid save", it.cause) }
             .bind()
-        if (jsonObject["saveName"] != null) loadFromPokeShowStatsSave(jsonObject).bind()
+        val entity = if (jsonObject["saveName"] != null) loadFromPokeShowStatsSave(jsonObject).bind()
         else load(jsonObject).bind()
+        transformer.toDomain(entity)
     }
 
-    private suspend fun load(jsonObject: JsonObject): Either<LoadTeamError, Teamlytics> = either {
+    private suspend fun load(jsonObject: JsonObject): Either<LoadTeamError, TeamlyticsEntity> = either {
         val name = jsonAccess { jsonObject[TeamlyticsEntity::name.name]?.jsonPrimitive?.contentOrNull ?: "<no name>" }.bind()
         val pokepaste = jsonAccess { jsonObject[TeamlyticsEntity::pokePaste.name]?.jsonPrimitive?.contentOrNull }.bind()
             ?: ""
@@ -57,16 +60,14 @@ class TeamlyticsSerializer(
             ?: listOf()
         val notes = jsonAccess { jsonObject["notes"]?.let { json.decodeFromJsonElement<TeamlyticsNotesEntity>(it) } }.bind()
 
-        transformer.toDomain(
-            TeamlyticsEntity(
-                id = Uuid.random(),
-                name = name,
-                pokePaste = pokepaste,
-                replays = replays,
-                sdNames = sdNames,
-                notes = notes,
-                lastUpdatedAt = Clock.System.now()
-            )
+        TeamlyticsEntity(
+            id = Uuid.random(),
+            name = name,
+            pokePaste = pokepaste,
+            replays = replays,
+            sdNames = sdNames,
+            notes = notes,
+            lastUpdatedAt = Clock.System.now()
         )
     }
 
@@ -91,8 +92,12 @@ class TeamlyticsSerializer(
     private inline fun <T> jsonAccess(run: () -> T) = Either.catch { run() }
         .mapLeft { LoadTeamError("Invalid save", it) }
 
-    private fun loadFromPokeShowStatsSave(jsonObject: JsonObject): Either<LoadTeamError, Teamlytics> {
-        TODO()
+    private fun loadFromPokeShowStatsSave(jsonObject: JsonObject): Either<LoadTeamError, TeamlyticsEntity> = either {
+        val save = Either.catch {
+            json.decodeFromJsonElement<PssTeamlytics>(jsonObject)
+        }.mapLeft { LoadTeamError("Invalid PokeShowStats save", it) }
+            .bind()
+        return Either.Right(save.toTeamlytics())
     }
 
     private fun decode(byteArray: ByteArray): Either<JsonError, JsonObject> = Either.catch {
@@ -106,3 +111,5 @@ class TeamlyticsSerializer(
     private fun error(throwable: Throwable): JsonError =
         JsonError(throwable.message ?: "Invalid JSON", throwable)
 }
+
+fun PssTeamlytics.toTeamlytics(): TeamlyticsEntity = TODO()
