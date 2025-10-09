@@ -68,10 +68,10 @@ internal fun OverviewTabMobile(viewModel: OverviewViewModel) {
 
 @Composable
 private fun NotedPokePaste(viewModel: OverviewViewModel) {
-    val entries = viewModel.pokemonNotes.entries
-    entries.forEachIndexed { index, (pokemonName, notes) ->
+    val pokemons = viewModel.team.pokePaste.pokemons
+    pokemons.forEachIndexed { index, pokemon ->
         PokemonNotes(
-            viewModel, pokemonName, notes,
+            viewModel, pokemon,
             pokepasteModifier = Modifier.fillMaxWidth().height(256.dp),
             modifier = Modifier.fillMaxWidth()
         )

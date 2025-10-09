@@ -137,7 +137,7 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
         ) {
             val snackBar = LocalSnackBar.current
             DropdownMenuItem(
-                text = { Text("Export team") },
+                text = { Text("Export") },
                 onClick = {
                     isMenuExpanded = false
                     viewModel.exportTeam(snackBar)
@@ -178,8 +178,8 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
 }
 
 @Composable
-internal fun PokemonNotes(viewModel: OverviewViewModel, pokemon: Pokemon,
-                          notes: String,
+internal fun PokemonNotes(viewModel: OverviewViewModel,
+                          pokemon: Pokemon,
                           modifier: Modifier = Modifier,
                           pokepasteModifier: Modifier = Modifier
                           ) {
@@ -193,7 +193,7 @@ internal fun PokemonNotes(viewModel: OverviewViewModel, pokemon: Pokemon,
         Spacer(Modifier.height(8.dp))
         NoteTextOrTextField(
             viewModel = viewModel,
-            notes = notes,
+            notes = viewModel.pokemonNotes[pokemon] ?: "",
             onValueChange = { viewModel.pokemonNotes[pokemon] = it },
             placeholder = "Notes for ${pokemon.name.pretty}"
         )

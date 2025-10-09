@@ -25,6 +25,7 @@ class OverviewViewModel(
     var isEditingNotes by mutableStateOf(false)
     var teamNotes by mutableStateOf("")
     val pokemonNotes = mutableStateMapOf<Pokemon, String>()
+    var foo by mutableStateOf("")
 
     var isLoading by mutableStateOf(false)
 
