@@ -64,6 +64,34 @@ data class ReplayAnalytics(
     val player2 get() = players[1]
 }
 
+fun List<ReplayAnalytics>.withComputedElo() = map { replay ->
+    if (replay.player1.beforeElo != null) return@map replay
+    val next = findNextMatchWithElo(replay) ?: return@map replay
+
+    return@map replay.copy(
+        players = replay.players.mapIndexed { index, player ->
+            val nextPlayer = next.players.getOrNull(index) ?: player
+            player.copy(
+                beforeElo = nextPlayer.beforeElo
+            )
+        }
+    )
+}
+
+private fun List<ReplayAnalytics>.findNextMatchWithElo(replay: ReplayAnalytics): ReplayAnalytics? {
+    val visitedReplays = mutableSetOf<ReplayAnalytics>()
+    var r: ReplayAnalytics = replay
+
+    while (r.nextBattleRef != null && !visitedReplays.contains(r)) {
+        visitedReplays.add(r)
+        val next = find { it.reference == r.nextBattleRef } ?: return null
+        if (next.player1.beforeElo != null) {
+            return next
+        }
+        r = next
+    }
+    return null
+}
 
 data class Terastallization(
     val pokemon: PokemonName,

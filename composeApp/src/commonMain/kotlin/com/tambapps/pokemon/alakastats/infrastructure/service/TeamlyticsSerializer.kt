@@ -15,6 +15,7 @@ import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PssPokepaste
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PssPokepastePokemon
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PssStats
@@ -55,7 +56,10 @@ class TeamlyticsSerializer(
             .bind()
         val entity = if (jsonObject["saveName"] != null) loadFromPokeShowStatsSave(jsonObject).bind()
         else loadTeamFromJson(jsonObject).bind()
-        transformer.toDomain(entity)
+        val team = transformer.toDomain(entity)
+        team.copy(
+            replays = team.replays.withComputedElo()
+        )
     }
 
     private suspend fun loadTeamFromJson(jsonObject: JsonObject): Either<LoadTeamError, TeamlyticsEntity> = either {
@@ -91,6 +95,7 @@ class TeamlyticsSerializer(
         loadReplays(replayUrlsWithNotes)
     }
 
+    // TODO investigate. It seems sometimes the elo is there only for one of the two players
     private suspend fun loadReplays(replayUrlsWithNotes: List<Pair<String, String?>>): List<ReplayAnalyticsEntity> {
         val replays = withContext(Dispatchers.Default) {
             replayUrlsWithNotes.map { (url, notes) ->

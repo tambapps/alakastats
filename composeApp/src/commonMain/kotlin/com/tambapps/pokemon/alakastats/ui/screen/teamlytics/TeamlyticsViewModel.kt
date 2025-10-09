@@ -9,6 +9,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
+import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
@@ -46,7 +47,7 @@ class TeamlyticsViewModel(
 
     override suspend fun addReplays(replays: List<ReplayAnalytics>) {
         val team = requireTeam()
-        save(team.copy(replays = trySetElo(team.replays + replays)))
+        save(team.copy(replays = (team.replays + replays).withComputedElo()))
     }
 
     override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?) {
@@ -55,35 +56,6 @@ class TeamlyticsViewModel(
     }
 
     override fun export(team: Teamlytics) = useCase.export(team)
-
-    private fun trySetElo(replays: List<ReplayAnalytics>) = replays.map { replay ->
-        if (replay.player1.beforeElo != null) return@map replay
-        val next = findNextMatchWithElo(replay, replays) ?: return@map replay
-
-        return@map replay.copy(
-            players = replay.players.mapIndexed { index, player ->
-                val nextPlayer = next.players.getOrNull(index) ?: player
-                player.copy(
-                    beforeElo = nextPlayer.beforeElo
-                )
-            }
-        )
-    }
-
-    private fun findNextMatchWithElo(replay: ReplayAnalytics, replays: List<ReplayAnalytics>): ReplayAnalytics? {
-        val visitedReplays = mutableSetOf<ReplayAnalytics>()
-        var r: ReplayAnalytics = replay
-
-        while (r.nextBattleRef != null && !visitedReplays.contains(r)) {
-            visitedReplays.add(r)
-            val next = replays.find { it.reference == r.nextBattleRef } ?: return null
-            if (next.player1.beforeElo != null) {
-                return next
-            }
-            r = next
-        }
-        return null
-    }
 
     override suspend fun removeReplay(replay: ReplayAnalytics) {
         val team = requireTeam()
