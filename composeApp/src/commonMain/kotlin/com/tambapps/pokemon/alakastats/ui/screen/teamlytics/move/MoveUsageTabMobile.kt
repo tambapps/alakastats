@@ -24,7 +24,8 @@ internal fun MoveUsageTabMobile(viewModel: MoveUsageViewModel) {
             if (viewModel.isLoading) {
 
             }
-            viewModel.pokemonMovesUsage.forEach { (pokemonName, moveUsage) ->
+            val entries = viewModel.sortedPokemonMovesUsageEntries
+            entries.forEach { (pokemonName, moveUsage) ->
                 PokemonMoveUsageDonut(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                     viewModel = viewModel,

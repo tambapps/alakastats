@@ -16,6 +16,8 @@ import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import io.github.koalaplot.core.pie.PieChart
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 @Composable
 fun MoveUsageTab(viewModel: MoveUsageViewModel) {
@@ -31,6 +33,14 @@ fun MoveUsageTab(viewModel: MoveUsageViewModel) {
         MoveUsageTabDesktop(viewModel)
     }
 }
+
+internal val MoveUsageViewModel.sortedPokemonMovesUsageEntries get() =
+    pokemonMovesUsage.entries.toList()
+    .sortedBy { (pName, _) ->
+        val i = team.pokePaste.pokemons.indexOfFirst { p -> p.name.matches(pName) }
+        if (i != -1) i else Int.MAX_VALUE
+    }
+
 
 private const val MOVE_STRUGGLE = "struggle"
 @OptIn(ExperimentalKoalaPlotApi::class)

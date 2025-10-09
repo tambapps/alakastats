@@ -22,7 +22,7 @@ internal fun MoveUsageTabDesktop(viewModel: MoveUsageViewModel) {
             Modifier.weight(1f)
                 .padding(8.dp)
         ) {
-            val entryBlocks = remember { viewModel.pokemonMovesUsage.entries.toList().chunked(3) }
+            val entryBlocks = remember { viewModel.sortedPokemonMovesUsageEntries.chunked(3) }
 
             for (entry in entryBlocks) {
                 DesktopRow(

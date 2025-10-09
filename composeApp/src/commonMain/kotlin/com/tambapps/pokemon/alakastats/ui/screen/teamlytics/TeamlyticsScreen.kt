@@ -121,6 +121,11 @@ internal fun Pager(
                 }
                 UsageStatsTab(viewModel)
             }
+            5 -> {
+                Box(Modifier.fillMaxSize()) {
+                    Text("Coming soon", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Center))
+                }
+            }
         }
     }
 }
