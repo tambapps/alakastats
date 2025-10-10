@@ -3,8 +3,6 @@ package com.tambapps.pokemon.alakastats.infrastructure.service
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
-import com.tambapps.pokemon.PokeType
-import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.PokemonNormalizer.normalize
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
@@ -162,7 +160,7 @@ private class ReplayAnalyticsBuilderVisitor(
         val player = getPlayer(pokemonSlot)
         player.terastallization = TerastallizationEntity(
             pokemon = getActualPokemonName(player, pokemonName),
-            type = PokeType.valueOf(teraType.uppercase())
+            type = teraType.uppercase()
         )
     }
 

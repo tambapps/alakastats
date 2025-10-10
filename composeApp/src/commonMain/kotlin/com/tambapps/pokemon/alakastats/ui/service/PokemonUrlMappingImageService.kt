@@ -55,6 +55,7 @@ import coil3.compose.AsyncImage
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
+import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.alakastats.ui.composables.TooltipIfEnabled
 import com.tambapps.pokemon.alakastats.util.titlecase
 import kotlinx.coroutines.CoroutineScope
@@ -75,7 +76,7 @@ interface PokemonImageService {
     fun PokemonArtwork(name: PokemonName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
 
     @Composable
-    fun TeraTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier)
+    fun TeraTypeImage(type: TeraType, disableTooltip: Boolean = false, modifier: Modifier = Modifier)
 
     @Composable
     fun MoveTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier)
@@ -94,29 +95,28 @@ abstract class AbstractPokemonImageService(
     private val movesData = mutableStateMapOf<String, MoveData>()
 
     @Composable
-    override fun TeraTypeImage(type: PokeType, disableTooltip: Boolean, modifier: Modifier) {
+    override fun TeraTypeImage(type: TeraType, disableTooltip: Boolean, modifier: Modifier) {
         val resource = when(type) {
-            PokeType.STEEL -> Res.drawable.tera_type_steel
-            PokeType.FIGHTING -> Res.drawable.tera_type_fighting
-            PokeType.DRAGON -> Res.drawable.tera_type_dragon
-            PokeType.FIRE -> Res.drawable.tera_type_fire
-            PokeType.ICE -> Res.drawable.tera_type_ice
-            PokeType.NORMAL -> Res.drawable.tera_type_normal
-            PokeType.WATER -> Res.drawable.tera_type_water
-            PokeType.GRASS -> Res.drawable.tera_type_grass
-            PokeType.ELECTRIC -> Res.drawable.tera_type_electric
-            PokeType.FAIRY -> Res.drawable.tera_type_fairy
-            PokeType.POISON -> Res.drawable.tera_type_poison
-            PokeType.PSY -> Res.drawable.tera_type_psychic
-            PokeType.ROCK -> Res.drawable.tera_type_rock
-            PokeType.GHOST -> Res.drawable.tera_type_ghost
-            PokeType.DARK -> Res.drawable.tera_type_dark
-            PokeType.GROUND -> Res.drawable.tera_type_ground
-            PokeType.FLYING -> Res.drawable.tera_type_flying
-            PokeType.PSYCHIC -> Res.drawable.tera_type_psychic
-            PokeType.BUG -> Res.drawable.tera_type_bug
-            PokeType.STELLAR -> Res.drawable.tera_type_stellar
-            PokeType.UNKNOWN -> Res.drawable.tera_type_normal
+            TeraType.STEEL -> Res.drawable.tera_type_steel
+            TeraType.FIGHTING -> Res.drawable.tera_type_fighting
+            TeraType.DRAGON -> Res.drawable.tera_type_dragon
+            TeraType.FIRE -> Res.drawable.tera_type_fire
+            TeraType.ICE -> Res.drawable.tera_type_ice
+            TeraType.NORMAL -> Res.drawable.tera_type_normal
+            TeraType.WATER -> Res.drawable.tera_type_water
+            TeraType.GRASS -> Res.drawable.tera_type_grass
+            TeraType.ELECTRIC -> Res.drawable.tera_type_electric
+            TeraType.FAIRY -> Res.drawable.tera_type_fairy
+            TeraType.POISON -> Res.drawable.tera_type_poison
+            TeraType.PSY -> Res.drawable.tera_type_psychic
+            TeraType.ROCK -> Res.drawable.tera_type_rock
+            TeraType.GHOST -> Res.drawable.tera_type_ghost
+            TeraType.DARK -> Res.drawable.tera_type_dark
+            TeraType.GROUND -> Res.drawable.tera_type_ground
+            TeraType.FLYING -> Res.drawable.tera_type_flying
+            TeraType.PSYCHIC -> Res.drawable.tera_type_psychic
+            TeraType.BUG -> Res.drawable.tera_type_bug
+            TeraType.STELLAR -> Res.drawable.tera_type_stellar
         }
         TooltipIfEnabled(disableTooltip,
             "Tera " + type.name.titlecase(), modifier) { mod ->
@@ -151,7 +151,6 @@ abstract class AbstractPokemonImageService(
             PokeType.FLYING -> Res.drawable.move_flying
             PokeType.PSYCHIC -> Res.drawable.move_psychic
             PokeType.BUG -> Res.drawable.move_bug
-            PokeType.UNKNOWN, PokeType.STELLAR -> Res.drawable.move_normal
         }
         TooltipIfEnabled(disableTooltip, type.name.titlecase(), modifier) { mod ->
             Image(

@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.domain.transformer
 
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.OtsPokemon
 import com.tambapps.pokemon.sd.replay.log.visitor.OtsPokemon as SdOtsPokemon
@@ -145,7 +146,7 @@ class OtsPokemonTransformer {
             ability = domain.ability,
             moves = domain.moves,
             level = domain.level,
-            teraType = domain.teraType
+            teraType = domain.teraType?.name
         )
     }
 
@@ -156,7 +157,7 @@ class OtsPokemonTransformer {
             ability = domain.ability,
             moves = domain.moves,
             level = domain.level,
-            teraType = domain.teraType
+            teraType = domain.teraType?.name
         )
     }
 
@@ -167,7 +168,7 @@ class OtsPokemonTransformer {
             ability = entity.ability,
             moves = entity.moves,
             level = entity.level,
-            teraType = entity.teraType
+            teraType = entity.teraType?.let(TeraType::valueOf)
         )
     }
 }
@@ -177,14 +178,14 @@ class TerastallizationTransformer {
     fun toEntity(domain: Terastallization): TerastallizationEntity {
         return TerastallizationEntity(
             pokemon = domain.pokemon.value,
-            type = domain.type
+            type = domain.type.name
         )
     }
 
     fun toDomain(entity: TerastallizationEntity): Terastallization {
         return Terastallization(
             pokemon = PokemonName(entity.pokemon),
-            type = entity.type
+            type = entity.type.let(TeraType::valueOf)
         )
     }
 }

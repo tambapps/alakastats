@@ -1,9 +1,9 @@
 package com.tambapps.pokemon.alakastats.domain.model
 
 import com.tambapps.pokemon.PokeStats
-import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 
 fun Teamlytics.getOpponentPlayer(replay: ReplayAnalytics) =
@@ -95,7 +95,7 @@ private fun List<ReplayAnalytics>.findNextMatchWithElo(replay: ReplayAnalytics):
 
 data class Terastallization(
     val pokemon: PokemonName,
-    val type: PokeType
+    val type: TeraType
 )
 
 data class OpenTeamSheet(
@@ -113,7 +113,7 @@ data class OpenTeamSheet(
                 shiny = false,
                 happiness = 0,
                 ability = p.ability,
-                teraType = p.teraType ?: PokeType.UNKNOWN,
+                teraType = p.teraType,
                 level = 50,
                 moves = p.moves,
                 ivs = PokeStats.default(0),
@@ -130,7 +130,7 @@ data class OtsPokemon(
     val ability: String,
     val moves: List<String>,
     val level: Int,
-    val teraType: PokeType?
+    val teraType: TeraType?
 )
 
 data class TeamPreview(

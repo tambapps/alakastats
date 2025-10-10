@@ -1,6 +1,5 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity
 
-import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.util.Identifiable
 import kotlin.time.Instant
 import kotlinx.serialization.Serializable
@@ -38,7 +37,7 @@ data class TeamlyticsPreviewEntity(
 @Serializable
 data class TerastallizationEntity(
     val pokemon: String,
-    val type: PokeType
+    val type: String
 )
 
 @Serializable
@@ -68,7 +67,7 @@ data class OtsPokemonEntity(
     val ability: String,
     val moves: List<String>,
     val level: Int,
-    val teraType: PokeType?
+    val teraType: String?
 )
 
 @Serializable

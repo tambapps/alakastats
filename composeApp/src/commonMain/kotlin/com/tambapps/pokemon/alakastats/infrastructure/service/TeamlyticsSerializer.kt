@@ -12,9 +12,9 @@ import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsTransformer
 import com.tambapps.pokemon.Gender
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
-import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PssPokepaste
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PssPokepastePokemon
@@ -170,7 +170,7 @@ private fun PssPokepastePokemon.toPokemon(): Pokemon {
         shiny = false,
         happiness = 255,
         ability = ability,
-        teraType = teraType?.let { parsePokeType(it) },
+        teraType = teraType?.let { parseTeraType(it) },
         level = level ?: 100,
         moves = moves,
         ivs = ivs?.toPokeStats() ?: PokeStats.default(31),
@@ -205,9 +205,9 @@ private fun parseNature(nature: String): Nature? {
     }
 }
 
-private fun parsePokeType(type: String): PokeType? {
+private fun parseTeraType(type: String): TeraType? {
     return try {
-        PokeType.valueOf(type.uppercase())
+        TeraType.valueOf(type.uppercase())
     } catch (e: IllegalArgumentException) {
         null
     }

@@ -4,8 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
@@ -83,7 +83,7 @@ class UsageStatsViewModel(
     }
 
     private fun TeamlyticsContext.loadTeraAndWinStats(replays: List<ReplayAnalytics>) {
-        val teraAndWinPerTera: Map<PokemonName, Map<PokeType, List<ReplayAnalytics>>> = team.pokePaste.pokemons.asSequence().map { it.name }
+        val teraAndWinPerTera: Map<PokemonName, Map<TeraType, List<ReplayAnalytics>>> = team.pokePaste.pokemons.asSequence().map { it.name }
             .associateWith { pokemonName ->
                 val pokemonTeraReplays = replays.filter { replay ->
                             replay.youPlayer.hasSelected(pokemonName)
