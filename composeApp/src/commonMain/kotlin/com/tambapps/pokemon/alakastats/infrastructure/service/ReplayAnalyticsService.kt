@@ -186,7 +186,7 @@ private class ReplayAnalyticsBuilderVisitor(
     }
 
     private fun getPlayerByName(name: String): PlayerBuilderEntityBuilder {
-        return if (name.lowercase() == playerNames.first()) playerBuilders.getValue(playerNames.first())
+        return if (name.lowercase() == playerNames.first().lowercase()) playerBuilders.getValue(playerNames.first())
         else playerBuilders.getValue(playerNames.last())
     }
 
