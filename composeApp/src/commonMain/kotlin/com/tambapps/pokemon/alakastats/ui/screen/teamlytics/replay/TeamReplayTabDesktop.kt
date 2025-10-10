@@ -174,7 +174,9 @@ private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String
             Text("Elo: ${player.beforeElo}")
         }
 
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             for (pokemon in player.selection) {
                 val teraType = player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
                 SelectedPokemon(
