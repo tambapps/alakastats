@@ -104,14 +104,12 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                     ViewReplayButton(team, replay, replay.url)
                     Spacer(Modifier.weight(1f))
                 }
-                Spacer(Modifier.height(8.dp))
             } else if (gameOutput != GameOutput.UNKNOWN && opponentPlayer.ots != null) {
-                OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
-                Spacer(Modifier.height(8.dp))
+                OtsButton(opponentPlayer, opponentPlayer.ots, viewModel, modifier = Modifier.align(Alignment.CenterHorizontally))
             } else if (replay.url != null) {
-                ViewReplayButton(team, replay, replay.url)
-                Spacer(Modifier.height(8.dp))
+                ViewReplayButton(team, replay, replay.url, modifier = Modifier.align(Alignment.CenterHorizontally))
             }
+            Spacer(Modifier.height(8.dp))
 
             if (gameOutput == GameOutput.UNKNOWN) {
                 MobileSdNamesWarning(viewModel)

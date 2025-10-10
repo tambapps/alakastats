@@ -208,7 +208,7 @@ private fun RemoveReplayDialog(viewModel: TeamReplayViewModel) {
 
 
 @Composable
-internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: String) {
+internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: String, modifier: Modifier = Modifier) {
     var url = url.removeSuffix(".json")
     if (!team.sdNames.contains(replay.player1.name)) {
         url += "?p2"
@@ -217,6 +217,7 @@ internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: St
 
     if (getPlatform().type != PlatformType.Web) {
         OutlinedButton(
+            modifier= modifier,
             onClick = { uriHandler.openUri(url) },
         ) {
             Text("Replay")
@@ -232,9 +233,10 @@ internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: St
 }
 
 @Composable
-internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplayViewModel) {
+internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplayViewModel, modifier: Modifier = Modifier) {
     var showDialog by remember { mutableStateOf(false) }
     OutlinedButton(
+        modifier = modifier,
         onClick = {showDialog = true },
     ) {
         Text("OTS")
