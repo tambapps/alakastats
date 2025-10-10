@@ -95,7 +95,6 @@ class TeamlyticsSerializer(
         loadReplays(replayUrlsWithNotes)
     }
 
-    // TODO investigate. It seems sometimes the elo is there only for one of the two players
     private suspend fun loadReplays(replayUrlsWithNotes: List<Pair<String, String?>>): List<ReplayAnalyticsEntity> {
         val replays = withContext(Dispatchers.Default) {
             replayUrlsWithNotes.map { (url, notes) ->

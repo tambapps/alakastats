@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.TeraType
@@ -52,6 +53,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.util.copyToClipboard
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -260,11 +262,11 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplay
             }
         },
         dismissButton = {
-            /* TODO copy to clipboard. unfortunately not that simple in KMP */
             val snackbar = LocalSnackBar.current
+            val clipboardManager = LocalClipboard.current
             TextButton(onClick = {
                 showDialog = false
-                snackbar.show("TODO: not implemented yet")
+                viewModel.copyToClipboard(clipboardManager, snackbar, "${player.name}'s OTS", ots.toPokepaste().toPokePasteString())
             }) {
                 Text("Copy")
             }

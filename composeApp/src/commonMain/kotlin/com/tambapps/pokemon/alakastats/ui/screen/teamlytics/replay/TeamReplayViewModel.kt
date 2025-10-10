@@ -3,12 +3,14 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.Clipboard
 import arrow.core.getOrElse
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.util.copyToClipboard
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -166,6 +168,21 @@ class TeamReplayViewModel(
             urls.size < totalUrls -> "${urls.size}/${totalUrls} valid URLs found"
             urls.isNotEmpty() -> "${urls.size} valid URLs found"
             else -> null
+        }
+    }
+
+    fun copyToClipboard(
+        clipboardManager: Clipboard,
+        snackbar: SnackBar,
+        label: String,
+        text: String
+    ) {
+        scope.launch {
+            if (copyToClipboard(clipboardManager, label, text)) {
+                snackbar.show("Copied to clipboard")
+            } else {
+                snackbar.show("Copy to clipboard not supported")
+            }
         }
     }
 }
