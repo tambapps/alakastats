@@ -47,7 +47,24 @@ class TeamlyticsViewModel(
 
     override suspend fun addReplays(replays: List<ReplayAnalytics>) {
         val team = requireTeam()
-        save(team.copy(replays = (team.replays + replays).withComputedElo()))
+        val teamReplays = team.replays.toMutableList()
+
+        // add the new replays at the right spot, in case they were unordered
+        for (newReplay in replays) {
+            val previousIndex = teamReplays.indexOfFirst { it.nextBattleRef == newReplay.reference }
+            if (previousIndex >= 0) {
+                teamReplays.add(previousIndex + 1, newReplay)
+                continue
+            }
+            val nextIndex = teamReplays.indexOfFirst { it.reference == newReplay.nextBattleRef }
+            if (nextIndex >= 0) {
+                teamReplays.add(nextIndex, newReplay)
+                continue
+            }
+            teamReplays.add(newReplay)
+        }
+
+        save(team.copy(replays = teamReplays.withComputedElo()))
     }
 
     override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?) {
