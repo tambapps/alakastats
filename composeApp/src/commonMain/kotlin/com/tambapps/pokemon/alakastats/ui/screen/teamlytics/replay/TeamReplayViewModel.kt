@@ -47,6 +47,8 @@ class TeamReplayViewModel(
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
+    val hasNoReplaysToShow get() = team.replays.isEmpty() && !isLoading
+
     fun showAddReplayDialog() {
         showAddReplayDialog = true
         replayUrlsText = ""

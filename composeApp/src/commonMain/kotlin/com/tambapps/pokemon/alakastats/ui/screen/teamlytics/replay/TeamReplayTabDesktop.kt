@@ -48,7 +48,7 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
     val team = viewModel.team
 
     val replays = team.replays
-    if (replays.isEmpty() && !viewModel.isLoading) {
+    if (viewModel.hasNoReplaysToShow) {
         NoReplaysDesktop(viewModel)
         return
     }
@@ -61,7 +61,7 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Header(viewModel, replays, team)
+                Header(replays, team)
             }
             itemsIndexed(replays) { index, replay ->
                 DesktopReplay(viewModel, team, replay)

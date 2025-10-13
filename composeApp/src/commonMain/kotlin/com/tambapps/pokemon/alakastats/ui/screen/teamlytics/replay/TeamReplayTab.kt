@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -20,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -59,20 +61,45 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun TeamReplayTab(viewModel: TeamReplayViewModel) {
     val isCompact = LocalIsCompact.current
-    if (isCompact) {
-        TeamReplayTabMobile(viewModel)
-    } else {
-        TeamReplayTabDesktop(viewModel)
-    }
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (isCompact) {
+            TeamReplayTabMobile(viewModel)
+        } else {
+            TeamReplayTabDesktop(viewModel)
+        }
 
-    if (viewModel.showAddReplayDialog) {
-        AddReplayDialog(viewModel)
+        if (!viewModel.hasNoReplaysToShow) {
+            Fab(Modifier.align(Alignment.BottomEnd), viewModel)
+        }
+        if (viewModel.showAddReplayDialog) {
+            AddReplayDialog(viewModel)
+        }
+        viewModel.replayToNote?.let {
+            NotesDialog(viewModel, it)
+        }
+        if (viewModel.replayToRemove != null) {
+            RemoveReplayDialog(viewModel)
+        }
     }
-    viewModel.replayToNote?.let {
-        NotesDialog(viewModel, it)
-    }
-    if (viewModel.replayToRemove != null) {
-        RemoveReplayDialog(viewModel)
+}
+
+@Composable
+private fun Fab(modifier: Modifier, viewModel: TeamReplayViewModel) {
+    val (padX, padY) = if (LocalIsCompact.current) 32.dp to 32.dp else 50.dp to 50.dp
+    FloatingActionButton(
+        onClick = {
+            if (!viewModel.isLoading) {
+                viewModel.showAddReplayDialog()
+            }
+        },
+        modifier = modifier.padding(bottom = padY, end = padX),
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.add),
+            contentDescription = "Add",
+        )
     }
 }
 
@@ -341,7 +368,7 @@ internal fun ReplayDropDownMenu(isMenuExpandedState: MutableState<Boolean>, view
 }
 
 @Composable
-internal fun Header(viewModel: TeamReplayViewModel, replays: List<ReplayAnalytics>, team: Teamlytics) {
+internal fun Header(replays: List<ReplayAnalytics>, team: Teamlytics) {
     val winRatePercentage = remember { team.winRate }
     Row(Modifier.fillMaxWidth()) {
         Spacer(Modifier.weight(1f))
@@ -351,8 +378,6 @@ internal fun Header(viewModel: TeamReplayViewModel, replays: List<ReplayAnalytic
         Spacer(Modifier.weight(1f))
     }
 
-    Spacer(Modifier.height(32.dp))
-    AddReplayButton(viewModel)
     Spacer(Modifier.height(32.dp))
 }
 @Composable

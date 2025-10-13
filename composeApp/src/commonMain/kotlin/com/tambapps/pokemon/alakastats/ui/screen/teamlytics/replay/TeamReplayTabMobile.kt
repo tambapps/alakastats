@@ -35,7 +35,7 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
     val team = viewModel.team
     val replays = team.replays
 
-    if (replays.isEmpty() && !viewModel.isLoading) {
+    if (viewModel.hasNoReplaysToShow) {
         NoReplaysMobile(viewModel)
         return
     }
@@ -47,13 +47,18 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Header(viewModel, replays, team)
+                Header(replays, team)
             }
             itemsIndexed(replays) { index, replay ->
                 MobileReplay(viewModel, team, replay)
                 if (index < replays.size - 1) {
                     Spacer(Modifier.height(32.dp))
                 }
+            }
+
+            item {
+                // just to be able to scroll past Fab button
+                Spacer(Modifier.height(64.dp))
             }
         }
         LinearProgressBarIfEnabled(viewModel.isLoading)
