@@ -64,6 +64,23 @@ class TeamReplayViewModel(
         replayNotesText = ""
     }
 
+    fun reloadReplay(snackBar: SnackBar, replay: ReplayAnalytics, url: String) {
+        isLoading = true
+        scope.launch {
+            val replayEither = handleReplaysUseCase.parseReplay(url)
+            withContext(Dispatchers.Main) {
+                isLoading = false
+                replayEither.fold(
+                    ifLeft = {
+                        snackBar.show("Failed to fetch replay: ${it.message}", SnackBar.Severity.ERROR)
+                    },
+                    ifRight = { reloadedReplay ->
+                        handleReplaysUseCase.replaceReplay(replay, reloadedReplay.copy(notes = replay.notes))
+                    }
+                )
+            }
+        }
+    }
 
     fun showRemoveReplayDialog(replay: ReplayAnalytics) {
         replayToRemove = replay

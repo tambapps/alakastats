@@ -336,6 +336,7 @@ internal fun ReplayDropDownMenu(isMenuExpandedState: MutableState<Boolean>, view
         expanded = isMenuExpandedState.value,
         onDismissRequest = { isMenuExpandedState.value = false }
     ) {
+        val snackBar = LocalSnackBar.current
         val alreadyHasNotes = !replay.notes.isNullOrBlank()
         DropdownMenuItem(
             text = { Text(
@@ -352,6 +353,16 @@ internal fun ReplayDropDownMenu(isMenuExpandedState: MutableState<Boolean>, view
                 text = { Text("Remove notes") },
                 onClick = {
                     viewModel.editNotes(replay, null)
+                    isMenuExpandedState.value = false
+                }
+            )
+        }
+
+        replay.url?.let { replayUrl ->
+            DropdownMenuItem(
+                text = { Text("Reload") },
+                onClick = {
+                    viewModel.reloadReplay(snackBar, replay, replayUrl)
                     isMenuExpandedState.value = false
                 }
             )
