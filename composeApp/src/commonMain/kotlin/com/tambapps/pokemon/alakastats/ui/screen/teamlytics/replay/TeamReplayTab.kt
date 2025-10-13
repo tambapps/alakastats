@@ -242,7 +242,7 @@ internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: St
     }
     val uriHandler = LocalUriHandler.current
 
-    if (getPlatform().type != PlatformType.Web) {
+    if (LocalIsCompact.current) {
         OutlinedButton(
             modifier= modifier,
             onClick = { uriHandler.openUri(url) },
