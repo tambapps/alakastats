@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.Player
@@ -192,14 +193,16 @@ private fun NoReplaysMobile(viewModel: TeamReplayViewModel) {
 }
 
 @Composable
-private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutput: GameOutput) {
+private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutput: GameOutput, modifier: Modifier = Modifier) {
     val text =
         if (gameOutput != GameOutput.UNKNOWN) "VS ${opponentPlayer.name}"
         else "${currentPlayer.name}\nVS\n${opponentPlayer.name}"
     Text(
         text = text,
         style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(start = 8.dp),
-        textAlign = if (gameOutput != GameOutput.UNKNOWN) null else TextAlign.Center
+        modifier = modifier.padding(start = 8.dp),
+        textAlign = if (gameOutput != GameOutput.UNKNOWN) null else TextAlign.Center,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = 1
     )
 }

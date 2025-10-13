@@ -9,6 +9,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -123,9 +124,15 @@ private fun AbstractExpansionTile(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                title(isCardExpandedState.value)
-                Spacer(Modifier.weight(1f))
-                expandButton(isCardExpandedState)
+                Row(Modifier.weight(0.725f)) {
+                    title(isCardExpandedState.value)
+                }
+                Row(
+                    modifier = Modifier.weight(0.275f),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    expandButton(isCardExpandedState)
+                }
             }
             subtitle()
             AnimatedVisibility(
