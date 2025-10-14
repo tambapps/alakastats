@@ -124,11 +124,14 @@ private fun AbstractExpansionTile(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(Modifier.weight(0.725f)) {
+                val titleWeight by animateFloatAsState(
+                    targetValue = if (isCardExpandedState.value) 0.725f else 0.85f
+                )
+                Row(Modifier.weight(titleWeight)) {
                     title(isCardExpandedState.value)
                 }
                 Row(
-                    modifier = Modifier.weight(0.275f),
+                    modifier = Modifier.weight(1 - titleWeight),
                     horizontalArrangement = Arrangement.End,
                 ) {
                     expandButton(isCardExpandedState)
