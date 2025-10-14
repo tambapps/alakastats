@@ -1,10 +1,12 @@
 package com.tambapps.pokemon.alakastats.ui.screen.home
 
+import alakastats.composeapp.generated.resources.Res
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import arrow.core.Either
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.error.StorageError
@@ -43,6 +45,9 @@ class HomeViewModel(
     var isLoading by mutableStateOf(false)
         private set
 
+    var samplesToShow by mutableStateOf<List<TeamlyticsPreview>?>(null)
+        private set
+
     var teamToImport by mutableStateOf<Teamlytics?>(null)
         private set
 
@@ -59,26 +64,37 @@ class HomeViewModel(
             if (file == null) {
                 return@launch
             }
-            withContext(Dispatchers.Main) {
-                isLoading = true
-            }
-            val eitherTeam = useCase.loadTeam(file.readBytes())
-            withContext(Dispatchers.Main) {
-                isLoading = false
-                eitherTeam.fold(
-                    ifLeft = {
-                        snackBar.show("Couldn't import team: ${it.message}", SnackBar.Severity.ERROR)
-                    },
-                    ifRight = {
-                        teamToImport = it
-                    }
-                )
-            }
+            importTeam(snackBar, file.readBytes())
         }
     }
 
-    fun confirmImport() {
-        val team = teamToImport ?: return
+    private suspend fun importTeam(snackBar: SnackBar, saveBytes: ByteArray, importDirectly: Boolean = false) {
+        withContext(Dispatchers.Main) {
+            isLoading = true
+        }
+        val eitherTeam = useCase.loadTeam(saveBytes)
+        withContext(Dispatchers.Main) {
+            eitherTeam.fold(
+                ifLeft = {
+                    isLoading = false
+                    snackBar.show("Couldn't import team: ${it.message}", SnackBar.Severity.ERROR)
+                },
+                ifRight = {
+                    if (importDirectly) {
+                        doImport(it)
+                    } else {
+                        isLoading = false
+                        // will open confirmation dialog
+                        teamToImport = it
+                    }
+                }
+            )
+        }
+    }
+
+    fun confirmImport() = teamToImport?.let { doImport(it) } ?: Unit
+
+    private fun doImport(team: Teamlytics) {
         isLoading = true
         scope.launch {
             useCase.saveNewTeam(team)
@@ -97,7 +113,20 @@ class HomeViewModel(
     }
 
     fun showSamplesDialog() {
-        // TODO
+        samplesToShow = useCase.listSamplePreviews()
+    }
+
+    fun hideSamplesDialog() {
+        samplesToShow = null
+    }
+
+    fun importSample(snackBar: SnackBar, preview: TeamlyticsPreview) {
+        val fileName = preview.name.lowercase().replace(' ', '_')
+        scope.launch {
+            val saveBytes = Either.catch { Res.readBytes("files/samples/$fileName.json") }
+                .getOrNull() ?: return@launch
+            importTeam(snackBar, saveBytes, importDirectly = true)
+        }
     }
 
     private suspend fun doLoadTeams() {

@@ -1,12 +1,14 @@
 package com.tambapps.pokemon.alakastats.domain.usecase
 
 import arrow.core.Either
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.error.GetTeamlyticsError
 import com.tambapps.pokemon.alakastats.domain.error.LoadTeamError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.service.TeamlyticsSerializer
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 class ManageTeamlyticsListUseCase(
@@ -25,4 +27,23 @@ class ManageTeamlyticsListUseCase(
 
     suspend fun saveNewTeam(team: Teamlytics) = repository.save(team.copy(id = Uuid.random()))
 
+    fun listSamplePreviews(): List<TeamlyticsPreview> = listOf(
+        samplePreview(
+            name = "Electrizer",
+            pokemons = listOf("Miraidon", "Iron-Bundle", "Landorus", "Farigiraf", "Incineroar", "Ogerpon-Cornerstone").map(::PokemonName),
+            nbReplays = 10,
+            winrate = 50,
+        )
+    )
+
+    private fun samplePreview(name: String, pokemons: List<PokemonName>, nbReplays: Int, winrate: Int): TeamlyticsPreview {
+        return TeamlyticsPreview(
+            name = name,
+            pokemons = pokemons,
+            nbReplays = nbReplays,
+            winrate = winrate, sdNames = emptyList(),
+            lastUpdatedAt = Instant.DISTANT_PAST,
+            id = Uuid.random()
+            )
+    }
 }

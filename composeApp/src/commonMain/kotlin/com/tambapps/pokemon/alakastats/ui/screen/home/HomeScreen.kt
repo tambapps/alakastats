@@ -3,17 +3,21 @@ package com.tambapps.pokemon.alakastats.ui.screen.home
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.more_horiz
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -114,6 +118,9 @@ object HomeScreen : Screen {
                 }
             )
         }
+        viewModel.samplesToShow?.let { samples ->
+            SamplesDialog(viewModel, samples)
+        }
     }
 }
 
@@ -213,10 +220,54 @@ internal fun ImportTeamButton(viewModel: HomeViewModel, modifier: Modifier = Mod
 }
 @Composable
 internal fun SampleTeamButton(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
-    val snackBar = LocalSnackBar.current
-    OutlinedButton(onClick = { snackBar.show("Coming Soon"); viewModel.showSamplesDialog() }, modifier = modifier) {
+    OutlinedButton(onClick = { viewModel.showSamplesDialog() }, modifier = modifier) {
         Text("Sample", style = buttonTextStyle)
     }
+}
+
+@Composable
+private fun SamplesDialog(viewModel: HomeViewModel, samplePreviews: List<TeamlyticsPreview>) {
+    val snackBar = LocalSnackBar.current
+    AlertDialog(
+        onDismissRequest = { viewModel.hideSamplesDialog() },
+        title = {
+            Text("Select Sample")
+        },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                samplePreviews.forEachIndexed { index, preview ->
+                    if (index > 0) {
+                        HorizontalDivider(Modifier.fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 16.dp), thickness = 2.dp)
+                    }
+                    Column(
+                        Modifier.clickable(onClick = {
+                            viewModel.importSample(snackBar, preview)
+                            viewModel.hideSamplesDialog()
+                        })
+                    ) {
+                        Text(preview.name, style = MaterialTheme.typography.titleLarge)
+                        PokemonTeamPreview(viewModel.imageService, preview.pokemons, fillWidth = true)
+                        Spacer(Modifier.height(4.dp))
+                        Row {
+                            Text("${preview.nbReplays} replays")
+                            Spacer(Modifier.weight(1f))
+                            Text("${preview.winrate}% winrate")
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(
+                onClick = { viewModel.hideSamplesDialog() }
+            ) {
+                Text("Cancel")
+            }
+        }
+
+    )
 }
 
 @Composable
