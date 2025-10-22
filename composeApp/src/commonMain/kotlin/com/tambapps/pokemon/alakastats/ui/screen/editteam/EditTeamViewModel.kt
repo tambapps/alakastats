@@ -117,7 +117,7 @@ class EditTeamViewModel(
     
     fun addShowdownName() {
         if (isNewNameValid && !sdNames.contains(newSdNameInput)) {
-            sdNames.add(newSdNameInput)
+            sdNames.add(newSdNameInput.trim())
             hideAddNameDialog()
         }
     }
