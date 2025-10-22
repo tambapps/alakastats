@@ -3,9 +3,12 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import arrow.core.Either
 import arrow.core.getOrElse
+import arrow.core.raise.either
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
+import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
@@ -45,7 +48,7 @@ class TeamlyticsViewModel(
 
     override suspend fun parseReplay(url: String) = replayService.fetch(url)
 
-    override suspend fun addReplays(replays: List<ReplayAnalytics>) {
+    override suspend fun addReplays(replays: List<ReplayAnalytics>): Either<DomainError, Unit> {
         val team = requireTeam()
         val teamReplays = team.replays.toMutableList()
 
@@ -64,32 +67,32 @@ class TeamlyticsViewModel(
             teamReplays.add(newReplay)
         }
 
-        save(team.copy(replays = teamReplays.withComputedElo()))
+        return save(team.copy(replays = teamReplays.withComputedElo()))
     }
 
-    override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?) {
+    override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?): Either<DomainError, Unit> {
         val team = requireTeam()
-        save(team.copy(notes = notes))
+        return save(team.copy(notes = notes))
     }
 
     override fun export(team: Teamlytics) = useCase.export(team)
 
-    override suspend fun removeReplay(replay: ReplayAnalytics) {
+    override suspend fun removeReplay(replay: ReplayAnalytics): Either<DomainError, Unit> {
         val team = requireTeam()
-        save(team.copy(replays = team.replays - replay))
+        return save(team.copy(replays = team.replays - replay))
     }
 
-    override suspend fun replaceReplay(original: ReplayAnalytics, replay: ReplayAnalytics) {
+    override suspend fun replaceReplay(original: ReplayAnalytics, replay: ReplayAnalytics): Either<DomainError, Unit> {
         val team = requireTeam()
         val replayIndex = team.replays.indexOf(original)
         val replays = team.replays.mapIndexed { index, r ->
             if (index == replayIndex) replay else r
         }
-        save(team.copy(replays = replays))
+        return save(team.copy(replays = replays))
     }
 
-    private suspend fun save(team: Teamlytics) {
-        val updatedTeam = useCase.save(team)
+    private suspend fun save(team: Teamlytics): Either<DomainError, Unit> = either {
+        val updatedTeam = useCase.save(team).bind()
         withContext(Dispatchers.Main) {
             teamState.value = updatedTeam
         }

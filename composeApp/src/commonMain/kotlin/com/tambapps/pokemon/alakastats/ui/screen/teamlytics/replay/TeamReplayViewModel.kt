@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.Clipboard
+import arrow.core.flatMap
 import arrow.core.getOrElse
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
@@ -70,12 +71,14 @@ class TeamReplayViewModel(
             val replayEither = handleReplaysUseCase.parseReplay(url)
             withContext(Dispatchers.Main) {
                 isLoading = false
-                replayEither.fold(
+                replayEither.flatMap { reloadedReplay ->
+                    handleReplaysUseCase.replaceReplay(replay, reloadedReplay.copy(notes = replay.notes))
+                }.fold(
                     ifLeft = {
-                        snackBar.show("Failed to fetch replay: ${it.message}", SnackBar.Severity.ERROR)
+                        snackBar.show("Failed to reload replay: ${it.message}", SnackBar.Severity.ERROR)
                     },
                     ifRight = { reloadedReplay ->
-                        handleReplaysUseCase.replaceReplay(replay, reloadedReplay.copy(notes = replay.notes))
+                        snackBar.show("Successfully reloaded replay", SnackBar.Severity.SUCCESS)
                     }
                 )
             }
@@ -139,12 +142,13 @@ class TeamReplayViewModel(
             }.awaitAll().filterNotNull()
 
             val duplicates = results.filter { resultReplay -> team.replays.any { it.reference == resultReplay.reference } }
-            if (duplicates.size < results.size) {
-                handleReplaysUseCase.addReplays(results - duplicates)
-            }
+            val error =
+                if (duplicates.size < results.size) handleReplaysUseCase.addReplays(results - duplicates).leftOrNull()
+                else null
             withContext(Dispatchers.Main) {
                 isLoading = false
                 when {
+                    error != null -> snackBar.show("Couldn't add replay: ${error.message}", SnackBar.Severity.ERROR)
                     duplicates.size == results.size -> snackBar.show(if (duplicates.size == 1) "The replay was already added" else "The Replays were already added")
                     duplicates.isNotEmpty() -> snackBar.show("Some replay(s) were already added")
                 }

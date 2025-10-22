@@ -81,7 +81,7 @@ class HomeViewModel(
                 },
                 ifRight = {
                     if (importDirectly) {
-                        doImport(it)
+                        doImport(snackBar, it)
                     } else {
                         isLoading = false
                         // will open confirmation dialog
@@ -92,14 +92,19 @@ class HomeViewModel(
         }
     }
 
-    fun confirmImport() = teamToImport?.let { doImport(it) } ?: Unit
+    fun confirmImport(snackBar: SnackBar) = teamToImport?.let { doImport(snackBar, it) } ?: Unit
 
-    private fun doImport(team: Teamlytics) {
+    private fun doImport(snackBar: SnackBar, team: Teamlytics) {
         isLoading = true
         scope.launch {
-            useCase.saveNewTeam(team)
+            val either = useCase.saveNewTeam(team)
             val previews = useCase.list()
             withContext(Dispatchers.Main) {
+                either.fold(ifLeft = {
+                    snackBar.show("Error: ${it.message}", SnackBar.Severity.ERROR)
+                }, ifRight = {
+
+                })
                 teamlyticsList.clear()
                 teamlyticsList.addAll(previews.sortedWith(compareBy({ - it.lastUpdatedAt.epochSeconds }, { it.name })))
                 isLoading = false

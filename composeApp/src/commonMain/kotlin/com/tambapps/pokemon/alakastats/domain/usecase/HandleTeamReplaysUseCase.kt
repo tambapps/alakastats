@@ -8,10 +8,10 @@ interface HandleTeamReplaysUseCase {
 
     suspend fun parseReplay(url: String): Either<DomainError, ReplayAnalytics>
 
-    suspend fun addReplays(replays: List<ReplayAnalytics>)
+    suspend fun addReplays(replays: List<ReplayAnalytics>): Either<DomainError, Unit>
 
-    suspend fun removeReplay(replay: ReplayAnalytics)
+    suspend fun removeReplay(replay: ReplayAnalytics): Either<DomainError, Unit>
 
-    suspend fun replaceReplay(original: ReplayAnalytics, replay: ReplayAnalytics)
+    suspend fun replaceReplay(original: ReplayAnalytics, replay: ReplayAnalytics): Either<DomainError, Unit>
 
 }

@@ -14,7 +14,7 @@ interface TeamlyticsRepository {
 
     suspend fun listPreviews(): List<TeamlyticsPreview>
 
-    suspend fun save(teamlytics: Teamlytics): Teamlytics
+    suspend fun save(teamlytics: Teamlytics): Either<GetTeamlyticsError, Teamlytics>
 
     suspend fun delete(teamlytics: Teamlytics)
 

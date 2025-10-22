@@ -25,7 +25,8 @@ class ManageTeamlyticsListUseCase(
     suspend fun loadTeam(byteArray: ByteArray): Either<LoadTeamError, Teamlytics> =
         serializer.loadTeam(byteArray)
 
-    suspend fun saveNewTeam(team: Teamlytics) = repository.save(team.copy(id = Uuid.random()))
+    suspend fun saveNewTeam(team: Teamlytics): Either<GetTeamlyticsError, Teamlytics> =
+        repository.save(team.copy(id = Uuid.random()))
 
     fun listSamplePreviews(): List<TeamlyticsPreview> = listOf(
         samplePreview(

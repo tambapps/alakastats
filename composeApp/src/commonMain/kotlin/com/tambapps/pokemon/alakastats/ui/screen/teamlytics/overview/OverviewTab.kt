@@ -103,8 +103,9 @@ internal fun PokePasteTitle() {
 
 @Composable
 internal fun NoteEditingButtons(viewModel: OverviewViewModel) {
+    val snackBar = LocalSnackBar.current
     Button(
-        onClick = { viewModel.saveNotes() }
+        onClick = { viewModel.saveNotes(snackBar) }
     ) {
         Text("Save Notes", style = buttonTextStyle.copy(
             color = LocalContentColor.current

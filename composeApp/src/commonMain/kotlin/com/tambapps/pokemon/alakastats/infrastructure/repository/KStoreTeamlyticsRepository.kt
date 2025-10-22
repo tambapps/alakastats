@@ -1,6 +1,8 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository
 
 import arrow.core.Either
+import arrow.core.flatMap
+import arrow.core.raise.either
 import com.tambapps.pokemon.alakastats.domain.error.GetTeamlyticsError
 import com.tambapps.pokemon.alakastats.domain.error.TeamlyticsNotFound
 import com.tambapps.pokemon.alakastats.domain.error.StorageError
@@ -11,7 +13,6 @@ import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsTransformer
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
-import kotlinx.coroutines.coroutineScope
 import kotlin.uuid.Uuid
 
 class KStoreTeamlyticsRepository(
@@ -35,9 +36,19 @@ class KStoreTeamlyticsRepository(
         }
     }
 
-    override suspend fun save(teamlytics: Teamlytics): Teamlytics = coroutineScope {
+    override suspend fun save(teamlytics: Teamlytics): Either<GetTeamlyticsError, Teamlytics> = either {
         val savedTeam = teamsStorage.save(teamlyticsTransformer.toEntity(teamlytics))
+            .mapLeft { error ->
+                StorageError("Failed to save team. No more space left?", error.throwable)
+            }.bind()
+
+        // save preview
         previewsStorage.save(teamlyticsTransformer.toPreview(savedTeam))
+            .mapLeft { error ->
+                StorageError("Failed to save team. No more space left?", error.throwable)
+            }
+            .bind()
+
         teamlyticsTransformer.toDomain(savedTeam)
     }
 

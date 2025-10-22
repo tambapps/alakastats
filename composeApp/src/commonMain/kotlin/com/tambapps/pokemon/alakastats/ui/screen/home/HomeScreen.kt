@@ -90,8 +90,9 @@ object HomeScreen : Screen {
                 title = "Load Team",
                 onDismissRequest = { viewModel.dismissImportTeamDialog() },
                 confirmButton = {
+                    val snackBar = LocalSnackBar.current
                     TextButton(
-                        onClick = { viewModel.confirmImport() }
+                        onClick = { viewModel.confirmImport(snackBar) }
                     ) {
                         Text("Load")
                     }

@@ -73,11 +73,12 @@ class OverviewViewModel(
         }
     }
 
-    fun saveNotes() {
+    fun saveNotes(snackBar: SnackBar) {
         isLoading = true
         scope.launch {
-            useCase.setNotes(team, TeamlyticsNotes(teamNotes, pokemonNotes.mapKeys { (key, _) -> key.name }))
+            val either = useCase.setNotes(team, TeamlyticsNotes(teamNotes, pokemonNotes.mapKeys { (key, _) -> key.name }))
             withContext(Dispatchers.Main) {
+                either.onLeft { error -> snackBar.show("Couldn't save notes: ${error.message}", SnackBar.Severity.ERROR) }
                 isLoading = false
                 onStopEditingNotes()
             }

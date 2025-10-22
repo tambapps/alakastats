@@ -185,13 +185,13 @@ class EditTeamViewModel(
                     editTeamlyticsUseCase.edit(editingTeam!!,
                         name = teamName,
                         sdNames = sdNames,
-                        pokePaste = pokepaste)
+                        pokePaste = pokepaste).getOrNull()
                 } else {
                     editTeamlyticsUseCase.create(
                         name = teamName,
                         sdNames = sdNames,
                         pokePaste = pokepaste
-                    )
+                    ).getOrNull()
                 }
                 navigator.pop()
                 snackBar.show(

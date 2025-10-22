@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository.storage
 
+import arrow.core.Either
 import com.tambapps.pokemon.alakastats.util.Identifiable
 import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.extensions.getOrEmpty
@@ -25,14 +26,16 @@ abstract class AbstractKStorage<ID: @Serializable Any, T : @Serializable Identif
 
     override suspend fun get(id: ID) = getStore(id).get()
 
-    override suspend fun save(e: T): T {
+    override suspend fun save(e: T): Either<KStorageError, T> = Either.catch {
         val ids = listIds()
         val entityId = e.id
         if (!ids.contains(entityId)) {
             idsStore.update { (it ?: emptyList()) + entityId }
         }
         getStore(entityId).set(e)
-        return e
+        e
+    }.mapLeft { throwable ->
+        KStorageError("Failed to save entity: ${throwable.message}", throwable)
     }
 
     override suspend fun delete(e: T) = delete(e.id)
