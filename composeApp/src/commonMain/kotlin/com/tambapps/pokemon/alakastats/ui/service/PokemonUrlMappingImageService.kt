@@ -344,7 +344,8 @@ private fun MyImage(url: String, contentDescription: String = "", modifier: Modi
         contentDescription = contentDescription,
         modifier = modifier,
         placeholder = painterResource(placeHolderDrawable),
-    )
+        error = painterResource(placeHolderDrawable),
+        )
 }
 
 private suspend inline fun <reified T> readMappingFile(json: Json, filename: String): T {
