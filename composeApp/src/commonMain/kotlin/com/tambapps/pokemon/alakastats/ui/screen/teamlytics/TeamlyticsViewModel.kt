@@ -17,6 +17,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
+import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,6 +31,17 @@ class TeamlyticsViewModel(
 
     private val scope = CoroutineScope(Dispatchers.Default)
     val teamState = mutableStateOf<Teamlytics?>(null)
+    override val filters = ReplayFilters()
+    var showFiltersDialog by mutableStateOf(false)
+
+    override fun openFilters() {
+        showFiltersDialog = true
+    }
+
+    fun closeFilters() {
+        showFiltersDialog = false
+    }
+
     var team: Teamlytics? by teamState
         private set
 

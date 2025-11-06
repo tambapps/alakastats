@@ -10,6 +10,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
 import io.ktor.http.Url
@@ -25,6 +26,7 @@ class TeamReplayViewModel(
     private val handleReplaysUseCase: HandleTeamReplaysUseCase,
     val team: Teamlytics,
 ) {
+    val filters: ReplayFilters get() = handleReplaysUseCase.filters
 
     private companion object {
         val REPLAYS_SEPARATOR_REGEX = Regex("[,\\s]+")
@@ -64,6 +66,8 @@ class TeamReplayViewModel(
         replayToNote = null
         replayNotesText = ""
     }
+
+    fun openFilters() = handleReplaysUseCase.openFilters()
 
     fun reloadReplay(snackBar: SnackBar, replay: ReplayAnalytics, url: String) {
         isLoading = true

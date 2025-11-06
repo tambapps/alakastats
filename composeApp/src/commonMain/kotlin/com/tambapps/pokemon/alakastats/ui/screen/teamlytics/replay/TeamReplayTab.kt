@@ -93,7 +93,6 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
 
 @Composable
 private fun AddReplayButton(viewModel: TeamReplayViewModel, modifier: Modifier = Modifier) {
-    val (padX, padY) = if (LocalIsCompact.current) 32.dp to 32.dp else 50.dp to 50.dp
     FloatingActionButton(
         onClick = {
             if (!viewModel.isLoading) {
@@ -114,15 +113,17 @@ internal fun FiltersButton(viewModel: TeamReplayViewModel, modifier: Modifier = 
     BadgedBox(
         modifier = modifier,
         badge = {
-            Badge(
-                modifier = Modifier.align(Alignment.BottomEnd),
-            ) {
-                Text(" ")
+            if (viewModel.filters.hasAny()) {
+                Badge(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                ) {
+                    Text(" ")
+                }
             }
         }
     ) {
         FloatingActionButton(
-            onClick = {},
+            onClick = { viewModel.openFilters() },
         ) {
             Icon(
                 painter = painterResource(Res.drawable.tune),
