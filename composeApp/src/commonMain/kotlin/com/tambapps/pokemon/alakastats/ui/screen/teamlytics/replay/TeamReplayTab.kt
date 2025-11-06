@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
+import alakastats.composeapp.generated.resources.tune
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -44,18 +47,15 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
-import com.tambapps.pokemon.alakastats.util.copyToClipboard
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -71,7 +71,13 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
         }
 
         if (!viewModel.hasNoReplaysToShow) {
-            Fab(Modifier.align(Alignment.BottomEnd), viewModel)
+            val (padX, padY) = if (LocalIsCompact.current) 32.dp to 32.dp else 50.dp to 50.dp
+
+            Row(modifier = Modifier.align(Alignment.BottomEnd).padding(end = padX, bottom = padY)) {
+                FiltersButton(viewModel)
+                Spacer(Modifier.width(32.dp))
+                AddReplayButton(viewModel)
+            }
         }
         if (viewModel.showAddReplayDialog) {
             AddReplayDialog(viewModel)
@@ -86,7 +92,7 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
 }
 
 @Composable
-private fun Fab(modifier: Modifier, viewModel: TeamReplayViewModel) {
+private fun AddReplayButton(viewModel: TeamReplayViewModel, modifier: Modifier = Modifier) {
     val (padX, padY) = if (LocalIsCompact.current) 32.dp to 32.dp else 50.dp to 50.dp
     FloatingActionButton(
         onClick = {
@@ -94,7 +100,7 @@ private fun Fab(modifier: Modifier, viewModel: TeamReplayViewModel) {
                 viewModel.showAddReplayDialog()
             }
         },
-        modifier = modifier.padding(bottom = padY, end = padX),
+        modifier = modifier,
     ) {
         Icon(
             painter = painterResource(Res.drawable.add),
@@ -104,7 +110,30 @@ private fun Fab(modifier: Modifier, viewModel: TeamReplayViewModel) {
 }
 
 @Composable
-internal fun AddReplayButton(viewModel: TeamReplayViewModel) {
+internal fun FiltersButton(viewModel: TeamReplayViewModel, modifier: Modifier = Modifier) {
+    BadgedBox(
+        modifier = modifier,
+        badge = {
+            Badge(
+                modifier = Modifier.align(Alignment.BottomEnd),
+            ) {
+                Text(" ")
+            }
+        }
+    ) {
+        FloatingActionButton(
+            onClick = {},
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.tune),
+                contentDescription = "Filters",
+            )
+        }
+    }
+}
+
+@Composable
+internal fun AddReplayTextButton(viewModel: TeamReplayViewModel) {
     Button(
         onClick = {
             if (!viewModel.isLoading) {

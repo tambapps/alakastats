@@ -185,7 +185,7 @@ private fun NoReplaysMobile(viewModel: TeamReplayViewModel) {
             verticalArrangement = Arrangement.Center
         ) {
             Text("No replays were found")
-            AddReplayButton(viewModel)
+            AddReplayTextButton(viewModel)
         }
         LinearProgressBarIfEnabled(viewModel.isLoading, modifier = Modifier
             .align(Alignment.BottomStart))
