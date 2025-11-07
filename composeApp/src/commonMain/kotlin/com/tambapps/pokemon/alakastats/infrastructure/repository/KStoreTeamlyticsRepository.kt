@@ -13,6 +13,7 @@ import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsTransformer
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 class KStoreTeamlyticsRepository(
@@ -37,7 +38,7 @@ class KStoreTeamlyticsRepository(
     }
 
     override suspend fun save(teamlytics: Teamlytics): Either<GetTeamlyticsError, Teamlytics> = either {
-        val savedTeam = teamsStorage.save(teamlyticsTransformer.toEntity(teamlytics))
+        val savedTeam = teamsStorage.save(teamlyticsTransformer.toEntity(teamlytics.copy(lastUpdatedAt = Clock.System.now())))
             .mapLeft { error ->
                 StorageError("Failed to save team. No more space left?", error.throwable)
             }.bind()

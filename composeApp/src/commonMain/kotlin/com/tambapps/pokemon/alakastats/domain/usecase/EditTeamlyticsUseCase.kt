@@ -21,7 +21,6 @@ class EditTeamlyticsUseCase(
         name = name,
         pokePaste = pokePaste,
         sdNames = sdNames,
-        lastUpdatedAt = Clock.System.now()
     ))
 
     suspend fun create(
