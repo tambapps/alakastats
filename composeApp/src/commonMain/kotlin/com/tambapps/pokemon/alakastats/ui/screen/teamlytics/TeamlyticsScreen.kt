@@ -32,9 +32,11 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
@@ -113,8 +115,19 @@ private fun FiltersDialog(viewModel: TeamlyticsViewModel, filters: ReplayFilters
                         },
                         content = {
                             Column {
+                                PokemonNameTextField(
+                                    value = PokemonName("b"),
+                                    onValueChange = {}
+                                )
+                                PokemonNameTextField(
+                                    value = PokemonName("b"),
+                                    onValueChange = {}
+                                )
+                                PokemonNameTextField(
+                                    value = PokemonName("b"),
+                                    onValueChange = {}
+                                )
 
-                                Text("TODO")
                             }
                         }
                     )
