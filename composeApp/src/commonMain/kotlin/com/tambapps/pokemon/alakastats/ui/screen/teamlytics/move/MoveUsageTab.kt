@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
+import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import io.github.koalaplot.core.pie.PieChart
@@ -51,16 +52,20 @@ internal val MoveUsageViewModel.sortedPokemonMovesUsageEntries get() =
 internal fun PokemonMoveUsageCard(
     viewModel: MoveUsageViewModel,
     name: PokemonName,
-    moveUsage: Map<String, Int>,
+    moveUsage: MovesUsage,
     modifier: Modifier = Modifier,
     ) {
     MyCard(
         modifier = modifier.padding(horizontal = 8.dp),
-        gradientBackgroundColors = elevatedCardGradientColors
+        gradientBackgroundColors = cardGradientColors
     ) {
         Spacer(Modifier.height(4.dp))
         PokemonMoveUsageDonut(viewModel, name, moveUsage, Modifier.fillMaxWidth())
         Spacer(Modifier.height(16.dp))
+        if (moveUsage.movesCount.isNotEmpty()) {
+            Text("Participated in ${moveUsage.replaysCount} games", modifier = Modifier.padding(horizontal = 8.dp))
+            Spacer(Modifier.height(8.dp))
+        }
     }
 }
 
@@ -70,10 +75,10 @@ private const val MOVE_STRUGGLE = "struggle"
 internal fun PokemonMoveUsageDonut(
     viewModel: MoveUsageViewModel,
     name: PokemonName,
-    moveUsage: Map<String, Int>,
+    moveUsage: MovesUsage,
     modifier: Modifier = Modifier,
 ) {
-    val rawEntries = moveUsage.entries.filter { PokemonNormalizer.normalize(it.key) != MOVE_STRUGGLE }
+    val rawEntries = moveUsage.movesCount.entries.filter { PokemonNormalizer.normalize(it.key) != MOVE_STRUGGLE }
     val total = remember { rawEntries.sumOf { it.value } }
     val entries = remember {
         rawEntries.map {

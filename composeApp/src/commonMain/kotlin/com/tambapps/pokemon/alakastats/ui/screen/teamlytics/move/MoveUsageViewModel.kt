@@ -15,6 +15,19 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+data class MovesUsage(
+    val movesCount: Map<String, Int> = emptyMap(),
+    val replaysCount: Int
+) {
+
+    fun mergeWith(movesUsage: MovesUsage) = MovesUsage(
+        movesCount = (movesCount.keys + movesUsage.movesCount.keys).associateWith { move ->
+            (movesCount[move] ?: 0) + (movesUsage.movesCount[move] ?: 0)
+        },
+        replaysCount = this.replaysCount + movesUsage.replaysCount
+    )
+}
+
 class MoveUsageViewModel(
     val team: Teamlytics,
     val pokemonImageService: PokemonImageService,
@@ -23,7 +36,7 @@ class MoveUsageViewModel(
         private set
 
     private val scope = CoroutineScope(Dispatchers.Default)
-    val pokemonMovesUsage = mutableStateMapOf<PokemonName, Map<String, Int>>()
+    val pokemonMovesUsage = mutableStateMapOf<PokemonName, MovesUsage>()
 
     fun loadStats() {
         if (isLoading) {
@@ -43,7 +56,7 @@ class MoveUsageViewModel(
 
     private fun TeamlyticsContext.doLoadStats(replays: List<ReplayAnalytics>) {
         val result = replays.asSequence().map { replay ->
-            replay.youPlayer.movesUsage
+            fromReplay(replay)
         }
             .reduceOrNull { m1, m2 -> merged(m1, m2) } ?: emptyMap()
         pokemonMovesUsage.clear()
@@ -51,16 +64,29 @@ class MoveUsageViewModel(
     }
 
     private fun merged(
-        m1: Map<PokemonName, Map<String, Int>>,
-        m2: Map<PokemonName, Map<String, Int>>
-    ): Map<PokemonName, Map<String, Int>> {
+        m1: Map<PokemonName, MovesUsage>,
+        m2: Map<PokemonName, MovesUsage>
+    ): Map<PokemonName, MovesUsage> {
         return (m1.keys + m2.keys).associateWith { pokemon ->
-            val moves1 = m1[pokemon] ?: emptyMap()
-            val moves2 = m2[pokemon] ?: emptyMap()
-            (moves1.keys + moves2.keys).associateWith { move ->
-                (moves1[move] ?: 0) + (moves2[move] ?: 0)
+            val usage1 = m1[pokemon]
+            val usage2 = m2[pokemon]
+            when {
+                usage1 != null && usage2 != null -> usage1.mergeWith(usage2)
+                usage1 != null -> usage1
+                usage2 != null -> usage2
+                else -> throw RuntimeException("Shouldn't happen")
             }
         }
     }
+}
 
+private fun TeamlyticsContext.fromReplay(replay: ReplayAnalytics): Map<PokemonName, MovesUsage> {
+    val player = replay.youPlayer
+    return player.selection.asSequence()
+        .associateWith { pokemonName ->
+            MovesUsage(
+                movesCount = player.movesUsage[pokemonName] ?: emptyMap(),
+                replaysCount = 1
+            )
+        }
 }
