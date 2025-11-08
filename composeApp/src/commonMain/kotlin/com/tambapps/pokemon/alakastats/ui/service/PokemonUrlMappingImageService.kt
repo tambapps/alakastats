@@ -360,7 +360,7 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
 }
 
 @Composable
-private fun MyImage(url: String, contentDescription: String = "", modifier: Modifier = Modifier, flipX: Boolean = false) {
+private fun MyImage(url: String, contentDescription: String = "", modifier: Modifier = Modifier) {
     AsyncImage(
         model = url,
         contentDescription = contentDescription,
