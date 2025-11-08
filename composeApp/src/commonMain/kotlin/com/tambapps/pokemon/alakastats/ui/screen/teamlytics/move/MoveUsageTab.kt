@@ -81,7 +81,7 @@ internal fun PokemonUsagesCard(
         Spacer(Modifier.height(8.dp))
         val replays = viewModel.replays
         if (replays.isNotEmpty()) {
-            val winRate = usages.winCount * 100 / usages.usageCount
+            val winRate = if (usages.usageCount > 0) usages.winCount * 100 / usages.usageCount else 0
             val usageRate = usages.usageCount * 100 / viewModel.replays.size
             Row(
                 Modifier.padding(horizontal = 8.dp)
@@ -124,7 +124,8 @@ private fun PokemonUsagesDonut(
     val total = remember { rawEntries.sumOf { it.value } }
     val entries = remember {
         rawEntries.map {
-            Triple(PokemonNormalizer.pretty(it.key), it.value, it.value * 100 / total)
+            val percentage = if (total > 0) it.value * 100 / total else 0
+            Triple(PokemonNormalizer.pretty(it.key), it.value, percentage)
         }
     }
 
