@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
+import com.tambapps.pokemon.alakastats.ui.composables.verticalPokemonSpace
 
 @Composable
 internal fun OverviewTabMobile(viewModel: OverviewViewModel) {
@@ -67,10 +68,8 @@ internal fun OverviewTabMobile(viewModel: OverviewViewModel) {
 @Composable
 private fun NotedPokePaste(viewModel: OverviewViewModel) {
     val pokemons = viewModel.team.pokePaste.pokemons
-    pokemons.forEachIndexed { index, pokemon ->
-        PokemonNotes(
-            viewModel, pokemon,
-            modifier = Modifier.fillMaxWidth()
-        )
+    pokemons.forEach { pokemon ->
+        NotedPokepastePokemon(viewModel, pokemon, Modifier.fillMaxWidth())
+        Spacer(Modifier.height(verticalPokemonSpace))
     }
 }

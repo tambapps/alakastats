@@ -179,13 +179,29 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
 }
 
 @Composable
-internal fun PokemonNotes(viewModel: OverviewViewModel,
+internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
                           pokemon: Pokemon,
                           modifier: Modifier = Modifier,
                           ) {
-    // TODO handle editing notes in PokepastePokemon. A textfield should be displayed there.
-    //   this means this PokemonNotes function might be useless
-    PokepastePokemon(viewModel.team.pokePaste.isOts, pokemon, viewModel.pokemonImageService, modifier, viewModel.pokemonNotes[pokemon])
+    val notes = viewModel.pokemonNotes[pokemon]
+    if (viewModel.isEditingNotes) {
+        PokepastePokemon(
+            viewModel.team.pokePaste.isOts,
+            pokemon,
+            viewModel.pokemonImageService,
+            modifier,
+            onNotesChanged = { viewModel.pokemonNotes[pokemon] = it },
+            notes
+        )
+    } else {
+        PokepastePokemon(
+            viewModel.team.pokePaste.isOts,
+            pokemon,
+            viewModel.pokemonImageService,
+            modifier,
+            notes
+        )
+    }
 
 }
 

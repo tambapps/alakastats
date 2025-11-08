@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,7 +53,7 @@ fun Pokepaste(
     }
 }
 
-private val verticalPokemonSpace = 32.dp
+val verticalPokemonSpace = 32.dp
 
 @Composable
 fun VerticalPokepaste(
@@ -157,12 +158,33 @@ private fun PokemonStatColumn(
             pokemon.nature?.malusStat == stat -> Color.Cyan
             else -> Color.Unspecified
         }
-        Text(txt, color = textColor, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium)
+        Text(txt, color = textColor, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
         val statValueStyle = MaterialTheme.typography.titleMedium
         Text(evs[stat].toString(), color = textColor, textAlign = TextAlign.Center, style = statValueStyle)
         Text(ivs[stat].toString(), color = textColor, textAlign = TextAlign.Center, style = statValueStyle)
     }
 }
+
+@Composable
+fun PokepastePokemon(
+    isOts: Boolean,
+    pokemon: Pokemon,
+    pokemonImageService: PokemonImageService,
+    modifier: Modifier = Modifier,
+    onNotesChanged: (String) -> Unit,
+    notes: String? = null,
+) = PokepastePokemon(
+    isOts,
+    pokemon,
+    pokemonImageService,
+    modifier,
+    notes
+) {
+    OutlinedTextField(notes ?: "", onValueChange = onNotesChanged, placeholder = {
+        Text("Tap notes")
+    }, textStyle = MaterialTheme.typography.bodyLarge)
+}
+
 @Composable
 fun PokepastePokemon(
     isOts: Boolean,
@@ -170,6 +192,24 @@ fun PokepastePokemon(
     pokemonImageService: PokemonImageService,
     modifier: Modifier = Modifier,
     notes: String? = null
+) = PokepastePokemon(
+    isOts,
+    pokemon,
+    pokemonImageService,
+    modifier,
+    notes
+) {
+    Text(notes ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 4.dp))
+}
+
+@Composable
+private fun PokepastePokemon(
+    isOts: Boolean,
+    pokemon: Pokemon,
+    pokemonImageService: PokemonImageService,
+    modifier: Modifier = Modifier,
+    notes: String? = null,
+    notesComposer: @Composable () -> Unit
 ) {
     Box(
         modifier = modifier,
@@ -205,8 +245,7 @@ fun PokepastePokemon(
             Spacer(Modifier.height(4.dp))
             Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
             if (notes != null) {
-                // TODO handle editing mode
-                Text(notes, style = MaterialTheme.typography.bodyMedium)
+                notesComposer.invoke()
             }
             if (!isOts) {
                 // only want margin if above element is not headline text because headline already has a lot of margin
@@ -220,45 +259,10 @@ fun PokepastePokemon(
                     )
                 }
                 Spacer(Modifier.width(4.dp))
-                Text((pokemon.item ?: "<no item>") + " | " + (pokemon.ability ?: "<no ability>"), style = MaterialTheme.typography.bodyMedium)
+                Text((pokemon.item ?: "<no item>") + " | " + (pokemon.ability ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
             }
             Spacer(Modifier.height(16.dp))
             PokemonMoves(pokemon, pokemonImageService)
         }
     }
-
-    // TODO delete below
-    if (true) return
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        val scale = 0.75f
-        Box(
-            modifier = Modifier.graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            },
-            contentAlignment = Alignment.Center
-        ) {
-            pokemonImageService.PokemonArtwork(pokemon.name)
-        }
-        val offset = 16.dp
-        pokemon.teraType?.let {
-            pokemonImageService.TeraTypeImage(it, modifier = Modifier
-                .align(Alignment.TopStart)
-                .offset(x = 0.dp, y = -offset)
-                .size(50.dp)
-            )
-        }
-        // Bottom-right badge
-        pokemon.item?.let {
-            pokemonImageService.ItemImage(it, modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .size(40.dp)
-                .offset(x = 0.dp, y = offset)
-            )
-        }
-    }
-
 }

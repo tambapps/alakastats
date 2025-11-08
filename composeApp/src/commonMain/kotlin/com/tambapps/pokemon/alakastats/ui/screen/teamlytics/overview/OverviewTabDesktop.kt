@@ -15,12 +15,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tambapps.pokemon.alakastats.ui.composables.DesktopPokemonRow
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
-import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
+import com.tambapps.pokemon.alakastats.ui.composables.verticalPokemonSpace
 import kotlin.collections.chunked
 import kotlin.collections.forEachIndexed
-
 
 @Composable
 internal fun OverviewTabDesktop(viewModel: OverviewViewModel) {
@@ -54,11 +52,7 @@ internal fun OverviewTabDesktop(viewModel: OverviewViewModel) {
 
         PokePasteTitle()
         Spacer(Modifier.height(16.dp))
-        if (viewModel.isEditingNotes || team.notes != null) {
-            NotedPokePaste(viewModel)
-        } else {
-            Pokepaste(team.pokePaste, viewModel.pokemonImageService, pokemonNotes = viewModel.pokemonNotes)
-        }
+        NotedPokePaste(viewModel)
     }
 }
 
@@ -67,7 +61,16 @@ private fun NotedPokePaste(viewModel: OverviewViewModel) {
     val pokemonBlocks = remember { viewModel.team.pokePaste.pokemons.chunked(3) }
 
     for (pokemons in pokemonBlocks) {
-        DesktopPokemonRow(
-            viewModel.team.pokePaste.isOts, pokemons, viewModel.pokemonImageService, viewModel.pokemonNotes)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(bottom = verticalPokemonSpace)
+        ) {
+            pokemons.forEachIndexed { index, pokemon ->
+                if (index > 0) {
+                    Spacer(Modifier.width(16.dp))
+                }
+                NotedPokepastePokemon(viewModel, pokemon, Modifier.weight(1f))
+            }
+        }
     }
 }
