@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -174,13 +175,17 @@ fun PokepastePokemon(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        var contentHeight by remember { mutableStateOf(0.dp) }
+        var dimensions by remember { mutableStateOf(0.dp to 0.dp) }
+        val (contentWidth, contentHeight) = dimensions
         MyCard(modifier = Modifier.fillMaxWidth(0.9f)
             // + for padding
             .height(remember(contentHeight) { contentHeight + 16.dp }), gradientBackground = true) {}
 
         pokemonImageService.PokemonArtwork(
-            modifier = Modifier.align(Alignment.BottomEnd).height(if (LocalIsCompact.current) 175.dp else 200.dp)
+            modifier = Modifier.align(Alignment.BottomEnd)
+                .height(if (LocalIsCompact.current) 175.dp else 200.dp)
+                // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
+                .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
                 .offset(y = 16.dp),
             name = pokemon.name
         )
@@ -191,9 +196,7 @@ fun PokepastePokemon(
             modifier = Modifier.fillMaxWidth(0.825f)
                 .fillMaxHeight(0.85f)
                 .onSizeChanged { size ->
-                    with(density) {
-                        contentHeight = size.height.toDp()
-                    }
+                    with(density) { dimensions = size.width.toDp() to size.height.toDp() }
                 }
         ) {
             pokemon.teraType?.let {
