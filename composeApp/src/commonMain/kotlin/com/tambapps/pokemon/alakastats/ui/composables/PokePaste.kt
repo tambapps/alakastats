@@ -1,9 +1,11 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -13,10 +15,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,6 +51,7 @@ fun Pokepaste(
     }
 }
 
+private val verticalPokemonSpace = 32.dp
 
 @Composable
 fun VerticalPokepaste(
@@ -51,12 +60,11 @@ fun VerticalPokepaste(
     modifier: Modifier = Modifier,
     pokemonNotes: Map<Pokemon, String>? = null) {
     Column(modifier = modifier) {
-        val space = 32.dp
-        Spacer(Modifier.height(space))
+        Spacer(Modifier.height(verticalPokemonSpace))
         for (pokemon in pokePaste.pokemons) {
             val notes = pokemonNotes?.get(pokemon)
             PokepastePokemon(pokePaste.isOts, pokemon, pokemonImageService, Modifier.fillMaxWidth(), notes)
-            Spacer(Modifier.height(space))
+            Spacer(Modifier.height(verticalPokemonSpace))
         }
 
     }
@@ -65,24 +73,27 @@ fun VerticalPokepaste(
 @Composable
 private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonImageService, modifier: Modifier, pokemonNotes: Map<Pokemon, String>? = null) {
     Column(modifier = modifier) {
-        for (pokemonBlock in pokePaste.pokemons.chunked(3)) {
+        for (pokemonBlock in remember { pokePaste.pokemons.chunked(3) }) {
             DesktopPokemonRow(pokePaste.isOts, pokemonBlock, pokemonImageService, pokemonNotes)
-            Spacer(Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
-private fun DesktopPokemonRow(
+ fun DesktopPokemonRow(
     isOts: Boolean,
     pokemons: List<Pokemon>,
     pokemonImageService: PokemonImageService,
     pokemonNotes: Map<Pokemon, String>?
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(bottom = verticalPokemonSpace)
     ) {
-        pokemons.forEach { pokemon ->
+        pokemons.forEachIndexed { index, pokemon ->
+            if (index > 0) {
+                Spacer(Modifier.width(16.dp))
+            }
             val notes = pokemonNotes?.get(pokemon)
             PokepastePokemon(isOts, pokemon, pokemonImageService, Modifier.weight(1f), notes)
         }
@@ -163,45 +174,54 @@ fun PokepastePokemon(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        MyCard(
-            modifier = Modifier.fillMaxWidth(0.9f),
-            onClick = {},
-            gradientBackground = true,
-            enabled = false
-        ) {
-            Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                pokemon.teraType?.let {
-                    pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(45.dp))
-                }
-                Spacer(Modifier.height(4.dp))
-                Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
-                if (notes != null) {
-                    // TODO handle editing mode
-                    Text(notes, style = MaterialTheme.typography.bodyMedium)
-                }
-                if (!isOts) {
-                    // only want margin if above element is not headline text because headline already has a lot of margin
-                    if (notes != null) Spacer(Modifier.height(8.dp))
-                    PokemonStatsRow(pokemon, Modifier.fillMaxWidth())
-                }
-                if (notes != null || !isOts) Spacer(Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    pokemon.item?.let {
-                        pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp)
-                        )
-                    }
-                    Spacer(Modifier.width(4.dp))
-                    Text((pokemon.item ?: "<no item>") + " | " + (pokemon.ability ?: "<no ability>"), style = MaterialTheme.typography.bodyMedium)
-                }
-                Spacer(Modifier.height(16.dp))
-                PokemonMoves(pokemon, pokemonImageService)
-            }
-        }
+        var contentHeight by remember { mutableStateOf(0.dp) }
+        MyCard(modifier = Modifier.fillMaxWidth(0.9f)
+            // + for padding
+            .height(remember(contentHeight) { contentHeight + 16.dp }), gradientBackground = true) {}
+
         pokemonImageService.PokemonArtwork(
             modifier = Modifier.align(Alignment.BottomEnd).height(if (LocalIsCompact.current) 175.dp else 200.dp)
                 .offset(y = 16.dp),
             name = pokemon.name
         )
+
+        val density = LocalDensity.current
+        Column(
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth(0.825f)
+                .fillMaxHeight(0.85f)
+                .onSizeChanged { size ->
+                    with(density) {
+                        contentHeight = size.height.toDp()
+                    }
+                }
+        ) {
+            pokemon.teraType?.let {
+                pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(45.dp))
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
+            if (notes != null) {
+                // TODO handle editing mode
+                Text(notes, style = MaterialTheme.typography.bodyMedium)
+            }
+            if (!isOts) {
+                // only want margin if above element is not headline text because headline already has a lot of margin
+                if (notes != null) Spacer(Modifier.height(8.dp))
+                PokemonStatsRow(pokemon, Modifier.fillMaxWidth())
+            }
+            if (notes != null || !isOts) Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                pokemon.item?.let {
+                    pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp)
+                    )
+                }
+                Spacer(Modifier.width(4.dp))
+                Text((pokemon.item ?: "<no item>") + " | " + (pokemon.ability ?: "<no ability>"), style = MaterialTheme.typography.bodyMedium)
+            }
+            Spacer(Modifier.height(16.dp))
+            PokemonMoves(pokemon, pokemonImageService)
+        }
     }
 
     // TODO delete below

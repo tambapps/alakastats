@@ -182,25 +182,11 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
 internal fun PokemonNotes(viewModel: OverviewViewModel,
                           pokemon: Pokemon,
                           modifier: Modifier = Modifier,
-                          pokepasteModifier: Modifier = Modifier
                           ) {
-    Column(
-        modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineMedium)
-        PokepastePokemon(viewModel.team.pokePaste.isOts, pokemon, viewModel.pokemonImageService, pokepasteModifier, viewModel.pokemonNotes[pokemon])
+    // TODO handle editing notes in PokepastePokemon. A textfield should be displayed there.
+    //   this means this PokemonNotes function might be useless
+    PokepastePokemon(viewModel.team.pokePaste.isOts, pokemon, viewModel.pokemonImageService, modifier, viewModel.pokemonNotes[pokemon])
 
-        Spacer(Modifier.height(8.dp))
-        // TODO use editing from PokePastePokemon instead of below
-        NoteTextOrTextField(
-            viewModel = viewModel,
-            notes = viewModel.pokemonNotes[pokemon] ?: "",
-            onValueChange = { viewModel.pokemonNotes[pokemon] = it },
-            placeholder = "Notes for ${pokemon.name.pretty}"
-        )
-        Spacer(Modifier.height(16.dp))
-    }
 }
 
 private val noteTextFieldTextStyle
@@ -223,7 +209,7 @@ internal fun NoteTextOrTextField(
             textStyle = noteTextFieldTextStyle
         )
     } else {
-        Text(notes, style = noteTextFieldTextStyle)
+        Text("notes", style = noteTextFieldTextStyle)
     }
 }
 

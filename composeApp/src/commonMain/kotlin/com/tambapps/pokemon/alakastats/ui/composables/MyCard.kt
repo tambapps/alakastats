@@ -22,9 +22,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun MyCard(
-    onClick: () -> Unit,
+    onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
+    enabled: Boolean = onClick != null,
     border: BorderStroke? = null,
     shape: Shape = RoundedCornerShape(12.dp),
     colors: CardColors = CardDefaults.elevatedCardColors(),
@@ -41,7 +41,7 @@ fun MyCard(
     val cardColors = if (gradientBackground) colors.copy(containerColor = Color.Transparent) else colors
     ElevatedCard(
         modifier = cardModifier,
-        onClick = onClick,
+        onClick = onClick ?: {},
         enabled = enabled,
         shape = shape,
         colors = cardColors,
@@ -52,14 +52,7 @@ fun MyCard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.surfaceContainerHigh,
-                                MaterialTheme.colorScheme.surfaceContainerLow
-                            )
-                        )
-                    )
+                    .gradientCardBackground()
             ) {
                 content()
             }
@@ -68,3 +61,14 @@ fun MyCard(
         }
     }
 }
+
+@Composable
+fun Modifier.gradientCardBackground() =
+    background(
+        brush = Brush.verticalGradient(
+            colors = listOf(
+                MaterialTheme.colorScheme.surfaceContainerHigh,
+                MaterialTheme.colorScheme.surfaceContainerLow
+            )
+        )
+    )

@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.ui.composables.DesktopPokemonRow
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
 import kotlin.collections.chunked
@@ -63,19 +64,10 @@ internal fun OverviewTabDesktop(viewModel: OverviewViewModel) {
 
 @Composable
 private fun NotedPokePaste(viewModel: OverviewViewModel) {
-    val pokemonBlocks = remember { viewModel.team.pokePaste.pokemons.chunked(2) }
+    val pokemonBlocks = remember { viewModel.team.pokePaste.pokemons.chunked(3) }
+
     for (pokemons in pokemonBlocks) {
-        Row(Modifier.fillMaxWidth()) {
-            pokemons.forEachIndexed { index, pokemon ->
-                if (index > 0) {
-                    Spacer(Modifier.width(16.dp))
-                }
-                PokemonNotes(
-                    viewModel, pokemon,
-                    pokepasteModifier = Modifier.fillMaxWidth().height(256.dp),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
+        DesktopPokemonRow(
+            viewModel.team.pokePaste.isOts, pokemons, viewModel.pokemonImageService, viewModel.pokemonNotes)
     }
 }

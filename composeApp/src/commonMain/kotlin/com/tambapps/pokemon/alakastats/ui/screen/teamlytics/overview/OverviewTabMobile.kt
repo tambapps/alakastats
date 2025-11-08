@@ -70,7 +70,6 @@ private fun NotedPokePaste(viewModel: OverviewViewModel) {
     pokemons.forEachIndexed { index, pokemon ->
         PokemonNotes(
             viewModel, pokemon,
-            pokepasteModifier = Modifier.fillMaxWidth().height(256.dp),
             modifier = Modifier.fillMaxWidth()
         )
     }

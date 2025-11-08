@@ -80,7 +80,6 @@ internal fun <T> DesktopStatCard(
             width = 2.dp,
             color = MaterialTheme.colorScheme.outline
         ),
-        onClick = {}
     ) {
         Text(
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
