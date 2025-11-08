@@ -1,7 +1,11 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,6 +17,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
+import com.tambapps.pokemon.alakastats.ui.composables.MyCard
+import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import io.github.koalaplot.core.pie.PieChart
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
@@ -41,15 +47,31 @@ internal val MoveUsageViewModel.sortedPokemonMovesUsageEntries get() =
         if (i != -1) i else Int.MAX_VALUE
     }
 
+@Composable
+internal fun PokemonMoveUsageCard(
+    viewModel: MoveUsageViewModel,
+    name: PokemonName,
+    moveUsage: Map<String, Int>,
+    modifier: Modifier = Modifier,
+    ) {
+    MyCard(
+        modifier = modifier.padding(horizontal = 8.dp),
+        gradientBackgroundColors = elevatedCardGradientColors
+    ) {
+        Spacer(Modifier.height(4.dp))
+        PokemonMoveUsageDonut(viewModel, name, moveUsage, Modifier.fillMaxWidth())
+        Spacer(Modifier.height(16.dp))
+    }
+}
 
 private const val MOVE_STRUGGLE = "struggle"
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 internal fun PokemonMoveUsageDonut(
     viewModel: MoveUsageViewModel,
-    modifier: Modifier,
     name: PokemonName,
-    moveUsage: Map<String, Int>
+    moveUsage: Map<String, Int>,
+    modifier: Modifier = Modifier,
 ) {
     val rawEntries = moveUsage.entries.filter { PokemonNormalizer.normalize(it.key) != MOVE_STRUGGLE }
     val total = remember { rawEntries.sumOf { it.value } }
