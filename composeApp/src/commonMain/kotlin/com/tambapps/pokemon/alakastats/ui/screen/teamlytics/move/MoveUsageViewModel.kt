@@ -15,16 +15,22 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-data class MovesUsage(
+data class PokemonUsages(
     val movesCount: Map<String, Int> = emptyMap(),
-    val replaysCount: Int
+    val usageCount: Int,
+    val winCount: Int,
+    val teraCount: Int,
+    val teraAndWinCount: Int
 ) {
 
-    fun mergeWith(movesUsage: MovesUsage) = MovesUsage(
-        movesCount = (movesCount.keys + movesUsage.movesCount.keys).associateWith { move ->
-            (movesCount[move] ?: 0) + (movesUsage.movesCount[move] ?: 0)
+    fun mergeWith(pokemonUsages: PokemonUsages) = PokemonUsages(
+        movesCount = (this.movesCount.keys + pokemonUsages.movesCount.keys).associateWith { move ->
+            (this.movesCount[move] ?: 0) + (pokemonUsages.movesCount[move] ?: 0)
         },
-        replaysCount = this.replaysCount + movesUsage.replaysCount
+        usageCount = this.usageCount + pokemonUsages.usageCount,
+        winCount = this.winCount + pokemonUsages.winCount,
+        teraCount = this.teraCount + pokemonUsages.teraCount,
+        teraAndWinCount = this.teraAndWinCount + pokemonUsages.teraAndWinCount
     )
 }
 
@@ -35,8 +41,10 @@ class MoveUsageViewModel(
     var isLoading by mutableStateOf(false)
         private set
 
+    val replays get() = team.replays
+
     private val scope = CoroutineScope(Dispatchers.Default)
-    val pokemonMovesUsage = mutableStateMapOf<PokemonName, MovesUsage>()
+    val pokemonPokemonUsages = mutableStateMapOf<PokemonName, PokemonUsages>()
 
     fun loadStats() {
         if (isLoading) {
@@ -59,14 +67,14 @@ class MoveUsageViewModel(
             fromReplay(replay)
         }
             .reduceOrNull { m1, m2 -> merged(m1, m2) } ?: emptyMap()
-        pokemonMovesUsage.clear()
-        pokemonMovesUsage.putAll(result)
+        pokemonPokemonUsages.clear()
+        pokemonPokemonUsages.putAll(result)
     }
 
     private fun merged(
-        m1: Map<PokemonName, MovesUsage>,
-        m2: Map<PokemonName, MovesUsage>
-    ): Map<PokemonName, MovesUsage> {
+        m1: Map<PokemonName, PokemonUsages>,
+        m2: Map<PokemonName, PokemonUsages>
+    ): Map<PokemonName, PokemonUsages> {
         return (m1.keys + m2.keys).associateWith { pokemon ->
             val usage1 = m1[pokemon]
             val usage2 = m2[pokemon]
@@ -80,13 +88,18 @@ class MoveUsageViewModel(
     }
 }
 
-private fun TeamlyticsContext.fromReplay(replay: ReplayAnalytics): Map<PokemonName, MovesUsage> {
+private fun TeamlyticsContext.fromReplay(replay: ReplayAnalytics): Map<PokemonName, PokemonUsages> {
     val player = replay.youPlayer
     return player.selection.asSequence()
         .associateWith { pokemonName ->
-            MovesUsage(
+            val hasWon = replay.hasWon(player)
+            val hasTerastallized = player.hasTerastallized(pokemonName)
+            PokemonUsages(
                 movesCount = player.movesUsage[pokemonName] ?: emptyMap(),
-                replaysCount = 1
+                usageCount = 1,
+                winCount = if (hasWon) 1 else 0,
+                teraCount = if (hasTerastallized) 1 else 0,
+                teraAndWinCount = if (hasWon && hasTerastallized) 1 else 0
             )
         }
 }

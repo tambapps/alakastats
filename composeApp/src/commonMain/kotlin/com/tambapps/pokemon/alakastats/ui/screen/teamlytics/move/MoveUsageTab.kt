@@ -1,11 +1,15 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,13 +17,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
-import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import io.github.koalaplot.core.pie.PieChart
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
@@ -32,7 +37,7 @@ fun MoveUsageTab(viewModel: MoveUsageViewModel) {
     LaunchedEffect(Unit) {
         viewModel.loadStats()
     }
-    if (!viewModel.isLoading && viewModel.pokemonMovesUsage.isEmpty()) {
+    if (!viewModel.isLoading && viewModel.pokemonPokemonUsages.isEmpty()) {
         NoData()
     } else if (isCompact) {
         MoveUsageTabMobile(viewModel)
@@ -42,7 +47,7 @@ fun MoveUsageTab(viewModel: MoveUsageViewModel) {
 }
 
 internal val MoveUsageViewModel.sortedPokemonMovesUsageEntries get() =
-    pokemonMovesUsage.entries.toList()
+    pokemonPokemonUsages.entries.toList()
     .sortedBy { (pName, _) ->
         val i = team.pokePaste.pokemons.indexOfFirst { p -> p.name.matches(pName) }
         if (i != -1) i else Int.MAX_VALUE
@@ -52,7 +57,7 @@ internal val MoveUsageViewModel.sortedPokemonMovesUsageEntries get() =
 internal fun PokemonMoveUsageCard(
     viewModel: MoveUsageViewModel,
     name: PokemonName,
-    moveUsage: MovesUsage,
+    moveUsage: PokemonUsages,
     modifier: Modifier = Modifier,
     ) {
     MyCard(
@@ -60,10 +65,35 @@ internal fun PokemonMoveUsageCard(
         gradientBackgroundColors = cardGradientColors
     ) {
         Spacer(Modifier.height(4.dp))
+        Text(name.pretty, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(horizontal = 8.dp))
+        Spacer(Modifier.height(8.dp))
+        val replays = viewModel.replays
+        if (replays.isNotEmpty()) {
+            val winRate = moveUsage.winCount * 100 / viewModel.replays.size
+            val usageRate = moveUsage.usageCount * 100 / viewModel.replays.size
+            Row(
+                Modifier.padding(horizontal = 8.dp)
+            ) {
+                Spacer(Modifier.weight(1f))
+                Text("$winRate% winrate", style = MaterialTheme.typography.headlineSmall)
+                Spacer(Modifier.width(32.dp))
+                Text("$usageRate% usage", style = MaterialTheme.typography.headlineSmall)
+                Spacer(Modifier.weight(1f))
+            }
+            Spacer(Modifier.height(8.dp))
+        }
         PokemonMoveUsageDonut(viewModel, name, moveUsage, Modifier.fillMaxWidth())
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+        Spacer(Modifier.height(8.dp))
         if (moveUsage.movesCount.isNotEmpty()) {
-            Text("Participated in ${moveUsage.replaysCount} games", modifier = Modifier.padding(horizontal = 8.dp))
+            Column(Modifier.padding(horizontal = 8.dp)) {
+                moveUsage.run {
+                    Text("Participated in $usageCount games", fontSize = 18.sp, modifier = Modifier.alpha(0.9f))
+                    Text("Won $winCount of them", fontSize = 16.sp, modifier = Modifier.alpha(0.9f))
+                    Text("Tera-ed in $teraCount games and won $teraAndWinCount of them", fontSize = 16.sp, modifier = Modifier.alpha(0.75f))
+                }
+            }
             Spacer(Modifier.height(8.dp))
         }
     }
@@ -75,7 +105,7 @@ private const val MOVE_STRUGGLE = "struggle"
 internal fun PokemonMoveUsageDonut(
     viewModel: MoveUsageViewModel,
     name: PokemonName,
-    moveUsage: MovesUsage,
+    moveUsage: PokemonUsages,
     modifier: Modifier = Modifier,
 ) {
     val rawEntries = moveUsage.movesCount.entries.filter { PokemonNormalizer.normalize(it.key) != MOVE_STRUGGLE }

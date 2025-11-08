@@ -38,7 +38,7 @@ internal fun MoveUsageTabDesktop(viewModel: MoveUsageViewModel) {
 @Composable
 internal fun DesktopRow(
     viewModel: MoveUsageViewModel,
-    entries: List<Map.Entry<PokemonName, MovesUsage>>,
+    entries: List<Map.Entry<PokemonName, PokemonUsages>>,
     modifier: Modifier = Modifier
 ) {
     Row(modifier.fillMaxWidth()) {

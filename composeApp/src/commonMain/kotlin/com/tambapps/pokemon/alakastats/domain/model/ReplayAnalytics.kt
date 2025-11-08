@@ -33,6 +33,8 @@ class TeamlyticsContext(val team: Teamlytics) {
 
     val ReplayAnalytics.opponentPlayer: Player
         get() = team.getOpponentPlayer(this)
+
+
 }
 
 inline fun <R> Teamlytics.withContext(block: TeamlyticsContext.() -> R): R {
@@ -62,6 +64,8 @@ data class ReplayAnalytics(
 
     val player1 get() = players[0]
     val player2 get() = players[1]
+
+    fun hasWon(player: Player) = winner == player.name
 }
 
 fun List<ReplayAnalytics>.withComputedElo() = map { replay ->
