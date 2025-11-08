@@ -102,7 +102,7 @@ internal fun PokemonMoveUsageCard(
 private const val MOVE_STRUGGLE = "struggle"
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
-internal fun PokemonMoveUsageDonut(
+private fun PokemonMoveUsageDonut(
     viewModel: MoveUsageViewModel,
     name: PokemonName,
     moveUsage: PokemonUsages,

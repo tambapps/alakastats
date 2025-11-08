@@ -3,9 +3,13 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -21,6 +25,7 @@ internal fun MoveUsageTabDesktop(viewModel: MoveUsageViewModel) {
         Column(
             Modifier.weight(1f)
                 .padding(8.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             val entryBlocks = remember { viewModel.sortedPokemonMovesUsageEntries.chunked(3) }
 
@@ -28,8 +33,9 @@ internal fun MoveUsageTabDesktop(viewModel: MoveUsageViewModel) {
                 DesktopRow(
                     viewModel,
                     entry,
-                    Modifier.weight(1f)
+                    Modifier
                 )
+                Spacer(Modifier.height(32.dp))
             }
         }
     }
@@ -41,13 +47,16 @@ internal fun DesktopRow(
     entries: List<Map.Entry<PokemonName, PokemonUsages>>,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier.fillMaxWidth()) {
+    Row(
+        modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         entries.forEach { (pokemonName, moveUsage) ->
             Box(
                 Modifier.weight(1f),
                 contentAlignment = Alignment.Center
             ) {
-                PokemonMoveUsageDonut(
+                PokemonMoveUsageCard(
                     modifier = Modifier,
                     viewModel = viewModel,
                     name = pokemonName,
