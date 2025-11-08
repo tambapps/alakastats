@@ -14,11 +14,9 @@ import alakastats.composeapp.generated.resources.move_grass
 import alakastats.composeapp.generated.resources.move_ground
 import alakastats.composeapp.generated.resources.move_ice
 import alakastats.composeapp.generated.resources.move_normal
-import alakastats.composeapp.generated.resources.move_physical
 import alakastats.composeapp.generated.resources.move_poison
 import alakastats.composeapp.generated.resources.move_psychic
 import alakastats.composeapp.generated.resources.move_rock
-import alakastats.composeapp.generated.resources.move_special
 import alakastats.composeapp.generated.resources.move_steel
 import alakastats.composeapp.generated.resources.move_water
 import alakastats.composeapp.generated.resources.pokeball
@@ -42,15 +40,14 @@ import alakastats.composeapp.generated.resources.tera_type_steel
 import alakastats.composeapp.generated.resources.tera_type_stellar
 import alakastats.composeapp.generated.resources.tera_type_water
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
@@ -68,12 +65,20 @@ import org.jetbrains.compose.resources.painterResource
 
 private val placeHolderDrawable = Res.drawable.pokeball
 
+enum class FacingDirection {
+    LEFT, RIGHT
+}
 interface PokemonImageService {
     @Composable
     fun PokemonSprite(name: PokemonName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
 
     @Composable
-    fun PokemonArtwork(name: PokemonName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
+    fun PokemonArtwork(
+        name: PokemonName,
+        modifier: Modifier = Modifier,
+        disableTooltip: Boolean = false,
+        facingDirection: FacingDirection = FacingDirection.LEFT
+    )
 
     @Composable
     fun TeraTypeImage(type: TeraType, disableTooltip: Boolean = false, modifier: Modifier = Modifier)
@@ -93,6 +98,18 @@ abstract class AbstractPokemonImageService(
 ): PokemonImageService {
     protected val coroutineScope = CoroutineScope(Dispatchers.Default)
     private val movesData = mutableStateMapOf<String, MoveData>()
+    private val pokemonImages = mutableStateMapOf<String, PokemonSpriteData>()
+
+    init {
+        coroutineScope.launch {
+            val map: Map<String, PokemonSpriteData> = readMappingFile(json, "pokemon-sprites.json")
+            withContext(Dispatchers.Main) {
+                pokemonImages.putAll(map)
+            }
+        }
+    }
+
+    protected fun getPokemonSpriteData(name: PokemonName) = pokemonImages[name.normalized.value]
 
     @Composable
     override fun TeraTypeImage(type: TeraType, disableTooltip: Boolean, modifier: Modifier) {
@@ -224,14 +241,17 @@ class PokemonLocalUrlImageService(
         name: PokemonName,
         modifier: Modifier,
         disableTooltip: Boolean
-    ) = WebPokemonImage("sprite", name.normalized.value, modifier, disableTooltip)
+    ) = WebPokemonImage("sprite", name.normalized.value, modifier, flipX = false, disableTooltip)
 
     @Composable
     override fun PokemonArtwork(
         name: PokemonName,
         modifier: Modifier,
-        disableTooltip: Boolean
-    ) = WebPokemonImage("artwork", name.normalized.value, modifier, disableTooltip)
+        disableTooltip: Boolean,
+        facingDirection: FacingDirection
+    ) = WebPokemonImage("artwork", name.normalized.value, modifier,
+        disableTooltip = disableTooltip,
+        flipX = shouldFlipX(facingDirection, getPokemonSpriteData(name)?.artworkDirection))
 
     @Composable
     override fun ItemImage(
@@ -246,7 +266,6 @@ class PokemonLocalUrlImageService(
                 modifier = modifier,
             )
         }
-
     }
 
     @Composable
@@ -254,51 +273,52 @@ class PokemonLocalUrlImageService(
         type: String,
         name: String,
         modifier: Modifier,
+        flipX: Boolean = false,
         disableTooltip: Boolean
     ) {
         TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
             MyImage(url = "$baseUrl/images/pokemons/$type/$name.png",
                 contentDescription = name,
-                modifier = mod,
+                modifier = mod.then(if (flipX) Modifier.scale(scaleX = -1f, scaleY = 1f) else Modifier),
             )
         }
     }
 }
 
 class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(json) {
-    private val pokemonImages = mutableStateMapOf<String, PokemonSpriteData>()
     private val itemsData = mutableStateMapOf<String, ItemData>()
-
-    init {
-        coroutineScope.launch {
-            val map: Map<String, PokemonSpriteData> = readMappingFile(json, "pokemon-sprites.json")
-            withContext(Dispatchers.Main) {
-                pokemonImages.putAll(map)
-            }
-        }
-    }
 
     @Composable
     override fun PokemonSprite(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name, modifier, disableTooltip) { it.sprite }
     @Composable
-    override fun PokemonArtwork(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name, modifier, disableTooltip) { it.artwork }
+    override fun PokemonArtwork(
+        name: PokemonName,
+        modifier: Modifier,
+        disableTooltip: Boolean,
+        facingDirection: FacingDirection
+    ) = PokemonImage(name, modifier, disableTooltip, facingDirection) { it.artwork }
 
     @Composable
-    private inline fun PokemonImage(pokemonName: PokemonName, modifier: Modifier, disableTooltip: Boolean = false, imageUrlSupplier: (PokemonSpriteData) -> String) {
-        val name = pokemonName.normalized.value
-        val pokemonSpriteData = pokemonImages[name]
+    private inline fun PokemonImage(pokemonName: PokemonName, modifier: Modifier, disableTooltip: Boolean = false, facingDirection: FacingDirection? = null, imageUrlSupplier: (PokemonSpriteData) -> String) {
+        val pokemonSpriteData = getPokemonSpriteData(pokemonName)
         val imageUrl = pokemonSpriteData?.let(imageUrlSupplier)
 
-
-        TooltipIfEnabled(disableTooltip, name, modifier) { mod ->
+        val prettyName = pokemonName.pretty
+        TooltipIfEnabled(disableTooltip, prettyName, modifier) { mod ->
+            val imageFacingDirection = pokemonSpriteData?.artworkDirection
+            val directionModifier = if (shouldFlipX(facingDirection, imageFacingDirection)) {
+                Modifier.scale(scaleX = -1f, scaleY = 1f)
+            } else {
+                Modifier
+            }
             if (imageUrl != null) {
                 MyImage(url = imageUrl,
-                    contentDescription = pokemonName.pretty,
-                    modifier = mod,
+                    contentDescription = prettyName,
+                    modifier = mod.then(directionModifier),
                 )
             } else {
                 DefaultIcon(
-                    contentDescription = name,
+                    contentDescription = prettyName,
                     modifier = mod
                 )
             }
@@ -340,7 +360,7 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
 }
 
 @Composable
-private fun MyImage(url: String, contentDescription: String = "", modifier: Modifier = Modifier) {
+private fun MyImage(url: String, contentDescription: String = "", modifier: Modifier = Modifier, flipX: Boolean = false) {
     AsyncImage(
         model = url,
         contentDescription = contentDescription,
@@ -374,6 +394,9 @@ data class MoveData(
 data class PokemonSpriteData(
     val name: String,
     val sprite: String,
-    val artwork: String
+    val artwork: String,
+    val artworkDirection: FacingDirection = FacingDirection.LEFT
 )
 
+private fun shouldFlipX(wantedFacingDirection: FacingDirection?, pokemonFacingDirection: FacingDirection?) =
+    wantedFacingDirection != null && wantedFacingDirection != pokemonFacingDirection

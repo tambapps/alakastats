@@ -125,7 +125,8 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                         modifier = Modifier.weight(1f),
                         player = currentPlayer,
                         playerName = "You",
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        isYouPlayer = true
                     )
 
                     MobilePlayer(
@@ -150,7 +151,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
 }
 
 @Composable
-private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String, viewModel: TeamReplayViewModel) {
+private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String, viewModel: TeamReplayViewModel, isYouPlayer: Boolean = false) {
     Column(
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -168,7 +169,8 @@ private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String,
             SelectedPokemon(
                 pokemon = pokemon,
                 teraType = teraType,
-                pokemonImageService = viewModel.pokemonImageService
+                pokemonImageService = viewModel.pokemonImageService,
+                isYouPlayer = isYouPlayer
             )
         }
     }

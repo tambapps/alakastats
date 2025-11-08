@@ -222,12 +222,12 @@ private fun PokepastePokemon(
             .height(remember(contentHeight) { contentHeight + 16.dp }), gradientBackgroundColors = elevatedCardGradientColors) {}
 
         pokemonImageService.PokemonArtwork(
+            name = pokemon.name,
             modifier = Modifier.align(Alignment.BottomEnd)
                 .height(if (LocalIsCompact.current) 175.dp else 200.dp)
                 // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
                 .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
-                .offset(y = 16.dp),
-            name = pokemon.name
+                .offset(y = 16.dp)
         )
 
         val density = LocalDensity.current

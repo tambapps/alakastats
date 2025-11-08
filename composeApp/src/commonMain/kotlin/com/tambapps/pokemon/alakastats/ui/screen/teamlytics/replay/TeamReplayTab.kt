@@ -53,6 +53,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
@@ -324,7 +325,9 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplay
 }
 
 @Composable
-internal fun SelectedPokemon(pokemon: PokemonName, teraType: TeraType?, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+internal fun SelectedPokemon(pokemon: PokemonName, teraType: TeraType?, pokemonImageService: PokemonImageService,
+                             isYouPlayer: Boolean,
+                             modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
@@ -337,7 +340,7 @@ internal fun SelectedPokemon(pokemon: PokemonName, teraType: TeraType?, pokemonI
             },
             contentAlignment = Alignment.Center
         ) {
-            pokemonImageService.PokemonArtwork(pokemon, modifier = Modifier.height(128.dp))
+            pokemonImageService.PokemonArtwork(pokemon, modifier = Modifier.height(128.dp), facingDirection = if (isYouPlayer) FacingDirection.RIGHT else FacingDirection.LEFT)
         }
         val offset = 16.dp
         teraType?.let {

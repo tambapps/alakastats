@@ -43,6 +43,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
+import kotlin.Boolean
 
 @Composable
 internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
@@ -121,7 +122,7 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                DesktopPlayer(modifier = Modifier.weight(1f), player = currentPlayer, playerName = "You", viewModel = viewModel)
+                DesktopPlayer(modifier = Modifier.weight(1f), player = currentPlayer, playerName = "You", viewModel = viewModel, isYouPlayer = true)
                 Spacer(Modifier.width(8.dp))
                 DesktopPlayer(modifier = Modifier.weight(1f), player = opponentPlayer, playerName = "Opponent", viewModel = viewModel)
             }
@@ -159,7 +160,7 @@ internal fun EditSdNamesButton(viewModel: TeamReplayViewModel) {
     }
 }
 @Composable
-private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String, viewModel: TeamReplayViewModel) {
+private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String, viewModel: TeamReplayViewModel, isYouPlayer: Boolean = false) {
     Column(
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -176,13 +177,25 @@ private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            for (pokemon in player.selection) {
-                val teraType = player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
-                SelectedPokemon(
-                    pokemon = pokemon,
-                    teraType = teraType,
-                    pokemonImageService = viewModel.pokemonImageService
-                )
+            var selectionChunks = player.selection.chunked(2)
+            if (isYouPlayer) selectionChunks = selectionChunks.reversed()
+            selectionChunks.forEachIndexed { index, selectionChunk ->
+                if (index < selectionChunks.lastIndex) {
+                    Spacer(Modifier.width(8.dp))
+                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    for (pokemon in selectionChunk) {
+                        val teraType = player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
+                        SelectedPokemon(
+                            pokemon = pokemon,
+                            teraType = teraType,
+                            pokemonImageService = viewModel.pokemonImageService,
+                            isYouPlayer = isYouPlayer
+                        )
+                    }
+                }
             }
         }
     }
