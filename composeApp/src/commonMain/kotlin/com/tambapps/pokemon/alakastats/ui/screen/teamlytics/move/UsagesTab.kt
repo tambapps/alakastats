@@ -98,16 +98,14 @@ internal fun PokemonUsagesCard(
         Spacer(Modifier.height(8.dp))
         HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
         Spacer(Modifier.height(8.dp))
-        if (usages.movesCount.isNotEmpty()) {
-            Column(Modifier.padding(horizontal = 8.dp)) {
-                usages.run {
-                    Text("Participated in $usageCount games", fontSize = 18.sp, modifier = Modifier.alpha(0.9f))
-                    Text("Won $winCount of them", fontSize = 16.sp, modifier = Modifier.alpha(0.9f))
-                    Text("Tera-ed in $teraCount games and won $teraAndWinCount of them", fontSize = 16.sp, modifier = Modifier.alpha(0.75f))
-                }
+        Column(Modifier.padding(horizontal = 8.dp)) {
+            usages.run {
+                Text("Participated in $usageCount games", fontSize = 18.sp, modifier = Modifier.alpha(0.9f))
+                Text("Won $winCount of them", fontSize = 16.sp, modifier = Modifier.alpha(0.9f))
+                Text("Tera-ed in $teraCount games and won $teraAndWinCount of them", fontSize = 16.sp, modifier = Modifier.alpha(0.75f))
             }
-            Spacer(Modifier.height(8.dp))
         }
+        Spacer(Modifier.height(8.dp))
     }
 }
 

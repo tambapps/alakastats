@@ -90,9 +90,9 @@ class UsagesViewModel(
 
 private fun TeamlyticsContext.fromReplay(replay: ReplayAnalytics): Map<PokemonName, PokemonUsages> {
     val player = replay.youPlayer
+    val hasWon = replay.hasWon(player)
     return player.selection.asSequence()
         .associateWith { pokemonName ->
-            val hasWon = replay.hasWon(player)
             val hasTerastallized = player.hasTerastallized(pokemonName)
             PokemonUsages(
                 movesCount = player.movesUsage[pokemonName] ?: emptyMap(),
