@@ -177,12 +177,12 @@ abstract class AbstractPokemonImageService(
         }
         val (_, category, type) = data
 
-        val categoryRes = when(category.lowercase()) {
+        MoveTypeImage(type, modifier = iconModifier, disableTooltip = true)
+        /*
+          val categoryRes = when(category.lowercase()) {
             "physical" -> Res.drawable.move_physical
             else -> Res.drawable.move_special
         }
-
-        MoveTypeImage(type, modifier = iconModifier, disableTooltip = true)
         Spacer(Modifier.width(8.dp))
         Image(
             painter = painterResource(categoryRes),
@@ -190,6 +190,8 @@ abstract class AbstractPokemonImageService(
             modifier = iconModifier,
             contentScale = ContentScale.Fit,
         )
+
+         */
     }
 
     @Composable

@@ -142,8 +142,8 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
 
     MyCard(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        onClick = { viewModel.consultTeam(team, navigator) }
+        onClick = { viewModel.consultTeam(team, navigator) },
+        gradientBackground = true
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(

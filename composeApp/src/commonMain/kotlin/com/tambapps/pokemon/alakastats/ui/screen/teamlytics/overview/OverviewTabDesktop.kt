@@ -56,7 +56,7 @@ internal fun OverviewTabDesktop(viewModel: OverviewViewModel) {
         if (viewModel.isEditingNotes || team.notes != null) {
             NotedPokePaste(viewModel)
         } else {
-            Pokepaste(team.pokePaste, viewModel.pokemonImageService)
+            Pokepaste(team.pokePaste, viewModel.pokemonImageService, pokemonNotes = viewModel.pokemonNotes)
         }
     }
 }

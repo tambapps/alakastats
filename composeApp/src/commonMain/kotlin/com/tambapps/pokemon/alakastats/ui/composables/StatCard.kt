@@ -74,17 +74,13 @@ internal fun <T> DesktopStatCard(
     modifier: Modifier = Modifier,
     rowContent: @Composable RowScope.(T) -> Unit
 ) {
-    Card(
+    MyCard(
         modifier = modifier.verticalScroll(rememberScrollState()),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(),
         border = BorderStroke(
             width = 2.dp,
             color = MaterialTheme.colorScheme.outline
         ),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        ),
+        onClick = {}
     ) {
         Text(
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),

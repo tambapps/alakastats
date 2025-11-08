@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,13 +32,14 @@ import com.tambapps.pokemon.pokepaste.parser.PokePaste
 fun Pokepaste(
     pokePaste: PokePaste,
     pokemonImageService: PokemonImageService,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    pokemonNotes: Map<Pokemon, String>? = null
 ) {
     val isCompact = LocalIsCompact.current
     if (isCompact) {
-        VerticalPokepaste(pokePaste, pokemonImageService, modifier)
+        VerticalPokepaste(pokePaste, pokemonImageService, modifier, pokemonNotes)
     } else {
-        DesktopPokepaste(pokePaste, pokemonImageService, modifier)
+        DesktopPokepaste(pokePaste, pokemonImageService, modifier, pokemonNotes)
     }
 }
 
@@ -46,12 +48,14 @@ fun Pokepaste(
 fun VerticalPokepaste(
     pokePaste: PokePaste,
     pokemonImageService: PokemonImageService,
-    modifier: Modifier = Modifier) {
+    modifier: Modifier = Modifier,
+    pokemonNotes: Map<Pokemon, String>? = null) {
     Column(modifier = modifier) {
         val space = 16.dp
         Spacer(Modifier.height(space))
         for (pokemon in pokePaste.pokemons) {
-            PokepastePokemon(pokePaste.isOts, pokemon, pokemonImageService, Modifier.fillMaxWidth())
+            val notes = pokemonNotes?.get(pokemon)
+            PokepastePokemon(pokePaste.isOts, pokemon, pokemonImageService, Modifier.fillMaxWidth(), notes)
             Spacer(Modifier.height(space))
         }
 
@@ -59,49 +63,29 @@ fun VerticalPokepaste(
 }
 
 @Composable
-private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonImageService, modifier: Modifier) {
+private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonImageService, modifier: Modifier, pokemonNotes: Map<Pokemon, String>? = null) {
     Column(modifier = modifier) {
         for (pokemonBlock in pokePaste.pokemons.chunked(3)) {
-            DesktopPokemonRow(pokePaste.isOts, pokemonBlock, pokemonImageService)
+            DesktopPokemonRow(pokePaste.isOts, pokemonBlock, pokemonImageService, pokemonNotes)
+            Spacer(Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
-private fun DesktopPokemonRow(isOts: Boolean, pokemons: List<Pokemon>, pokemonImageService: PokemonImageService) {
+private fun DesktopPokemonRow(
+    isOts: Boolean,
+    pokemons: List<Pokemon>,
+    pokemonImageService: PokemonImageService,
+    pokemonNotes: Map<Pokemon, String>?
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         pokemons.forEach { pokemon ->
-            PokepastePokemon(isOts, pokemon, pokemonImageService, Modifier.weight(1f))
+            val notes = pokemonNotes?.get(pokemon)
+            PokepastePokemon(isOts, pokemon, pokemonImageService, Modifier.weight(1f), notes)
         }
-    }
-}
-
-@Composable
-fun PokepastePokemon(isOts: Boolean, pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val (weightA, weightB) = if (!isOts) Pair(0.35f, 0.65f) else Pair(0.45f, 0.55f)
-        PokemonView(pokemon, pokemonImageService, Modifier.weight(weightA))
-        Spacer(Modifier.width(8.dp))
-        PokemonDetails(isOts, pokemon, pokemonImageService, Modifier.weight(weightB))
-    }
-}
-
-@Composable
-private fun PokemonDetails(isOts: Boolean, pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
-    Column(
-        modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        if (!isOts) {
-            PokemonStatsRow(pokemon)
-            Spacer(Modifier.height(4.dp))
-        }
-        PokemonMoves(pokemon, pokemonImageService)
     }
 }
 
@@ -126,11 +110,11 @@ private fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageServ
                 Spacer(Modifier.width(8.dp))
                 val prettyMove = PokemonNormalizer.pretty(move)
                 Tooltip(prettyMove) {
-                    Text(prettyMove, textAlign = TextAlign.Start, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(prettyMove, textAlign = TextAlign.Start, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
                 }
             }
             if (index < pokemon.moves.lastIndex) {
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(8.dp))
             }
          }
     }
@@ -161,13 +145,67 @@ private fun PokemonStatColumn(
             pokemon.nature?.malusStat == stat -> Color.Cyan
             else -> Color.Unspecified
         }
-        Text(txt, color = textColor, textAlign = TextAlign.Center)
-        Text(evs[stat].toString(), color = textColor, textAlign = TextAlign.Center)
-        Text(ivs[stat].toString(), color = textColor, textAlign = TextAlign.Center)
+        Text(txt, color = textColor, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyMedium)
+        val statValueStyle = MaterialTheme.typography.titleMedium
+        Text(evs[stat].toString(), color = textColor, textAlign = TextAlign.Center, style = statValueStyle)
+        Text(ivs[stat].toString(), color = textColor, textAlign = TextAlign.Center, style = statValueStyle)
     }
 }
 @Composable
-private fun PokemonView(pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+fun PokepastePokemon(
+    isOts: Boolean,
+    pokemon: Pokemon,
+    pokemonImageService: PokemonImageService,
+    modifier: Modifier = Modifier,
+    notes: String? = null
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        MyCard(
+            modifier = Modifier.fillMaxWidth(0.9f),
+            onClick = {},
+            gradientBackground = true,
+            enabled = false
+        ) {
+            Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                pokemon.teraType?.let {
+                    pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(45.dp))
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
+                if (notes != null) {
+                    // TODO handle editing mode
+                    Spacer(Modifier.height(8.dp))
+                    Text(notes, style = MaterialTheme.typography.bodyMedium)
+                }
+                if (!isOts) {
+                    Spacer(Modifier.height(8.dp))
+                    PokemonStatsRow(pokemon, Modifier.fillMaxWidth())
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    pokemon.item?.let {
+                        pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(4.dp))
+                    Text((pokemon.item ?: "<no item>") + " | " + (pokemon.ability ?: "<no ability>"), style = MaterialTheme.typography.bodyMedium)
+                }
+                Spacer(Modifier.height(16.dp))
+                PokemonMoves(pokemon, pokemonImageService)
+            }
+        }
+        pokemonImageService.PokemonArtwork(
+            modifier = Modifier.align(Alignment.BottomEnd).height(if (LocalIsCompact.current) 175.dp else 200.dp)
+                .offset(y = 16.dp),
+            name = pokemon.name
+        )
+    }
+
+    // TODO delete below
+    if (true) return
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center

@@ -189,9 +189,10 @@ internal fun PokemonNotes(viewModel: OverviewViewModel,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineMedium)
-        PokepastePokemon(viewModel.team.pokePaste.isOts, pokemon, viewModel.pokemonImageService, pokepasteModifier)
+        PokepastePokemon(viewModel.team.pokePaste.isOts, pokemon, viewModel.pokemonImageService, pokepasteModifier, viewModel.pokemonNotes[pokemon])
 
         Spacer(Modifier.height(8.dp))
+        // TODO use editing from PokePastePokemon instead of below
         NoteTextOrTextField(
             viewModel = viewModel,
             notes = viewModel.pokemonNotes[pokemon] ?: "",

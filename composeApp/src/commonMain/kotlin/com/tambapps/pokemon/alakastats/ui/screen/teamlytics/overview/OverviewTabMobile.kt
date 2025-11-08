@@ -16,8 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 @Composable
 internal fun OverviewTabMobile(viewModel: OverviewViewModel) {
@@ -58,7 +56,7 @@ internal fun OverviewTabMobile(viewModel: OverviewViewModel) {
             if (viewModel.isEditingNotes || team.notes != null) {
                 NotedPokePaste(viewModel)
             } else {
-                Pokepaste(team.pokePaste, viewModel.pokemonImageService)
+                Pokepaste(team.pokePaste, viewModel.pokemonImageService, pokemonNotes = viewModel.pokemonNotes)
             }
             Spacer(Modifier.height(12.dp))
         }
