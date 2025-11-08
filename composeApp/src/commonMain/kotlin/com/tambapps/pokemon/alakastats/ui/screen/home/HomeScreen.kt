@@ -51,6 +51,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -138,11 +139,10 @@ internal fun CatchPhrase(skipLine: Boolean = false, textAlign: TextAlign = TextA
 @Composable
 internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.currentOrThrow
-    
-    Card(
+
+    MyCard(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(),
         onClick = { viewModel.consultTeam(team, navigator) }
     ) {
         Column(Modifier.padding(16.dp)) {
