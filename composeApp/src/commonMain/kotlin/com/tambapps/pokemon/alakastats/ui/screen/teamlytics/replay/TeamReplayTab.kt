@@ -347,7 +347,7 @@ internal fun SelectedPokemon(pokemon: PokemonName, teraType: TeraType?, pokemonI
             },
             contentAlignment = Alignment.Center
         ) {
-            pokemonImageService.PokemonArtwork(pokemon, modifier = Modifier.size(128.dp))
+            pokemonImageService.PokemonArtwork(pokemon, modifier = Modifier.height(128.dp))
         }
         val offset = 16.dp
         teraType?.let {
