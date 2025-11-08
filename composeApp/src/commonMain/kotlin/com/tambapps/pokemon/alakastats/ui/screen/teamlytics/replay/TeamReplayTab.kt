@@ -3,7 +3,6 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.tune
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -272,20 +271,11 @@ internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: St
     }
     val uriHandler = LocalUriHandler.current
 
-    if (LocalIsCompact.current) {
-        OutlinedButton(
-            modifier= modifier,
-            onClick = { uriHandler.openUri(url) },
-        ) {
-            Text("Replay")
-        }
-    } else {
-        Text(
-            text = "Replay",
-            modifier = Modifier.clickable(onClick = { uriHandler.openUri(url) }),
-            color = remember { Color(0xFF2196F3) },
-            textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
-        )
+    OutlinedButton(
+        modifier= modifier,
+        onClick = { uriHandler.openUri(url) },
+    ) {
+        Text("Replay")
     }
 }
 
