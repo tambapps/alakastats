@@ -24,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -219,7 +218,7 @@ private fun PokepastePokemon(
         val (contentWidth, contentHeight) = dimensions
         MyCard(modifier = Modifier.fillMaxWidth(0.9f)
             // + for padding
-            .height(remember(contentHeight) { contentHeight + 16.dp }), gradientBackground = true) {}
+            .height(remember(contentHeight) { contentHeight + 16.dp }), gradientBackgroundColors = elevatedCardGradientColors) {}
 
         pokemonImageService.PokemonArtwork(
             modifier = Modifier.align(Alignment.BottomEnd)

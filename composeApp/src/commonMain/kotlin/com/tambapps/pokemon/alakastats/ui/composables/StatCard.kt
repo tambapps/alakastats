@@ -76,6 +76,7 @@ internal fun <T> DesktopStatCard(
 ) {
     MyCard(
         modifier = modifier.verticalScroll(rememberScrollState()),
+        gradientBackgroundColors = cardGradientColors,
         border = BorderStroke(
             width = 2.dp,
             color = MaterialTheme.colorScheme.outline

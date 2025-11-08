@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +37,9 @@ import com.tambapps.pokemon.alakastats.domain.model.getGameOutput
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
+import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
+import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -65,13 +66,7 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
             }
             itemsIndexed(replays) { index, replay ->
                 DesktopReplay(viewModel, team, replay)
-                if (index < replays.size - 1) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Spacer(Modifier.width(64.dp))
-                        HorizontalDivider(Modifier.weight(1f).height(2.dp))
-                        Spacer(Modifier.width(64.dp))
-                    }
-                }
+                Spacer(Modifier.height(32.dp))
             }
         }
     }
@@ -81,9 +76,13 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
 fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
     val gameOutput = team.getGameOutput(replay)
-    Column {
+    MyCard(
+        modifier = Modifier.fillMaxWidth(),
+        gradientBackgroundColors = cardGradientColors
+        ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 8.dp)
         ) {
             GameOutputCard(gameOutput)
             VsText(currentPlayer, opponentPlayer, gameOutput)

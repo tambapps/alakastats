@@ -20,6 +20,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
+
+val elevatedCardGradientColors @Composable get() = listOf(
+    MaterialTheme.colorScheme.surfaceContainerHigh,
+    MaterialTheme.colorScheme.surfaceContainerLow
+)
+
+val cardGradientColors @Composable get() = listOf(
+    MaterialTheme.colorScheme.surfaceContainerHighest,
+    MaterialTheme.colorScheme.surfaceContainerHigh
+)
+
 @Composable
 fun MyCard(
     onClick: (() -> Unit)? = null,
@@ -28,7 +39,7 @@ fun MyCard(
     border: BorderStroke? = null,
     shape: Shape = RoundedCornerShape(12.dp),
     colors: CardColors = CardDefaults.elevatedCardColors(),
-    gradientBackground: Boolean = false,
+    gradientBackgroundColors: List<Color>? = null,
     elevation: CardElevation = CardDefaults.elevatedCardElevation(8.dp),
     interactionSource: MutableInteractionSource? = null,
     content: @Composable ColumnScope.() -> Unit
@@ -38,7 +49,7 @@ fun MyCard(
         cardModifier = cardModifier.border(border, shape)
     }
 
-    val cardColors = if (gradientBackground) colors.copy(containerColor = Color.Transparent) else colors
+    val cardColors = if (gradientBackgroundColors != null) colors.copy(containerColor = Color.Transparent) else colors
     ElevatedCard(
         modifier = cardModifier,
         onClick = onClick ?: {},
@@ -48,11 +59,11 @@ fun MyCard(
         elevation = elevation,
         interactionSource = interactionSource,
     ) {
-        if (gradientBackground) {
+        if (gradientBackgroundColors != null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .gradientCardBackground()
+                    .background(brush = Brush.verticalGradient(gradientBackgroundColors))
             ) {
                 content()
             }
@@ -61,14 +72,3 @@ fun MyCard(
         }
     }
 }
-
-@Composable
-fun Modifier.gradientCardBackground() =
-    background(
-        brush = Brush.verticalGradient(
-            colors = listOf(
-                MaterialTheme.colorScheme.surfaceContainerHigh,
-                MaterialTheme.colorScheme.surfaceContainerLow
-            )
-        )
-    )
