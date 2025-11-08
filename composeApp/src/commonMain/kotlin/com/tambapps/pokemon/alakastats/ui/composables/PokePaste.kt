@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -154,7 +155,7 @@ private fun PokemonStatColumn(
         pokemon.nature?.bonusStat
         val textColor = when {
             pokemon.nature?.bonusStat == stat -> Color.Red
-            pokemon.nature?.malusStat == stat -> Color.Cyan
+            pokemon.nature?.malusStat == stat -> if (isSystemInDarkTheme()) Color.Cyan else Color.Blue
             else -> Color.Unspecified
         }
         Text(txt, color = textColor, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
