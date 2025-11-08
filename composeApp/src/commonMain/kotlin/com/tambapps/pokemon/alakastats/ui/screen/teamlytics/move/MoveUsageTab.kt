@@ -32,7 +32,7 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 
 @Composable
-fun MoveUsageTab(viewModel: MoveUsageViewModel) {
+fun UsagesTab(viewModel: UsagesViewModel) {
     val isCompact = LocalIsCompact.current
     LaunchedEffect(Unit) {
         viewModel.loadStats()
@@ -40,13 +40,13 @@ fun MoveUsageTab(viewModel: MoveUsageViewModel) {
     if (!viewModel.isLoading && viewModel.pokemonPokemonUsages.isEmpty()) {
         NoData()
     } else if (isCompact) {
-        MoveUsageTabMobile(viewModel)
+        UsagesTabMobile(viewModel)
     } else {
-        MoveUsageTabDesktop(viewModel)
+        UsagesTabDesktop(viewModel)
     }
 }
 
-internal val MoveUsageViewModel.sortedPokemonMovesUsageEntries get() =
+internal val UsagesViewModel.sortedPokemonMovesUsageEntries get() =
     pokemonPokemonUsages.entries.toList()
     .sortedBy { (pName, _) ->
         val i = team.pokePaste.pokemons.indexOfFirst { p -> p.name.matches(pName) }
@@ -54,10 +54,22 @@ internal val MoveUsageViewModel.sortedPokemonMovesUsageEntries get() =
     }
 
 @Composable
-internal fun PokemonMoveUsageCard(
-    viewModel: MoveUsageViewModel,
+internal fun ReplayCountText(viewModel: UsagesViewModel) {
+
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Text(
+            "${viewModel.replays.size} replays",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+        )
+    }
+}
+
+@Composable
+internal fun PokemonUsagesCard(
+    viewModel: UsagesViewModel,
     name: PokemonName,
-    moveUsage: PokemonUsages,
+    usages: PokemonUsages,
     modifier: Modifier = Modifier,
     ) {
     MyCard(
@@ -69,8 +81,8 @@ internal fun PokemonMoveUsageCard(
         Spacer(Modifier.height(8.dp))
         val replays = viewModel.replays
         if (replays.isNotEmpty()) {
-            val winRate = moveUsage.winCount * 100 / viewModel.replays.size
-            val usageRate = moveUsage.usageCount * 100 / viewModel.replays.size
+            val winRate = usages.winCount * 100 / usages.usageCount
+            val usageRate = usages.usageCount * 100 / viewModel.replays.size
             Row(
                 Modifier.padding(horizontal = 8.dp)
             ) {
@@ -82,13 +94,13 @@ internal fun PokemonMoveUsageCard(
             }
             Spacer(Modifier.height(8.dp))
         }
-        PokemonMoveUsageDonut(viewModel, name, moveUsage, Modifier.fillMaxWidth())
+        PokemonUsagesDonut(viewModel, name, usages, Modifier.fillMaxWidth())
         Spacer(Modifier.height(8.dp))
         HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
         Spacer(Modifier.height(8.dp))
-        if (moveUsage.movesCount.isNotEmpty()) {
+        if (usages.movesCount.isNotEmpty()) {
             Column(Modifier.padding(horizontal = 8.dp)) {
-                moveUsage.run {
+                usages.run {
                     Text("Participated in $usageCount games", fontSize = 18.sp, modifier = Modifier.alpha(0.9f))
                     Text("Won $winCount of them", fontSize = 16.sp, modifier = Modifier.alpha(0.9f))
                     Text("Tera-ed in $teraCount games and won $teraAndWinCount of them", fontSize = 16.sp, modifier = Modifier.alpha(0.75f))
@@ -102,13 +114,13 @@ internal fun PokemonMoveUsageCard(
 private const val MOVE_STRUGGLE = "struggle"
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
-private fun PokemonMoveUsageDonut(
-    viewModel: MoveUsageViewModel,
+private fun PokemonUsagesDonut(
+    viewModel: UsagesViewModel,
     name: PokemonName,
-    moveUsage: PokemonUsages,
+    usages: PokemonUsages,
     modifier: Modifier = Modifier,
 ) {
-    val rawEntries = moveUsage.movesCount.entries.filter { PokemonNormalizer.normalize(it.key) != MOVE_STRUGGLE }
+    val rawEntries = usages.movesCount.entries.filter { PokemonNormalizer.normalize(it.key) != MOVE_STRUGGLE }
     val total = remember { rawEntries.sumOf { it.value } }
     val entries = remember {
         rawEntries.map {

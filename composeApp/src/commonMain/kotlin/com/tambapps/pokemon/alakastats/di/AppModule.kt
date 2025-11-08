@@ -30,10 +30,9 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.infrastructure.service.TeamlyticsSerializer
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.MoveUsageViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsageStatsViewModel
 import kotlinx.serialization.json.Json
 import kotlin.uuid.Uuid
 import org.koin.core.qualifier.named
@@ -85,10 +84,7 @@ private val appModule = module {
         LeadStatsViewModel(team, get())
     }
     factory { (team: Teamlytics) ->
-        UsageStatsViewModel(team, get())
-    }
-    factory { (team: Teamlytics) ->
-        MoveUsageViewModel(team, get())
+        UsagesViewModel(team, get())
     }
 }
 

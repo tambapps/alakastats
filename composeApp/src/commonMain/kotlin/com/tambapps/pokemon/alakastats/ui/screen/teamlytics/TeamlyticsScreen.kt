@@ -40,14 +40,12 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.MoveUsageTab
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.MoveUsageViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.UsagesTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsageStatsTab
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsageStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -56,7 +54,7 @@ import kotlin.uuid.Uuid
 
 data class TeamlyticsScreen(val teamId: Uuid) : Screen {
     private companion object {
-        val TABS = listOf("Overview", "Replays", "Move Usages", "Lead Stats", "Usage Stats", "Match-up Notes")
+        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Match-up Notes")
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -171,10 +169,10 @@ internal fun Pager(
                 TeamReplayTab(viewModel)
             }
             2 -> {
-                val viewModel = koinInject<MoveUsageViewModel> {
+                val viewModel = koinInject<UsagesViewModel> {
                     parametersOf(team)
                 }
-                MoveUsageTab(viewModel)
+                UsagesTab(viewModel)
             }
             3 -> {
                 val viewModel = koinInject<LeadStatsViewModel> {
@@ -183,12 +181,6 @@ internal fun Pager(
                 LeadStatsTab(viewModel)
             }
             4 -> {
-                val viewModel = koinInject<UsageStatsViewModel> {
-                    parametersOf(team)
-                }
-                UsageStatsTab(viewModel)
-            }
-            5 -> {
                 Box(Modifier.fillMaxSize()) {
                     Text("Coming soon", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Center))
                 }

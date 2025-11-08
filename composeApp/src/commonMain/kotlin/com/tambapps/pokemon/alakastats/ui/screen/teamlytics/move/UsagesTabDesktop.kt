@@ -19,7 +19,7 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 
 @Composable
-internal fun MoveUsageTabDesktop(viewModel: MoveUsageViewModel) {
+internal fun UsagesTabDesktop(viewModel: UsagesViewModel) {
     Column(Modifier.fillMaxSize()) {
         LinearProgressBarIfEnabled(viewModel.isLoading)
         Column(
@@ -27,8 +27,8 @@ internal fun MoveUsageTabDesktop(viewModel: MoveUsageViewModel) {
                 .padding(8.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+            ReplayCountText(viewModel)
             val entryBlocks = remember { viewModel.sortedPokemonMovesUsageEntries.chunked(3) }
-
             for (entry in entryBlocks) {
                 DesktopRow(
                     viewModel,
@@ -43,7 +43,7 @@ internal fun MoveUsageTabDesktop(viewModel: MoveUsageViewModel) {
 
 @Composable
 internal fun DesktopRow(
-    viewModel: MoveUsageViewModel,
+    viewModel: UsagesViewModel,
     entries: List<Map.Entry<PokemonName, PokemonUsages>>,
     modifier: Modifier = Modifier
 ) {
@@ -51,16 +51,16 @@ internal fun DesktopRow(
         modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        entries.forEach { (pokemonName, moveUsage) ->
+        entries.forEach { (pokemonName, usages) ->
             Box(
                 Modifier.weight(1f),
                 contentAlignment = Alignment.Center
             ) {
-                PokemonMoveUsageCard(
+                PokemonUsagesCard(
                     modifier = Modifier,
                     viewModel = viewModel,
                     name = pokemonName,
-                    moveUsage = moveUsage
+                    usages = usages
                 )
             }
         }

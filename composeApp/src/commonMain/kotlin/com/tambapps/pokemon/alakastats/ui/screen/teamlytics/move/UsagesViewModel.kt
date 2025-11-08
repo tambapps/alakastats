@@ -34,7 +34,7 @@ data class PokemonUsages(
     )
 }
 
-class MoveUsageViewModel(
+class UsagesViewModel(
     val team: Teamlytics,
     val pokemonImageService: PokemonImageService,
 ) {
