@@ -51,7 +51,7 @@ fun VerticalPokepaste(
     modifier: Modifier = Modifier,
     pokemonNotes: Map<Pokemon, String>? = null) {
     Column(modifier = modifier) {
-        val space = 16.dp
+        val space = 32.dp
         Spacer(Modifier.height(space))
         for (pokemon in pokePaste.pokemons) {
             val notes = pokemonNotes?.get(pokemon)
@@ -177,14 +177,14 @@ fun PokepastePokemon(
                 Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
                 if (notes != null) {
                     // TODO handle editing mode
-                    Spacer(Modifier.height(8.dp))
                     Text(notes, style = MaterialTheme.typography.bodyMedium)
                 }
                 if (!isOts) {
-                    Spacer(Modifier.height(8.dp))
+                    // only want margin if above element is not headline text because headline already has a lot of margin
+                    if (notes != null) Spacer(Modifier.height(8.dp))
                     PokemonStatsRow(pokemon, Modifier.fillMaxWidth())
                 }
-                Spacer(Modifier.height(8.dp))
+                if (notes != null || !isOts) Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     pokemon.item?.let {
                         pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp)
