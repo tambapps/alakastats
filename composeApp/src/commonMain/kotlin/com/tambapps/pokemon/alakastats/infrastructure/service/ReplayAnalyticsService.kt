@@ -188,7 +188,10 @@ private class ReplayAnalyticsBuilderVisitor(
         else playerBuilders.getValue(playerNames.last())
     }
 
-    override fun formatPokemonName(name: String) = normalize(name)
+    override fun formatPokemonName(name: String) = normalize(name).let {
+        if (it.endsWith("-*")) it.dropLast(2) // e.g. greninja-*
+        else it
+    }
 
     override fun formatPokemonTrait(name: String) = normalize(name)
 }
@@ -229,4 +232,5 @@ private data class PlayerBuilderEntityBuilder(
         ots = ots,
         movesUsage = movesUsage.toMap()
     )
+
 }
