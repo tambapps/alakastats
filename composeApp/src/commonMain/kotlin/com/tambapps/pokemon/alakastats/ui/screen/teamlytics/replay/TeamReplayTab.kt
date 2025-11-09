@@ -114,11 +114,7 @@ internal fun FiltersButton(viewModel: TeamReplayViewModel, modifier: Modifier = 
         modifier = modifier,
         badge = {
             if (viewModel.filters.hasAny()) {
-                Badge(
-                    modifier = Modifier.align(Alignment.BottomEnd),
-                ) {
-                    Text(" ")
-                }
+                Badge()
             }
         }
     ) {

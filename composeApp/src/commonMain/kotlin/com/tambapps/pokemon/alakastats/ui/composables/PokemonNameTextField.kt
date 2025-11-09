@@ -28,12 +28,14 @@ fun PokemonNameTextField(
     value: PokemonName,
     placeholder: String = "Pokemon",
     onValueChange: (PokemonName) -> Unit,
+    isError: Boolean = false,
+    supportingText: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     val allNames = remember { listOf<PokemonName>(
-        PokemonName("baxcalibar")
+        PokemonName("baxcalibur")
     ) }
     val filteredSuggestions = remember(value) {
         val formattedValue = value.normalized
@@ -48,8 +50,11 @@ fun PokemonNameTextField(
                 onValueChange(PokemonName(it))
                 expanded = it.isNotEmpty()
             },
+            isError = isError,
+            supportingText = supportingText,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(placeholder) }
+            label = { Text(placeholder) },
+
         )
 
         DropdownMenu(

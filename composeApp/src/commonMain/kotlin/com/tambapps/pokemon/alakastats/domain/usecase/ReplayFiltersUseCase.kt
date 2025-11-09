@@ -7,4 +7,5 @@ interface ReplayFiltersUseCase {
 
     fun openFilters()
 
+    fun closeFilters()
 }

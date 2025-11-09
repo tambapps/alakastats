@@ -73,7 +73,7 @@ private val appModule = module {
 
     factory { HomeViewModel(get(), get()) }
     factory { EditTeamViewModel(get(), get(), get()) }
-    factory { TeamlyticsViewModel(get(), get()) }
+    factory { TeamlyticsViewModel(get(), get(), get()) }
     factory { (useCase: HandleTeamOverviewUseCase, team: Teamlytics) ->
         OverviewViewModel(useCase, get(), team)
     }

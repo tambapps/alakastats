@@ -18,6 +18,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,7 +27,8 @@ import kotlin.uuid.Uuid
 
 class TeamlyticsViewModel(
     private val useCase: TeamlyticsUseCase,
-    private val replayService: ReplayAnalyticsService
+    private val replayService: ReplayAnalyticsService,
+    val imageService: PokemonImageService,
 ) : ScreenModel, HandleTeamReplaysUseCase, HandleTeamOverviewUseCase {
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -38,7 +40,7 @@ class TeamlyticsViewModel(
         showFiltersDialog = true
     }
 
-    fun closeFilters() {
+    override fun closeFilters() {
         showFiltersDialog = false
     }
 

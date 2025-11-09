@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,59 +92,8 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
             }
         }
         if (viewModel.showFiltersDialog) {
-            FiltersDialog(viewModel, viewModel.filters)
-        }
-    }
-}
-
-@Composable
-private fun FiltersDialog(viewModel: TeamlyticsViewModel, filters: ReplayFilters) {
-    Dialog(onDismissRequest = { viewModel.closeFilters() }) {
-        Card(Modifier.fillMaxSize()) {
-            Column(Modifier.padding(vertical = 16.dp, horizontal = 8.dp)) {
-                Column(Modifier.weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                    ) {
-                    ExpansionTile(
-                        title = {
-                            Text(
-                                text = "Opponent's team",
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                        },
-                        content = {
-                            Column {
-                                PokemonNameTextField(
-                                    value = PokemonName("b"),
-                                    onValueChange = {}
-                                )
-                                PokemonNameTextField(
-                                    value = PokemonName("b"),
-                                    onValueChange = {}
-                                )
-                                PokemonNameTextField(
-                                    value = PokemonName("b"),
-                                    onValueChange = {}
-                                )
-
-                            }
-                        }
-                    )
-                }
-                Row(Modifier.padding(horizontal = 8.dp)) {
-                    TextButton(onClick = { viewModel.closeFilters() }) {
-                        Text("Close")
-                    }
-                    Spacer(Modifier.weight(1f))
-                    TextButton(onClick = { viewModel.closeFilters() }) {
-                        Text("Cancel")
-                    }
-                    Spacer(Modifier.weight(1f))
-                    TextButton(onClick = { viewModel.closeFilters() }) {
-                        Text("Apply")
-                    }
-                }
-            }
+            val filtersViewModel = remember { FiltersViewModel(viewModel, viewModel.imageService) }
+            FiltersDialog(filtersViewModel)
         }
     }
 }
