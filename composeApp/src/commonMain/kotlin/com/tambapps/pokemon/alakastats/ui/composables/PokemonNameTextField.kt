@@ -77,11 +77,11 @@ fun PokemonNameTextField(
                         ) {
                             pokemonImageService.PokemonSprite(suggestion, Modifier.size(40.dp), disableTooltip = true)
                             Spacer(Modifier.width(8.dp))
-                            Text(suggestion.value)
+                            Text(suggestion.pretty)
                         }
                     },
                     onClick = {
-                        onValueChange(suggestion)
+                        onValueChange(PokemonName(suggestion.pretty))
                         expanded = false
                     }
                 )

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -160,7 +159,7 @@ private fun PokemonsFiltersTile(
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.headlineSmall
                             ) },
-                            selected = false,
+                            selected = pokemonFilter.asLead,
                             trailingIcon = {
                                 Text(
                                     text = "×",
@@ -196,7 +195,6 @@ private fun PokemonsFiltersTile(
             pokemonImageService = viewModel.pokemonImageService,
             containsValidator = { pName -> pokemons.isNotEmpty() && pokemons.any { it.name.matches(pName) } },
             onDismissRequest = { showAddDialog = false },
-            placeholder = "Pokemon Name",
             proposeLeadOption = !preventLeadOption && pokemons.count { it.asLead } < 2,
             onAdd = { pokemons.add(it) }
             )
@@ -207,7 +205,6 @@ private fun PokemonsFiltersTile(
 private fun AddPokemonNameDialog(
     pokemonImageService: PokemonImageService,
     containsValidator: (PokemonName) -> Boolean,
-    placeholder: String,
     proposeLeadOption: Boolean,
     onAdd: (PokemonFilter) -> Unit,
     onDismissRequest: () -> Unit
@@ -224,7 +221,7 @@ private fun AddPokemonNameDialog(
             Column {
                 PokemonNameTextField(
                     value = pokemonName,
-                    placeholder = placeholder,
+                    placeholder = "Pokemon Name",
                     isError = alreadyContains,
                     supportingText = if (alreadyContains) ({
                         Text("${pokemonName.pretty} was already added")
