@@ -30,6 +30,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
+import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
 
 @Composable
 internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
@@ -43,11 +44,13 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
+                Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
                 Header(viewModel.useCase)
+                Spacer(Modifier.height(16.dp))
             }
             itemsIndexed(team.replays) { index, replay ->
                 MobileReplay(viewModel, team, replay)

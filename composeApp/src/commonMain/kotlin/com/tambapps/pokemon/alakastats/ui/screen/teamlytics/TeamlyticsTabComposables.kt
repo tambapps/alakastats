@@ -47,7 +47,7 @@ fun NbReplaysText(
             style = textStyle
         )
     } else {
-        NbReplaysText(useCase.team)
+        NbReplaysText(useCase.team, modifier = modifier, textAlign = textAlign)
     }
 }
 

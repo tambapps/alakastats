@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
+import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 
 
@@ -23,7 +25,9 @@ internal fun UsagesTabMobile(viewModel: UsagesViewModel) {
         Column(Modifier.weight(1f)
             .padding(horizontal = 4.dp)
             .verticalScroll(rememberScrollState())) {
-            ReplayCountText(viewModel)
+            Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
+            NbReplaysText(viewModel.useCase, modifier = Modifier.fillMaxWidth()) // fill maxWidth to center text
+            Spacer(Modifier.height(16.dp))
 
             val entries = viewModel.sortedPokemonMovesUsageEntries
             entries.forEach { (pokemonName, moveUsage) ->

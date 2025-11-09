@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 
 val LocalIsCompact = compositionLocalOf { false }
 
+val tabReplaysTextMarginTopMobile = 32.dp
 val statCardPokemonSpriteSize = 64.dp
 val statCardPercentageWidth = 60.dp
 

@@ -54,18 +54,6 @@ internal val UsagesViewModel.sortedPokemonMovesUsageEntries get() =
     }
 
 @Composable
-internal fun ReplayCountText(viewModel: UsagesViewModel) {
-
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        Text(
-            "${viewModel.replays.size} replays",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
-        )
-    }
-}
-
-@Composable
 internal fun PokemonUsagesCard(
     viewModel: UsagesViewModel,
     name: PokemonName,
