@@ -219,8 +219,8 @@ internal fun NoteTextOrTextField(
             modifier = Modifier.fillMaxWidth(),
             textStyle = noteTextFieldTextStyle
         )
-    } else {
-        Text("notes", style = noteTextFieldTextStyle)
+    } else if (notes.isNotBlank()) {
+        Text(notes, style = noteTextFieldTextStyle)
     }
 }
 
