@@ -30,8 +30,8 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.UsagesTab
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.UsagesViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsagesTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayTab

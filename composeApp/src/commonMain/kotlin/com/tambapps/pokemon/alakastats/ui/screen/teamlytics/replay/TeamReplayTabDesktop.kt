@@ -49,7 +49,6 @@ import kotlin.Boolean
 internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
     val team = viewModel.team
 
-    val replays = team.replays
     if (viewModel.hasNoReplaysToShow) {
         NoReplaysDesktop(viewModel)
         return
@@ -63,9 +62,9 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Header(replays, team)
+                Header(viewModel.useCase)
             }
-            itemsIndexed(replays) { index, replay ->
+            itemsIndexed(team.replays) { index, replay ->
                 DesktopReplay(viewModel, team, replay)
                 Spacer(Modifier.height(32.dp))
             }

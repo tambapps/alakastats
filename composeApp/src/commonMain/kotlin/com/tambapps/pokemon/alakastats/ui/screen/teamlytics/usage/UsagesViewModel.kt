@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf

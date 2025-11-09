@@ -50,9 +50,12 @@ import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -377,24 +380,16 @@ internal fun ReplayDropDownMenu(isMenuExpandedState: MutableState<Boolean>, view
 }
 
 @Composable
-internal fun Header(replays: List<ReplayAnalytics>, team: Teamlytics) {
-    val winRatePercentage = remember { team.winRate }
-    Row(Modifier.fillMaxWidth()) {
+internal fun Header(useCase: ConsultTeamlyticsUseCase) {
+    Row(
+        Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Spacer(Modifier.weight(1f))
-        NbReplaysText(replays)
+        NbReplaysText(useCase)
         Spacer(Modifier.width(32.dp))
-        WinRateText(winRatePercentage)
+        WinRateText(useCase)
         Spacer(Modifier.weight(1f))
     }
-
     Spacer(Modifier.height(32.dp))
-}
-@Composable
-internal fun NbReplaysText(replays: List<ReplayAnalytics>) {
-    Text("${replays.size} replays", style = MaterialTheme.typography.titleLarge)
-}
-
-@Composable
-internal fun WinRateText(winRatePercentage: Int) {
-    Text("$winRatePercentage% winrate", style = MaterialTheme.typography.titleLarge)
 }

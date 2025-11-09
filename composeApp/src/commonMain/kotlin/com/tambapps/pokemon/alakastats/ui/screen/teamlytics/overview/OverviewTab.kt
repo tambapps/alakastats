@@ -37,6 +37,8 @@ import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemon
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -64,14 +66,11 @@ internal fun TeamName(team: Teamlytics, modifier: Modifier = Modifier) {
 
 @Composable
 internal fun Header(team: Teamlytics) {
-    val replaysCount = remember { team.replays.size }
-    val textStyle = MaterialTheme.typography.titleLarge
-    if (replaysCount == 0) {
-        Text(
-            "${team.replays.size} replays",
+    if (team.replays.isEmpty()) {
+        NbReplaysText(
+            team = team,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            style = textStyle
         )
         return
     }
@@ -79,10 +78,10 @@ internal fun Header(team: Teamlytics) {
         modifier = Modifier.padding(vertical = 8.dp)
     ) {
         Spacer(Modifier.weight(1f))
-        Text("$replaysCount replays", style = textStyle)
+        NbReplaysText(team)
         Spacer(Modifier.width(32.dp))
         val winRate = remember { team.computeWinRatePercentage() }
-        Text("$winRate% winrate", style = textStyle)
+        WinRateText(winRate)
         Spacer(Modifier.weight(1f))
     }
 }

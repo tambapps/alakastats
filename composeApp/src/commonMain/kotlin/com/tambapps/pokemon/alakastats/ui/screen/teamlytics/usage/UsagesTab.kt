@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
