@@ -9,14 +9,18 @@ import arrow.core.raise.either
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
+import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
+import com.tambapps.pokemon.alakastats.domain.model.withContext
+import com.tambapps.pokemon.alakastats.domain.usecase.FilterableReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.TeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
+import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
@@ -29,14 +33,24 @@ class TeamlyticsViewModel(
     private val useCase: TeamlyticsUseCase,
     private val replayService: ReplayAnalyticsService,
     val imageService: PokemonImageService,
-) : ScreenModel, HandleTeamReplaysUseCase, HandleTeamOverviewUseCase {
+) : ScreenModel, FilterableReplaysUseCase, HandleTeamReplaysUseCase, HandleTeamOverviewUseCase {
 
     private val scope = CoroutineScope(Dispatchers.Default)
-    val teamState = mutableStateOf<Teamlytics?>(null)
+    private val teamState = mutableStateOf<Teamlytics?>(null)
     override var filters by mutableStateOf(ReplayFilters())
         private set
     var showFiltersDialog by mutableStateOf(false)
 
+    override val allReplays get() = requireTeam().replays
+
+    override var filteredReplays by mutableStateOf(listOf<ReplayAnalytics>())
+        private set
+
+    override val hasFiltered get() = filters.hasAny()
+
+    // TODO use me
+    var isLoading by mutableStateOf(false)
+        private set
 
     override fun applyFilters(filters: ReplayFilters) {
         this.filters = filters
@@ -87,19 +101,14 @@ class TeamlyticsViewModel(
             teamReplays.add(newReplay)
         }
 
-        return save(team.copy(replays = teamReplays.withComputedElo()))
-    }
-
-    override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?): Either<DomainError, Unit> {
-        val team = requireTeam()
-        return save(team.copy(notes = notes))
+        return save(team.copy(replays = teamReplays.withComputedElo())).also { onReplaysModified() }
     }
 
     override fun export(team: Teamlytics) = useCase.export(team)
 
     override suspend fun removeReplay(replay: ReplayAnalytics): Either<DomainError, Unit> {
         val team = requireTeam()
-        return save(team.copy(replays = team.replays - replay))
+        return save(team.copy(replays = team.replays - replay)).also { onReplaysModified() }
     }
 
     override suspend fun replaceReplay(original: ReplayAnalytics, replay: ReplayAnalytics): Either<DomainError, Unit> {
@@ -108,7 +117,12 @@ class TeamlyticsViewModel(
         val replays = team.replays.mapIndexed { index, r ->
             if (index == replayIndex) replay else r
         }
-        return save(team.copy(replays = replays))
+        return save(team.copy(replays = replays)).also { onReplaysModified() }
+    }
+
+    override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?): Either<DomainError, Unit> {
+        val team = requireTeam()
+        return save(team.copy(notes = notes))
     }
 
     private suspend fun save(team: Teamlytics): Either<DomainError, Unit> = either {
@@ -117,4 +131,48 @@ class TeamlyticsViewModel(
             teamState.value = updatedTeam
         }
     }
+
+    private suspend fun onReplaysModified() {
+        withContext(Dispatchers.Main) {
+            isLoading = true
+        }
+        filteredReplays = if (hasFiltered) allReplays.filter { filters.matches(it) }
+        else allReplays
+
+        withContext(Dispatchers.Main) {
+            isLoading = false
+        }
+    }
+
+    private fun ReplayFilters.matches(replay: ReplayAnalytics) = requireTeam().withContext {
+        when {
+            opponentTeam.isNotEmpty() && !teamMatches(replay.opponentPlayer, opponentTeam) -> false
+            yourSelection.isNotEmpty() && !selectionMatches(replay.youPlayer, yourSelection) -> false
+            else -> true
+        }
+    }
+}
+
+private fun teamMatches(player: Player, pokemonFilters: List<PokemonFilter>): Boolean {
+    for (pokemonFilter in pokemonFilters) {
+        if (player.teamPreview.pokemons.none { it.name.matches(pokemonFilter.name) }) {
+            return false
+        }
+        if (pokemonFilter.asLead && player.lead.none { it.matches(pokemonFilter.name) }) {
+            return false
+        }
+    }
+    return true
+}
+
+private fun selectionMatches(player: Player, pokemonFilters: List<PokemonFilter>): Boolean {
+    for (pokemonFilter in pokemonFilters) {
+        if (player.selection.none { it.matches(pokemonFilter.name) }) {
+            return false
+        }
+        if (pokemonFilter.asLead && player.lead.none { it.matches(pokemonFilter.name) }) {
+            return false
+        }
+    }
+    return true
 }
