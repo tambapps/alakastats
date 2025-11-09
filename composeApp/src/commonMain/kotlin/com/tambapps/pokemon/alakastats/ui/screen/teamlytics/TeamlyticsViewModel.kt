@@ -41,10 +41,6 @@ class TeamlyticsViewModel(
         private set
     var showFiltersDialog by mutableStateOf(false)
 
-    override val allReplays get() = requireTeam().replays
-
-    override var filteredReplays by mutableStateOf(listOf<ReplayAnalytics>())
-        private set
 
     override val hasFiltered get() = filters.hasAny()
 
@@ -136,8 +132,11 @@ class TeamlyticsViewModel(
         withContext(Dispatchers.Main) {
             isLoading = true
         }
-        filteredReplays = if (hasFiltered) allReplays.filter { filters.matches(it) }
+        /*
+        TODO update teamlytics
+        replays = if (hasFiltered) allReplays.filter { filters.matches(it) }
         else allReplays
+         */
 
         withContext(Dispatchers.Main) {
             isLoading = false
