@@ -25,10 +25,11 @@ internal fun UsagesTabDesktop(viewModel: UsagesViewModel) {
         LinearProgressBarIfEnabled(viewModel.isLoading)
         Column(
             Modifier.weight(1f)
-                .padding(8.dp)
+                .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             NbReplaysText(viewModel.useCase, modifier = Modifier.fillMaxWidth()) // fill maxWidth to center text
+            Spacer(Modifier.height(32.dp))
             val entryBlocks = remember { viewModel.sortedPokemonMovesUsageEntries.chunked(3) }
             for (entry in entryBlocks) {
                 DesktopRow(
