@@ -33,7 +33,7 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
         }
     ) {
         if (!viewModel.isLoading && viewModel.duoStatsMap.isEmpty() && viewModel.pokemonStats.isEmpty()) {
-            NoData()
+            NoData(viewModel)
         } else if (isCompact) {
             LeadStatsTabMobile(viewModel)
         } else {
@@ -43,9 +43,9 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
 }
 
 @Composable
-private fun NoData() {
+private fun NoData(viewModel: LeadStatsViewModel) {
     Box(Modifier.fillMaxSize()) {
-        Text("No data", style = MaterialTheme.typography.titleSmall, modifier = Modifier.align(Alignment.Center))
+        Text(if (!viewModel.useCase.hasFilteredReplays) "No data" else "No replays matched the filters", style = MaterialTheme.typography.titleSmall, modifier = Modifier.align(Alignment.Center))
     }
 }
 

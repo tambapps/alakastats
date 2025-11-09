@@ -58,7 +58,10 @@ fun NbReplaysText(
     textAlign: TextAlign? = null,
 ) {
     Text(
-        "${replays.size} replays",
+        when(val replayCount = replays.size) {
+            1 -> "$replayCount replay"
+            else -> "$replayCount replays"
+        },
         modifier = modifier,
         textAlign = textAlign,
         style = textStyle
@@ -73,7 +76,11 @@ fun NbReplaysText(
 ) {
     if (useCase.hasFilteredReplays) {
         Text(
-            "${useCase.filteredTeam.replays.size} replays\nmatched",
+            when(val replaysCount = useCase.filteredTeam.replays.size) {
+                0 -> "no replays\nmatched"
+                1 -> "$replaysCount replay\nmatched"
+                else -> "$replaysCount replays\nmatched"
+            },
             modifier = modifier,
             textAlign = textAlign,
             style = textStyle

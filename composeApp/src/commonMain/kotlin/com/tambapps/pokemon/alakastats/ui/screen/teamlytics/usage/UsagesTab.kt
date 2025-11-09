@@ -45,7 +45,7 @@ fun UsagesTab(viewModel: UsagesViewModel) {
         }
     ) {
         if (!viewModel.isLoading && viewModel.pokemonPokemonUsages.isEmpty()) {
-            NoData()
+            NoData(viewModel)
         } else if (isCompact) {
             UsagesTabMobile(viewModel)
         } else {
@@ -147,8 +147,8 @@ private fun PokemonUsagesDonut(
 }
 
 @Composable
-private fun NoData() {
+private fun NoData(viewModel: UsagesViewModel) {
     Box(Modifier.fillMaxSize()) {
-        Text("No data", style = MaterialTheme.typography.titleSmall, modifier = Modifier.align(Alignment.Center))
+        Text(if (!viewModel.useCase.hasFilteredReplays) "No data" else "No replays matched the filters", style = MaterialTheme.typography.titleSmall, modifier = Modifier.align(Alignment.Center))
     }
 }
