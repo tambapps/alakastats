@@ -70,15 +70,15 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
             TeamReplayTabDesktop(viewModel)
         }
 
-        if (!viewModel.hasNoReplaysToShow) {
-            val (padX, padY) = if (LocalIsCompact.current) 32.dp to 32.dp else 50.dp to 50.dp
 
-            Row(modifier = Modifier.align(Alignment.BottomEnd).padding(end = padX, bottom = padY)) {
-                FiltersButton(viewModel)
-                Spacer(Modifier.width(32.dp))
-                AddReplayButton(viewModel)
-            }
+        val (padX, padY) = if (LocalIsCompact.current) 32.dp to 32.dp else 50.dp to 50.dp
+
+        Row(modifier = Modifier.align(Alignment.BottomEnd).padding(end = padX, bottom = padY)) {
+            FiltersButton(viewModel)
+            Spacer(Modifier.width(32.dp))
+            AddReplayButton(viewModel)
         }
+
         if (viewModel.showAddReplayDialog) {
             AddReplayDialog(viewModel)
         }
@@ -126,27 +126,6 @@ internal fun FiltersButton(viewModel: TeamReplayViewModel, modifier: Modifier = 
                 contentDescription = "Filters",
             )
         }
-    }
-}
-
-@Composable
-internal fun AddReplayTextButton(viewModel: TeamReplayViewModel) {
-    Button(
-        onClick = {
-            if (!viewModel.isLoading) {
-                viewModel.showAddReplayDialog()
-            }
-        }
-    ) {
-        Icon(
-            painter = painterResource(Res.drawable.add),
-            contentDescription = "Add",
-            modifier = Modifier.size(ButtonDefaults.IconSize)
-        )
-        Spacer(Modifier.width(8.dp))
-        Text("Add Replay(s)", style = buttonTextStyle.copy(
-            color = LocalContentColor.current
-        ))
     }
 }
 

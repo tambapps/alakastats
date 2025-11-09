@@ -211,8 +211,7 @@ private fun NoReplaysDesktop(viewModel: TeamReplayViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("No replays were found")
-            AddReplayTextButton(viewModel)
+            Text(if (!viewModel.useCase.hasFilteredReplays) "No replays were found" else "No replays matched the filters")
         }
 
         LinearProgressBarIfEnabled(viewModel.isLoading, modifier = Modifier

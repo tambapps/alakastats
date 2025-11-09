@@ -145,13 +145,13 @@ private fun PokemonsFiltersTile(
                     pokemons.forEach { pokemonFilter ->
                         val height = 64.dp
                         FilterChip(
-                            modifier = Modifier.height(height),
+                            modifier = Modifier.height(height).padding(vertical = 4.dp),
                             onClick = { pokemons.remove(pokemonFilter) },
                             leadingIcon = {
                                 viewModel.pokemonImageService.PokemonSprite(
                                     pokemonFilter.name,
                                     disableTooltip = true,
-                                    modifier = Modifier.size(height)
+                                    modifier = Modifier.size(height).padding(bottom = 8.dp)
                                 )
                             },
                             label = { Text(
