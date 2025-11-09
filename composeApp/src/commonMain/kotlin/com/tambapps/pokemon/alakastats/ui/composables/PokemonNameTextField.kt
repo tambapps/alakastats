@@ -51,8 +51,8 @@ fun PokemonNameTextField(
             value = value.value,
             onValueChange = {
                 onValueChange(PokemonName(it))
-                // only on insertion, for at least 3 characters
-                expanded = it.length > value.value.length && it.length >= 3
+                // only on insertion, for at least n characters
+                expanded = it.length > value.value.length && it.length >= 4
             },
             isError = isError,
             supportingText = supportingText,

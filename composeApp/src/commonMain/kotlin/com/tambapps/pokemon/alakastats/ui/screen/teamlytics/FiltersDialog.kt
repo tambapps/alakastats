@@ -143,7 +143,7 @@ private fun PokemonsFiltersTile(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     pokemons.forEach { pokemonFilter ->
-                        val height = 64.dp
+                        val height = 70.dp
                         FilterChip(
                             modifier = Modifier.height(height).padding(vertical = 4.dp),
                             onClick = { pokemons.remove(pokemonFilter) },
