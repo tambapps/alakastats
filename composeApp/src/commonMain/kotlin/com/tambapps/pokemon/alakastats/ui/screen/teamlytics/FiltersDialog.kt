@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -55,7 +56,7 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun FiltersDialog(viewModel: FiltersViewModel) {
     Dialog(onDismissRequest = { viewModel.closeFilters() }) {
-        Card(Modifier.fillMaxSize()) {
+        Card(Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.8f)) {
             Column(Modifier.padding(vertical = 16.dp, horizontal = 8.dp)) {
                 Column(Modifier.weight(1f)
                     .verticalScroll(rememberScrollState()),
@@ -195,7 +196,7 @@ private fun PokemonsFiltersTile(
             pokemonImageService = viewModel.pokemonImageService,
             containsValidator = { pName -> pokemons.isNotEmpty() && pokemons.any { it.name.matches(pName) } },
             onDismissRequest = { showAddDialog = false },
-            placeholder = "Pokemon ${pokemons.size + 1}",
+            placeholder = "Pokemon Name",
             proposeLeadOption = !preventLeadOption && pokemons.count { it.asLead } < 2,
             onAdd = { pokemons.add(it) }
             )
