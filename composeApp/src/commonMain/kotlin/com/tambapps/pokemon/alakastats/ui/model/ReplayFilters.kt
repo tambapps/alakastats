@@ -5,19 +5,20 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.tambapps.pokemon.PokemonName
 
 data class ReplayFilters(
-    val opponentTeamFilters: OpponentTeamFilters = OpponentTeamFilters(),
-    val yourSelectionFilters: SnapshotStateList<PokemonName> = mutableStateListOf(),
+    val opponentTeam: PokemonsFilters = PokemonsFilters(),
+    val yourSelection: PokemonsFilters = PokemonsFilters(),
 ) {
-    fun hasAny() = opponentTeamFilters.isNotEmpty() || yourSelectionFilters.isNotEmpty()
+    fun hasAny() = opponentTeam.isNotEmpty() || yourSelection.isNotEmpty()
 }
 
-data class OpponentTeamFilters(
-    val team: SnapshotStateList<PokemonFilter> = mutableStateListOf()
+data class PokemonsFilters(
+    val pokemons: SnapshotStateList<PokemonFilter> = mutableStateListOf()
 ) {
-    fun isNotEmpty() = team.isNotEmpty()
+    fun isNotEmpty() = pokemons.isNotEmpty()
 }
 
 data class PokemonFilter(
     val name: PokemonName,
+    val asLead: Boolean
     // maybe I'll add something else later
 )

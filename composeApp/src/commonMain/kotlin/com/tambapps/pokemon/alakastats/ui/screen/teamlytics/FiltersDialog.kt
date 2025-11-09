@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,11 +22,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,21 +36,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import coil3.compose.AsyncImage
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.usecase.ReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
-import com.tambapps.pokemon.alakastats.ui.model.OpponentTeamFilters
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
-import kotlin.text.matches
 
 @Composable
 fun FiltersDialog(viewModel: FiltersViewModel) {
@@ -60,6 +57,11 @@ fun FiltersDialog(viewModel: FiltersViewModel) {
                 Column(Modifier.weight(1f)
                     .verticalScroll(rememberScrollState()),
                 ) {
+
+                    Text("Replay Filters", style = MaterialTheme.typography.displaySmall)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Filter replays to view stats for specific matchups", style = MaterialTheme.typography.bodyLarge)
+                    Spacer(Modifier.height(8.dp))
                     OpponentTeamFiltersTile(viewModel)
                 }
                 Row(Modifier.padding(horizontal = 8.dp)) {
@@ -83,13 +85,13 @@ fun FiltersDialog(viewModel: FiltersViewModel) {
 
 @Composable
 private fun OpponentTeamFiltersTile(viewModel: FiltersViewModel) {
-    val filters = viewModel.filters.opponentTeamFilters
+    val filters = viewModel.filters.opponentTeam
     var showAddDialog by remember { mutableStateOf(false) }
     ExpansionTile(
         title = {
             BadgedBox(
                 badge = {
-                    if (filters.team.isNotEmpty()) {
+                    if (filters.pokemons.isNotEmpty()) {
                         Badge()
                     }
                 }
@@ -109,23 +111,24 @@ private fun OpponentTeamFiltersTile(viewModel: FiltersViewModel) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    filters.team.forEach { pokemon ->
+                    filters.pokemons.forEach { pokemonFilter ->
                         val height = 64.dp
                         FilterChip(
                             modifier = Modifier.height(height),
-                            onClick = { filters.team.remove(pokemon) },
+                            onClick = { filters.pokemons.remove(pokemonFilter) },
                             leadingIcon = {
                                 viewModel.pokemonImageService.PokemonSprite(
-                                    pokemon.name,
+                                    pokemonFilter.name,
                                     disableTooltip = true,
                                     modifier = Modifier.size(height)
                                 )
                             },
                             label = { Text(
-                                pokemon.name.pretty,
+                                text = pokemonFilter.name.pretty + (if (pokemonFilter.asLead) "\nas lead" else ""),
+                                textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.headlineSmall
                             ) },
-                            selected = true,
+                            selected = false,
                             trailingIcon = {
                                 Text(
                                     text = "×",
@@ -156,10 +159,11 @@ private fun OpponentTeamFiltersTile(viewModel: FiltersViewModel) {
 
     if (showAddDialog) {
         AddPokemonNameDialog(
-            containsValidator = { pName -> filters.team.isNotEmpty() && filters.team.any { it.name.matches(pName) } },
+            containsValidator = { pName -> filters.pokemons.isNotEmpty() && filters.pokemons.any { it.name.matches(pName) } },
             onDismissRequest = { showAddDialog = false },
-            placeholder = "Pokemon ${filters.team.size + 1}",
-            onAdd = { filters.team.add(PokemonFilter(it)) }
+            placeholder = "Pokemon ${filters.pokemons.size + 1}",
+            proposeLeadOption = filters.pokemons.count { it.asLead } < 2,
+            onAdd = { filters.pokemons.add(it) }
             )
     }
 }
@@ -168,10 +172,12 @@ private fun OpponentTeamFiltersTile(viewModel: FiltersViewModel) {
 private fun AddPokemonNameDialog(
     containsValidator: (PokemonName) -> Boolean,
     placeholder: String,
-    onAdd: (PokemonName) -> Unit,
+    proposeLeadOption: Boolean,
+    onAdd: (PokemonFilter) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     var pokemonName by remember { mutableStateOf(PokemonName("")) }
+    var asLead by remember { mutableStateOf(false) }
 
     val alreadyContains = remember(pokemonName) { containsValidator.invoke(pokemonName) }
     val isValid = pokemonName.value.isNotBlank() && !alreadyContains
@@ -183,18 +189,32 @@ private fun AddPokemonNameDialog(
                 PokemonNameTextField(
                     value = pokemonName,
                     placeholder = placeholder,
-                    isError = !alreadyContains,
+                    isError = alreadyContains,
                     supportingText = if (alreadyContains) ({
                         Text("${pokemonName.pretty} was already added")
                     }) else null,
                     onValueChange = { pokemonName = it }
                 )
+                if (proposeLeadOption) {
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.clickable { asLead = !asLead },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = asLead,
+                            onCheckedChange = { asLead = it}
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text("as lead", style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
-                    onAdd.invoke(pokemonName)
+                    onAdd.invoke(PokemonFilter(pokemonName, asLead))
                     onDismissRequest.invoke()
                 },
                 enabled = isValid
