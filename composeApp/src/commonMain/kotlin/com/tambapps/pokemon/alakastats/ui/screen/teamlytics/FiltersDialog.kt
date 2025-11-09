@@ -65,13 +65,24 @@ fun FiltersDialog(viewModel: FiltersViewModel) {
                     Spacer(Modifier.height(8.dp))
                     Text("Filter replays to view stats for specific matchups", style = MaterialTheme.typography.bodyLarge)
                     Spacer(Modifier.height(16.dp))
+
                     PokemonsFiltersTile(
                         title = "Opponent's team",
                         viewModel = viewModel,
                         pokemons = viewModel.opponentTeamFilters,
                         max = 6,
+                        preventLeadOption = true
                         )
                     Spacer(Modifier.height(16.dp))
+
+                    PokemonsFiltersTile(
+                        title = "Opponent's selection",
+                        viewModel = viewModel,
+                        pokemons = viewModel.opponentSelectionFilters,
+                        max = 4,
+                        )
+                    Spacer(Modifier.height(16.dp))
+
                     PokemonsFiltersTile(
                         title = "Your selection",
                         viewModel = viewModel,
@@ -104,6 +115,7 @@ private fun PokemonsFiltersTile(
     viewModel: FiltersViewModel,
     pokemons: SnapshotStateList<PokemonFilter>,
     max: Int,
+    preventLeadOption: Boolean = false
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     ExpansionTile(
@@ -184,7 +196,7 @@ private fun PokemonsFiltersTile(
             containsValidator = { pName -> pokemons.isNotEmpty() && pokemons.any { it.name.matches(pName) } },
             onDismissRequest = { showAddDialog = false },
             placeholder = "Pokemon ${pokemons.size + 1}",
-            proposeLeadOption = pokemons.count { it.asLead } < 2,
+            proposeLeadOption = !preventLeadOption && pokemons.count { it.asLead } < 2,
             onAdd = { pokemons.add(it) }
             )
     }
@@ -263,16 +275,19 @@ class FiltersViewModel(
 ) {
 
     val opponentTeamFilters = useCase.filters.opponentTeam.toMutableStateList()
+    val opponentSelectionFilters = useCase.filters.opponentSelection.toMutableStateList()
     val yourSelectionFilters = useCase.filters.yourSelection.toMutableStateList()
 
     fun clearFilters() {
         opponentTeamFilters.clear()
+        opponentSelectionFilters.clear()
         yourSelectionFilters.clear()
     }
 
     fun applyFilters() = useCase.applyFilters(
         ReplayFilters(
             opponentTeam = opponentTeamFilters.toList(),
+            opponentSelection = opponentSelectionFilters.toList(),
             yourSelection = yourSelectionFilters.toList()
         )
     )

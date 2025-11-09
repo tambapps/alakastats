@@ -4,9 +4,10 @@ import com.tambapps.pokemon.PokemonName
 
 data class ReplayFilters(
     val opponentTeam: List<PokemonFilter> = listOf(),
+    val opponentSelection: List<PokemonFilter> = listOf(),
     val yourSelection: List<PokemonFilter> = listOf(),
 ) {
-    fun hasAny() = opponentTeam.isNotEmpty() || yourSelection.isNotEmpty()
+    fun hasAny() = opponentTeam.isNotEmpty() || opponentSelection.isNotEmpty() || yourSelection.isNotEmpty()
 }
 
 data class PokemonFilter(

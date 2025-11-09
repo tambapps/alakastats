@@ -147,6 +147,7 @@ class TeamlyticsViewModel(
     private fun ReplayFilters.matches(replay: ReplayAnalytics) = requireTeam().withContext {
         when {
             opponentTeam.isNotEmpty() && !teamMatches(replay.opponentPlayer, opponentTeam) -> false
+            opponentSelection.isNotEmpty() && !selectionMatches(replay.opponentPlayer, opponentSelection) -> false
             yourSelection.isNotEmpty() && !selectionMatches(replay.youPlayer, yourSelection) -> false
             else -> true
         }
