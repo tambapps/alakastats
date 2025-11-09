@@ -43,7 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.domain.usecase.ReplayFiltersUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
@@ -270,7 +270,7 @@ private fun AddPokemonNameDialog(
 }
 
 class FiltersViewModel(
-    private val useCase: ReplayFiltersUseCase,
+    private val useCase: ManageReplayFiltersUseCase,
     val pokemonImageService: PokemonImageService
 ) {
 

@@ -13,7 +13,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.domain.model.withContext
-import com.tambapps.pokemon.alakastats.domain.usecase.FilterableReplaysUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
@@ -38,7 +38,7 @@ class TeamlyticsViewModel(
     private val useCase: ManageTeamlyticsUseCase,
     private val replayService: ReplayAnalyticsService,
     val imageService: PokemonImageService,
-) : ScreenModel, FilterableReplaysUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase {
+) : ScreenModel, ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase {
 
     private val scope = CoroutineScope(Dispatchers.Default)
     var teamState by mutableStateOf<TeamState>(TeamState.Loading)
@@ -47,7 +47,7 @@ class TeamlyticsViewModel(
         private set
     var showFiltersDialog by mutableStateOf(false)
 
-    val team: Teamlytics
+    override val team: Teamlytics
         get() = (teamState as TeamState.Loaded).team
 
     override val hasFiltered get() = filters.hasAny()
