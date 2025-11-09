@@ -180,6 +180,7 @@ private fun PokemonsFiltersTile(
 
     if (showAddDialog) {
         AddPokemonNameDialog(
+            pokemonImageService = viewModel.pokemonImageService,
             containsValidator = { pName -> pokemons.isNotEmpty() && pokemons.any { it.name.matches(pName) } },
             onDismissRequest = { showAddDialog = false },
             placeholder = "Pokemon ${pokemons.size + 1}",
@@ -191,6 +192,7 @@ private fun PokemonsFiltersTile(
 
 @Composable
 private fun AddPokemonNameDialog(
+    pokemonImageService: PokemonImageService,
     containsValidator: (PokemonName) -> Boolean,
     placeholder: String,
     proposeLeadOption: Boolean,
@@ -214,7 +216,8 @@ private fun AddPokemonNameDialog(
                     supportingText = if (alreadyContains) ({
                         Text("${pokemonName.pretty} was already added")
                     }) else null,
-                    onValueChange = { pokemonName = it }
+                    onValueChange = { pokemonName = it },
+                    pokemonImageService = pokemonImageService,
                 )
                 if (proposeLeadOption) {
                     Spacer(Modifier.height(8.dp))

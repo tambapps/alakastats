@@ -43,6 +43,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -69,6 +70,9 @@ enum class FacingDirection {
     LEFT, RIGHT
 }
 interface PokemonImageService {
+
+    fun listAvailableNames(): List<PokemonName>
+
     @Composable
     fun PokemonSprite(name: PokemonName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
 
@@ -99,17 +103,25 @@ abstract class AbstractPokemonImageService(
     protected val coroutineScope = CoroutineScope(Dispatchers.Default)
     private val movesData = mutableStateMapOf<String, MoveData>()
     private val pokemonImages = mutableStateMapOf<String, PokemonSpriteData>()
+    private val availableNames = mutableStateListOf<PokemonName>()
 
     init {
         coroutineScope.launch {
             val map: Map<String, PokemonSpriteData> = readMappingFile(json, "pokemon-sprites.json")
             withContext(Dispatchers.Main) {
                 pokemonImages.putAll(map)
+                availableNames.addAll(
+                    map.keys.asSequence()
+                        .sorted()
+                        .map { PokemonName(it) }
+                )
             }
         }
     }
 
     protected fun getPokemonSpriteData(name: PokemonName) = pokemonImages[name.normalized.value]
+
+    override fun listAvailableNames() = availableNames
 
     @Composable
     override fun TeraTypeImage(type: TeraType, disableTooltip: Boolean, modifier: Modifier) {
