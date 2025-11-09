@@ -82,10 +82,10 @@ private val appModule = module {
     factory { (useCase: ManageTeamReplaysUseCase) ->
         TeamReplayViewModel(useCase, get())
     }
-    factory { (useCase: ConsultTeamlyticsUseCase) ->
+    factory { (useCase: ManageTeamReplaysUseCase) ->
         LeadStatsViewModel(useCase, get())
     }
-    factory { (useCase: ConsultTeamlyticsUseCase) ->
+    factory { (useCase: ManageTeamReplaysUseCase) ->
         UsagesViewModel(useCase, get())
     }
 }

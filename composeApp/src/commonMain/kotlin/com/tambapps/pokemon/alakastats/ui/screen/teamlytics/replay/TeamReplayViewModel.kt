@@ -26,7 +26,6 @@ class TeamReplayViewModel(
     val pokemonImageService: PokemonImageService,
 ): TeamlyticsTabViewModel() {
     val team get() = useCase.team
-    val filters: ReplayFilters get() = useCase.filters
 
     private companion object {
         val REPLAYS_SEPARATOR_REGEX = Regex("[,\\s]+")

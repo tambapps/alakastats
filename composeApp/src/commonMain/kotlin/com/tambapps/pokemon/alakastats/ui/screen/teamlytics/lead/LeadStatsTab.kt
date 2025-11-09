@@ -14,7 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.StatCard
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.statCardPercentageWidth
 import com.tambapps.pokemon.alakastats.ui.theme.statCardPokemonSpriteSize
@@ -25,12 +27,18 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
     LaunchedEffect(Unit) {
         viewModel.loadStats()
     }
-    if (!viewModel.isLoading && viewModel.duoStatsMap.isEmpty() && viewModel.pokemonStats.isEmpty()) {
-        NoData()
-    } else if (isCompact) {
-        LeadStatsTabMobile(viewModel)
-    } else {
-        LeadStatsTabDesktop(viewModel)
+    FabLayout(
+        fab = {
+            FiltersButton(viewModel.useCase)
+        }
+    ) {
+        if (!viewModel.isLoading && viewModel.duoStatsMap.isEmpty() && viewModel.pokemonStats.isEmpty()) {
+            NoData()
+        } else if (isCompact) {
+            LeadStatsTabMobile(viewModel)
+        } else {
+            LeadStatsTabDesktop(viewModel)
+        }
     }
 }
 

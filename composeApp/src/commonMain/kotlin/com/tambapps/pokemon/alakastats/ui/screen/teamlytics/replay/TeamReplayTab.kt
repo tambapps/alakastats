@@ -2,12 +2,10 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
-import alakastats.composeapp.generated.resources.tune
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -17,8 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
@@ -49,6 +45,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
@@ -61,22 +58,19 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun TeamReplayTab(viewModel: TeamReplayViewModel) {
     val isCompact = LocalIsCompact.current
-    Box(
-        modifier = Modifier.fillMaxSize()
+    FabLayout(
+        fab = {
+            Row {
+                FiltersButton(viewModel.useCase)
+                Spacer(Modifier.width(32.dp))
+                AddReplayButton(viewModel)
+            }
+        }
     ) {
         if (isCompact) {
             TeamReplayTabMobile(viewModel)
         } else {
             TeamReplayTabDesktop(viewModel)
-        }
-
-
-        val (padX, padY) = if (LocalIsCompact.current) 32.dp to 32.dp else 50.dp to 50.dp
-
-        Row(modifier = Modifier.align(Alignment.BottomEnd).padding(end = padX, bottom = padY)) {
-            FiltersButton(viewModel.useCase)
-            Spacer(Modifier.width(32.dp))
-            AddReplayButton(viewModel)
         }
 
         if (viewModel.showAddReplayDialog) {

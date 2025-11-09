@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
+import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsPaddingBottomMobile
 
 @Composable
 internal fun LeadStatsTabMobile(viewModel: LeadStatsViewModel) {
@@ -37,6 +38,7 @@ internal fun LeadStatsTabMobile(viewModel: LeadStatsViewModel) {
             MostEffectiveLeadCard(viewModel)
             Space()
             LeadAndWin(viewModel)
+            Spacer(Modifier.height(teamlyticsPaddingBottomMobile))
         }
         LinearProgressBarIfEnabled(viewModel.isLoading)
     }

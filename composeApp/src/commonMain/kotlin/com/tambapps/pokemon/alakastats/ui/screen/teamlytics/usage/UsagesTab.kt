@@ -23,8 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
+import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import io.github.koalaplot.core.pie.PieChart
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
@@ -37,12 +39,18 @@ fun UsagesTab(viewModel: UsagesViewModel) {
     LaunchedEffect(Unit) {
         viewModel.loadStats()
     }
-    if (!viewModel.isLoading && viewModel.pokemonPokemonUsages.isEmpty()) {
-        NoData()
-    } else if (isCompact) {
-        UsagesTabMobile(viewModel)
-    } else {
-        UsagesTabDesktop(viewModel)
+    FabLayout(
+        fab = {
+            FiltersButton(viewModel.useCase)
+        }
+    ) {
+        if (!viewModel.isLoading && viewModel.pokemonPokemonUsages.isEmpty()) {
+            NoData()
+        } else if (isCompact) {
+            UsagesTabMobile(viewModel)
+        } else {
+            UsagesTabDesktop(viewModel)
+        }
     }
 }
 

@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
+import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsPaddingBottomMobile
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 
 
@@ -38,7 +39,7 @@ internal fun UsagesTabMobile(viewModel: UsagesViewModel) {
                     usages = moveUsage
                 )
             }
-            Spacer(Modifier.height(64.dp))
+            Spacer(Modifier.height(teamlyticsPaddingBottomMobile))
         }
         LinearProgressBarIfEnabled(viewModel.isLoading)
     }

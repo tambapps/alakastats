@@ -31,6 +31,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
+import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsPaddingBottomMobile
 
 @Composable
 internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
@@ -61,7 +62,7 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
 
             item {
                 // just to be able to scroll past Fab button
-                Spacer(Modifier.height(64.dp))
+                Spacer(Modifier.height(teamlyticsPaddingBottomMobile))
             }
         }
         LinearProgressBarIfEnabled(viewModel.isLoading)
