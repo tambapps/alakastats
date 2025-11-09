@@ -9,7 +9,6 @@ import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
-import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -25,8 +24,8 @@ class UsagesViewModel(
     override var isTabLoading by mutableStateOf(false)
         private set
 
-    val team get() = useCase.team
-    val replays get() = useCase.team.replays
+    val team get() = useCase.filteredTeam
+    val replays get() = useCase.filteredTeam.replays
 
     private val scope = CoroutineScope(Dispatchers.Default)
     val pokemonPokemonUsages = mutableStateMapOf<PokemonName, PokemonUsages>()
@@ -37,7 +36,7 @@ class UsagesViewModel(
         }
         isTabLoading = true
         scope.launch {
-            useCase.team.withContext {
+            useCase.filteredTeam.withContext {
                 val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
                 doLoadStats(replays)
             }

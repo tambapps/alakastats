@@ -7,7 +7,7 @@ interface ConsultTeamlyticsUseCase {
     val originalTeam: Teamlytics
 
     // the one with replays that may be filtered
-    val team: Teamlytics
+    val filteredTeam: Teamlytics
 
     val hasFilteredReplays: Boolean
     val isApplyingFiltersLoading: Boolean

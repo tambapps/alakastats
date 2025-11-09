@@ -50,15 +50,15 @@ class TeamlyticsViewModel(
     override val originalTeam: Teamlytics
         get() = (teamState as TeamState.Loaded).team
 
-    override val team: Teamlytics
-        get() = filteredTeam ?: originalTeam
+    override val filteredTeam: Teamlytics
+        get() = _filteredTeam ?: originalTeam
 
     override val hasFilteredReplays get() = filters.hasAny()
 
     override var isApplyingFiltersLoading by mutableStateOf(false)
         private set
 
-    private var filteredTeam by mutableStateOf<Teamlytics?>(null)
+    private var _filteredTeam by mutableStateOf<Teamlytics?>(null)
 
     init {
         loadTeam()
@@ -152,7 +152,7 @@ class TeamlyticsViewModel(
     }
 
     private fun reloadFilteredTeam() {
-        filteredTeam =
+        _filteredTeam =
             if (hasFilteredReplays) originalTeam.copy(replays = originalTeam.replays.filter { filters.matches(it) })
             else originalTeam
     }

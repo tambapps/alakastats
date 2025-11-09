@@ -73,18 +73,18 @@ fun NbReplaysText(
 ) {
     if (useCase.hasFilteredReplays) {
         Text(
-            "${useCase.team.replays.size} replays\nmatched",
+            "${useCase.filteredTeam.replays.size} replays\nmatched",
             modifier = modifier,
             textAlign = textAlign,
             style = textStyle
         )
     } else {
-        NbReplaysText(useCase.team, modifier = modifier, textAlign = textAlign)
+        NbReplaysText(useCase.filteredTeam, modifier = modifier, textAlign = textAlign)
     }
 }
 
 @Composable
-fun WinRateText(useCase: ConsultTeamlyticsUseCase, modifier: Modifier = Modifier) = WinRateText(useCase.team, modifier)
+fun WinRateText(useCase: ConsultTeamlyticsUseCase, modifier: Modifier = Modifier) = WinRateText(useCase.filteredTeam, modifier)
 
 @Composable
 fun WinRateText(teamlytics: Teamlytics, modifier: Modifier = Modifier) = WinRateText(remember { teamlytics.winRate }, modifier)

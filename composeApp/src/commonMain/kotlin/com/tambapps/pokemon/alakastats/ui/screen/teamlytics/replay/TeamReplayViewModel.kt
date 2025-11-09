@@ -9,7 +9,6 @@ import arrow.core.getOrElse
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.SnackBar
-import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
@@ -25,7 +24,7 @@ class TeamReplayViewModel(
     override val useCase: ManageTeamReplaysUseCase,
     val pokemonImageService: PokemonImageService,
 ): TeamlyticsTabViewModel() {
-    val team get() = useCase.team
+    val team get() = useCase.filteredTeam
 
     private companion object {
         val REPLAYS_SEPARATOR_REGEX = Regex("[,\\s]+")
@@ -65,8 +64,6 @@ class TeamReplayViewModel(
         replayToNote = null
         replayNotesText = ""
     }
-
-    fun openFilters() = useCase.openFilters()
 
     fun reloadReplay(snackBar: SnackBar, replay: ReplayAnalytics, url: String) {
         if (isLoading) {
@@ -147,7 +144,7 @@ class TeamReplayViewModel(
                 }
             }.awaitAll().filterNotNull()
 
-            val duplicates = results.filter { resultReplay -> team.replays.any { it.reference == resultReplay.reference } }
+            val duplicates = results.filter { resultReplay -> useCase.originalTeam.replays.any { it.reference == resultReplay.reference } }
             val error =
                 if (duplicates.size < results.size) useCase.addReplays(results - duplicates).leftOrNull()
                 else null
@@ -155,8 +152,8 @@ class TeamReplayViewModel(
                 isTabLoading = false
                 when {
                     error != null -> snackBar.show("Couldn't add replay: ${error.message}", SnackBar.Severity.ERROR)
-                    duplicates.size == results.size -> snackBar.show(if (duplicates.size == 1) "The replay was already added" else "The Replays were already added")
-                    duplicates.isNotEmpty() -> snackBar.show("Some replay(s) were already added")
+                    duplicates.size == results.size -> snackBar.show(if (duplicates.size == 1) "The replay was already added" else "The replays were already added")
+                    duplicates.isNotEmpty() -> snackBar.show("Added replays (some replay(s) were already added)")
                 }
             }
         }
