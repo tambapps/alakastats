@@ -11,19 +11,20 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class LeadStatsViewModel(
-    val useCase: ConsultTeamlyticsUseCase,
+    override val useCase: ConsultTeamlyticsUseCase,
     val pokemonImageService: PokemonImageService,
-    ) {
+    ): TeamlyticsTabViewModel() {
     val duoStatsMap: SnapshotStateMap<List<PokemonName>, WinStats> = mutableStateMapOf()
     val pokemonStats: SnapshotStateMap<PokemonName, WinStats> = mutableStateMapOf()
 
-    var isLoading by mutableStateOf(false)
+    override var isTabLoading by mutableStateOf(false)
         private set
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -32,7 +33,7 @@ class LeadStatsViewModel(
         if (isLoading) {
             return
         }
-        isLoading = true
+        isTabLoading = true
         scope.launch {
             useCase.team.withContext {
                 val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
@@ -40,7 +41,7 @@ class LeadStatsViewModel(
                 loadIndividualStats(replays)
             }
             kotlinx.coroutines.withContext(Dispatchers.Main) {
-                isLoading = false
+                isTabLoading = false
             }
         }
     }

@@ -5,11 +5,11 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.Pokemon
-import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.downloadToFile
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,15 +17,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class OverviewViewModel(
-    private val useCase: ManageTeamOverviewUseCase,
+    override val useCase: ManageTeamOverviewUseCase,
     val pokemonImageService: PokemonImageService,
-) {
-    val team get() = useCase.team
+): TeamlyticsTabViewModel() {
+    // important. In this tab we don't want to consider filters
+    val team get() = useCase.originalTeam
     var isEditingNotes by mutableStateOf(false)
     var teamNotes by mutableStateOf("")
     val pokemonNotes = mutableStateMapOf<Pokemon, String>()
 
-    var isLoading by mutableStateOf(false)
+    override var isTabLoading by mutableStateOf(false)
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
@@ -39,12 +40,15 @@ class OverviewViewModel(
     }
 
     fun exportTeam(snackBar: SnackBar) {
-        isLoading = true
+        if (isLoading) {
+            return
+        }
+        isTabLoading = true
         scope.launch {
             val success = downloadToFile(team.name, "json", useCase.export(team))
 
             withContext(Dispatchers.Main) {
-                isLoading = false
+                isTabLoading = false
                 if (success) {
                     snackBar.show("Successfully exported team", SnackBar.Severity.SUCCESS)
                 }
@@ -72,12 +76,15 @@ class OverviewViewModel(
     }
 
     fun saveNotes(snackBar: SnackBar) {
-        isLoading = true
+        if (isLoading) {
+            return
+        }
+        isTabLoading = true
         scope.launch {
             val either = useCase.setNotes(team, TeamlyticsNotes(teamNotes, pokemonNotes.mapKeys { (key, _) -> key.name }))
             withContext(Dispatchers.Main) {
                 either.onLeft { error -> snackBar.show("Couldn't save notes: ${error.message}", SnackBar.Severity.ERROR) }
-                isLoading = false
+                isTabLoading = false
                 onStopEditingNotes()
             }
         }
@@ -93,11 +100,14 @@ class OverviewViewModel(
     }
 
     fun removeNotes() {
-        isLoading = true
+        if (isLoading) {
+            return
+        }
+        isTabLoading = true
         scope.launch {
             useCase.setNotes(team, null)
             withContext(Dispatchers.Main) {
-                isLoading = false
+                isTabLoading = false
             }
         }
     }

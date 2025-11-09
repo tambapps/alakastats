@@ -47,14 +47,18 @@ class TeamlyticsViewModel(
         private set
     var showFiltersDialog by mutableStateOf(false)
 
-    override val team: Teamlytics
+    override val originalTeam: Teamlytics
         get() = (teamState as TeamState.Loaded).team
+
+    override val team: Teamlytics
+        get() = filteredTeam ?: originalTeam
 
     override val hasFilteredReplays get() = filters.hasAny()
 
-    // TODO use me
-    var isLoading by mutableStateOf(false)
+    override var isApplyingFiltersLoading by mutableStateOf(false)
         private set
+
+    private var filteredTeam by mutableStateOf<Teamlytics?>(null)
 
     init {
         loadTeam()
@@ -75,6 +79,13 @@ class TeamlyticsViewModel(
     override fun applyFilters(filters: ReplayFilters) {
         this.filters = filters
         closeFilters()
+        isApplyingFiltersLoading = true
+        scope.launch {
+            reloadFilteredTeam()
+            withContext(Dispatchers.Main) {
+                isApplyingFiltersLoading = false
+            }
+        }
     }
     override fun openFilters() {
         showFiltersDialog = true
@@ -87,7 +98,7 @@ class TeamlyticsViewModel(
     override suspend fun parseReplay(url: String) = replayService.fetch(url)
 
     override suspend fun addReplays(replays: List<ReplayAnalytics>): Either<DomainError, Unit> {
-        val currentTeam = team
+        val currentTeam = originalTeam
         val teamReplays = currentTeam.replays.toMutableList()
 
         // add the new replays at the right spot, in case they were unordered
@@ -111,12 +122,12 @@ class TeamlyticsViewModel(
     override fun export(team: Teamlytics) = useCase.export(team)
 
     override suspend fun removeReplay(replay: ReplayAnalytics): Either<DomainError, Unit> {
-        val currentTeam = team
+        val currentTeam = originalTeam
         return save(currentTeam.copy(replays = currentTeam.replays - replay)).also { onReplaysModified() }
     }
 
     override suspend fun replaceReplay(original: ReplayAnalytics, replay: ReplayAnalytics): Either<DomainError, Unit> {
-        val currentTeam = team
+        val currentTeam = originalTeam
         val replayIndex = currentTeam.replays.indexOf(original)
         val replays = currentTeam.replays.mapIndexed { index, r ->
             if (index == replayIndex) replay else r
@@ -125,7 +136,7 @@ class TeamlyticsViewModel(
     }
 
     override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?): Either<DomainError, Unit> {
-        val currentTeam = this.team
+        val currentTeam = this.originalTeam
         return save(currentTeam.copy(notes = notes))
     }
 
@@ -136,22 +147,17 @@ class TeamlyticsViewModel(
         }
     }
 
-    private suspend fun onReplaysModified() {
-        withContext(Dispatchers.Main) {
-            isLoading = true
-        }
-        /*
-        TODO update teamlytics
-        replays = if (hasFiltered) allReplays.filter { filters.matches(it) }
-        else allReplays
-         */
-
-        withContext(Dispatchers.Main) {
-            isLoading = false
-        }
+    private fun onReplaysModified() {
+        reloadFilteredTeam()
     }
 
-    private fun ReplayFilters.matches(replay: ReplayAnalytics) = team.withContext {
+    private fun reloadFilteredTeam() {
+        filteredTeam =
+            if (hasFilteredReplays) originalTeam.copy(replays = originalTeam.replays.filter { filters.matches(it) })
+            else originalTeam
+    }
+
+    private fun ReplayFilters.matches(replay: ReplayAnalytics) = originalTeam.withContext {
         when {
             opponentTeam.isNotEmpty() && !teamMatches(replay.opponentPlayer, opponentTeam) -> false
             opponentSelection.isNotEmpty() && !selectionMatches(replay.opponentPlayer, opponentSelection) -> false

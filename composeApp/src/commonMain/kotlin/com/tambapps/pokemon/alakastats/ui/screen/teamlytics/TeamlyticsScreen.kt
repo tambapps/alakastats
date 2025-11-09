@@ -110,7 +110,6 @@ internal fun Pager(
         state = pagerState,
         modifier = modifier
     ) { page ->
-        val team = viewModel.team
         when (page) {
             0 -> {
                 val viewModel = koinInjectUseCase<ManageTeamOverviewUseCase, OverviewViewModel>(viewModel)

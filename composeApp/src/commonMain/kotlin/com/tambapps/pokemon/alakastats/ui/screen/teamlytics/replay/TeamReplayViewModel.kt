@@ -10,6 +10,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
 import io.ktor.http.Url
@@ -21,16 +22,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TeamReplayViewModel(
-    private val useCase: ManageTeamReplaysUseCase,
+    override val useCase: ManageTeamReplaysUseCase,
     val pokemonImageService: PokemonImageService,
-) {
+): TeamlyticsTabViewModel() {
     val team get() = useCase.team
     val filters: ReplayFilters get() = useCase.filters
 
     private companion object {
         val REPLAYS_SEPARATOR_REGEX = Regex("[,\\s]+")
     }
-    var isLoading by mutableStateOf(false)
+    override var isTabLoading by mutableStateOf(false)
         private set
 
     var showAddReplayDialog by mutableStateOf(false)
@@ -69,11 +70,14 @@ class TeamReplayViewModel(
     fun openFilters() = useCase.openFilters()
 
     fun reloadReplay(snackBar: SnackBar, replay: ReplayAnalytics, url: String) {
-        isLoading = true
+        if (isLoading) {
+            return
+        }
+        isTabLoading = true
         scope.launch {
             val replayEither = useCase.parseReplay(url)
             withContext(Dispatchers.Main) {
-                isLoading = false
+                isTabLoading = false
                 replayEither.flatMap { reloadedReplay ->
                     useCase.replaceReplay(replay, reloadedReplay.copy(notes = replay.notes))
                 }.fold(
@@ -129,7 +133,7 @@ class TeamReplayViewModel(
         if (isLoading) {
             return
         }
-        isLoading = true
+        isTabLoading = true
         // need to be here because after we're clearing the text
         val urls = parseReplayUrls(replayUrlsText)
         scope.launch {
@@ -149,7 +153,7 @@ class TeamReplayViewModel(
                 if (duplicates.size < results.size) useCase.addReplays(results - duplicates).leftOrNull()
                 else null
             withContext(Dispatchers.Main) {
-                isLoading = false
+                isTabLoading = false
                 when {
                     error != null -> snackBar.show("Couldn't add replay: ${error.message}", SnackBar.Severity.ERROR)
                     duplicates.size == results.size -> snackBar.show(if (duplicates.size == 1) "The replay was already added" else "The Replays were already added")

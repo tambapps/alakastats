@@ -7,39 +7,21 @@ import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
-import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-data class PokemonUsages(
-    val movesCount: Map<String, Int> = emptyMap(),
-    val usageCount: Int,
-    val winCount: Int,
-    val teraCount: Int,
-    val teraAndWinCount: Int
-) {
-
-    fun mergeWith(pokemonUsages: PokemonUsages) = PokemonUsages(
-        movesCount = (this.movesCount.keys + pokemonUsages.movesCount.keys).associateWith { move ->
-            (this.movesCount[move] ?: 0) + (pokemonUsages.movesCount[move] ?: 0)
-        },
-        usageCount = this.usageCount + pokemonUsages.usageCount,
-        winCount = this.winCount + pokemonUsages.winCount,
-        teraCount = this.teraCount + pokemonUsages.teraCount,
-        teraAndWinCount = this.teraAndWinCount + pokemonUsages.teraAndWinCount
-    )
-}
-
 class UsagesViewModel(
-    val useCase: ConsultTeamlyticsUseCase,
+    override val useCase: ConsultTeamlyticsUseCase,
     val pokemonImageService: PokemonImageService,
-) {
-    var isLoading by mutableStateOf(false)
+): TeamlyticsTabViewModel() {
+
+    override var isTabLoading by mutableStateOf(false)
         private set
 
     val team get() = useCase.team
@@ -52,14 +34,14 @@ class UsagesViewModel(
         if (isLoading) {
             return
         }
-        isLoading = true
+        isTabLoading = true
         scope.launch {
             useCase.team.withContext {
                 val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
                 doLoadStats(replays)
             }
             kotlinx.coroutines.withContext(Dispatchers.Main) {
-                isLoading = false
+                isTabLoading = false
             }
         }
     }
@@ -104,4 +86,23 @@ private fun TeamlyticsContext.fromReplay(replay: ReplayAnalytics): Map<PokemonNa
                 teraAndWinCount = if (hasWon && hasTerastallized) 1 else 0
             )
         }
+}
+
+data class PokemonUsages(
+    val movesCount: Map<String, Int> = emptyMap(),
+    val usageCount: Int,
+    val winCount: Int,
+    val teraCount: Int,
+    val teraAndWinCount: Int
+) {
+
+    fun mergeWith(pokemonUsages: PokemonUsages) = PokemonUsages(
+        movesCount = (this.movesCount.keys + pokemonUsages.movesCount.keys).associateWith { move ->
+            (this.movesCount[move] ?: 0) + (pokemonUsages.movesCount[move] ?: 0)
+        },
+        usageCount = this.usageCount + pokemonUsages.usageCount,
+        winCount = this.winCount + pokemonUsages.winCount,
+        teraCount = this.teraCount + pokemonUsages.teraCount,
+        teraAndWinCount = this.teraAndWinCount + pokemonUsages.teraAndWinCount
+    )
 }
