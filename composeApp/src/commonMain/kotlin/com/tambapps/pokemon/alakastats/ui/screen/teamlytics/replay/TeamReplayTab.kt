@@ -50,6 +50,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
@@ -73,7 +74,7 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
         val (padX, padY) = if (LocalIsCompact.current) 32.dp to 32.dp else 50.dp to 50.dp
 
         Row(modifier = Modifier.align(Alignment.BottomEnd).padding(end = padX, bottom = padY)) {
-            FiltersButton(viewModel)
+            FiltersButton(viewModel.useCase)
             Spacer(Modifier.width(32.dp))
             AddReplayButton(viewModel)
         }
@@ -104,27 +105,6 @@ private fun AddReplayButton(viewModel: TeamReplayViewModel, modifier: Modifier =
             painter = painterResource(Res.drawable.add),
             contentDescription = "Add",
         )
-    }
-}
-
-@Composable
-internal fun FiltersButton(viewModel: TeamReplayViewModel, modifier: Modifier = Modifier) {
-    BadgedBox(
-        modifier = modifier,
-        badge = {
-            if (viewModel.filters.hasAny()) {
-                Badge(Modifier.size(16.dp))
-            }
-        }
-    ) {
-        FloatingActionButton(
-            onClick = { viewModel.openFilters() },
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.tune),
-                contentDescription = "Filters",
-            )
-        }
     }
 }
 

@@ -1,16 +1,48 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.tune
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
+import org.jetbrains.compose.resources.painterResource
 
 private val textStyle @Composable get() = MaterialTheme.typography.titleLarge
+
+@Composable
+internal fun FiltersButton(useCase: ManageReplayFiltersUseCase, modifier: Modifier = Modifier) {
+    BadgedBox(
+        modifier = modifier,
+        badge = {
+            if (useCase.filters.hasAny()) {
+                Badge(Modifier.size(16.dp))
+            }
+        }
+    ) {
+        FloatingActionButton(
+            onClick = { useCase.openFilters() },
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.tune),
+                contentDescription = "Filters",
+            )
+        }
+    }
+}
+
 
 @Composable
 fun NbReplaysText(
