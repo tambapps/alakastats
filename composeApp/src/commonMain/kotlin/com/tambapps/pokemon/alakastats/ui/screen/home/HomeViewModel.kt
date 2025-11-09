@@ -7,6 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import arrow.core.Either
+import arrow.core.getOrElse
+import arrow.core.raise.either
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.error.StorageError
@@ -14,6 +16,7 @@ import com.tambapps.pokemon.alakastats.domain.error.TeamlyticsNotFound
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
+import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
@@ -24,12 +27,15 @@ import io.github.vinceglb.filekit.dialogs.openFilePicker
 import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.uuid.Uuid
 
 class HomeViewModel(
     val imageService: PokemonImageService,
+    private val replayAnalyticsService: ReplayAnalyticsService,
     private val useCase: ManageTeamlyticsListUseCase
 ): ScreenModel {
     
@@ -97,7 +103,7 @@ class HomeViewModel(
     private fun doImport(snackBar: SnackBar, team: Teamlytics) {
         isLoading = true
         scope.launch {
-            val either = useCase.saveNewTeam(team)
+            val either = useCase.create(team)
             val previews = useCase.list()
             withContext(Dispatchers.Main) {
                 either.fold(ifLeft = {
@@ -152,6 +158,41 @@ class HomeViewModel(
 
     fun consultTeam(team: TeamlyticsPreview, navigator: Navigator) {
         navigator.push(TeamlyticsScreen(team.id))
+    }
+
+    fun reloadReplays(preview: TeamlyticsPreview, snackBar: SnackBar) {
+        isLoading = true
+        scope.launch {
+            val either = either {
+                val team = useCase.get(preview.id).bind()
+                val reloadedReplays = team.replays.map { replay ->
+                    async {
+                        replay.url?.let { replayUrl ->
+                            replayAnalyticsService.fetch(replayUrl).getOrElse { error ->
+                                withContext(Dispatchers.Main) {
+                                    snackBar.show("Failed to fetch replay: ${error.message}", SnackBar.Severity.ERROR)
+                                }
+                                null
+                            }
+                        }?.copy(notes = replay.notes) ?: replay
+                    }
+                }.awaitAll()
+                useCase.save(team.copy(replays = reloadedReplays)).bind()
+                doLoadTeams()
+            }
+            withContext(Dispatchers.Main) {
+                isLoading = false
+                either.fold(
+                    ifLeft = {
+                        snackBar.show("Failed to reload replays: ${it.message}", SnackBar.Severity.ERROR)
+                    },
+                    ifRight = {
+                        snackBar.show("Successfully reloaded replays")
+                    }
+                )
+            }
+        }
+        hideMenu()
     }
 
     fun editTeam(team: TeamlyticsPreview, navigator: Navigator, snackBar: SnackBar) {

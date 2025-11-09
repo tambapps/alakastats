@@ -168,6 +168,10 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
                             onClick = { viewModel.editTeam(team, navigator, snackBar) }
                         )
                         DropdownMenuItem(
+                            text = { Text("Reload replays") },
+                            onClick = { viewModel.reloadReplays(team, snackBar) }
+                        )
+                        DropdownMenuItem(
                             text = { Text("Delete") },
                             onClick = { viewModel.deleteTeamDialog(team) }
                         )

@@ -8,6 +8,7 @@ import arrow.core.flatMap
 import arrow.core.getOrElse
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
+import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -22,6 +23,7 @@ import kotlinx.coroutines.withContext
 
 class TeamReplayViewModel(
     override val useCase: ManageTeamReplaysUseCase,
+    private val replayService: ReplayAnalyticsService,
     val pokemonImageService: PokemonImageService,
 ): TeamlyticsTabViewModel() {
     val team get() = useCase.filteredTeam
@@ -71,7 +73,7 @@ class TeamReplayViewModel(
         }
         isTabLoading = true
         scope.launch {
-            val replayEither = useCase.parseReplay(url)
+            val replayEither = replayService.fetch(url)
             withContext(Dispatchers.Main) {
                 isTabLoading = false
                 replayEither.flatMap { reloadedReplay ->
@@ -135,7 +137,7 @@ class TeamReplayViewModel(
         scope.launch {
             val results = urls.map { url ->
                 async {
-                    useCase.parseReplay(url).getOrElse { error ->
+                    replayService.fetch(url).getOrElse { error ->
                         withContext(Dispatchers.Main) {
                             snackBar.show("Failed to fetch replay: ${error.message}", SnackBar.Severity.ERROR)
                         }

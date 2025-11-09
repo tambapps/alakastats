@@ -6,8 +6,6 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 
 interface ManageTeamReplaysUseCase: ManageReplayFiltersUseCase, ConsultTeamlyticsUseCase {
 
-    suspend fun parseReplay(url: String): Either<DomainError, ReplayAnalytics>
-
     suspend fun addReplays(replays: List<ReplayAnalytics>): Either<DomainError, Unit>
 
     suspend fun removeReplay(replay: ReplayAnalytics): Either<DomainError, Unit>

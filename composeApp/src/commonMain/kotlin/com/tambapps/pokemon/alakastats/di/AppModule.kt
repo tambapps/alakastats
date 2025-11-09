@@ -71,16 +71,16 @@ private val appModule = module {
     singleOf(::ManageTeamlyticsUseCase)
     singleOf(::TeamlyticsSerializer)
 
-    factory { HomeViewModel(get(), get()) }
+    factory { HomeViewModel(get(), get(), get()) }
     factory { EditTeamViewModel(get(), get(), get()) }
     factory { (teamId: Uuid) ->
-        TeamlyticsViewModel(teamId, get(), get(), get())
+        TeamlyticsViewModel(teamId, get(), get())
     }
     factory { (useCase: ManageTeamOverviewUseCase) ->
         OverviewViewModel(useCase, get())
     }
     factory { (useCase: ManageTeamReplaysUseCase) ->
-        TeamReplayViewModel(useCase, get())
+        TeamReplayViewModel(useCase, get(), get())
     }
     factory { (useCase: ManageTeamReplaysUseCase) ->
         LeadStatsViewModel(useCase, get())

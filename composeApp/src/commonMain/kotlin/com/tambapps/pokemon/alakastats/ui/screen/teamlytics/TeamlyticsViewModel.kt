@@ -17,7 +17,6 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -36,7 +35,6 @@ sealed class TeamState {
 class TeamlyticsViewModel(
     private val teamId: Uuid,
     private val useCase: ManageTeamlyticsUseCase,
-    private val replayService: ReplayAnalyticsService,
     val imageService: PokemonImageService,
 ) : ScreenModel, ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase {
 
@@ -94,8 +92,6 @@ class TeamlyticsViewModel(
     override fun closeFilters() {
         showFiltersDialog = false
     }
-
-    override suspend fun parseReplay(url: String) = replayService.fetch(url)
 
     override suspend fun addReplays(replays: List<ReplayAnalytics>): Either<DomainError, Unit> {
         val currentTeam = originalTeam
