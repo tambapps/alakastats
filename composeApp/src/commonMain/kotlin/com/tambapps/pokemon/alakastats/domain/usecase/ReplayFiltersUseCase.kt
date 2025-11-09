@@ -5,6 +5,8 @@ import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 interface ReplayFiltersUseCase {
     val filters: ReplayFilters
 
+    fun applyFilters(filters: ReplayFilters)
+
     fun openFilters()
 
     fun closeFilters()

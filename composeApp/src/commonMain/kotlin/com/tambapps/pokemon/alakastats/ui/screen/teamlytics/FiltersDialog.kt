@@ -34,6 +34,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +47,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
+import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -61,19 +64,32 @@ fun FiltersDialog(viewModel: FiltersViewModel) {
                     Text("Replay Filters", style = MaterialTheme.typography.displaySmall)
                     Spacer(Modifier.height(8.dp))
                     Text("Filter replays to view stats for specific matchups", style = MaterialTheme.typography.bodyLarge)
-                    Spacer(Modifier.height(8.dp))
-                    OpponentTeamFiltersTile(viewModel)
+                    Spacer(Modifier.height(16.dp))
+                    PokemonsFiltersTile(
+                        title = "Opponent's team",
+                        viewModel = viewModel,
+                        pokemons = viewModel.opponentTeamFilters,
+                        max = 6,
+                        )
+                    Spacer(Modifier.height(16.dp))
+                    PokemonsFiltersTile(
+                        title = "Your selection",
+                        viewModel = viewModel,
+                        pokemons = viewModel.yourSelectionFilters,
+                        max = 4,
+                        )
+                    Spacer(Modifier.height(16.dp))
                 }
                 Row(Modifier.padding(horizontal = 8.dp)) {
-                    TextButton(onClick = { viewModel.closeFilters() }) {
-                        Text("Close")
-                    }
-                    Spacer(Modifier.weight(1f))
                     TextButton(onClick = { viewModel.closeFilters() }) {
                         Text("Cancel")
                     }
                     Spacer(Modifier.weight(1f))
-                    TextButton(onClick = { viewModel.closeFilters() }) {
+                    TextButton(onClick = { viewModel.clearFilters() }) {
+                        Text("Clear")
+                    }
+                    Spacer(Modifier.weight(1f))
+                    TextButton(onClick = { viewModel.applyFilters() }) {
                         Text("Apply")
                     }
                 }
@@ -82,22 +98,25 @@ fun FiltersDialog(viewModel: FiltersViewModel) {
     }
 }
 
-
 @Composable
-private fun OpponentTeamFiltersTile(viewModel: FiltersViewModel) {
-    val filters = viewModel.filters.opponentTeam
+private fun PokemonsFiltersTile(
+    title: String,
+    viewModel: FiltersViewModel,
+    pokemons: SnapshotStateList<PokemonFilter>,
+    max: Int,
+) {
     var showAddDialog by remember { mutableStateOf(false) }
     ExpansionTile(
         title = {
             BadgedBox(
                 badge = {
-                    if (filters.pokemons.isNotEmpty()) {
+                    if (pokemons.isNotEmpty()) {
                         Badge()
                     }
                 }
             ) {
                 Text(
-                    text = "Opponent's team",
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                 )
             }
@@ -111,11 +130,11 @@ private fun OpponentTeamFiltersTile(viewModel: FiltersViewModel) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    filters.pokemons.forEach { pokemonFilter ->
+                    pokemons.forEach { pokemonFilter ->
                         val height = 64.dp
                         FilterChip(
                             modifier = Modifier.height(height),
-                            onClick = { filters.pokemons.remove(pokemonFilter) },
+                            onClick = { pokemons.remove(pokemonFilter) },
                             leadingIcon = {
                                 viewModel.pokemonImageService.PokemonSprite(
                                     pokemonFilter.name,
@@ -139,19 +158,21 @@ private fun OpponentTeamFiltersTile(viewModel: FiltersViewModel) {
                         )
                     }
                 }
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = { showAddDialog = true },
-                    shape = CircleShape,
-                    contentPadding = PaddingValues(0.dp),
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.add),
-                        contentDescription = "Add Pokemon",
-                        tint = MaterialTheme.colorScheme.defaultIconColor
-                    )
-                    Text("Add Pokemon")
-                    Spacer(Modifier.width(8.dp))
+                if (pokemons.size < max) {
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = { showAddDialog = true },
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.add),
+                            contentDescription = "Add Pokemon",
+                            tint = MaterialTheme.colorScheme.defaultIconColor
+                        )
+                        Text("Add Pokemon")
+                        Spacer(Modifier.width(8.dp))
+                    }
                 }
             }
         }
@@ -159,11 +180,11 @@ private fun OpponentTeamFiltersTile(viewModel: FiltersViewModel) {
 
     if (showAddDialog) {
         AddPokemonNameDialog(
-            containsValidator = { pName -> filters.pokemons.isNotEmpty() && filters.pokemons.any { it.name.matches(pName) } },
+            containsValidator = { pName -> pokemons.isNotEmpty() && pokemons.any { it.name.matches(pName) } },
             onDismissRequest = { showAddDialog = false },
-            placeholder = "Pokemon ${filters.pokemons.size + 1}",
-            proposeLeadOption = filters.pokemons.count { it.asLead } < 2,
-            onAdd = { filters.pokemons.add(it) }
+            placeholder = "Pokemon ${pokemons.size + 1}",
+            proposeLeadOption = pokemons.count { it.asLead } < 2,
+            onAdd = { pokemons.add(it) }
             )
     }
 }
@@ -233,12 +254,24 @@ private fun AddPokemonNameDialog(
     )
 }
 
-
 class FiltersViewModel(
     private val useCase: ReplayFiltersUseCase,
     val pokemonImageService: PokemonImageService
 ) {
-    val filters = useCase.filters
 
+    val opponentTeamFilters = useCase.filters.opponentTeam.toMutableStateList()
+    val yourSelectionFilters = useCase.filters.yourSelection.toMutableStateList()
+
+    fun clearFilters() {
+        opponentTeamFilters.clear()
+        yourSelectionFilters.clear()
+    }
+
+    fun applyFilters() = useCase.applyFilters(
+        ReplayFilters(
+            opponentTeam = opponentTeamFilters.toList(),
+            yourSelection = yourSelectionFilters.toList()
+        )
+    )
     fun closeFilters() = useCase.closeFilters()
 }

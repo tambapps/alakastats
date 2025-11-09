@@ -114,7 +114,7 @@ internal fun FiltersButton(viewModel: TeamReplayViewModel, modifier: Modifier = 
         modifier = modifier,
         badge = {
             if (viewModel.filters.hasAny()) {
-                Badge()
+                Badge(Modifier.size(16.dp))
             }
         }
     ) {

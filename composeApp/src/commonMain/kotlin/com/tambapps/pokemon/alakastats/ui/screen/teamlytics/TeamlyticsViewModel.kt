@@ -33,9 +33,15 @@ class TeamlyticsViewModel(
 
     private val scope = CoroutineScope(Dispatchers.Default)
     val teamState = mutableStateOf<Teamlytics?>(null)
-    override val filters = ReplayFilters()
+    override var filters by mutableStateOf(ReplayFilters())
+        private set
     var showFiltersDialog by mutableStateOf(false)
 
+
+    override fun applyFilters(filters: ReplayFilters) {
+        this.filters = filters
+        closeFilters()
+    }
     override fun openFilters() {
         showFiltersDialog = true
     }
