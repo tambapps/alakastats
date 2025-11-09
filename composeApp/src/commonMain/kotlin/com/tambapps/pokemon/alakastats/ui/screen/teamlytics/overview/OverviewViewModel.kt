@@ -7,7 +7,7 @@ import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
-import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamOverviewUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.downloadToFile
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class OverviewViewModel(
-    private val useCase: HandleTeamOverviewUseCase,
+    private val useCase: ManageTeamOverviewUseCase,
     val pokemonImageService: PokemonImageService,
     val team: Teamlytics,
 ) {

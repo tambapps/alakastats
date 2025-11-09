@@ -7,7 +7,7 @@ import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.service.TeamlyticsSerializer
 import kotlin.uuid.Uuid
 
-class TeamlyticsUseCase(
+class ManageTeamlyticsUseCase(
     private val repository: TeamlyticsRepository,
     private val teamlyticsSerializer: TeamlyticsSerializer
 ) {

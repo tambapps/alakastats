@@ -25,8 +25,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamOverviewUseCase
-import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.move.UsagesTab
@@ -49,12 +49,16 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val viewModel = koinScreenModel<TeamlyticsViewModel>()
+        val viewModel = koinScreenModel<TeamlyticsViewModel> { parametersOf(teamId) }
         val navigator = LocalNavigator.currentOrThrow
-        LaunchedEffect(Unit) {
-            viewModel.initTeam(teamId, navigator)
-        }
         val isCompact = LocalIsCompact.current
+
+        // Handle error state - navigate back if team loading failed
+        LaunchedEffect(viewModel.teamState) {
+            if (viewModel.teamState is TeamState.Error) {
+                navigator.pop()
+            }
+        }
 
         val pagerState = rememberPagerState(pageCount = { TABS.size })
 
@@ -64,24 +68,33 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
                 .fillMaxSize()
                 .safeContentPadding()
         ) {
-            if (viewModel.team == null) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(48.dp)
-                    )
+            when (viewModel.teamState) {
+                is TeamState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
                 }
-            } else if (isCompact) {
-                TeamlyticsScreenMobile(viewModel, TABS, pagerState)
-            } else {
-                TeamlyticsScreenDesktop(viewModel, TABS, pagerState)
+                is TeamState.Error -> {
+                    // Error is handled by LaunchedEffect above (navigator.pop())
+                    // This branch is just to satisfy the when expression
+                }
+                is TeamState.Loaded -> {
+                    if (isCompact) {
+                        TeamlyticsScreenMobile(viewModel, TABS, pagerState)
+                    } else {
+                        TeamlyticsScreenDesktop(viewModel, TABS, pagerState)
+                    }
+                    if (viewModel.showFiltersDialog) {
+                        val filtersViewModel = remember { FiltersViewModel(viewModel, viewModel.imageService) }
+                        FiltersDialog(filtersViewModel)
+                    }
+                }
             }
-        }
-        if (viewModel.showFiltersDialog) {
-            val filtersViewModel = remember { FiltersViewModel(viewModel, viewModel.imageService) }
-            FiltersDialog(filtersViewModel)
         }
     }
 }
@@ -96,14 +109,14 @@ internal fun Pager(
         state = pagerState,
         modifier = modifier
     ) { page ->
-        val team = viewModel.requireTeam()
+        val team = viewModel.team
         when (page) {
             0 -> {
-                val viewModel = koinInjectUseCase<HandleTeamOverviewUseCase, OverviewViewModel>(viewModel)
+                val viewModel = koinInjectUseCase<ManageTeamOverviewUseCase, OverviewViewModel>(viewModel)
                 OverviewTab(viewModel)
             }
             1 -> {
-                val viewModel = koinInjectUseCase<HandleTeamReplaysUseCase, TeamReplayViewModel>(viewModel)
+                val viewModel = koinInjectUseCase<ManageTeamReplaysUseCase, TeamReplayViewModel>(viewModel)
                 TeamReplayTab(viewModel)
             }
             2 -> {

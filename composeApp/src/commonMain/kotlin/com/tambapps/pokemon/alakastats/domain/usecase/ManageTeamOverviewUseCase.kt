@@ -5,7 +5,7 @@ import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 
-interface HandleTeamOverviewUseCase: FilterableReplaysUseCase {
+interface ManageTeamOverviewUseCase: FilterableReplaysUseCase {
     suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?): Either<DomainError, Unit>
 
     fun export(team: Teamlytics): ByteArray

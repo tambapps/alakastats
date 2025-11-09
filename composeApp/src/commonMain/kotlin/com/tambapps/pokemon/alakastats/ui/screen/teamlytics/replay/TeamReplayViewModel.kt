@@ -8,7 +8,7 @@ import arrow.core.flatMap
 import arrow.core.getOrElse
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.domain.usecase.HandleTeamReplaysUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -23,7 +23,7 @@ import kotlinx.coroutines.withContext
 
 class TeamReplayViewModel(
     val pokemonImageService: PokemonImageService,
-    private val handleReplaysUseCase: HandleTeamReplaysUseCase,
+    private val handleReplaysUseCase: ManageTeamReplaysUseCase,
     val team: Teamlytics,
 ) {
     val filters: ReplayFilters get() = handleReplaysUseCase.filters
