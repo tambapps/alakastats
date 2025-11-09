@@ -318,7 +318,7 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplay
                 showDialog = false
                 viewModel.copyToClipboard(clipboardManager, snackbar, "${player.name}'s OTS", ots.toPokepaste().toPokePasteString())
             }) {
-                Text("Copy")
+                Text("COPY")
             }
         }
     )
