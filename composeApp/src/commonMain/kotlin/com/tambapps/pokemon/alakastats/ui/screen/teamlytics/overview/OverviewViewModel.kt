@@ -19,8 +19,8 @@ import kotlinx.coroutines.withContext
 class OverviewViewModel(
     private val useCase: ManageTeamOverviewUseCase,
     val pokemonImageService: PokemonImageService,
-    val team: Teamlytics,
 ) {
+    val team get() = useCase.team
     var isEditingNotes by mutableStateOf(false)
     var teamNotes by mutableStateOf("")
     val pokemonNotes = mutableStateMapOf<Pokemon, String>()

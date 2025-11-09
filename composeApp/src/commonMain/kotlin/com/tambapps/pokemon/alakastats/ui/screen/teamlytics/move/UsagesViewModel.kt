@@ -10,6 +10,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
+import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,13 +36,14 @@ data class PokemonUsages(
 }
 
 class UsagesViewModel(
-    val team: Teamlytics,
+    val useCase: ConsultTeamlyticsUseCase,
     val pokemonImageService: PokemonImageService,
 ) {
     var isLoading by mutableStateOf(false)
         private set
 
-    val replays get() = team.replays
+    val team get() = useCase.team
+    val replays get() = useCase.team.replays
 
     private val scope = CoroutineScope(Dispatchers.Default)
     val pokemonPokemonUsages = mutableStateMapOf<PokemonName, PokemonUsages>()
@@ -52,7 +54,7 @@ class UsagesViewModel(
         }
         isLoading = true
         scope.launch {
-            team.withContext {
+            useCase.team.withContext {
                 val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
                 doLoadStats(replays)
             }

@@ -8,16 +8,16 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
-import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
+import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class LeadStatsViewModel(
-    val team: Teamlytics,
+    val useCase: ConsultTeamlyticsUseCase,
     val pokemonImageService: PokemonImageService,
     ) {
     val duoStatsMap: SnapshotStateMap<List<PokemonName>, WinStats> = mutableStateMapOf()
@@ -34,7 +34,7 @@ class LeadStatsViewModel(
         }
         isLoading = true
         scope.launch {
-            team.withContext {
+            useCase.team.withContext {
                 val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
                 loadDuoStats(replays)
                 loadIndividualStats(replays)

@@ -6,5 +6,5 @@ interface ConsultTeamlyticsUseCase {
 
     val team: Teamlytics
 
-    val hasFiltered: Boolean
+    val hasFilteredReplays: Boolean
 }

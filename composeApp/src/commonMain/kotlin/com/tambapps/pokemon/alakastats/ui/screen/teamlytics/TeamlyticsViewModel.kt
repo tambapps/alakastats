@@ -50,7 +50,7 @@ class TeamlyticsViewModel(
     override val team: Teamlytics
         get() = (teamState as TeamState.Loaded).team
 
-    override val hasFiltered get() = filters.hasAny()
+    override val hasFilteredReplays get() = filters.hasAny()
 
     // TODO use me
     var isLoading by mutableStateOf(false)

@@ -4,7 +4,7 @@ import arrow.core.Either
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 
-interface ManageTeamReplaysUseCase: ManageReplayFiltersUseCase {
+interface ManageTeamReplaysUseCase: ManageReplayFiltersUseCase, ConsultTeamlyticsUseCase {
 
     suspend fun parseReplay(url: String): Either<DomainError, ReplayAnalytics>
 

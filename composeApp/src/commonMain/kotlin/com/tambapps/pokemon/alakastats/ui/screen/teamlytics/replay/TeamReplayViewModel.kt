@@ -7,7 +7,6 @@ import androidx.compose.ui.platform.Clipboard
 import arrow.core.flatMap
 import arrow.core.getOrElse
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
-import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
@@ -22,11 +21,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TeamReplayViewModel(
+    private val useCase: ManageTeamReplaysUseCase,
     val pokemonImageService: PokemonImageService,
-    private val handleReplaysUseCase: ManageTeamReplaysUseCase,
-    val team: Teamlytics,
 ) {
-    val filters: ReplayFilters get() = handleReplaysUseCase.filters
+    val team get() = useCase.team
+    val filters: ReplayFilters get() = useCase.filters
 
     private companion object {
         val REPLAYS_SEPARATOR_REGEX = Regex("[,\\s]+")
@@ -67,16 +66,16 @@ class TeamReplayViewModel(
         replayNotesText = ""
     }
 
-    fun openFilters() = handleReplaysUseCase.openFilters()
+    fun openFilters() = useCase.openFilters()
 
     fun reloadReplay(snackBar: SnackBar, replay: ReplayAnalytics, url: String) {
         isLoading = true
         scope.launch {
-            val replayEither = handleReplaysUseCase.parseReplay(url)
+            val replayEither = useCase.parseReplay(url)
             withContext(Dispatchers.Main) {
                 isLoading = false
                 replayEither.flatMap { reloadedReplay ->
-                    handleReplaysUseCase.replaceReplay(replay, reloadedReplay.copy(notes = replay.notes))
+                    useCase.replaceReplay(replay, reloadedReplay.copy(notes = replay.notes))
                 }.fold(
                     ifLeft = {
                         snackBar.show("Failed to reload replay: ${it.message}", SnackBar.Severity.ERROR)
@@ -100,7 +99,7 @@ class TeamReplayViewModel(
     fun removeReplay() {
         replayToRemove?.let {
             scope.launch {
-                handleReplaysUseCase.removeReplay(it)
+                useCase.removeReplay(it)
             }
         }
         replayToRemove = null
@@ -121,7 +120,7 @@ class TeamReplayViewModel(
 
     fun editNotes(replayToNote: ReplayAnalytics, notes: String?) {
         scope.launch {
-            handleReplaysUseCase.replaceReplay(replayToNote, replayToNote.copy(notes = notes))
+            useCase.replaceReplay(replayToNote, replayToNote.copy(notes = notes))
         }
         hideNoteReplayDialog()
     }
@@ -136,7 +135,7 @@ class TeamReplayViewModel(
         scope.launch {
             val results = urls.map { url ->
                 async {
-                    handleReplaysUseCase.parseReplay(url).getOrElse { error ->
+                    useCase.parseReplay(url).getOrElse { error ->
                         withContext(Dispatchers.Main) {
                             snackBar.show("Failed to fetch replay: ${error.message}", SnackBar.Severity.ERROR)
                         }
@@ -147,7 +146,7 @@ class TeamReplayViewModel(
 
             val duplicates = results.filter { resultReplay -> team.replays.any { it.reference == resultReplay.reference } }
             val error =
-                if (duplicates.size < results.size) handleReplaysUseCase.addReplays(results - duplicates).leftOrNull()
+                if (duplicates.size < results.size) useCase.addReplays(results - duplicates).leftOrNull()
                 else null
             withContext(Dispatchers.Main) {
                 isLoading = false
