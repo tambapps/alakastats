@@ -1,28 +1,61 @@
-# Alakastats
+# 🧠 Alakastats
 
-Alakastats is a project that fetches Pokemon Showdown replays and displays insights about the battles. This app can be used to see how well a player performs with a team, and take notes to improve on using this team.
+**Alakastats** is a cross-platform app designed to analyze and visualize your **Pokémon VGC battles and replays**.  
+It transforms your Showdown data into beautiful, interactive dashboards — helping you understand your playstyle, track your team performance, and improve your results over time.
 
-## Kotlin Multiplatform (KMP)
-This is a Kotlin Multiplatform project targeting Android, iOS, Web.
+---
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+## 🚀 Live demo
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+Check out the live web version here:  
+👉 **[alakastats.app](https://tambapps.github.io/alakastats)** *(or your GitHub Pages URL)*
 
+Android and iOS builds are coming soon.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+---
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+## ✨ Overview
 
-You can open the web application by running the `:composeApp:wasmJsBrowserDevelopmentRun` Gradle task.
+Understanding your games shouldn’t be complicated.  
+Alakastats turns [Pokemon Showdown](https://pokemonshowdown.com/) replays into clean, digestible insights:
+
+- 📊 **Team analysis** — overall winrate, usage rate, and performance per Pokémon.
+- 🧩 **Detailed sets** — moves, EVs, IVs, items, natures, and Tera types.
+- 🔁 **Match history** — replay visualization with Elo tracking and lead pairing.
+- 🎯 **Move & lead statistics** — per-Pokémon breakdowns for fine-tuned strategy.
+- 💡 **Smooth UI** — elegant and optimized for both mobile and desktop.
+
+---
+
+## 🧱 Tech stack
+
+Built entirely with **Kotlin Multiplatform**, Alakastats delivers a native-feeling experience across every platform.
+
+| Platform | Stack |
+|-----------|--------|
+| 🖥️ **Web** | Kotlin/Wasm + Compose Multiplatform |
+| 📱 **Mobile** | Android & iOS via Compose Multiplatform |
+| ⚙️ **Shared core** | Kotlin common module (replay parsing, stats computation) |
+| 💾 **Storage** | `SharedPreferences` (mobile) / `localStorage` (web) |
+| 🚀 **Build & deploy** | Gradle Multiplatform + GitHub Pages (web) |
+
+---
+
+## 🧬 Goal
+
+> To make Alakastats the most enjoyable and insightful **Pokémon VGC tracker** for competitive players.
+
+It’s designed to be:
+- a **personal performance analyzer**,
+- a **team-building assistant**,
+- and a **visual showcase** of your battle data.
+
+---
+
+## 🖼️ Screenshots
+
+*(To be added below — app interface, move usage graphs, Pokémon cards, and match breakdowns.)*
+
+---
+
+> *“Analyze smarter. Play stronger.” — Alakastats*
