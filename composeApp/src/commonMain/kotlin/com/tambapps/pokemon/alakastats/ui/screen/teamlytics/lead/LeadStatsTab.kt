@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,18 +77,33 @@ internal fun LeadAndWinRow(viewModel: LeadStatsViewModel) {
                 .toList()
         }
         val isCompact = LocalIsCompact.current
-        Row(
-            Modifier.fillMaxWidth().then(
-                if (isCompact) Modifier.horizontalScroll(rememberScrollState()) else Modifier
-            )
-        ) {
-            entries.forEach { (pokemonName, stat) ->
-                LeadAndWinCard(viewModel, pokemonName, stat,
-                    modifier = if (isCompact) Modifier.size(256.dp) else Modifier.weight(1f)
-                )
-                Spacer(Modifier.width(64.dp))
+        val scrollState = rememberScrollState()
+
+        if (isCompact) {
+            // Auto-scroll animation to show the row is scrollable
+            LaunchedEffect(scrollState.maxValue) {
+                if (scrollState.maxValue > 0) {
+                    scrollState.scrollTo(scrollState.maxValue)
+                    kotlinx.coroutines.delay(250)
+                    scrollState.animateScrollTo(
+                        value = 0,
+                        animationSpec = tween(durationMillis = 1250)
+                    )
+                }
             }
+
+            Row(Modifier.fillMaxWidth().horizontalScroll(scrollState)) {
+                entries.forEach { (pokemonName, stat) ->
+                    LeadAndWinCard(viewModel, pokemonName, stat,
+                        modifier = if (isCompact) Modifier.size(256.dp) else Modifier.weight(1f)
+                    )
+                    Spacer(Modifier.width(64.dp))
+                }
+            }
+        } else {
+            // TODO
         }
+
         Spacer(Modifier.height(32.dp))
     }
 }
