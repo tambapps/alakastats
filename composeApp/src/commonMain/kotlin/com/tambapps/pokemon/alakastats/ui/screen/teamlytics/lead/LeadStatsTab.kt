@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,11 +18,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
@@ -31,6 +38,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.statCardPercentageWidth
 import com.tambapps.pokemon.alakastats.ui.theme.statCardPokemonSpriteSize
+import kotlin.math.pow
 
 @Composable
 fun LeadStatsTab(viewModel: LeadStatsViewModel) {
@@ -56,34 +64,60 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
 
 @Composable
 internal fun LeadAndWinRow(viewModel: LeadStatsViewModel) {
-    Text(
-        text = "Lead And Win",
-        style = MaterialTheme.typography.displaySmall,
-        fontWeight = FontWeight.Bold
-    )
+    Column {
+        Text(
+            text = "Lead And Win",
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold
+        )
 
-    val entries = remember(viewModel.pokemonStats) {
-        viewModel.pokemonStats.entries.asSequence().map { it.key to it.value }.sortedBy { (_, stats) -> - stats.winRate }
-            .toList()
-    }
-    val isCompact = LocalIsCompact.current
-    Row(
-        Modifier.fillMaxWidth().then(
+        val entries = remember(viewModel.pokemonStats) {
+            viewModel.pokemonStats.entries.asSequence().map { it.key to it.value }.sortedBy { (_, stats) -> - stats.winRate }
+                .toList()
+        }
+        val isCompact = LocalIsCompact.current
+        Row(
+            Modifier.fillMaxWidth().then(
                 if (isCompact) Modifier.horizontalScroll(rememberScrollState()) else Modifier
             )
-    ) {
-        entries.forEach { (pokemonName, stat) ->
-            LeadAndWinCard(viewModel, pokemonName, stat,
-                modifier = if (isCompact) Modifier.size(256.dp) else Modifier.weight(1f)
-            )
-            Spacer(Modifier.width(64.dp))
+        ) {
+            entries.forEach { (pokemonName, stat) ->
+                LeadAndWinCard(viewModel, pokemonName, stat,
+                    modifier = if (isCompact) Modifier.size(256.dp) else Modifier.weight(1f)
+                )
+                Spacer(Modifier.width(64.dp))
+            }
         }
+        Spacer(Modifier.height(32.dp))
     }
+}
+
+/**
+ * Function given by ChatGPT: Power-law (gamma) mapping — easiest to tune
+ * I wanted a function to offset a little Pokemons with a small width, and a lot Pokemon with large with,
+ * here it is
+ */
+private fun leadOffsetDp(
+    widthDp: Dp,
+    wMinDp: Dp = 56.dp,          // tune to your art
+    wMaxDp: Dp = 160.dp,         // tune to your art
+    minOffsetDp: Dp = 12.dp,     // thin sprites
+    maxOffsetDp: Dp = 80.dp,     // very wide sprites
+    gamma: Double = 1.8
+): Dp {
+    val w = widthDp.value
+    val wMin = wMinDp.value
+    val wMax = wMaxDp.value
+    val t = ((w - wMin) / (wMax - wMin)).coerceIn(0f, 1f)
+    val eased = t.toDouble().pow(gamma).toFloat()
+    val off = minOffsetDp.value + (maxOffsetDp.value - minOffsetDp.value) * eased
+    return off.dp
 }
 
 @Composable
 private fun LeadAndWinCard(viewModel: LeadStatsViewModel, pokemonName: PokemonName, stat: WinStats, modifier: Modifier) {
-
+    val density = LocalDensity.current
+    var spriteWidth by remember { mutableStateOf(0.dp) }
     PokemonCard(
         modifier = modifier,
         pokemonArtwork = { contentWidth, contentHeight ->
@@ -93,7 +127,10 @@ private fun LeadAndWinCard(viewModel: LeadStatsViewModel, pokemonName: PokemonNa
                     .height(if (LocalIsCompact.current) 175.dp else 200.dp)
                     // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
                     .widthIn(max = remember(contentWidth) { contentWidth * 0.7f })
-                    .offset(y = 16.dp, x = 32.dp)
+                    .onSizeChanged { size ->
+                        with(density) { spriteWidth = size.width.toDp() }
+                    }
+                    .offset(y = 16.dp, x = leadOffsetDp(spriteWidth))
             )
         }
     ) {
@@ -112,14 +149,13 @@ private fun LeadAndWinCard(viewModel: LeadStatsViewModel, pokemonName: PokemonNa
                 winCount == 0 -> "Lost all $total games"
                 winCount == total && total == 1 -> "Won\n1 out of 1\ngame"
                 winCount == total -> "Won all\n$total games"
-                else -> "Won\n${winCount} out of ${stat.total}\ngames"
+                else -> "Won ${winCount}\nout of ${stat.total}\ngames"
             },
             modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 8.dp),
             style = MaterialTheme.typography.headlineMedium
         )
     }
 }
-
 
 @Composable
 private fun NoData(viewModel: LeadStatsViewModel) {
