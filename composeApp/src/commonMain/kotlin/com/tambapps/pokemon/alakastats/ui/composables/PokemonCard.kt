@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 fun PokemonCard(
     modifier: Modifier = Modifier,
     pokemonArtwork: @Composable BoxScope.(Dp, Dp) -> Unit,
-    cardContent: @Composable ColumnScope.() -> Unit
+    cardContent: @Composable BoxScope.() -> Unit
 ) {
     Box(
         modifier = modifier,
@@ -40,8 +40,7 @@ fun PokemonCard(
         pokemonArtwork.invoke(this, contentWidth, contentHeight)
 
         val density = LocalDensity.current
-        Column(
-            verticalArrangement = Arrangement.Center,
+        Box(
             modifier = Modifier.fillMaxWidth(0.825f)
                 .fillMaxHeight(0.85f)
                 .onSizeChanged { size ->

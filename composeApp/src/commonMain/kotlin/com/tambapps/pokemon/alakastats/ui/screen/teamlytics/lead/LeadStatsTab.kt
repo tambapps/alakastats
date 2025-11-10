@@ -1,20 +1,31 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonCard
 import com.tambapps.pokemon.alakastats.ui.composables.StatCard
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -41,6 +52,74 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
         }
     }
 }
+
+
+@Composable
+internal fun LeadAndWinRow(viewModel: LeadStatsViewModel) {
+    Text(
+        text = "Lead And Win",
+        style = MaterialTheme.typography.displaySmall,
+        fontWeight = FontWeight.Bold
+    )
+
+    val entries = remember(viewModel.pokemonStats) {
+        viewModel.pokemonStats.entries.asSequence().map { it.key to it.value }.sortedBy { (_, stats) -> - stats.winRate }
+            .toList()
+    }
+    val isCompact = LocalIsCompact.current
+    Row(
+        Modifier.fillMaxWidth().then(
+                if (isCompact) Modifier.horizontalScroll(rememberScrollState()) else Modifier
+            )
+    ) {
+        entries.forEach { (pokemonName, stat) ->
+            LeadAndWinCard(viewModel, pokemonName, stat,
+                modifier = if (isCompact) Modifier.size(256.dp) else Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(64.dp))
+        }
+    }
+}
+
+@Composable
+private fun LeadAndWinCard(viewModel: LeadStatsViewModel, pokemonName: PokemonName, stat: WinStats, modifier: Modifier) {
+
+    PokemonCard(
+        modifier = modifier,
+        pokemonArtwork = { contentWidth, contentHeight ->
+            viewModel.pokemonImageService.PokemonArtwork(
+                name = pokemonName,
+                modifier = Modifier.align(Alignment.BottomEnd)
+                    .height(if (LocalIsCompact.current) 175.dp else 200.dp)
+                    // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
+                    .widthIn(max = remember(contentWidth) { contentWidth * 0.7f })
+                    .offset(y = 16.dp, x = 32.dp)
+            )
+        }
+    ) {
+        Text(
+            "${stat.winRate.times(100).toInt()}%",
+            modifier = Modifier.align(Alignment.TopCenter),
+            style = MaterialTheme.typography.displayLarge,
+            textAlign = TextAlign.Center,
+        )
+
+        val winCount = stat.winCount
+        val total = stat.total
+        Text(
+            when {
+                total == 0 -> "Did not participate\nto any game"
+                winCount == 0 -> "Lost all $total games"
+                winCount == total && total == 1 -> "Won\n1 out of 1\ngame"
+                winCount == total -> "Won all\n$total games"
+                else -> "Won\n${winCount} out of ${stat.total}\ngames"
+            },
+            modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 8.dp),
+            style = MaterialTheme.typography.headlineMedium
+        )
+    }
+}
+
 
 @Composable
 private fun NoData(viewModel: LeadStatsViewModel) {

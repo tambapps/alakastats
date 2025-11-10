@@ -224,29 +224,33 @@ private fun PokepastePokemon(
             )
         }
     ) {
-        pokemon.teraType?.let {
-            pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(45.dp))
-        }
-        Spacer(Modifier.height(4.dp))
-        Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
-        if (notes != null) {
-            notesComposer.invoke()
-        }
-        if (!isOts) {
-            // only want margin if above element is not headline text because headline already has a lot of margin
-            if (notes != null) Spacer(Modifier.height(8.dp))
-            PokemonStatsRow(pokemon, Modifier.fillMaxWidth())
-        }
-        if (notes != null || !isOts) Spacer(Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            pokemon.item?.let {
-                pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp)
-                )
+        Column(
+            verticalArrangement = Arrangement.Center,
+        ) {
+            pokemon.teraType?.let {
+                pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(45.dp))
             }
-            Spacer(Modifier.width(4.dp))
-            Text((pokemon.item ?: "<no item>") + " | " + (pokemon.ability ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
+            Spacer(Modifier.height(4.dp))
+            Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
+            if (notes != null) {
+                notesComposer.invoke()
+            }
+            if (!isOts) {
+                // only want margin if above element is not headline text because headline already has a lot of margin
+                if (notes != null) Spacer(Modifier.height(8.dp))
+                PokemonStatsRow(pokemon, Modifier.fillMaxWidth())
+            }
+            if (notes != null || !isOts) Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                pokemon.item?.let {
+                    pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp)
+                    )
+                }
+                Spacer(Modifier.width(4.dp))
+                Text((pokemon.item ?: "<no item>") + " | " + (pokemon.ability ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
+            }
+            Spacer(Modifier.height(16.dp))
+            PokemonMoves(pokemon, pokemonImageService)
         }
-        Spacer(Modifier.height(16.dp))
-        PokemonMoves(pokemon, pokemonImageService)
     }
 }

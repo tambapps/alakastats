@@ -33,6 +33,7 @@ internal fun LeadStatsTabMobile(viewModel: LeadStatsViewModel) {
             Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
             NbReplaysText(viewModel.useCase, modifier = Modifier.fillMaxWidth()) // fill maxWidth to center text
             Spacer(Modifier.height(64.dp))
+            LeadAndWinRow(viewModel)
             MostCommonLeadCard(viewModel)
             Space()
             MostEffectiveLeadCard(viewModel)
