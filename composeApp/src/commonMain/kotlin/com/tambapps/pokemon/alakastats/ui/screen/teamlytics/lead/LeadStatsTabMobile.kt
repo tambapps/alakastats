@@ -34,11 +34,10 @@ internal fun LeadStatsTabMobile(viewModel: LeadStatsViewModel) {
             NbReplaysText(viewModel.useCase, modifier = Modifier.fillMaxWidth()) // fill maxWidth to center text
             Spacer(Modifier.height(64.dp))
             LeadAndWinRow(viewModel)
-            MostCommonLeadCard(viewModel)
             Space()
-            MostEffectiveLeadCard(viewModel)
+            MostEffectiveLeadRow(viewModel)
             Space()
-            LeadAndWin(viewModel)
+            MostCommonLeadRow(viewModel)
             Spacer(Modifier.height(teamlyticsPaddingBottomMobile))
         }
         LinearProgressBarIfEnabled(viewModel.isLoading)

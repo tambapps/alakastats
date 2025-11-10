@@ -66,23 +66,81 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
 
 @Composable
 internal fun LeadAndWinRow(viewModel: LeadStatsViewModel) {
+    val cardInputs: List<Triple<PokemonName, PokemonName?, WinStats>> = remember(viewModel.pokemonStats) {
+        viewModel.pokemonStats
+            .entries
+            .asSequence()
+            .map { Triple(it.key, null, it.value) }
+            .sortedWith(compareBy({ (_, _, stats) -> - stats.winRate }, { (_, _, stats) -> - stats.total }))
+            .toList()
+    }
+    LeadRow(
+        title = "Lead And Win",
+        viewModel = viewModel,
+        leadCardInputs = cardInputs,
+        isDuo = false
+    )
+}
+
+@Composable
+internal fun MostEffectiveLeadRow(viewModel: LeadStatsViewModel) {
+    DuoLeadRow(
+        title = "Most Effective Leads",
+        viewModel = viewModel,
+        comparator = compareBy({ (_, _, stats) -> - stats.winRate }, { (_, _, stats) -> - stats.total })
+    )
+}
+
+@Composable
+internal fun MostCommonLeadRow(viewModel: LeadStatsViewModel) {
+    DuoLeadRow(
+        title = "Most Common Leads",
+        viewModel = viewModel,
+        comparator = compareBy({ (_, _, stats) -> - stats.total }, { (_, _, stats) -> - stats.winRate }),
+    )
+}
+
+@Composable
+private fun DuoLeadRow(
+    title: String,
+    viewModel: LeadStatsViewModel,
+    comparator: Comparator<in Triple<PokemonName, PokemonName?, WinStats>>
+) {
+    val cardInputs: List<Triple<PokemonName, PokemonName?, WinStats>> = remember(viewModel.duoStatsMap) {
+        viewModel.duoStatsMap
+            .entries
+            .asSequence()
+            .map { Triple(it.key.first(), it.key[1], it.value) }
+            .sortedWith(comparator)
+            .toList()
+    }
+    LeadRow(
+        title = title,
+        viewModel = viewModel,
+        leadCardInputs = cardInputs,
+        isDuo = true
+    )
+}
+
+@Composable
+private fun LeadRow(
+    viewModel: LeadStatsViewModel,
+    title: String,
+    leadCardInputs: List<Triple<PokemonName, PokemonName?, WinStats>>,
+    isDuo: Boolean
+) {
     Column {
         Text(
-            text = "Lead And Win",
+            text = title,
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold
         )
-
-        val entries = remember(viewModel.pokemonStats) {
-            viewModel.pokemonStats.entries.asSequence().map { it.key to it.value }.sortedBy { (_, stats) -> - stats.winRate }
-                .toList()
-        }
         val isCompact = LocalIsCompact.current
         val scrollState = rememberScrollState()
 
         if (isCompact) {
             // Auto-scroll animation to show the row is scrollable
-            LaunchedEffect(scrollState.maxValue) {
+            LaunchedEffect(scrollState.maxValue, viewModel.useCase.filters) {
                 if (scrollState.maxValue > 0) {
                     scrollState.scrollTo(scrollState.maxValue)
                     kotlinx.coroutines.delay(250)
@@ -93,21 +151,25 @@ internal fun LeadAndWinRow(viewModel: LeadStatsViewModel) {
                 }
             }
 
+            val spaceWidth = if (isDuo) 200.dp else 64.dp
             Row(Modifier.fillMaxWidth().horizontalScroll(scrollState)) {
-                entries.forEach { (pokemonName, stat) ->
+                if (isDuo) {
+                    Spacer(Modifier.width(spaceWidth * 0.5f))
+                }
+                leadCardInputs.forEach { (pokemon1, pokemon2, stat) ->
                     LeadCard(
                         viewModel = viewModel,
-                        pokemonName = pokemonName,
+                        pokemonName = pokemon1,
+                        pokemonName2 = pokemon2,
                         stat = stat,
                         modifier = Modifier.size(256.dp)
                     )
-                    Spacer(Modifier.width(64.dp))
+                    Spacer(Modifier.width(spaceWidth))
                 }
             }
         } else {
             // TODO
         }
-
         Spacer(Modifier.height(32.dp))
     }
 }
@@ -119,10 +181,10 @@ internal fun LeadAndWinRow(viewModel: LeadStatsViewModel) {
  */
 private fun leadOffsetDp(
     widthDp: Dp,
+    minOffsetDp: Dp,     // thin sprites
+    maxOffsetDp: Dp,     // very wide sprites
     wMinDp: Dp = 56.dp,          // tune to your art
     wMaxDp: Dp = 160.dp,         // tune to your art
-    minOffsetDp: Dp = 12.dp,     // thin sprites
-    maxOffsetDp: Dp = 80.dp,     // very wide sprites
     gamma: Double = 1.8
 ): Dp {
     val w = widthDp.value
@@ -143,6 +205,7 @@ private fun LeadCard(
     stat: WinStats,
     modifier: Modifier) {
     val density = LocalDensity.current
+    val (minOffsetDp, maxOffsetDp) = if (pokemonName2 == null) 12.dp  to 80.dp else 24.dp to 100.dp
     PokemonCard(
         modifier = modifier,
         pokemonArtwork = { contentWidth, contentHeight ->
@@ -156,7 +219,11 @@ private fun LeadCard(
                     .onSizeChanged { size ->
                         with(density) { spriteWidth = size.width.toDp() }
                     }
-                    .offset(y = 16.dp, x = leadOffsetDp(spriteWidth))
+                    .offset(y = 16.dp, x = leadOffsetDp(
+                        spriteWidth,
+                        minOffsetDp = minOffsetDp,
+                        maxOffsetDp = maxOffsetDp
+                    ))
             )
             pokemonName2?.let {
                 var spriteWidth by remember { mutableStateOf(0.dp) }
@@ -171,7 +238,11 @@ private fun LeadCard(
                         .onSizeChanged { size ->
                             with(density) { spriteWidth = size.width.toDp() }
                         }
-                        .offset(y = 16.dp, x = - leadOffsetDp(spriteWidth))
+                        .offset(y = 16.dp, x = - leadOffsetDp(
+                            spriteWidth,
+                            minOffsetDp = minOffsetDp,
+                            maxOffsetDp = maxOffsetDp
+                        ))
                 )
             }
         }
@@ -208,6 +279,7 @@ private fun NoData(viewModel: LeadStatsViewModel) {
     }
 }
 
+// TODO delete below
 @Composable
 internal fun MostCommonLeadCard(viewModel: LeadStatsViewModel, modifier: Modifier = Modifier) {
     LeadCard(
