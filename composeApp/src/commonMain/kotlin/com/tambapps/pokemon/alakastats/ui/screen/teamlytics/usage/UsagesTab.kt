@@ -14,7 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -115,12 +114,10 @@ private fun PokemonUsagesDonut(
     modifier: Modifier = Modifier,
 ) {
     val rawEntries = usages.movesCount.entries.filter { PokemonNormalizer.normalize(it.key) != MOVE_STRUGGLE }
-    val total = remember { rawEntries.sumOf { it.value } }
-    val entries = remember {
-        rawEntries.map {
-            val percentage = if (total > 0) it.value * 100 / total else 0
-            Triple(PokemonNormalizer.pretty(it.key), it.value, percentage)
-        }
+    val total = rawEntries.sumOf { it.value }
+    val entries = rawEntries.map {
+        val percentage = if (total > 0) it.value * 100 / total else 0
+        Triple(PokemonNormalizer.pretty(it.key), it.value, percentage)
     }
 
     val diameter = if (LocalIsCompact.current) 150.dp else 200.dp

@@ -37,23 +37,22 @@ class UsagesViewModel(
         isTabLoading = true
         pokemonPokemonUsages.clear()
         scope.launch {
-            useCase.filteredTeam.withContext {
+            val result = useCase.filteredTeam.withContext {
                 val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
-                doLoadStats(replays)
+                computeStats(replays)
             }
             kotlinx.coroutines.withContext(Dispatchers.Main) {
+                pokemonPokemonUsages.putAll(result)
                 isTabLoading = false
             }
         }
     }
 
-    private fun TeamlyticsContext.doLoadStats(replays: List<ReplayAnalytics>) {
-        val result = replays.asSequence().map { replay ->
+    private fun TeamlyticsContext.computeStats(replays: List<ReplayAnalytics>): Map<PokemonName, PokemonUsages> {
+        return replays.asSequence().map { replay ->
             fromReplay(replay)
         }
             .reduceOrNull { m1, m2 -> merged(m1, m2) } ?: emptyMap()
-        pokemonPokemonUsages.clear()
-        pokemonPokemonUsages.putAll(result)
     }
 
     private fun merged(

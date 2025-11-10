@@ -37,33 +37,31 @@ class LeadStatsViewModel(
         pokemonStats.clear()
         duoStatsMap.clear()
         scope.launch {
-            useCase.filteredTeam.withContext {
+            val (duoStats, individualStats) = useCase.filteredTeam.withContext {
                 val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
-                loadDuoStats(replays)
-                loadIndividualStats(replays)
+                val duoStats = computeDuoStats(replays)
+                val individualStats = computeIndividualStats(replays)
+                duoStats to individualStats
             }
             kotlinx.coroutines.withContext(Dispatchers.Main) {
+                duoStatsMap.putAll(duoStats)
+                pokemonStats.putAll(individualStats)
                 isTabLoading = false
             }
         }
     }
 
-    private fun TeamlyticsContext.loadDuoStats(replays: List<ReplayAnalytics>) {
-        val result = replays.groupBy { it.youPlayer.lead }
+    private fun TeamlyticsContext.computeDuoStats(replays: List<ReplayAnalytics>): Map<List<PokemonName>, WinStats> {
+        return replays.groupBy { it.youPlayer.lead }
             .mapValues { (_, replaysByLead) -> winStats(replaysByLead) }
-
-        duoStatsMap.clear()
-        duoStatsMap.putAll(result)
     }
 
-    private fun TeamlyticsContext.loadIndividualStats(replays: List<ReplayAnalytics>) {
+    private fun TeamlyticsContext.computeIndividualStats(replays: List<ReplayAnalytics>): Map<PokemonName, WinStats> {
         val leadPokemons = replays.asSequence().flatMap { it.youPlayer.lead }.toSet()
-        val result = leadPokemons.associateWith { leadPokemon ->
+        return leadPokemons.associateWith { leadPokemon ->
             val leadPokemonReplays = replays.filter { replay -> replay.youPlayer.isLead(leadPokemon) }
             winStats(leadPokemonReplays)
         }
-        pokemonStats.clear()
-        pokemonStats.putAll(result)
     }
 }
 
