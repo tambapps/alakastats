@@ -36,6 +36,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonCard
 import com.tambapps.pokemon.alakastats.ui.composables.StatCard
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.statCardPercentageWidth
 import com.tambapps.pokemon.alakastats.ui.theme.statCardPokemonSpriteSize
@@ -94,8 +95,11 @@ internal fun LeadAndWinRow(viewModel: LeadStatsViewModel) {
 
             Row(Modifier.fillMaxWidth().horizontalScroll(scrollState)) {
                 entries.forEach { (pokemonName, stat) ->
-                    LeadAndWinCard(viewModel, pokemonName, stat,
-                        modifier = if (isCompact) Modifier.size(256.dp) else Modifier.weight(1f)
+                    LeadCard(
+                        viewModel = viewModel,
+                        pokemonName = pokemonName,
+                        stat = stat,
+                        modifier = Modifier.size(256.dp)
                     )
                     Spacer(Modifier.width(64.dp))
                 }
@@ -130,13 +134,19 @@ private fun leadOffsetDp(
     return off.dp
 }
 
+
 @Composable
-private fun LeadAndWinCard(viewModel: LeadStatsViewModel, pokemonName: PokemonName, stat: WinStats, modifier: Modifier) {
+private fun LeadCard(
+    viewModel: LeadStatsViewModel,
+    pokemonName: PokemonName,
+    pokemonName2: PokemonName? = null,
+    stat: WinStats,
+    modifier: Modifier) {
     val density = LocalDensity.current
-    var spriteWidth by remember { mutableStateOf(0.dp) }
     PokemonCard(
         modifier = modifier,
         pokemonArtwork = { contentWidth, contentHeight ->
+            var spriteWidth by remember { mutableStateOf(0.dp) }
             viewModel.pokemonImageService.PokemonArtwork(
                 name = pokemonName,
                 modifier = Modifier.align(Alignment.BottomEnd)
@@ -148,6 +158,22 @@ private fun LeadAndWinCard(viewModel: LeadStatsViewModel, pokemonName: PokemonNa
                     }
                     .offset(y = 16.dp, x = leadOffsetDp(spriteWidth))
             )
+            pokemonName2?.let {
+                var spriteWidth by remember { mutableStateOf(0.dp) }
+
+                viewModel.pokemonImageService.PokemonArtwork(
+                    name = it,
+                    facingDirection = FacingDirection.RIGHT,
+                    modifier = Modifier.align(Alignment.BottomStart)
+                        .height(if (LocalIsCompact.current) 175.dp else 200.dp)
+                        // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
+                        .widthIn(max = remember(contentWidth) { contentWidth * 0.7f })
+                        .onSizeChanged { size ->
+                            with(density) { spriteWidth = size.width.toDp() }
+                        }
+                        .offset(y = 16.dp, x = - leadOffsetDp(spriteWidth))
+                )
+            }
         }
     ) {
         Text(
@@ -167,11 +193,13 @@ private fun LeadAndWinCard(viewModel: LeadStatsViewModel, pokemonName: PokemonNa
                 winCount == total -> "Won all\n$total games"
                 else -> "Won ${winCount}\nout of ${stat.total}\ngames"
             },
-            modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 8.dp),
+            textAlign = if (pokemonName2 != null) TextAlign.Center else TextAlign.Start,
+            modifier = Modifier.align(if (pokemonName2 != null) Alignment.BottomCenter else Alignment.BottomStart).padding(bottom = 8.dp),
             style = MaterialTheme.typography.headlineMedium
         )
     }
 }
+
 
 @Composable
 private fun NoData(viewModel: LeadStatsViewModel) {
