@@ -32,8 +32,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.PlatformType
+import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonCard
+import com.tambapps.pokemon.alakastats.ui.composables.ScrollableRow
 import com.tambapps.pokemon.alakastats.ui.composables.StatCard
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
@@ -136,10 +139,12 @@ private fun LeadRow(
             fontWeight = FontWeight.Bold
         )
         val isCompact = LocalIsCompact.current
-        val scrollState = rememberScrollState()
+        val spaceWidth = if (isDuo) 200.dp else 64.dp
 
-        if (isCompact) {
+        val scrollState = rememberScrollState()
+        if (getPlatform().type != PlatformType.Web || isCompact) {
             // Auto-scroll animation to show the row is scrollable
+            // for desktop Web only
             LaunchedEffect(scrollState.maxValue, viewModel.useCase.filters) {
                 if (scrollState.maxValue > 0) {
                     scrollState.scrollTo(scrollState.maxValue)
@@ -150,25 +155,21 @@ private fun LeadRow(
                     )
                 }
             }
-
-            val spaceWidth = if (isDuo) 200.dp else 64.dp
-            Row(Modifier.fillMaxWidth().horizontalScroll(scrollState)) {
-                if (isDuo) {
-                    Spacer(Modifier.width(spaceWidth * 0.5f))
-                }
-                leadCardInputs.forEach { (pokemon1, pokemon2, stat) ->
-                    LeadCard(
-                        viewModel = viewModel,
-                        pokemonName = pokemon1,
-                        pokemonName2 = pokemon2,
-                        stat = stat,
-                        modifier = Modifier.size(256.dp)
-                    )
-                    Spacer(Modifier.width(spaceWidth))
-                }
+        }
+        ScrollableRow(Modifier.fillMaxWidth(), scrollState) {
+            if (isDuo) {
+                Spacer(Modifier.width(spaceWidth * 0.5f))
             }
-        } else {
-            // TODO
+            leadCardInputs.forEach { (pokemon1, pokemon2, stat) ->
+                LeadCard(
+                    viewModel = viewModel,
+                    pokemonName = pokemon1,
+                    pokemonName2 = pokemon2,
+                    stat = stat,
+                    modifier = Modifier.size(256.dp)
+                )
+                Spacer(Modifier.width(spaceWidth))
+            }
         }
         Spacer(Modifier.height(32.dp))
     }
