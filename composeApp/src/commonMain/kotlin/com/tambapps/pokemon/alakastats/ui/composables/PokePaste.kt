@@ -211,58 +211,42 @@ private fun PokepastePokemon(
     notes: String? = null,
     notesComposer: @Composable () -> Unit
 ) {
-    Box(
+    PokemonCard(
         modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        var dimensions by remember { mutableStateOf(0.dp to 0.dp) }
-        val (contentWidth, contentHeight) = dimensions
-        MyCard(modifier = Modifier.fillMaxWidth(0.9f)
-            // + for padding
-            .height(remember(contentHeight) { contentHeight + 16.dp }), gradientBackgroundColors = elevatedCardGradientColors) {}
-
-        pokemonImageService.PokemonArtwork(
-            name = pokemon.name,
-            modifier = Modifier.align(Alignment.BottomEnd)
-                .height(if (LocalIsCompact.current) 175.dp else 200.dp)
-                // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
-                .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
-                .offset(y = 16.dp)
-        )
-
-        val density = LocalDensity.current
-        Column(
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth(0.825f)
-                .fillMaxHeight(0.85f)
-                .onSizeChanged { size ->
-                    with(density) { dimensions = size.width.toDp() to size.height.toDp() }
-                }
-        ) {
-            pokemon.teraType?.let {
-                pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(45.dp))
-            }
-            Spacer(Modifier.height(4.dp))
-            Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
-            if (notes != null) {
-                notesComposer.invoke()
-            }
-            if (!isOts) {
-                // only want margin if above element is not headline text because headline already has a lot of margin
-                if (notes != null) Spacer(Modifier.height(8.dp))
-                PokemonStatsRow(pokemon, Modifier.fillMaxWidth())
-            }
-            if (notes != null || !isOts) Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                pokemon.item?.let {
-                    pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp)
-                    )
-                }
-                Spacer(Modifier.width(4.dp))
-                Text((pokemon.item ?: "<no item>") + " | " + (pokemon.ability ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
-            }
-            Spacer(Modifier.height(16.dp))
-            PokemonMoves(pokemon, pokemonImageService)
+        pokemonArtwork = { contentWidth, contentHeight ->
+            pokemonImageService.PokemonArtwork(
+                name = pokemon.name,
+                modifier = Modifier.align(Alignment.BottomEnd)
+                    .height(if (LocalIsCompact.current) 175.dp else 200.dp)
+                    // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
+                    .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
+                    .offset(y = 16.dp)
+            )
         }
+    ) {
+        pokemon.teraType?.let {
+            pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(45.dp))
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
+        if (notes != null) {
+            notesComposer.invoke()
+        }
+        if (!isOts) {
+            // only want margin if above element is not headline text because headline already has a lot of margin
+            if (notes != null) Spacer(Modifier.height(8.dp))
+            PokemonStatsRow(pokemon, Modifier.fillMaxWidth())
+        }
+        if (notes != null || !isOts) Spacer(Modifier.height(8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            pokemon.item?.let {
+                pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp)
+                )
+            }
+            Spacer(Modifier.width(4.dp))
+            Text((pokemon.item ?: "<no item>") + " | " + (pokemon.ability ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
+        }
+        Spacer(Modifier.height(16.dp))
+        PokemonMoves(pokemon, pokemonImageService)
     }
 }
