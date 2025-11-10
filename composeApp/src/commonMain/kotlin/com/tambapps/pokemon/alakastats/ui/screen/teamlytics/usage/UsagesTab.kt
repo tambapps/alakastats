@@ -95,9 +95,26 @@ internal fun PokemonUsagesCard(
         Spacer(Modifier.height(8.dp))
         Column(Modifier.padding(horizontal = 8.dp)) {
             usages.run {
-                Text("Participated in $usageCount games", fontSize = 18.sp, modifier = Modifier.alpha(0.9f))
-                Text("Won $winCount of them", fontSize = 16.sp, modifier = Modifier.alpha(0.9f))
-                Text("Tera-ed in $teraCount games and won $teraAndWinCount of them", fontSize = 16.sp, modifier = Modifier.alpha(0.75f))
+                Text(when(usageCount) {
+                    0 -> "Did not participated in any games"
+                    1 -> "Participated in 1 game"
+                    else -> "Participated in $usageCount games"
+                }, fontSize = 18.sp, modifier = Modifier.alpha(0.9f))
+                Text(when {
+                    usageCount == 1 && winCount == 1 -> "Won it"
+                    usageCount == 1 -> "Did not win it"
+                    winCount == usageCount -> "Won all of them"
+                    winCount == 0 -> "Won none of them"
+                    else -> "Won $winCount of them"
+                }, fontSize = 16.sp, modifier = Modifier.alpha(0.9f))
+                Text(when {
+                    teraCount == 0 -> "Did not tera"
+                    teraCount == 1 && teraAndWinCount == 0 -> "Tera-ed in 1 game and did not win it"
+                    teraCount == 1 -> "Tera-ed in 1 game and won it"
+                    teraCount == teraAndWinCount -> "Tera-ed in $teraCount games and won all of them"
+                    teraAndWinCount == 0 -> "Tera-ed in $teraCount games and won none of them"
+                    else -> "Tera-ed in $teraCount games and won $teraAndWinCount of them"
+                }, fontSize = 16.sp, modifier = Modifier.alpha(0.75f))
             }
         }
         Spacer(Modifier.height(8.dp))
