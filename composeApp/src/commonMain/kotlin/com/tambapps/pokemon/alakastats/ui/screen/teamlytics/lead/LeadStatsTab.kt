@@ -24,7 +24,7 @@ import com.tambapps.pokemon.alakastats.ui.theme.statCardPokemonSpriteSize
 @Composable
 fun LeadStatsTab(viewModel: LeadStatsViewModel) {
     val isCompact = LocalIsCompact.current
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.useCase.filters) {
         viewModel.loadStats()
     }
     FabLayout(

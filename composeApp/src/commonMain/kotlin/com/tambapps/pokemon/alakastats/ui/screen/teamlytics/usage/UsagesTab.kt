@@ -36,7 +36,7 @@ import kotlin.collections.component2
 @Composable
 fun UsagesTab(viewModel: UsagesViewModel) {
     val isCompact = LocalIsCompact.current
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.useCase.filters) {
         viewModel.loadStats()
     }
     FabLayout(

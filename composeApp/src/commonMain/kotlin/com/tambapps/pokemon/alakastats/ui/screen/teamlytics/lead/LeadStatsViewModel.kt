@@ -30,10 +30,12 @@ class LeadStatsViewModel(
     private val scope = CoroutineScope(Dispatchers.Default)
 
     fun loadStats() {
-        if (isLoading) {
+        if (isTabLoading) {
             return
         }
         isTabLoading = true
+        pokemonStats.clear()
+        duoStatsMap.clear()
         scope.launch {
             useCase.filteredTeam.withContext {
                 val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }

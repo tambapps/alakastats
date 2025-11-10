@@ -31,10 +31,11 @@ class UsagesViewModel(
     val pokemonPokemonUsages = mutableStateMapOf<PokemonName, PokemonUsages>()
 
     fun loadStats() {
-        if (isLoading) {
+        if (isTabLoading) {
             return
         }
         isTabLoading = true
+        pokemonPokemonUsages.clear()
         scope.launch {
             useCase.filteredTeam.withContext {
                 val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
