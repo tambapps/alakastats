@@ -1,10 +1,8 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead
 
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,8 +30,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.PlatformType
-import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonCard
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollableRow
@@ -138,25 +134,25 @@ private fun LeadRow(
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold
         )
-        val isCompact = LocalIsCompact.current
         val spaceWidth = if (isDuo) 200.dp else 64.dp
 
         val scrollState = rememberScrollState()
-        if (getPlatform().type != PlatformType.Web || isCompact) {
-            // Auto-scroll animation to show the row is scrollable
-            // for desktop Web only
-            LaunchedEffect(scrollState.maxValue, viewModel.useCase.filters) {
-                if (scrollState.maxValue > 0) {
-                    scrollState.scrollTo(scrollState.maxValue)
-                    kotlinx.coroutines.delay(250)
-                    scrollState.animateScrollTo(
-                        value = 0,
-                        animationSpec = tween(durationMillis = 1250)
-                    )
-                }
+        // Auto-scroll animation to show the row is scrollable
+        LaunchedEffect(scrollState.maxValue, viewModel.useCase.filters) {
+            if (scrollState.maxValue > 0) {
+                scrollState.scrollTo(scrollState.maxValue)
+                kotlinx.coroutines.delay(250)
+                scrollState.animateScrollTo(
+                    value = 0,
+                    animationSpec = tween(durationMillis = 1250)
+                )
             }
         }
-        ScrollableRow(Modifier.fillMaxWidth(), scrollState) {
+        ScrollableRow(
+            modifier = Modifier.fillMaxWidth(),
+            scrollState = scrollState,
+            scrollbarThickness = 16.dp
+        ) {
             if (isDuo) {
                 Spacer(Modifier.width(spaceWidth * 0.5f))
             }
@@ -166,12 +162,11 @@ private fun LeadRow(
                     pokemonName = pokemon1,
                     pokemonName2 = pokemon2,
                     stat = stat,
-                    modifier = Modifier.size(256.dp)
+                    modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
                 )
                 Spacer(Modifier.width(spaceWidth))
             }
         }
-        Spacer(Modifier.height(32.dp))
     }
 }
 

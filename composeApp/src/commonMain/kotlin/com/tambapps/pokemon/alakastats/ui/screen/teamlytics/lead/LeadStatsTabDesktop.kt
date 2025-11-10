@@ -8,26 +8,35 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
+import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsPaddingBottomMobile
 
 @Composable
 internal fun LeadStatsTabDesktop(viewModel: LeadStatsViewModel) {
-    Column(Modifier.fillMaxSize().padding(top = 16.dp, bottom = 8.dp)) {
-        NbReplaysText(viewModel.useCase, modifier = Modifier.fillMaxWidth()) // fill maxWidth to center text
-        Spacer(Modifier.height(32.dp))
-        Row(Modifier.weight(1f)) {
-            Spacer(Modifier.width(128.dp))
-            val cardWeight = 2f
-            MostCommonLeadCard(viewModel, modifier = Modifier.weight(cardWeight))
-            val separatorSpacerModifier = Modifier.width(64.dp)
-            Spacer(separatorSpacerModifier)
-            MostEffectiveLeadCard(viewModel, Modifier.weight(cardWeight))
-            Spacer(separatorSpacerModifier)
-            LeadAndWin(viewModel, Modifier.weight(cardWeight))
-            Spacer(Modifier.width(128.dp))
+    Column(Modifier.fillMaxSize()) {
+        LinearProgressBarIfEnabled(viewModel.isLoading)
+        Column(Modifier.fillMaxWidth()
+            .weight(1f)
+            .verticalScroll(rememberScrollState())
+            .padding(top = 16.dp, bottom = 8.dp)) {
+            NbReplaysText(viewModel.useCase, modifier = Modifier.fillMaxWidth()) // fill maxWidth to center text
+            Spacer(Modifier.height(64.dp))
+            LeadAndWinRow(viewModel)
+            Space()
+            MostEffectiveLeadRow(viewModel)
+            Space()
+            MostCommonLeadRow(viewModel)
+            Spacer(Modifier.height(teamlyticsPaddingBottomMobile))
         }
     }
 }
+
+
+@Composable
+private fun Space() = Spacer(Modifier.height(64.dp))
