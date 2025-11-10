@@ -80,7 +80,7 @@ internal fun Header(team: Teamlytics) {
         Spacer(Modifier.weight(1f))
         NbReplaysText(team)
         Spacer(Modifier.width(32.dp))
-        val winRate = remember { team.computeWinRatePercentage() }
+        val winRate = team.computeWinRatePercentage()
         WinRateText(winRate)
         Spacer(Modifier.weight(1f))
     }

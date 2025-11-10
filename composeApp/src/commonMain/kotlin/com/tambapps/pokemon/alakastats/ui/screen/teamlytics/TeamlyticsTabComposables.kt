@@ -10,7 +10,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -94,7 +93,7 @@ fun NbReplaysText(
 fun WinRateText(useCase: ConsultTeamlyticsUseCase, modifier: Modifier = Modifier) = WinRateText(useCase.filteredTeam, modifier)
 
 @Composable
-fun WinRateText(teamlytics: Teamlytics, modifier: Modifier = Modifier) = WinRateText(remember { teamlytics.winRate }, modifier)
+fun WinRateText(teamlytics: Teamlytics, modifier: Modifier = Modifier) = WinRateText(teamlytics.winRate, modifier)
 
 @Composable
 fun WinRateText(winRate: Int, modifier: Modifier = Modifier) {

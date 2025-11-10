@@ -75,7 +75,7 @@ fun VerticalPokepaste(
 @Composable
 private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonImageService, modifier: Modifier, pokemonNotes: Map<Pokemon, String>? = null) {
     Column(modifier = modifier) {
-        for (pokemonBlock in remember { pokePaste.pokemons.chunked(3) }) {
+        for (pokemonBlock in pokePaste.pokemons.chunked(3)) {
             DesktopPokemonRow(pokePaste.isOts, pokemonBlock, pokemonImageService, pokemonNotes)
         }
     }

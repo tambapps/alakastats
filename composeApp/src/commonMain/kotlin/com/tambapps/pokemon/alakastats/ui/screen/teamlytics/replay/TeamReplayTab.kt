@@ -241,7 +241,7 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplay
         return
     }
 
-    val pokepaste = remember { ots.toPokepaste() }
+    val pokepaste = ots.toPokepaste()
     AlertDialog(
         onDismissRequest = { showDialog = false },
         title = { Text("${player.name}'s team") },

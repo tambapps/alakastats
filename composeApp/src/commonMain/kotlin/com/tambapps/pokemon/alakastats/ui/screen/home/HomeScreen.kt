@@ -33,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -83,8 +82,8 @@ object HomeScreen : Screen {
             TeamActionDialog(
                 viewModel = viewModel,
                 teamName = teamToImport.name,
-                pokemons = remember { teamToImport.pokePaste.pokemons.map { it.name } },
-                winRatePercentage = remember { teamToImport.winRate },
+                pokemons = teamToImport.pokePaste.pokemons.map { it.name },
+                winRatePercentage = teamToImport.winRate,
                 nbReplays = teamToImport.replays.size,
                 title = "Load Team",
                 onDismissRequest = { viewModel.dismissImportTeamDialog() },
