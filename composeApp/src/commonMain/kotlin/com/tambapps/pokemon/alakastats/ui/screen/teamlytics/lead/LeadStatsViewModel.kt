@@ -1,10 +1,8 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
@@ -21,31 +19,47 @@ class LeadStatsViewModel(
     override val useCase: ManageReplayFiltersUseCase,
     val pokemonImageService: PokemonImageService,
     ): TeamlyticsTabViewModel() {
-    val duoStatsMap: SnapshotStateMap<List<PokemonName>, WinStats> = mutableStateMapOf()
-    val pokemonStats: SnapshotStateMap<PokemonName, WinStats> = mutableStateMapOf()
+
+    val hasNoData: Boolean get() = leadAndWinStats.isEmpty() && mostCommonLeadStats.isEmpty() && mostEffectiveLeadStats.isEmpty()
+    var leadAndWinStats by mutableStateOf(listOf<LeadStat>())
+    var mostCommonLeadStats by mutableStateOf(listOf<LeadStat>())
+    var mostEffectiveLeadStats by mutableStateOf(listOf<LeadStat>())
+
 
     override var isTabLoading by mutableStateOf(false)
         private set
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
+    private val winRateComparator: Comparator<LeadStat> = compareBy { leadStat -> - leadStat.stats.winRate }
+    private val totalComparator: Comparator<LeadStat> = compareBy { leadStat -> - leadStat.stats.total }
+
     fun loadStats() {
         if (isTabLoading) {
             return
         }
         isTabLoading = true
-        pokemonStats.clear()
-        duoStatsMap.clear()
         scope.launch {
             val (duoStats, individualStats) = useCase.filteredTeam.withContext {
                 val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
                 val duoStats = computeDuoStats(replays)
-                val individualStats = computeIndividualStats(replays)
-                duoStats to individualStats
+                val pokemonLeadAndWins = computeIndividualStats(replays)
+                duoStats to pokemonLeadAndWins
             }
             kotlinx.coroutines.withContext(Dispatchers.Main) {
-                duoStatsMap.putAll(duoStats)
-                pokemonStats.putAll(individualStats)
+                leadAndWinStats = individualStats
+                    .entries
+                    .asSequence()
+                    .map { (pokemon, stats) -> LeadStat(listOf(pokemon), stats) }
+                    .sortedWith(winRateComparator.then(totalComparator))
+                    .toList()
+
+                val leadsSequence = duoStats
+                    .entries
+                    .asSequence()
+                    .map { (pokemons, stats) -> LeadStat(pokemons, stats) }
+                mostCommonLeadStats = leadsSequence.sortedWith(totalComparator.then(winRateComparator)).toList()
+                mostEffectiveLeadStats = leadsSequence.sortedWith(winRateComparator.then(totalComparator)).toList()
                 isTabLoading = false
             }
         }
@@ -79,4 +93,9 @@ data class WinStats(
     val winCount: Int,
     val total: Int,
     val winRate: Float
+)
+
+data class LeadStat(
+    val lead: List<PokemonName>,
+    val stats: WinStats
 )

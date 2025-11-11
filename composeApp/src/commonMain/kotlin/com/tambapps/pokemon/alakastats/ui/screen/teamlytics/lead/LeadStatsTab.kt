@@ -49,7 +49,7 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
             FiltersButton(viewModel.useCase)
         }
     ) {
-        if (!viewModel.isLoading && viewModel.duoStatsMap.isEmpty() && viewModel.pokemonStats.isEmpty()) {
+        if (!viewModel.isLoading && viewModel.hasNoData) {
             NoData(viewModel)
         } else if (isCompact) {
             LeadStatsTabMobile(viewModel)
@@ -62,59 +62,28 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
 
 @Composable
 internal fun LeadAndWinRow(viewModel: LeadStatsViewModel) {
-    val cardInputs: List<Triple<PokemonName, PokemonName?, WinStats>> = remember(viewModel.pokemonStats) {
-        viewModel.pokemonStats
-            .entries
-            .asSequence()
-            .map { Triple(it.key, null, it.value) }
-            .sortedWith(compareBy({ (_, _, stats) -> - stats.winRate }, { (_, _, stats) -> - stats.total }))
-            .toList()
-    }
     LeadRow(
         title = "Lead And Win",
         viewModel = viewModel,
-        leadCardInputs = cardInputs,
-        isDuo = false
+        leadStats = viewModel.leadAndWinStats,
     )
 }
 
 @Composable
 internal fun MostEffectiveLeadRow(viewModel: LeadStatsViewModel) {
-    DuoLeadRow(
+    LeadRow(
         title = "Most Effective Leads",
         viewModel = viewModel,
-        comparator = compareBy({ (_, _, stats) -> - stats.winRate }, { (_, _, stats) -> - stats.total })
+        leadStats = viewModel.mostCommonLeadStats,
     )
 }
 
 @Composable
 internal fun MostCommonLeadRow(viewModel: LeadStatsViewModel) {
-    DuoLeadRow(
+    LeadRow(
         title = "Most Common Leads",
         viewModel = viewModel,
-        comparator = compareBy({ (_, _, stats) -> - stats.total }, { (_, _, stats) -> - stats.winRate }),
-    )
-}
-
-@Composable
-private fun DuoLeadRow(
-    title: String,
-    viewModel: LeadStatsViewModel,
-    comparator: Comparator<in Triple<PokemonName, PokemonName?, WinStats>>
-) {
-    val cardInputs: List<Triple<PokemonName, PokemonName?, WinStats>> = remember(viewModel.duoStatsMap) {
-        viewModel.duoStatsMap
-            .entries
-            .asSequence()
-            .map { Triple(it.key.first(), it.key.getOrNull(1), it.value) }
-            .sortedWith(comparator)
-            .toList()
-    }
-    LeadRow(
-        title = title,
-        viewModel = viewModel,
-        leadCardInputs = cardInputs,
-        isDuo = true
+        leadStats = viewModel.mostCommonLeadStats,
     )
 }
 
@@ -122,8 +91,7 @@ private fun DuoLeadRow(
 private fun LeadRow(
     viewModel: LeadStatsViewModel,
     title: String,
-    leadCardInputs: List<Triple<PokemonName, PokemonName?, WinStats>>,
-    isDuo: Boolean
+    leadStats: List<LeadStat>,
 ) {
     Column {
         Text(
@@ -131,6 +99,7 @@ private fun LeadRow(
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold
         )
+        val isDuo = leadStats.firstOrNull()?.lead?.size?.let { it >= 2 } == true
         val spaceWidth = if (isDuo) 200.dp else 64.dp
 
         val scrollState = rememberScrollState()
@@ -153,12 +122,12 @@ private fun LeadRow(
             if (isDuo) {
                 Spacer(Modifier.width(spaceWidth * 0.5f))
             }
-            leadCardInputs.forEach { (pokemon1, pokemon2, stat) ->
+            leadStats.forEach { leadStat ->
                 LeadCard(
                     viewModel = viewModel,
-                    pokemonName = pokemon1,
-                    pokemonName2 = pokemon2,
-                    stat = stat,
+                    pokemonName = leadStat.lead.first(),
+                    pokemonName2 = leadStat.lead.getOrNull(1),
+                    stat = leadStat.stats,
                     modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
                 )
                 Spacer(Modifier.width(spaceWidth))
