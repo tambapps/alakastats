@@ -106,7 +106,7 @@ private fun DuoLeadRow(
         viewModel.duoStatsMap
             .entries
             .asSequence()
-            .map { Triple(it.key.first(), it.key[1], it.value) }
+            .map { Triple(it.key.first(), it.key.getOrNull(1), it.value) }
             .sortedWith(comparator)
             .toList()
     }
