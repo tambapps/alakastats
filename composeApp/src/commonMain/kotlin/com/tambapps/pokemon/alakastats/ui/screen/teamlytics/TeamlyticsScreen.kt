@@ -91,7 +91,7 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
                         TeamlyticsScreenDesktop(viewModel, TABS, pagerState)
                     }
                     if (viewModel.showFiltersDialog) {
-                        val filtersViewModel = remember { FiltersViewModel(viewModel, viewModel.imageService) }
+                        val filtersViewModel = remember(viewModel.filters) { FiltersViewModel(viewModel, viewModel.imageService) }
                         FiltersDialog(filtersViewModel)
                     }
                 }
