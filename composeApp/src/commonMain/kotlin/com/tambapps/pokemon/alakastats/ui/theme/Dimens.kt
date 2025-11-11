@@ -20,7 +20,7 @@ fun ProvideIsCompact(
     content: @Composable () -> Unit
 ) {
     BoxWithConstraints {
-        val isCompact = maxWidth < 600.dp
+        val isCompact = minOf(maxWidth, maxHeight) < 600.dp
         CompositionLocalProvider(LocalIsCompact provides isCompact) {
             content()
         }
