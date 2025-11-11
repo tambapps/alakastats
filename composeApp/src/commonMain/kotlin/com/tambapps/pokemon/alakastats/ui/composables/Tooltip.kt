@@ -2,7 +2,6 @@ package com.tambapps.pokemon.alakastats.ui.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.getPlatform
+import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import kotlin.time.Duration.Companion.seconds
 
 // Tooltip only works for Mobile
@@ -65,7 +65,7 @@ fun Tooltip(tooltip: String, modifier: Modifier = Modifier, content: @Composable
         if (show) {
             Popup(alignment = Alignment.BottomCenter) {
                 val (background, text) =
-                    if (isSystemInDarkTheme()) Pair(Color.Black, Color.White)
+                    if (isDarkThemeEnabled()) Pair(Color.Black, Color.White)
                     else Pair(Color.White, Color.Black)
                 Box(
                     modifier = Modifier

@@ -4,7 +4,6 @@ import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.more_horiz
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -52,6 +51,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.jetbrains.compose.resources.painterResource
 
 object HomeScreen : Screen {
@@ -61,7 +61,7 @@ object HomeScreen : Screen {
         LaunchedEffect(Unit) {
             viewModel.loadTeams()
         }
-        val isDarkTheme = isSystemInDarkTheme()
+        val isDarkTheme = isDarkThemeEnabled()
         val isCompact = LocalIsCompact.current
 
         if (isCompact) {

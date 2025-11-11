@@ -249,9 +249,13 @@ val unspecified_scheme = ColorFamily(
     Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
 )
 
+// using custom fun because some time I may want to force dark theme for everyone
+@Composable
+fun isDarkThemeEnabled() = isSystemInDarkTheme()
+
 @Composable
 fun AppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = isDarkThemeEnabled(),
     content: @Composable() () -> Unit
 ) {
   val colorScheme = if (darkTheme) darkScheme else lightScheme

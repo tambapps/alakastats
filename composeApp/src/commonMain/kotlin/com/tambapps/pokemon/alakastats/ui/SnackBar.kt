@@ -1,6 +1,5 @@
 package com.tambapps.pokemon.alakastats.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import com.tambapps.pokemon.alakastats.ui.theme.surfaceVariantDark
 import com.tambapps.pokemon.alakastats.ui.theme.surfaceVariantLight
 import kotlinx.coroutines.CoroutineScope
@@ -76,7 +76,7 @@ fun SnackBarContext(
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
     val backgroundColorState = remember { mutableStateOf(Color.Transparent) }
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = isDarkThemeEnabled()
     val snackBar = remember { SnackBar(snackBarHostState, backgroundColorState, isDarkTheme) }
     CompositionLocalProvider(LocalSnackBar provides snackBar) {
         Box(modifier = Modifier.fillMaxSize()) {
