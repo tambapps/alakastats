@@ -14,25 +14,25 @@ import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 class LeadStatsViewModel(
     override val useCase: ManageReplayFiltersUseCase,
     val pokemonImageService: PokemonImageService,
     ): TeamlyticsTabViewModel() {
 
-    val hasNoData: Boolean get() = leadAndWinStats.isEmpty() && mostCommonLeadStats.isEmpty() && mostEffectiveLeadStats.isEmpty()
-    var leadAndWinStats by mutableStateOf(listOf<LeadStat>())
-    var mostCommonLeadStats by mutableStateOf(listOf<LeadStat>())
-    var mostEffectiveLeadStats by mutableStateOf(listOf<LeadStat>())
-
+    val hasNoData: Boolean get() = leadAndWinStats.isEmpty() && mostCommonLeadsStats.isEmpty() && mostEffectiveLeadsStats.isEmpty()
+    var leadAndWinStats by mutableStateOf(listOf<LeadStats>())
+    var mostCommonLeadsStats by mutableStateOf(listOf<LeadStats>())
+    var mostEffectiveLeadsStats by mutableStateOf(listOf<LeadStats>())
 
     override var isTabLoading by mutableStateOf(false)
         private set
 
     private val scope = CoroutineScope(Dispatchers.Default)
-
-    private val winRateComparator: Comparator<LeadStat> = compareBy { leadStat -> - leadStat.stats.winRate }
-    private val totalComparator: Comparator<LeadStat> = compareBy { leadStat -> - leadStat.stats.total }
+    private val winRateComparator: Comparator<LeadStats> = compareBy { leadStat -> - leadStat.stats.winRate }
+    private val totalComparator: Comparator<LeadStats> = compareBy { leadStat -> - leadStat.stats.total }
 
     fun loadStats() {
         if (isTabLoading) {
@@ -40,34 +40,35 @@ class LeadStatsViewModel(
         }
         isTabLoading = true
         scope.launch {
-            val (duoStats, individualStats) = useCase.filteredTeam.withContext {
-                val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
-                val duoStats = computeDuoStats(replays)
-                val pokemonLeadAndWins = computeIndividualStats(replays)
-                duoStats to pokemonLeadAndWins
-            }
+            val (newLeadAndWinStats, newMostCommonLeadsStats, newMostEffectiveLeadsStats) = computeStats()
             kotlinx.coroutines.withContext(Dispatchers.Main) {
-                leadAndWinStats = individualStats
-                    .entries
-                    .asSequence()
-                    .map { (pokemon, stats) -> LeadStat(listOf(pokemon), stats) }
-                    .sortedWith(winRateComparator.then(totalComparator))
-                    .toList()
-
-                val leadsSequence = duoStats
-                    .entries
-                    .asSequence()
-                    .map { (pokemons, stats) -> LeadStat(pokemons, stats) }
-                mostCommonLeadStats = leadsSequence.sortedWith(totalComparator.then(winRateComparator)).toList()
-                mostEffectiveLeadStats = leadsSequence.sortedWith(winRateComparator.then(totalComparator)).toList()
+                leadAndWinStats = newLeadAndWinStats
+                mostCommonLeadsStats = newMostCommonLeadsStats
+                mostEffectiveLeadsStats = newMostEffectiveLeadsStats
                 isTabLoading = false
             }
         }
     }
 
-    private fun TeamlyticsContext.computeDuoStats(replays: List<ReplayAnalytics>): Map<List<PokemonName>, WinStats> {
+    private fun computeStats(): Triple<List<LeadStats>, List<LeadStats>, List<LeadStats>> = useCase.filteredTeam.withContext {
+        val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
+        val leadsStats = computeLeadsStats(replays)
+        val pokemonLeadAndWins = computeIndividualStats(replays)
+        val leadAndWinStats = pokemonLeadAndWins
+            .entries
+            .asSequence()
+            .map { (pokemon, stats) -> LeadStats(listOf(pokemon), stats) }
+            .sortedWith(winRateComparator.then(totalComparator))
+            .toList()
+        val mostCommonLeadsStats = leadsStats.sortedWith(totalComparator.then(winRateComparator)).toList()
+        val mostEffectiveLeadsStats = leadsStats.sortedWith(winRateComparator.then(totalComparator)).toList()
+        return Triple(leadAndWinStats, mostCommonLeadsStats, mostEffectiveLeadsStats)
+    }
+
+    private fun TeamlyticsContext.computeLeadsStats(replays: List<ReplayAnalytics>): List<LeadStats> {
         return replays.groupBy { it.youPlayer.lead }
             .mapValues { (_, replaysByLead) -> winStats(replaysByLead) }
+            .map { (pokemons, stats) -> LeadStats(pokemons, stats) }
     }
 
     private fun TeamlyticsContext.computeIndividualStats(replays: List<ReplayAnalytics>): Map<PokemonName, WinStats> {
@@ -95,7 +96,7 @@ data class WinStats(
     val winRate: Float
 )
 
-data class LeadStat(
+data class LeadStats(
     val lead: List<PokemonName>,
     val stats: WinStats
 )

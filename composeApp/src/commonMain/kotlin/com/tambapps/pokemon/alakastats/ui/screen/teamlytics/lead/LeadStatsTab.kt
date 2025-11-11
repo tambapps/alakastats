@@ -74,7 +74,7 @@ internal fun MostEffectiveLeadRow(viewModel: LeadStatsViewModel) {
     LeadRow(
         title = "Most Effective Leads",
         viewModel = viewModel,
-        leadStats = viewModel.mostCommonLeadStats,
+        leadStats = viewModel.mostEffectiveLeadsStats,
     )
 }
 
@@ -83,7 +83,7 @@ internal fun MostCommonLeadRow(viewModel: LeadStatsViewModel) {
     LeadRow(
         title = "Most Common Leads",
         viewModel = viewModel,
-        leadStats = viewModel.mostCommonLeadStats,
+        leadStats = viewModel.mostCommonLeadsStats,
     )
 }
 
@@ -91,7 +91,7 @@ internal fun MostCommonLeadRow(viewModel: LeadStatsViewModel) {
 private fun LeadRow(
     viewModel: LeadStatsViewModel,
     title: String,
-    leadStats: List<LeadStat>,
+    leadStats: List<LeadStats>,
 ) {
     Column {
         Text(
