@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.Dp
 actual fun ScrollableRow(
     modifier: Modifier,
     scrollState: ScrollState,
-    scrollbarThickness: Dp = 8.dp,
+    scrollbarThickness: Dp,
     content: @Composable RowScope.() -> Unit
 ) {
     Row(modifier.horizontalScroll(scrollState), content = content)
