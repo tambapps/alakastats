@@ -20,13 +20,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
-import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
-import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.jetbrains.compose.resources.painterResource
-
 
 @Composable
 fun BackIconButton(navigator: Navigator) {
@@ -37,20 +35,17 @@ fun BackIconButton(navigator: Navigator) {
             tint = MaterialTheme.colorScheme.defaultIconColor
         )
     }
-
 }
-
 
 private val WIN_COLOR = Color(0xFF4CAF50)
 private val LOOSE_COLOR = Color(0xFFF44336)
-private val UNKNOWN_COLOR = Color.DarkGray
 
 @Composable
 fun GameOutputCard(output: GameOutput) {
     val color = when (output) {
         GameOutput.WIN -> WIN_COLOR
         GameOutput.LOOSE -> LOOSE_COLOR
-        GameOutput.UNKNOWN -> UNKNOWN_COLOR
+        GameOutput.UNKNOWN -> if (isDarkThemeEnabled()) Color.LightGray else Color.DarkGray
     }
     val isCompact = LocalIsCompact.current
 
@@ -62,12 +57,12 @@ fun GameOutputCard(output: GameOutput) {
             containerColor = color
         ),
     ) {
-
         Text(
             modifier = Modifier.padding(all = 8.dp).fillMaxSize(),
             text = output.name[0].toString(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge,
+            color = if (isDarkThemeEnabled()) Color(0xFF222222) else Color.White,
             fontWeight = FontWeight.Bold,
             fontSize = textSize
         )
