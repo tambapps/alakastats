@@ -20,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -36,6 +38,13 @@ fun PokemonNameTextField(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
+    var textFieldValue by remember(value) {
+        mutableStateOf(TextFieldValue(
+            text = value.value,
+            selection = TextRange(value.value.length)
+        ))
+    }
+
     val allNames = remember { pokemonImageService.listAvailableNames() }
     val filteredSuggestions = remember(value) {
         val formattedValue = value.normalized
@@ -48,11 +57,13 @@ fun PokemonNameTextField(
         val density = LocalDensity.current
 
         OutlinedTextField(
-            value = value.value,
-            onValueChange = {
-                onValueChange(PokemonName(it))
-                // only on insertion, for at least n characters
-                expanded = it.length > value.value.length && it.length >= 4
+            value = textFieldValue,
+            onValueChange = { newValue ->
+                if (!expanded && newValue.text.length > textFieldValue.text.length) {
+                    expanded = newValue.text.length >= 4 || filteredSuggestions.size < 5
+                }
+                textFieldValue = newValue
+                onValueChange(PokemonName(newValue.text))
             },
             isError = isError,
             supportingText = supportingText,
@@ -81,7 +92,12 @@ fun PokemonNameTextField(
                         }
                     },
                     onClick = {
-                        onValueChange(PokemonName(suggestion.pretty))
+                        val newText = suggestion.pretty
+                        textFieldValue = TextFieldValue(
+                            text = newText,
+                            selection = TextRange(newText.length)
+                        )
+                        onValueChange(PokemonName(newText))
                         expanded = false
                     }
                 )
