@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
+import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 
 @Composable
 internal fun UsagesTabDesktop(viewModel: UsagesViewModel) {
@@ -30,14 +31,17 @@ internal fun UsagesTabDesktop(viewModel: UsagesViewModel) {
             NbReplaysText(viewModel.useCase, modifier = Modifier.fillMaxWidth()) // fill maxWidth to center text
             Spacer(Modifier.height(32.dp))
             val entryBlocks = viewModel.sortedPokemonMovesUsageEntries.chunked(3)
-            for (entry in entryBlocks) {
+            entryBlocks.forEachIndexed { index, entry ->
                 DesktopRow(
                     viewModel,
                     entry,
                     Modifier
                 )
-                Spacer(Modifier.height(32.dp))
+                if (index < entryBlocks.lastIndex) {
+                    Spacer(Modifier.height(32.dp))
+                }
             }
+            Spacer(Modifier.height(teamlyticsTabPaddingBottom))
         }
     }
 }

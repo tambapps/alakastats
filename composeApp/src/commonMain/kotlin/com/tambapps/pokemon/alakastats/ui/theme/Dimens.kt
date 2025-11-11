@@ -8,15 +8,12 @@ import androidx.compose.ui.unit.dp
 
 val LocalIsCompact = compositionLocalOf { false }
 
-
 // allow to scroll past the Fab button(s)
-val teamlyticsPaddingBottomMobile = 128.dp
+val teamlyticsTabPaddingBottom = 128.dp
 
 val fabPadding @Composable get() = if (LocalIsCompact.current) 32.dp else 50.dp
 
 val tabReplaysTextMarginTopMobile = 32.dp
-val statCardPokemonSpriteSize = 64.dp
-val statCardPercentageWidth = 60.dp
 
 @Composable
 fun ProvideIsCompact(

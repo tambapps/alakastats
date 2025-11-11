@@ -42,6 +42,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import org.jetbrains.compose.resources.painterResource
 import kotlin.Boolean
 
@@ -67,6 +68,10 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
             itemsIndexed(team.replays) { index, replay ->
                 DesktopReplay(viewModel, team, replay)
                 Spacer(Modifier.height(32.dp))
+            }
+            item {
+                // just to be able to scroll past Fab button
+                Spacer(Modifier.height(teamlyticsTabPaddingBottom))
             }
         }
     }
