@@ -15,6 +15,7 @@ import com.tambapps.pokemon.alakastats.domain.error.StorageError
 import com.tambapps.pokemon.alakastats.domain.error.TeamlyticsNotFound
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
+import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.SnackBar
@@ -174,10 +175,10 @@ class HomeViewModel(
                                 }
                                 null
                             }
-                        }?.copy(notes = replay.notes) ?: replay
+                        }?.completedWith(replay) ?: replay
                     }
                 }.awaitAll()
-                useCase.save(team.copy(replays = reloadedReplays)).bind()
+                useCase.save(team.copy(replays = reloadedReplays.withComputedElo())).bind()
                 doLoadTeams()
             }
             withContext(Dispatchers.Main) {

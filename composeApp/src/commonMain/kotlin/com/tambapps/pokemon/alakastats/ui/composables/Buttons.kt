@@ -37,8 +37,8 @@ fun BackIconButton(navigator: Navigator) {
     }
 }
 
-private val WIN_COLOR = Color(0xFF4CAF50)
-private val LOOSE_COLOR = Color(0xFFF44336)
+val WIN_COLOR = Color(0xFF4CAF50)
+val LOOSE_COLOR = Color(0xFFF44336)
 
 @Composable
 fun GameOutputCard(output: GameOutput) {

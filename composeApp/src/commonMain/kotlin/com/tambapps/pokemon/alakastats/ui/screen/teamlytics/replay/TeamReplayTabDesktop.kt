@@ -169,14 +169,8 @@ private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(playerName)
-        Spacer(Modifier.height(16.dp))
-
-        if (player.beforeElo != null && player.afterElo != null) {
-            Text("Elo: ${player.beforeElo} -> ${player.afterElo}")
-        } else if (player.beforeElo != null) {
-            Text("Elo: ${player.beforeElo}")
-        }
+        PlayerNameEloText(player, playerName)
+        Spacer(Modifier.height(8.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically

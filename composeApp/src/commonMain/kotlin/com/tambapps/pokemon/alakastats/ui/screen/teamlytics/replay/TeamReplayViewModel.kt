@@ -77,7 +77,7 @@ class TeamReplayViewModel(
             withContext(Dispatchers.Main) {
                 isTabLoading = false
                 replayEither.flatMap { reloadedReplay ->
-                    useCase.replaceReplay(replay, reloadedReplay.copy(notes = replay.notes))
+                    useCase.replaceReplay(replay, reloadedReplay.completedWith(replay))
                 }.fold(
                     ifLeft = {
                         snackBar.show("Failed to reload replay: ${it.message}", SnackBar.Severity.ERROR)

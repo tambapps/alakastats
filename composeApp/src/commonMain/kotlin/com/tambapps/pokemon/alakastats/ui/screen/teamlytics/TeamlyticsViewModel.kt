@@ -128,7 +128,7 @@ class TeamlyticsViewModel(
         val replays = currentTeam.replays.mapIndexed { index, r ->
             if (index == replayIndex) replay else r
         }
-        return save(currentTeam.copy(replays = replays)).also { onReplaysModified() }
+        return save(currentTeam.copy(replays = replays.withComputedElo())).also { onReplaysModified() }
     }
 
     override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?): Either<DomainError, Unit> {

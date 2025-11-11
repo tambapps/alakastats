@@ -2,8 +2,10 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
+import alakastats.composeapp.generated.resources.arrow_forward
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboard
@@ -46,7 +49,9 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
+import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
+import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
@@ -211,7 +216,35 @@ private fun RemoveReplayDialog(viewModel: TeamReplayViewModel) {
     )
 }
 
+private val playerNameTextStyle @Composable get() = MaterialTheme.typography.titleLarge
 
+@Composable
+internal fun ColumnScope.PlayerNameEloText(player: Player, playerName: String) {
+    Text(playerName, style = playerNameTextStyle)
+    Spacer(Modifier.height(8.dp))
+
+    if (player.beforeElo != null && player.afterElo != null) {
+        val iconSize = 28.dp
+        val won = player.beforeElo < player.afterElo
+        val outputColor = if (won) WIN_COLOR else LOOSE_COLOR
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(Res.drawable.arrow_forward),
+                contentDescription = "UP/DOWN",
+                modifier = Modifier.rotate(if (won) - 90f else 90f).size(iconSize),
+                tint = outputColor
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(player.beforeElo.toString(), style = playerNameTextStyle)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.width(iconSize + 4.dp))
+            Text(player.afterElo.toString(), style = playerNameTextStyle, color = outputColor)
+        }
+    } else if (player.beforeElo != null) {
+        Text(player.beforeElo.toString(), style = playerNameTextStyle)
+    }
+}
 @Composable
 internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: String, modifier: Modifier = Modifier) {
     var url = url.removeSuffix(".json")

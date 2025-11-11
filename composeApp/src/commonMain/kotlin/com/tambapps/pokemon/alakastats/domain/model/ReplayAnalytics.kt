@@ -66,6 +66,17 @@ data class ReplayAnalytics(
     val player2 get() = players[1]
 
     fun hasWon(player: Player) = winner == player.name
+
+    // complete information of replay from another one. Useful when reloading replys
+    fun completedWith(oldReplay: ReplayAnalytics) = copy(
+        notes = notes ?: oldReplay.notes,
+        players = players.mapIndexed { index, player ->
+            player.copy(
+                beforeElo = player.beforeElo ?: oldReplay.players.getOrNull(index)?.beforeElo,
+                afterElo = player.afterElo ?: oldReplay.players.getOrNull(index)?.afterElo
+            )
+        }
+    )
 }
 
 fun List<ReplayAnalytics>.withComputedElo() = map { replay ->
