@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,6 +38,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.getGameOutput
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
+import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
@@ -56,10 +59,15 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
     }
     Column(Modifier.fillMaxSize()) {
         LinearProgressBarIfEnabled(viewModel.isLoading)
-        LazyColumn(
+        val scrollState = rememberLazyListState()
+        LaunchedEffect(viewModel.useCase.filters) {
+            scrollState.scrollToItem(index = 0, scrollOffset = 0)
+        }
+        LazyColumnWithScrollbar(
             modifier = Modifier
                 .weight(1f)
                 .padding(16.dp),
+            state = scrollState,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
