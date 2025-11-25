@@ -44,6 +44,7 @@ import org.koin.dsl.module
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 
 private val appModule = module {
@@ -75,9 +76,10 @@ private val appModule = module {
     singleOf(::ManageTeamlyticsUseCase)
     singleOf(::TeamlyticsSerializer)
 
-    factory { HomeViewModel(get(), get(), get()) }
-    factory { EditTeamViewModel(get(), get(), get()) }
-    factory { MatchupNotesEditViewModel(get()) }
+    factoryOf(::HomeViewModel)
+    factoryOf(::EditTeamViewModel)
+    factoryOf(::MatchupNotesEditViewModel)
+
     factory { (teamId: Uuid) ->
         TeamlyticsViewModel(teamId, get(), get())
     }

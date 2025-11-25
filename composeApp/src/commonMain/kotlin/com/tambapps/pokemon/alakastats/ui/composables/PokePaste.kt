@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -26,9 +28,13 @@ import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.Stat
+import com.tambapps.pokemon.alakastats.PlatformType
+import com.tambapps.pokemon.alakastats.getPlatform
+import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
+import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 
 @Composable
@@ -246,4 +252,47 @@ private fun PokepastePokemon(
             PokemonMoves(pokemon, pokemonImageService)
         }
     }
+}
+
+
+
+
+@Composable
+fun PokePasteInput(viewModel: PokepasteEditingViewModel) {
+    if (getPlatform().type == PlatformType.Web) {
+        Text(
+            text = "Pokepaste",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Medium
+        )
+    } else {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Pokepaste",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(Modifier.width(16.dp))
+            OutlinedButton(onClick = { viewModel.showPokepasteUrlDialog() }) {
+                Text("Load from URL")
+            }
+        }
+    }
+
+    OutlinedTextField(
+        value = viewModel.pokepaste,
+        onValueChange = viewModel::updatePokepaste,
+        placeholder = { Text("The pokepaste content (not the URL)") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        minLines = 8,
+        maxLines = 12,
+        isError = viewModel.pokepasteError != null,
+        supportingText = viewModel.pokepasteError?.let { error ->
+            { Text(text = error) }
+        }
+    )
 }

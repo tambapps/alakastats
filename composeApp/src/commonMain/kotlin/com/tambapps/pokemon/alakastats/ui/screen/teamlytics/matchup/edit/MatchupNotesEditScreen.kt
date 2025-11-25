@@ -6,16 +6,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import arrow.core.Either
 import cafe.adriel.voyager.core.screen.Screen
@@ -25,6 +29,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
+import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
@@ -64,8 +69,28 @@ class MatchupNotesEditScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
+                NameInput(viewModel)
+
+                PokePasteInput(viewModel)
             }
         }
     }
-
 }
+
+@Composable
+private fun NameInput(viewModel: MatchupNotesEditViewModel) {
+    Text(
+        text = "Matchup Name",
+        style = MaterialTheme.typography.headlineSmall,
+        fontWeight = FontWeight.Bold
+    )
+
+    OutlinedTextField(
+        value = viewModel.name,
+        onValueChange = viewModel::updateName,
+        placeholder = { Text("Enter a name for your matchup") },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+    )
+}
+

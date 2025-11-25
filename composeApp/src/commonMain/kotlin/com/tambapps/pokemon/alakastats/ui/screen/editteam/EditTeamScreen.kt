@@ -47,6 +47,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
+import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -95,7 +96,7 @@ data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
                 ButtonBar(navigator, viewModel, teamlytics != null)
             }
         }
-        
+
         if (viewModel.showNewSdNameDialog) {
             ShowdownNameDialog(viewModel)
         }
@@ -123,45 +124,6 @@ private fun TeamNameInput(viewModel: EditTeamViewModel) {
     )
 }
 
-@Composable
-private fun PokePasteInput(viewModel: EditTeamViewModel) {
-    if (getPlatform().type == PlatformType.Web) {
-        Text(
-            text = "Pokepaste",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Medium
-        )
-    } else {
-      Row(
-          verticalAlignment = Alignment.CenterVertically
-      ) {
-          Text(
-              text = "Pokepaste",
-              style = MaterialTheme.typography.titleLarge,
-              fontWeight = FontWeight.Medium
-          )
-          Spacer(Modifier.width(16.dp))
-          OutlinedButton(onClick = { viewModel.showPokepasteUrlDialog() }) {
-              Text("Load from URL")
-          }
-      }
-    }
-
-    OutlinedTextField(
-        value = viewModel.pokepaste,
-        onValueChange = viewModel::updatePokepaste,
-        placeholder = { Text("The pokepaste content (not the URL)") },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp),
-        minLines = 8,
-        maxLines = 12,
-        isError = viewModel.pokepasteError != null,
-        supportingText = viewModel.pokepasteError?.let { error ->
-            { Text(text = error) }
-        }
-    )
-}
 
 @Composable
 private fun ShowdownNamesInput(viewModel: EditTeamViewModel) {
