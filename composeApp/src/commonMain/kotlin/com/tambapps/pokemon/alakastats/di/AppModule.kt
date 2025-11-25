@@ -33,6 +33,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsSer
 import com.tambapps.pokemon.alakastats.infrastructure.service.TeamlyticsSerializer
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.MatchupNotesViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit.MatchupNotesEditViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
@@ -76,6 +77,7 @@ private val appModule = module {
 
     factory { HomeViewModel(get(), get(), get()) }
     factory { EditTeamViewModel(get(), get(), get()) }
+    factory { MatchupNotesEditViewModel(get()) }
     factory { (teamId: Uuid) ->
         TeamlyticsViewModel(teamId, get(), get())
     }
