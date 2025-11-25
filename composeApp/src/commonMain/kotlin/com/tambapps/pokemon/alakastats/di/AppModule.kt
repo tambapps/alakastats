@@ -15,11 +15,11 @@ import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsNotesTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransformer
-import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesListUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
@@ -30,6 +30,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.infrastructure.service.TeamlyticsSerializer
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.MatchupNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
@@ -87,6 +88,9 @@ private val appModule = module {
     }
     factory { (useCase: ManageTeamReplaysUseCase) ->
         UsagesViewModel(useCase, get())
+    }
+    factory { (useCase: ManageMatchupNotesListUseCase) ->
+        MatchupNotesViewModel(useCase, get())
     }
 }
 

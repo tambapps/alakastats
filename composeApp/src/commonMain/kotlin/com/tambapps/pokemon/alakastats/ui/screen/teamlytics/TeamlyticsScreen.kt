@@ -30,6 +30,8 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.MatchupNotesTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.MatchupNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsagesTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewTab
@@ -128,9 +130,14 @@ internal fun Pager(
                 LeadStatsTab(viewModel)
             }
             4 -> {
+                val viewModel = koinInjectUseCase<ConsultTeamlyticsUseCase, MatchupNotesViewModel>(viewModel)
+                MatchupNotesTab(viewModel)
+                /* TODO delete this
                 Box(Modifier.fillMaxSize()) {
                     Text("Coming soon", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Center))
                 }
+
+                 */
             }
         }
     }
