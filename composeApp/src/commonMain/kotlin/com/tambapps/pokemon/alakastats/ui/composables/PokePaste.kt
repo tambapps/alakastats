@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,7 +32,6 @@ import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.getPlatform
-import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
@@ -254,9 +255,6 @@ private fun PokepastePokemon(
     }
 }
 
-
-
-
 @Composable
 fun PokePasteInput(viewModel: PokepasteEditingViewModel) {
     if (getPlatform().type == PlatformType.Web) {
@@ -293,6 +291,58 @@ fun PokePasteInput(viewModel: PokepasteEditingViewModel) {
         isError = viewModel.pokepasteError != null,
         supportingText = viewModel.pokepasteError?.let { error ->
             { Text(text = error) }
+        }
+    )
+
+    if (viewModel.showPokePasteUrlDialog) {
+        PokepasteUrlLoadDialog(viewModel)
+    }
+}
+
+@Composable
+private fun PokepasteUrlLoadDialog(viewModel: PokepasteEditingViewModel) {
+    val url = viewModel.pokePasteUrlInput
+    AlertDialog(
+        onDismissRequest = { viewModel.hidePokepasteUrlDialog() },
+        title = { Text("Load from URL") },
+        text = {
+            Column {
+                Text(
+                    text = "Enter a PokePaste URL:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = viewModel::updatePokepasteUrlInput,
+                    label = { Text("URL") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    enabled = !viewModel.isLoadingPokepasteUrl,
+                    isError = (url.isNotBlank() && !viewModel.isPokepasteUrlValid) || viewModel.pokepasteUrlError != null,
+                    supportingText = when {
+                        viewModel.pokepasteUrlError != null -> { { Text(viewModel.pokepasteUrlError!!) } }
+                        url.isNotBlank() && !viewModel.isPokepasteUrlValid -> { { Text("Please enter a valid URL starting with http:// or https://") } }
+                        else -> null
+                    }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { viewModel.loadPokepasteFromUrl() },
+                enabled = viewModel.isPokepasteUrlValid && !viewModel.isLoadingPokepasteUrl
+            ) {
+                Text(if (viewModel.isLoadingPokepasteUrl) "Loading..." else "Load")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { viewModel.hidePokepasteUrlDialog() },
+                enabled = !viewModel.isLoadingPokepasteUrl
+            ) {
+                Text("Cancel")
+            }
         }
     )
 }

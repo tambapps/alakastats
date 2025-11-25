@@ -100,10 +100,6 @@ data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
         if (viewModel.showNewSdNameDialog) {
             ShowdownNameDialog(viewModel)
         }
-        
-        if (viewModel.showPokePasteUrlDialog) {
-            UrlLoadDialog(viewModel)
-        }
     }
 }
 
@@ -253,54 +249,6 @@ private fun ShowdownNameDialog(viewModel: EditTeamViewModel) {
         dismissButton = {
             TextButton(
                 onClick = { viewModel.hideAddNameDialog() }
-            ) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-@Composable
-private fun UrlLoadDialog(viewModel: EditTeamViewModel) {
-    val url = viewModel.pokePasteUrlInput
-    AlertDialog(
-        onDismissRequest = { viewModel.hidePokepasteUrlDialog() },
-        title = { Text("Load from URL") },
-        text = {
-            Column {
-                Text(
-                    text = "Enter a PokePaste URL:",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = viewModel::updatePokepasteUrlInput,
-                    label = { Text("URL") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    enabled = !viewModel.isLoadingPokepasteUrl,
-                    isError = (url.isNotBlank() && !viewModel.isPokepasteUrlValid) || viewModel.pokepasteUrlError != null,
-                    supportingText = when {
-                        viewModel.pokepasteUrlError != null -> { { Text(viewModel.pokepasteUrlError!!) } }
-                        url.isNotBlank() && !viewModel.isPokepasteUrlValid -> { { Text("Please enter a valid URL starting with http:// or https://") } }
-                        else -> null
-                    }
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { viewModel.loadPokepasteFromUrl() },
-                enabled = viewModel.isPokepasteUrlValid && !viewModel.isLoadingPokepasteUrl
-            ) {
-                Text(if (viewModel.isLoadingPokepasteUrl) "Loading..." else "Load")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = { viewModel.hidePokepasteUrlDialog() },
-                enabled = !viewModel.isLoadingPokepasteUrl
             ) {
                 Text("Cancel")
             }
