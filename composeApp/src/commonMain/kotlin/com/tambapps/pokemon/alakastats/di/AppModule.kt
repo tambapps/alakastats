@@ -1,6 +1,8 @@
 package com.tambapps.pokemon.alakastats.di
 
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
+import com.tambapps.pokemon.alakastats.domain.transformer.GamePlanTransformer
+import com.tambapps.pokemon.alakastats.domain.transformer.MatchupNotesTransformer
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
@@ -19,7 +21,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesListUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
@@ -89,7 +91,7 @@ private val appModule = module {
     factory { (useCase: ManageTeamReplaysUseCase) ->
         UsagesViewModel(useCase, get())
     }
-    factory { (useCase: ManageMatchupNotesListUseCase) ->
+    factory { (useCase: ManageMatchupNotesUseCase) ->
         MatchupNotesViewModel(useCase, get())
     }
 }
@@ -105,6 +107,8 @@ private val transformerModule = module {
     singleOf(::TeamlyticsTransformer)
     singleOf(::TeamlyticsNotesTransformer)
     singleOf(::TeamlyticsPreviewTransformer)
+    singleOf(::MatchupNotesTransformer)
+    singleOf(::GamePlanTransformer)
 }
 
 val appModules = listOf(appModule, transformerModule)

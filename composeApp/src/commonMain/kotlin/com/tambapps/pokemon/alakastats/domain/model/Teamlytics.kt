@@ -12,12 +12,22 @@ data class Teamlytics(
     val replays: List<ReplayAnalytics>,
     val sdNames: List<String>,
     val lastUpdatedAt: Instant,
-    val notes: TeamlyticsNotes?
+    val notes: TeamlyticsNotes?,
+    val matchupNotes: List<MatchupNotes>
 ) {
     val winRate get() = computeWinRatePercentage(sdNames, replays)
 
 }
 
+data class MatchupNotes(
+    val name: String,
+    val pokePaste: PokePaste?,
+    val gamePlans: List<GamePlan>
+)
+
+data class GamePlan(
+    val description: String
+)
 data class TeamlyticsNotes(
     val teamNotes: String,
     val pokemonNotes: Map<PokemonName, String>

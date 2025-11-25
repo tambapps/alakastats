@@ -21,8 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit.MatchupNotesEditScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
 
@@ -34,8 +37,8 @@ fun MatchupNotesTab(viewModel: MatchupNotesViewModel) {
 
         }
     ) {
-        if (!viewModel.hasMatchups) {
-            NoNotes()
+        if (!viewModel.hasMatchupNotes) {
+            NoNotes(viewModel)
         } else if (LocalIsCompact.current)  {
             MatchupNotesTabMobile(viewModel)
         } else {
@@ -45,13 +48,14 @@ fun MatchupNotesTab(viewModel: MatchupNotesViewModel) {
 }
 
 @Composable
-fun NoNotes() {
+fun NoNotes(viewModel: MatchupNotesViewModel) {
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.align(Alignment.Center).padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Add your gameplay per matchup to remember how to handle the meta with your team",
                 style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(8.dp))
-            Button(onClick = {  }) {
+            val navigator = LocalNavigator.currentOrThrow
+            Button(onClick = { navigator.push(MatchupNotesEditScreen(viewModel::addMatchupNotes)) }) {
                 Icon(
                     painter = painterResource(Res.drawable.add),
                     contentDescription = "Add",

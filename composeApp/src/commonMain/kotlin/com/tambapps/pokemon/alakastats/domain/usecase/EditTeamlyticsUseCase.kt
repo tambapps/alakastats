@@ -35,7 +35,8 @@ class EditTeamlyticsUseCase(
             replays = emptyList(),
             sdNames = sdNames,
             lastUpdatedAt = Clock.System.now(),
-            notes = null
+            notes = null,
+            matchupNotes = emptyList()
         )
         return teamlyticsRepository.save(teamlytics)
     }

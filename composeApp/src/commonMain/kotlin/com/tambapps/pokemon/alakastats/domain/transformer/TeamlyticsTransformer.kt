@@ -1,10 +1,14 @@
 package com.tambapps.pokemon.alakastats.domain.transformer
 
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.GamePlan
+import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.GamePlanEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.MatchupNotesEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsNotesEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
@@ -15,6 +19,7 @@ import kotlin.time.Clock
 class TeamlyticsTransformer(
     private val replayAnalyticsTransformer: ReplayAnalyticsTransformer,
     private val notesTransformer: TeamlyticsNotesTransformer,
+    private val matchupNotesTransformer: MatchupNotesTransformer,
     private val pokepasteParser: PokepasteParser
 ) {
     
@@ -26,7 +31,8 @@ class TeamlyticsTransformer(
             replays = domain.replays.map { replayAnalyticsTransformer.toEntity(it) },
             sdNames = domain.sdNames,
             lastUpdatedAt = domain.lastUpdatedAt,
-            notes = domain.notes?.let(notesTransformer::toEntity)
+            notes = domain.notes?.let(notesTransformer::toEntity),
+            matchupNotes = domain.matchupNotes.map(matchupNotesTransformer::toEntity)
         )
     }
     
@@ -35,11 +41,12 @@ class TeamlyticsTransformer(
         return Teamlytics(
             id = entity.id,
             name = entity.name,
-            pokePaste = entity.pokePaste.let(pokepasteParser::tryParse) ?: PokePaste(emptyList()),
+            pokePaste = pokepaste,
             replays = entity.replays.map { replayAnalyticsTransformer.toDomain(it) },
             sdNames = entity.sdNames,
             lastUpdatedAt = entity.lastUpdatedAt ?: Clock.System.now(),
-            notes = entity.notes?.let { notesTransformer.toDomain(pokepaste, it) }
+            notes = entity.notes?.let { notesTransformer.toDomain(pokepaste, it) },
+            matchupNotes = entity.matchupNotes?.map(matchupNotesTransformer::toDomain) ?: emptyList()
         )
     }
 
@@ -107,4 +114,33 @@ class TeamlyticsNotesTransformer {
             pokemonNotes = domain.pokemonNotes.mapKeys { (key, _) -> key.value }
         )
     }
+}
+
+class MatchupNotesTransformer(
+    private val gamePlanTransformer: GamePlanTransformer,
+    private val pokepasteParser: PokepasteParser
+) {
+
+    fun toEntity(domain: MatchupNotes) = MatchupNotesEntity(
+        name = domain.name,
+        pokePaste = domain.pokePaste?.toPokePasteString(),
+        gamePlans = domain.gamePlans.map(gamePlanTransformer::toEntity)
+    )
+
+    fun toDomain(entity: MatchupNotesEntity) = MatchupNotes(
+        name = entity.name,
+        pokePaste = entity.pokePaste?.let(pokepasteParser::tryParse),
+        gamePlans = entity.gamePlans.map(gamePlanTransformer::toDomain)
+    )
+}
+
+class GamePlanTransformer {
+
+    fun toEntity(domain: GamePlan) = GamePlanEntity(
+        description = domain.description
+    )
+
+    fun toDomain(entity: GamePlanEntity) = GamePlan(
+        description = entity.description
+    )
 }

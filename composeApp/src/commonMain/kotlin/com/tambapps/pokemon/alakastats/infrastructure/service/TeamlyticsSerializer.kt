@@ -16,6 +16,7 @@ import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.MatchupNotesEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PssPokepaste
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PssPokepastePokemon
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PssStats
@@ -71,7 +72,9 @@ class TeamlyticsSerializer(
             .bind()
         val sdNames = jsonAccess { jsonObject[TeamlyticsEntity::sdNames.name]?.jsonArray?.map { it.jsonPrimitive.content } }.bind()
             ?: listOf()
-        val notes = jsonAccess { jsonObject["notes"]?.let { json.decodeFromJsonElement<TeamlyticsNotesEntity>(it) } }.bind()
+        val notes = jsonAccess { jsonObject[TeamlyticsEntity::notes.name]?.let { json.decodeFromJsonElement<TeamlyticsNotesEntity>(it) } }.bind()
+
+        val matchupNotes = jsonAccess { jsonObject[TeamlyticsEntity::matchupNotes.name]?.let { json.decodeFromJsonElement<List<MatchupNotesEntity>>(it) } }.bind()
 
         TeamlyticsEntity(
             id = Uuid.random(),
@@ -80,7 +83,8 @@ class TeamlyticsSerializer(
             replays = replays,
             sdNames = sdNames,
             notes = notes,
-            lastUpdatedAt = Clock.System.now()
+            lastUpdatedAt = Clock.System.now(),
+            matchupNotes = matchupNotes
         )
     }
 

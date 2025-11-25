@@ -13,7 +13,8 @@ data class TeamlyticsEntity(
     val replays: List<ReplayAnalyticsEntity>,
     val sdNames: List<String>,
     val notes: TeamlyticsNotesEntity? = null,
-    val lastUpdatedAt: Instant?
+    val lastUpdatedAt: Instant?,
+    val matchupNotes: List<MatchupNotesEntity>? = null
 ): Identifiable<Uuid>
 
 @Serializable
@@ -33,6 +34,17 @@ data class TeamlyticsPreviewEntity(
     val lastUpdatedAt: Instant?
 ): Identifiable<Uuid>
 
+@Serializable
+data class MatchupNotesEntity(
+    val name: String,
+    val pokePaste: String?,
+    val gamePlans: List<GamePlanEntity>
+)
+
+@Serializable
+data class GamePlanEntity(
+    val description: String
+)
 
 @Serializable
 data class TerastallizationEntity(
