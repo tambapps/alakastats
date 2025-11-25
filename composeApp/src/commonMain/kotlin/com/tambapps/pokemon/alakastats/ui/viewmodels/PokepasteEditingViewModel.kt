@@ -32,12 +32,12 @@ abstract class PokepasteEditingViewModel(
     var pokePasteUrlInput by mutableStateOf("")
         private set
 
-    var isLoadingUrl by mutableStateOf(false)
+    var isLoadingPokepasteUrl by mutableStateOf(false)
         private set
-    var urlError by mutableStateOf<String?>(null)
+    var pokepasteUrlError by mutableStateOf<String?>(null)
         private set
 
-    val isUrlValid: Boolean
+    val isPokepasteUrlValid: Boolean
         get() = isValidUrl(pokePasteUrlInput)
 
     protected val scope = CoroutineScope(Dispatchers.Default)
@@ -52,24 +52,24 @@ abstract class PokepasteEditingViewModel(
         }
     }
 
-    fun loadFromUrl() {
-        if (isUrlValid && !isLoadingUrl) {
-            isLoadingUrl = true
-            urlError = null
+    fun loadPokepasteFromUrl() {
+        if (isPokepasteUrlValid && !isLoadingPokepasteUrl) {
+            isLoadingPokepasteUrl = true
+            pokepasteUrlError = null
 
             scope.launch {
                 fetchUrlContent(pokePasteUrlInput).fold(
                     ifLeft = { error ->
-                        urlError = "Failed to load URL: ${error.message}"
+                        pokepasteUrlError = "Failed to load URL: ${error.message}"
                     },
                     ifRight = { content ->
                         withContext(Dispatchers.Main) {
                             updatePokepaste(content)
-                            hideUrlDialog()
+                            hidePokepasteUrlDialog()
                         }
                     }
                 )
-                isLoadingUrl = false
+                isLoadingPokepasteUrl = false
             }
         }
     }
@@ -87,20 +87,20 @@ abstract class PokepasteEditingViewModel(
     }.mapLeft { error -> NetworkError(error.message ?: "unknown error", error) }
 
 
-    fun showUrlDialog() {
+    fun showPokepasteUrlDialog() {
         showPokePasteUrlDialog = true
         pokePasteUrlInput = ""
-        urlError = null
+        pokepasteUrlError = null
     }
 
-    fun hideUrlDialog() {
+    fun hidePokepasteUrlDialog() {
         showPokePasteUrlDialog = false
         pokePasteUrlInput = ""
-        urlError = null
-        isLoadingUrl = false
+        pokepasteUrlError = null
+        isLoadingPokepasteUrl = false
     }
 
-    fun updateUrlInput(input: String) {
+    fun updatePokepasteUrlInput(input: String) {
         pokePasteUrlInput = input
     }
 

@@ -141,7 +141,7 @@ private fun PokePasteInput(viewModel: EditTeamViewModel) {
               fontWeight = FontWeight.Medium
           )
           Spacer(Modifier.width(16.dp))
-          OutlinedButton(onClick = { viewModel.showUrlDialog() }) {
+          OutlinedButton(onClick = { viewModel.showPokepasteUrlDialog() }) {
               Text("Load from URL")
           }
       }
@@ -302,7 +302,7 @@ private fun ShowdownNameDialog(viewModel: EditTeamViewModel) {
 private fun UrlLoadDialog(viewModel: EditTeamViewModel) {
     val url = viewModel.pokePasteUrlInput
     AlertDialog(
-        onDismissRequest = { viewModel.hideUrlDialog() },
+        onDismissRequest = { viewModel.hidePokepasteUrlDialog() },
         title = { Text("Load from URL") },
         text = {
             Column {
@@ -313,15 +313,15 @@ private fun UrlLoadDialog(viewModel: EditTeamViewModel) {
                 )
                 OutlinedTextField(
                     value = url,
-                    onValueChange = viewModel::updateUrlInput,
+                    onValueChange = viewModel::updatePokepasteUrlInput,
                     label = { Text("URL") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    enabled = !viewModel.isLoadingUrl,
-                    isError = (url.isNotBlank() && !viewModel.isUrlValid) || viewModel.urlError != null,
+                    enabled = !viewModel.isLoadingPokepasteUrl,
+                    isError = (url.isNotBlank() && !viewModel.isPokepasteUrlValid) || viewModel.pokepasteUrlError != null,
                     supportingText = when {
-                        viewModel.urlError != null -> { { Text(viewModel.urlError!!) } }
-                        url.isNotBlank() && !viewModel.isUrlValid -> { { Text("Please enter a valid URL starting with http:// or https://") } }
+                        viewModel.pokepasteUrlError != null -> { { Text(viewModel.pokepasteUrlError!!) } }
+                        url.isNotBlank() && !viewModel.isPokepasteUrlValid -> { { Text("Please enter a valid URL starting with http:// or https://") } }
                         else -> null
                     }
                 )
@@ -329,16 +329,16 @@ private fun UrlLoadDialog(viewModel: EditTeamViewModel) {
         },
         confirmButton = {
             TextButton(
-                onClick = { viewModel.loadFromUrl() },
-                enabled = viewModel.isUrlValid && !viewModel.isLoadingUrl
+                onClick = { viewModel.loadPokepasteFromUrl() },
+                enabled = viewModel.isPokepasteUrlValid && !viewModel.isLoadingPokepasteUrl
             ) {
-                Text(if (viewModel.isLoadingUrl) "Loading..." else "Load")
+                Text(if (viewModel.isLoadingPokepasteUrl) "Loading..." else "Load")
             }
         },
         dismissButton = {
             TextButton(
-                onClick = { viewModel.hideUrlDialog() },
-                enabled = !viewModel.isLoadingUrl
+                onClick = { viewModel.hidePokepasteUrlDialog() },
+                enabled = !viewModel.isLoadingPokepasteUrl
             ) {
                 Text("Cancel")
             }
