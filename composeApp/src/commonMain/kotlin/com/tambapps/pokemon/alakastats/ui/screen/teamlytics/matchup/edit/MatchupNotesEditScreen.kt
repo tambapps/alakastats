@@ -60,6 +60,12 @@ class MatchupNotesEditScreen(
 
         val isCompact = LocalIsCompact.current
         val navigator = LocalNavigator.currentOrThrow
+        val scrollState = rememberScrollState()
+
+        LaunchedEffect(viewModel.gamePlanStates.size) {
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
+
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -77,7 +83,7 @@ class MatchupNotesEditScreen(
                     .fillMaxSize()
                     .padding(scaffoldPadding)
                     .padding(paddingValues)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
@@ -95,9 +101,7 @@ class MatchupNotesEditScreen(
                 }
 
                 viewModel.gamePlanStates.forEachIndexed { index, gamePlanState ->
-
-                    Text("Game Plan ${index + 1}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-
+                    SectionTitle("Game Plan ${index + 1}")
                     OutlinedTextField(
                         value = gamePlanState.description,
                         onValueChange = gamePlanState::updateDescription,
@@ -111,7 +115,7 @@ class MatchupNotesEditScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "Composition",
-                            style = MaterialTheme.typography.headlineSmall,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(Modifier.width(16.dp))
