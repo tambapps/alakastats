@@ -18,6 +18,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -41,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,6 +66,7 @@ import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
 
+// TODO remove lambda. it is not serializable so it can make the app crash in some cases
 class MatchupNotesEditScreen(
     private val team: Teamlytics,
     private val onSuccess: (SnackBar, MatchupNotes) -> Unit,
@@ -76,10 +82,11 @@ class MatchupNotesEditScreen(
         }
         val isCompact = LocalIsCompact.current
         val navigator = LocalNavigator.currentOrThrow
-        val scrollState = rememberScrollState()
+        val scrollState = rememberLazyListState()
 
         LaunchedEffect(viewModel.gamePlanStates.size) {
-            scrollState.animateScrollTo(scrollState.maxValue)
+            val lastIndex = 1 + viewModel.gamePlanStates.size // 1 because we created one item before the gamePlanStates
+            scrollState.animateScrollToItem(lastIndex)
         }
 
         Scaffold(
@@ -99,35 +106,42 @@ class MatchupNotesEditScreen(
                     if (isCompact) PaddingValues(start = 16.dp, end = 16.dp)
                     else PaddingValues(16.dp)
                 )) {
-                Column(
-                    modifier = Modifier.verticalScroll(scrollState).weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    state = scrollState,
                 ) {
-                    SectionTitle("Matchup Name")
+                    item {
+                        SectionTitle("Matchup Name")
+                        VerticalSpacer()
 
-                    NameInput(viewModel)
+                        NameInput(viewModel)
+                        VerticalSpacer()
 
-                    PokePasteInput(viewModel)
+                        PokePasteInput(viewModel)
+                        VerticalSpacer(24.dp)
 
-                    Spacer(Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        SectionTitle("Game Plans")
-                        Spacer(Modifier.width(16.dp))
-                        OutlinedIconButton(onClick = { viewModel.createGamePlan() }) {
-                            Icon(
-                                painter = painterResource(Res.drawable.add),
-                                contentDescription = "Add New Game Plan",
-                                tint = MaterialTheme.colorScheme.defaultIconColor
-                            )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            SectionTitle("Game Plans")
+                            Spacer(Modifier.width(16.dp))
+                            OutlinedIconButton(onClick = { viewModel.createGamePlan() }) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.add),
+                                    contentDescription = "Add New Game Plan",
+                                    tint = MaterialTheme.colorScheme.defaultIconColor
+                                )
+                            }
                         }
                     }
 
-                    viewModel.gamePlanStates.forEachIndexed { index, gamePlanState ->
+                    itemsIndexed(viewModel.gamePlanStates) { index, gamePlanState ->
                         SectionTitle("Game Plan ${index + 1}", fontSize = 23.sp)
+                        VerticalSpacer()
 
                         GamePlanComposition(viewModel, gamePlanState)
+                        VerticalSpacer()
 
                         SectionSubTitle("Description")
+                        VerticalSpacer()
                         OutlinedTextField(
                             value = gamePlanState.description,
                             onValueChange = gamePlanState::updateDescription,
@@ -137,10 +151,8 @@ class MatchupNotesEditScreen(
                                 .heightIn(min = 150.dp),
                             singleLine = false,
                         )
-                        Spacer(Modifier.height(8.dp))
+                        VerticalSpacer(32.dp)
                     }
-
-                    Spacer(Modifier.height(16.dp))
                 }
                 ButtonsBar(navigator, viewModel)
             }
@@ -286,16 +298,19 @@ private fun GamePlanComposition(
         Spacer(Modifier.width(16.dp))
         OutlinedIconButton(
             onClick = { viewModel.compositionDialogFor = gamePlanState },
-            modifier = Modifier.size(36.dp)
+            modifier = Modifier.size(32.dp)
         ) {
             Icon(
                 painter = painterResource(Res.drawable.edit),
+                modifier = Modifier.size(16.dp),
                 contentDescription = "Add Pokemon to Composition",
                 tint = MaterialTheme.colorScheme.defaultIconColor
             )
         }
     }
+
     if (composition.isEmpty()) {
+        Spacer(Modifier.height(16.dp))
         Text("Select pokemons to bring into battle")
     } else {
         val isCompact = LocalIsCompact.current
@@ -314,3 +329,6 @@ private fun GamePlanComposition(
         }
     }
 }
+
+@Composable
+private fun VerticalSpacer(height: Dp = 16.dp) = Spacer(Modifier.height(height))

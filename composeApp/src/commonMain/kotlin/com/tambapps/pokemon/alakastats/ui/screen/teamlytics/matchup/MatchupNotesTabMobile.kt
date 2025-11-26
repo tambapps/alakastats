@@ -5,5 +5,7 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun MatchupNotesTabMobile(viewModel: MatchupNotesViewModel) {
+    val matchupNotes = viewModel.matchupNotes
+
 
 }

@@ -257,45 +257,49 @@ private fun PokepastePokemon(
 
 @Composable
 fun PokePasteInput(viewModel: PokepasteEditingViewModel) {
-    if (getPlatform().type == PlatformType.Web) {
-        Text(
-            text = "Pokepaste",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Medium
-        )
-    } else {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    Column {
+        if (getPlatform().type == PlatformType.Web) {
             Text(
                 text = "Pokepaste",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Medium
             )
-            Spacer(Modifier.width(16.dp))
-            OutlinedButton(onClick = { viewModel.showPokepasteUrlDialog() }) {
-                Text("Load from URL")
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Pokepaste",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.width(16.dp))
+                OutlinedButton(onClick = { viewModel.showPokepasteUrlDialog() }) {
+                    Text("Load from URL")
+                }
             }
         }
-    }
 
-    OutlinedTextField(
-        value = viewModel.pokepaste,
-        onValueChange = viewModel::updatePokepaste,
-        placeholder = { Text("The pokepaste content (not the URL)") },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp),
-        minLines = 8,
-        maxLines = 12,
-        isError = viewModel.pokepasteError != null,
-        supportingText = viewModel.pokepasteError?.let { error ->
-            { Text(text = error) }
+        Spacer(Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = viewModel.pokepaste,
+            onValueChange = viewModel::updatePokepaste,
+            placeholder = { Text("The pokepaste content (not the URL)") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            minLines = 8,
+            maxLines = 12,
+            isError = viewModel.pokepasteError != null,
+            supportingText = viewModel.pokepasteError?.let { error ->
+                { Text(text = error) }
+            }
+        )
+
+        if (viewModel.showPokePasteUrlDialog) {
+            PokepasteUrlLoadDialog(viewModel)
         }
-    )
-
-    if (viewModel.showPokePasteUrlDialog) {
-        PokepasteUrlLoadDialog(viewModel)
     }
 }
 
