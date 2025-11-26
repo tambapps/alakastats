@@ -20,6 +20,7 @@ data class Teamlytics(
 }
 
 data class MatchupNotes(
+    val id: Uuid,
     val name: String,
     val pokePaste: PokePaste?,
     val gamePlans: List<GamePlan>

@@ -15,10 +15,10 @@ import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import io.ktor.client.HttpClient
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.uuid.Uuid
 
 class MatchupNotesEditViewModel(
     pokepasteParser: PokepasteParser,
@@ -36,6 +36,7 @@ class MatchupNotesEditViewModel(
     var compositionDialogFor by mutableStateOf<GamePlanState?>(null)
 
     fun generateMatchupNotes() = MatchupNotes(
+        id = Uuid.random(),
         name = name,
         pokePaste = pokepasteParser.tryParse(pokepaste),
         gamePlans = gamePlanStates.map { it.toGamePlan() }

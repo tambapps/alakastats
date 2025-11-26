@@ -36,6 +36,7 @@ data class TeamlyticsPreviewEntity(
 
 @Serializable
 data class MatchupNotesEntity(
+    val id: Uuid,
     val name: String,
     val pokePaste: String?,
     val gamePlans: List<GamePlanEntity>

@@ -122,12 +122,14 @@ class MatchupNotesTransformer(
 ) {
 
     fun toEntity(domain: MatchupNotes) = MatchupNotesEntity(
+        id = domain.id,
         name = domain.name,
         pokePaste = domain.pokePaste?.toPokePasteString(),
         gamePlans = domain.gamePlans.map(gamePlanTransformer::toEntity)
     )
 
     fun toDomain(entity: MatchupNotesEntity) = MatchupNotes(
+        id = entity.id,
         name = entity.name,
         pokePaste = entity.pokePaste?.let(pokepasteParser::tryParse),
         gamePlans = entity.gamePlans.map(gamePlanTransformer::toDomain)
