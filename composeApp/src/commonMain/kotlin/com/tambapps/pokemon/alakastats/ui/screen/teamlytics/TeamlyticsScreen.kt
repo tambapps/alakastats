@@ -132,12 +132,6 @@ internal fun Pager(
             4 -> {
                 val viewModel = koinInjectUseCase<ConsultTeamlyticsUseCase, MatchupNotesViewModel>(viewModel)
                 MatchupNotesTab(viewModel)
-                /* TODO delete this
-                Box(Modifier.fillMaxSize()) {
-                    Text("Coming soon", style = MaterialTheme.typography.titleMedium, modifier = Modifier.align(Alignment.Center))
-                }
-
-                 */
             }
         }
     }

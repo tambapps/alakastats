@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 
 
@@ -32,6 +33,7 @@ fun PokemonFilterChip(
             pokemonImageService.PokemonSprite(
                 pokemonName,
                 disableTooltip = true,
+                facingDirection = FacingDirection.RIGHT,
                 modifier = Modifier.size(height).padding(bottom = 8.dp)
             )
         },

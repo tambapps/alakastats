@@ -56,6 +56,7 @@ import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -302,12 +303,12 @@ private fun GamePlanComposition(
             composition.forEach { pokemonName ->
                 viewModel.pokemonImageService.PokemonSprite(
                     pokemonName,
+                    facingDirection = FacingDirection.RIGHT,
                     modifier = Modifier.then(
                         if (isCompact) Modifier.weight(1f) else Modifier.size(
                             64.dp
                         )
                     )
-                        .scale(scaleX = -1f, scaleY = 1f)
                 )
             }
         }

@@ -74,7 +74,7 @@ interface PokemonImageService {
     fun listAvailableNames(): List<PokemonName>
 
     @Composable
-    fun PokemonSprite(name: PokemonName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
+    fun PokemonSprite(name: PokemonName, modifier: Modifier = Modifier, disableTooltip: Boolean = false, facingDirection: FacingDirection = FacingDirection.LEFT)
 
     @Composable
     fun PokemonArtwork(
@@ -252,8 +252,9 @@ class PokemonLocalUrlImageService(
     override fun PokemonSprite(
         name: PokemonName,
         modifier: Modifier,
-        disableTooltip: Boolean
-    ) = WebPokemonImage("sprite", name.normalized.value, modifier, flipX = false, disableTooltip)
+        disableTooltip: Boolean,
+        facingDirection: FacingDirection
+    ) = WebPokemonImage("sprite", name.normalized.value, modifier, flipX = facingDirection == FacingDirection.RIGHT, disableTooltip)
 
     @Composable
     override fun PokemonArtwork(
@@ -301,7 +302,9 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
     private val itemsData = mutableStateMapOf<String, ItemData>()
 
     @Composable
-    override fun PokemonSprite(name: PokemonName, modifier: Modifier, disableTooltip: Boolean) = PokemonImage(name, modifier, disableTooltip) { it.sprite }
+    override fun PokemonSprite(name: PokemonName, modifier: Modifier, disableTooltip: Boolean, facingDirection: FacingDirection) =
+        PokemonImage(name, modifier, disableTooltip = disableTooltip, facingDirection = facingDirection) { it.sprite }
+
     @Composable
     override fun PokemonArtwork(
         name: PokemonName,
