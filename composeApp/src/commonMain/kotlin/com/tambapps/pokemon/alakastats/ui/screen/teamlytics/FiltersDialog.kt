@@ -45,6 +45,7 @@ import androidx.compose.ui.window.Dialog
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
@@ -143,30 +144,11 @@ private fun PokemonsFiltersTile(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     pokemons.forEach { pokemonFilter ->
-                        val height = 70.dp
-                        FilterChip(
-                            modifier = Modifier.height(height).padding(vertical = 4.dp),
+                        PokemonFilterChip(
+                            pokemonName = pokemonFilter.name,
+                            pokemonImageService = viewModel.pokemonImageService,
                             onClick = { pokemons.remove(pokemonFilter) },
-                            leadingIcon = {
-                                viewModel.pokemonImageService.PokemonSprite(
-                                    pokemonFilter.name,
-                                    disableTooltip = true,
-                                    modifier = Modifier.size(height).padding(bottom = 8.dp)
-                                )
-                            },
-                            label = { Text(
-                                text = pokemonFilter.name.pretty + (if (pokemonFilter.asLead) "\nas lead" else ""),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.headlineSmall
-                            ) },
-                            selected = pokemonFilter.asLead,
-                            trailingIcon = {
-                                Text(
-                                    text = "×",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
+                            asLead = pokemonFilter.asLead
                         )
                     }
                 }

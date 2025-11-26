@@ -8,18 +8,22 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import io.ktor.client.HttpClient
 
 class MatchupNotesEditViewModel(
     pokepasteParser: PokepasteParser,
-    httpClient: HttpClient
+    httpClient: HttpClient,
+    val pokemonImageService: PokemonImageService,
     ) : PokepasteEditingViewModel(pokepasteParser, httpClient), ScreenModel {
 
     var name by mutableStateOf("")
         private set
     val gamePlanStates = mutableStateListOf<GamePlanState>()
+
+    var compositionDialogFor by mutableStateOf<GamePlanState?>(null)
 
     fun prepareEdition(matchupNotes: MatchupNotes) {
         name = matchupNotes.name
@@ -42,16 +46,21 @@ class GamePlanState {
     var description by mutableStateOf("")
         private set
 
-    var composition = mutableStateListOf<PokemonName>()
+    var composition by mutableStateOf(listOf<PokemonName>())
+        private set
 
 
     fun updateDescription(description: String) {
         this.description = description
     }
+
+    fun updateComposition(composition: List<PokemonName>) {
+        this.composition = composition
+    }
     companion object {
         fun from(gamePlan: GamePlan) = GamePlanState().apply {
             description = gamePlan.description
-            gamePlan.composition?.let(composition::addAll)
+            gamePlan.composition?.let { composition = it }
         }
     }
 }

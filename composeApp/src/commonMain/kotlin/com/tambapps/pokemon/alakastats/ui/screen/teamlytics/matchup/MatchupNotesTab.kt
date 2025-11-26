@@ -55,7 +55,7 @@ fun NoNotes(viewModel: MatchupNotesViewModel) {
                 style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(8.dp))
             val navigator = LocalNavigator.currentOrThrow
-            Button(onClick = { navigator.push(MatchupNotesEditScreen(viewModel::addMatchupNotes)) }) {
+            Button(onClick = { navigator.push(MatchupNotesEditScreen(viewModel.team, viewModel::addMatchupNotes)) }) {
                 Icon(
                     painter = painterResource(Res.drawable.add),
                     contentDescription = "Add",
