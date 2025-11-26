@@ -137,10 +137,12 @@ class MatchupNotesTransformer(
 class GamePlanTransformer {
 
     fun toEntity(domain: GamePlan) = GamePlanEntity(
-        description = domain.description
+        description = domain.description,
+        composition = domain.composition?.map { it.value }
     )
 
     fun toDomain(entity: GamePlanEntity) = GamePlan(
-        description = entity.description
+        description = entity.description,
+        composition = entity.composition?.map { PokemonName(it) }
     )
 }
