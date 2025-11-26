@@ -1,5 +1,8 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,8 +19,11 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -56,7 +62,7 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
         val isCompact = LocalIsCompact.current
         val pagerState = rememberPagerState(pageCount = { TABS.size })
 
-        Column(
+        Box(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
                 .fillMaxSize()
@@ -64,14 +70,10 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
         ) {
             when (viewModel.teamState) {
                 is TeamState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(48.dp).align(Alignment.Center)
+                    )
+
                 }
                 is TeamState.Error -> {
                     val navigator = LocalNavigator.currentOrThrow
@@ -82,10 +84,21 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
                     }
                 }
                 is TeamState.Loaded -> {
-                    if (isCompact) {
-                        TeamlyticsScreenMobile(viewModel, TABS, pagerState)
-                    } else {
-                        TeamlyticsScreenDesktop(viewModel, TABS, pagerState)
+                    var visible by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) {
+                        visible = true
+                    }
+                    AnimatedVisibility(
+                        visible = visible,
+                        enter = fadeIn(animationSpec = tween(durationMillis = 1000))
+                    ) {
+                        Column(Modifier.fillMaxSize()) {
+                            if (isCompact) {
+                                TeamlyticsScreenMobile(viewModel, TABS, pagerState)
+                            } else {
+                                TeamlyticsScreenDesktop(viewModel, TABS, pagerState)
+                            }
+                        }
                     }
                     if (viewModel.showFiltersDialog) {
                         val filtersViewModel = remember(viewModel.filters) { FiltersViewModel(viewModel, viewModel.imageService) }
