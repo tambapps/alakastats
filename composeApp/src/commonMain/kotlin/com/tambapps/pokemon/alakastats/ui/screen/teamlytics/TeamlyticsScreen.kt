@@ -53,16 +53,7 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
     @Composable
     override fun Content() {
         val viewModel = koinScreenModel<TeamlyticsViewModel> { parametersOf(teamId) }
-        val navigator = LocalNavigator.currentOrThrow
         val isCompact = LocalIsCompact.current
-
-        // Handle error state - navigate back if team loading failed
-        LaunchedEffect(viewModel.teamState) {
-            if (viewModel.teamState is TeamState.Error) {
-                navigator.pop()
-            }
-        }
-
         val pagerState = rememberPagerState(pageCount = { TABS.size })
 
         Column(
@@ -83,8 +74,12 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
                     }
                 }
                 is TeamState.Error -> {
-                    // Error is handled by LaunchedEffect above (navigator.pop())
-                    // This branch is just to satisfy the when expression
+                    val navigator = LocalNavigator.currentOrThrow
+                    LaunchedEffect(Unit) {
+                        if (viewModel.teamState is TeamState.Error) {
+                            navigator.pop()
+                        }
+                    }
                 }
                 is TeamState.Loaded -> {
                     if (isCompact) {
