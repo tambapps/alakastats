@@ -11,11 +11,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -25,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -42,9 +41,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
@@ -76,7 +73,7 @@ data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
             }
         ) { scaffoldPadding ->
             val paddingValues = if (isCompact) PaddingValues(start = 16.dp, end = 16.dp)
-             else PaddingValues(16.dp)
+            else PaddingValues(16.dp)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -86,11 +83,11 @@ data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 TeamNameInput(viewModel)
-                
+
                 ShowdownNamesInput(viewModel)
 
                 PokePasteInput(viewModel)
-                
+
                 Spacer(modifier = Modifier.weight(1f))
 
                 ButtonBar(navigator, viewModel, teamlytics != null)
@@ -136,11 +133,7 @@ private fun ShowdownNamesInput(viewModel: EditTeamViewModel) {
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.width(16.dp))
-            OutlinedButton(
-                onClick = { viewModel.showAddNameDialog() },
-                shape = CircleShape,
-                contentPadding = PaddingValues(0.dp),
-                ) {
+            OutlinedIconButton(onClick = { viewModel.showAddNameDialog() }) {
                 Icon(
                     painter = painterResource(Res.drawable.add),
                     contentDescription = "Add Name",
@@ -181,7 +174,11 @@ private fun ShowdownNamesInput(viewModel: EditTeamViewModel) {
 }
 
 @Composable
-private fun ButtonBar(navigator: Navigator, viewModel: EditTeamViewModel, isEditing: Boolean = false) {
+private fun ButtonBar(
+    navigator: Navigator,
+    viewModel: EditTeamViewModel,
+    isEditing: Boolean = false
+) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)

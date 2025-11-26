@@ -46,7 +46,7 @@ import kotlin.uuid.Uuid
 
 data class TeamlyticsScreen(val teamId: Uuid) : Screen {
     private companion object {
-        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Match-up Notes")
+        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Matchup Notes")
     }
 
     @OptIn(ExperimentalMaterial3Api::class)

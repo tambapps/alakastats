@@ -62,7 +62,7 @@ fun NoNotes(viewModel: MatchupNotesViewModel) {
                     modifier = Modifier.size(ButtonDefaults.IconSize)
                 )
                 Spacer(Modifier.width(8.dp))
-                Text("New Matchup", style = buttonTextStyle.copy(
+                Text("Create Matchup", style = buttonTextStyle.copy(
                     color = LocalContentColor.current
                 ))
             }

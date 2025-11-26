@@ -4,6 +4,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
+import alakastats.composeapp.generated.resources.edit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -18,15 +19,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -40,15 +41,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import arrow.core.Either
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
@@ -58,7 +62,7 @@ import org.jetbrains.compose.resources.painterResource
 
 class MatchupNotesEditScreen(
     private val team: Teamlytics,
-    private val onSuccess: suspend (MatchupNotes) -> Either<DomainError, Unit>,
+    private val onSuccess: (SnackBar, MatchupNotes) -> Unit,
     private val matchupNotes: MatchupNotes? = null
 ) : Screen {
     @Composable
@@ -85,57 +89,95 @@ class MatchupNotesEditScreen(
                         BackIconButton(navigator)
                     }
                 )
-            }
+            },
         ) { scaffoldPadding ->
-            val paddingValues = if (isCompact) PaddingValues(start = 16.dp, end = 16.dp)
-            else PaddingValues(16.dp)
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(scaffoldPadding)
-                    .padding(paddingValues)
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            Column(Modifier
+                .fillMaxSize()
+                .padding(scaffoldPadding)
+                .padding(
+                    if (isCompact) PaddingValues(start = 16.dp, end = 16.dp)
+                    else PaddingValues(16.dp)
+                )) {
+                Column(
+                    modifier = Modifier.verticalScroll(scrollState).weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    SectionTitle("Matchup Name")
 
-                SectionTitle("Matchup Name")
+                    NameInput(viewModel)
 
-                NameInput(viewModel)
-
-                PokePasteInput(viewModel)
-
-                Spacer(Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    SectionTitle("Game Plans")
-                    Spacer(Modifier.width(16.dp))
-                    AddButton(
-                        onClick = { viewModel.createGamePlan() },
-                        contentDescription = "Add Game Plan"
-                    )
-                }
-
-                viewModel.gamePlanStates.forEachIndexed { index, gamePlanState ->
-                    SectionTitle("Game Plan ${index + 1}")
-                    OutlinedTextField(
-                        value = gamePlanState.description,
-                        onValueChange = gamePlanState::updateDescription,
-                        placeholder = { Text("Type your game plan") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 150.dp),
-                        singleLine = false,
-                    )
-
-                    GamePlanComposition(viewModel, gamePlanState)
+                    PokePasteInput(viewModel)
 
                     Spacer(Modifier.height(8.dp))
-                }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        SectionTitle("Game Plans")
+                        Spacer(Modifier.width(16.dp))
+                        OutlinedIconButton(onClick = { viewModel.createGamePlan() }) {
+                            Icon(
+                                painter = painterResource(Res.drawable.add),
+                                contentDescription = "Add New Game Plan",
+                                tint = MaterialTheme.colorScheme.defaultIconColor
+                            )
+                        }
+                    }
 
-                Spacer(Modifier.height(16.dp))
+                    viewModel.gamePlanStates.forEachIndexed { index, gamePlanState ->
+                        SectionTitle("Game Plan ${index + 1}", fontSize = 23.sp)
+
+                        GamePlanComposition(viewModel, gamePlanState)
+
+                        SectionSubTitle("Description")
+                        OutlinedTextField(
+                            value = gamePlanState.description,
+                            onValueChange = gamePlanState::updateDescription,
+                            placeholder = { Text("Type your game plan") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 150.dp),
+                            singleLine = false,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+                }
+                ButtonsBar(navigator, viewModel)
             }
         }
         viewModel.compositionDialogFor?.let { AddToCompositionDialog(viewModel, team, it) }
     }
+
+    @Composable
+    private fun ButtonsBar(
+        navigator: Navigator,
+        viewModel: MatchupNotesEditViewModel,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = { navigator.pop() },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Cancel")
+            }
+
+            val snackBar = LocalSnackBar.current
+            Button(
+                onClick = { onSuccess.invoke(snackBar, viewModel.generateMatchupNotes()) },
+                modifier = Modifier.weight(1f),
+                enabled = viewModel.isFormValid,
+            ) {
+                Text(
+                    if (matchupNotes != null) "Update Matchup" else "Create Matchup",
+                    // important
+                    color = LocalContentColor.current
+                )
+            }
+        }
+    }
+
 }
 
 @Composable
@@ -185,6 +227,10 @@ private fun AddToCompositionDialog(
             }
         },
         dismissButton = {
+            TextButton(onClick = { selectedPokemons.clear() }) {
+                Text("Clear")
+            }
+
             TextButton(onClick = { viewModel.compositionDialogFor = null }) {
                 Text("Cancel")
             }
@@ -201,10 +247,19 @@ private fun AddToCompositionDialog(
 }
 
 @Composable
-private fun SectionTitle(text: String) = Text(
+private fun SectionTitle(text: String, fontSize: TextUnit = TextUnit.Unspecified) = Text(
     text = text,
     style = MaterialTheme.typography.headlineSmall,
-    fontWeight = FontWeight.Bold
+    fontWeight = FontWeight.Bold,
+    fontSize = fontSize
+)
+
+@Composable
+private fun SectionSubTitle(text: String) = Text(
+    text = text,
+    style = MaterialTheme.typography.titleLarge,
+    fontWeight = FontWeight.Bold,
+    fontSize = 18.sp
 )
 
 
@@ -219,22 +274,6 @@ private fun NameInput(viewModel: MatchupNotesEditViewModel) {
     )
 }
 
-
-@Composable
-private fun AddButton(onClick: () -> Unit, contentDescription: String?) {
-    OutlinedButton(
-        onClick = onClick,
-        shape = CircleShape,
-        contentPadding = PaddingValues(0.dp),
-    ) {
-        Icon(
-            painter = painterResource(Res.drawable.add),
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.defaultIconColor
-        )
-    }
-}
-
 @Composable
 private fun GamePlanComposition(
     viewModel: MatchupNotesEditViewModel,
@@ -242,26 +281,34 @@ private fun GamePlanComposition(
 ) {
     val composition = gamePlanState.composition
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = "Composition",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
+        SectionSubTitle(text = "Composition")
         Spacer(Modifier.width(16.dp))
-        AddButton(
+        OutlinedIconButton(
             onClick = { viewModel.compositionDialogFor = gamePlanState },
-            contentDescription = "Add Pokemon to Composition"
-        )
+            modifier = Modifier.size(36.dp)
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.edit),
+                contentDescription = "Add Pokemon to Composition",
+                tint = MaterialTheme.colorScheme.defaultIconColor
+            )
+        }
     }
     if (composition.isEmpty()) {
-        Text("Which pokemon to bring into battle")
+        Text("Select pokemons to bring into battle")
     } else {
         val isCompact = LocalIsCompact.current
         Row(Modifier.fillMaxWidth()) {
             composition.forEach { pokemonName ->
-                viewModel.pokemonImageService.PokemonSprite(pokemonName,
-                    modifier = Modifier.then(if (isCompact) Modifier.weight(1f) else Modifier.size(64.dp))
-                        .scale(scaleX = -1f, scaleY = 1f))
+                viewModel.pokemonImageService.PokemonSprite(
+                    pokemonName,
+                    modifier = Modifier.then(
+                        if (isCompact) Modifier.weight(1f) else Modifier.size(
+                            64.dp
+                        )
+                    )
+                        .scale(scaleX = -1f, scaleY = 1f)
+                )
             }
         }
     }

@@ -19,11 +19,19 @@ class MatchupNotesEditViewModel(
     val pokemonImageService: PokemonImageService,
     ) : PokepasteEditingViewModel(pokepasteParser, httpClient), ScreenModel {
 
+    val isFormValid: Boolean get() = name.isNotBlank() && (gamePlanStates.isNotEmpty() && gamePlanStates.all { it.isValid })
+
     var name by mutableStateOf("")
         private set
     val gamePlanStates = mutableStateListOf<GamePlanState>()
 
     var compositionDialogFor by mutableStateOf<GamePlanState?>(null)
+
+    fun generateMatchupNotes() = MatchupNotes(
+        name = name,
+        pokePaste = pokepasteParser.tryParse(pokepaste),
+        gamePlans = gamePlanStates.map { it.toGamePlan() }
+    )
 
     fun prepareEdition(matchupNotes: MatchupNotes) {
         name = matchupNotes.name
@@ -49,6 +57,7 @@ class GamePlanState {
     var composition by mutableStateOf(listOf<PokemonName>())
         private set
 
+    val isValid get() = description.isNotBlank() && composition.isNotEmpty()
 
     fun updateDescription(description: String) {
         this.description = description
@@ -57,6 +66,8 @@ class GamePlanState {
     fun updateComposition(composition: List<PokemonName>) {
         this.composition = composition
     }
+
+    fun toGamePlan() = GamePlan(description = description, composition = composition)
     companion object {
         fun from(gamePlan: GamePlan) = GamePlanState().apply {
             description = gamePlan.description
