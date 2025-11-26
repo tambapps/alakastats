@@ -15,7 +15,6 @@ import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
@@ -38,7 +37,7 @@ class TeamlyticsViewModel(
     private val teamId: Uuid,
     private val useCase: ManageTeamlyticsUseCase,
     val imageService: PokemonImageService,
-) : ScreenModel, ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase, ManageMatchupNotesUseCase {
+) : ScreenModel, ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase {
 
     private val scope = CoroutineScope(Dispatchers.Default)
     var teamState by mutableStateOf<TeamState>(TeamState.Loading)
@@ -136,11 +135,6 @@ class TeamlyticsViewModel(
     override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?): Either<DomainError, Unit> {
         val currentTeam = this.originalTeam
         return save(currentTeam.copy(notes = notes))
-    }
-
-    override suspend fun addMatchupNotes(matchupNotes: MatchupNotes): Either<DomainError, Unit> {
-        val currentTeam = this.originalTeam
-        return save(currentTeam.copy(matchupNotes = currentTeam.matchupNotes + matchupNotes))
     }
 
     private suspend fun save(team: Teamlytics): Either<DomainError, Unit> = either {

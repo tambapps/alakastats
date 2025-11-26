@@ -8,14 +8,22 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MatchupNotesEditViewModel(
     pokepasteParser: PokepasteParser,
     httpClient: HttpClient,
+    private val useCase: ManageTeamlyticsUseCase,
     val pokemonImageService: PokemonImageService,
     ) : PokepasteEditingViewModel(pokepasteParser, httpClient), ScreenModel {
 
@@ -47,6 +55,28 @@ class MatchupNotesEditViewModel(
 
     fun createGamePlan() {
         gamePlanStates.add(GamePlanState())
+    }
+
+    fun saveMatchupNotes(teamlytics: Teamlytics, original: MatchupNotes?, snackBar: SnackBar, onSuccess: () -> Unit) {
+        scope.launch {
+            val matchupNotes = generateMatchupNotes()
+            val matchupNotesList =
+                if (original != null) teamlytics.matchupNotes.map { if (it == original) matchupNotes else it }
+                else teamlytics.matchupNotes + matchupNotes
+
+            val either = useCase.save(teamlytics.copy(matchupNotes = matchupNotesList))
+
+            withContext(Dispatchers.Main) {
+                either.fold(
+                    ifLeft = {
+                        snackBar.show("Error: ${it.message}", SnackBar.Severity.ERROR)
+                    },
+                    ifRight = {
+                        onSuccess()
+                    }
+                )
+            }
+        }
     }
 }
 

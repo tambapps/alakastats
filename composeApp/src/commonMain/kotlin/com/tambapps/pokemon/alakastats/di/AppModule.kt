@@ -17,11 +17,11 @@ import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsNotesTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransformer
+import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
@@ -95,7 +95,7 @@ private val appModule = module {
     factory { (useCase: ManageTeamReplaysUseCase) ->
         UsagesViewModel(useCase, get())
     }
-    factory { (useCase: ManageMatchupNotesUseCase) ->
+    factory { (useCase: ConsultTeamlyticsUseCase) ->
         MatchupNotesViewModel(useCase, get())
     }
 }

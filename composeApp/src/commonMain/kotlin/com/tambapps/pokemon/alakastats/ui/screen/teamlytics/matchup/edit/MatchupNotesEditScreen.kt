@@ -19,11 +19,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -57,7 +53,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
-import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
@@ -66,10 +61,9 @@ import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
 
-// TODO remove lambda. it is not serializable so it can make the app crash in some cases
 class MatchupNotesEditScreen(
+    // TODO no. Il faut un parcelable, une Uuid. Pour la team et le matchupNotes
     private val team: Teamlytics,
-    private val onSuccess: (SnackBar, MatchupNotes) -> Unit,
     private val matchupNotes: MatchupNotes? = null
 ) : Screen {
     @Composable
@@ -85,7 +79,8 @@ class MatchupNotesEditScreen(
         val scrollState = rememberLazyListState()
 
         LaunchedEffect(viewModel.gamePlanStates.size) {
-            val lastIndex = 1 + viewModel.gamePlanStates.size // 1 because we created one item before the gamePlanStates
+            val lastIndex =
+                1 + viewModel.gamePlanStates.size // 1 because we created one item before the gamePlanStates
             scrollState.animateScrollToItem(lastIndex)
         }
 
@@ -99,13 +94,15 @@ class MatchupNotesEditScreen(
                 )
             },
         ) { scaffoldPadding ->
-            Column(Modifier
-                .fillMaxSize()
-                .padding(scaffoldPadding)
-                .padding(
-                    if (isCompact) PaddingValues(start = 16.dp, end = 16.dp)
-                    else PaddingValues(16.dp)
-                )) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(scaffoldPadding)
+                    .padding(
+                        if (isCompact) PaddingValues(start = 16.dp, end = 16.dp)
+                        else PaddingValues(16.dp)
+                    )
+            ) {
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     state = scrollState,
@@ -178,7 +175,11 @@ class MatchupNotesEditScreen(
 
             val snackBar = LocalSnackBar.current
             Button(
-                onClick = { onSuccess.invoke(snackBar, viewModel.generateMatchupNotes()) },
+                onClick = {
+                    viewModel.saveMatchupNotes(team, matchupNotes, snackBar) {
+                        navigator.pop()
+                    }
+                },
                 modifier = Modifier.weight(1f),
                 enabled = viewModel.isFormValid,
             ) {
