@@ -56,8 +56,6 @@ import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
-// TODO rename file
-
 @Composable
 fun MatchupNotesEdit(
     team: Teamlytics,
