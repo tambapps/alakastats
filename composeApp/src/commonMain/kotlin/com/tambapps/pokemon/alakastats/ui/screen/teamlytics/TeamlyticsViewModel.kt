@@ -15,6 +15,7 @@ import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
@@ -37,7 +38,8 @@ class TeamlyticsViewModel(
     private val teamId: Uuid,
     private val useCase: ManageTeamlyticsUseCase,
     val imageService: PokemonImageService,
-) : ScreenModel, ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase {
+) : ScreenModel, ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase,
+    ManageMatchupNotesUseCase {
 
     private val scope = CoroutineScope(Dispatchers.Default)
     var teamState by mutableStateOf<TeamState>(TeamState.Loading)
@@ -114,6 +116,11 @@ class TeamlyticsViewModel(
         }
 
         return save(currentTeam.copy(replays = teamReplays.withComputedElo())).also { onReplaysModified() }
+    }
+
+    override suspend fun setMatchupNotes(matchupNotes: List<MatchupNotes>): Either<DomainError, Unit> {
+        val currentTeam = originalTeam
+        return save(currentTeam.copy(matchupNotes = matchupNotes)).also { onReplaysModified() }
     }
 
     override fun export(team: Teamlytics) = useCase.export(team)

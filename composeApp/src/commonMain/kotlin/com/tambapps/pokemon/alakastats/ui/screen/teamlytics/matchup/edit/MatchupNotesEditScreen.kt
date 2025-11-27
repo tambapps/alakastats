@@ -45,14 +45,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
@@ -60,138 +54,135 @@ import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 
-class MatchupNotesEditScreen(
-    // TODO no. Il faut un parcelable, une Uuid. Pour la team et le matchupNotes
-    private val team: Teamlytics,
-    private val matchupNotes: MatchupNotes? = null
-) : Screen {
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<MatchupNotesEditViewModel>()
-        LaunchedEffect(Unit) {
-            if (matchupNotes != null) {
-                viewModel.prepareEdition(matchupNotes)
-            }
+// TODO rename file
+
+@Composable
+fun MatchupNotesEdit(
+    team: Teamlytics,
+    matchupNotes: MatchupNotes? = null,
+    onCancel: () -> Unit,
+    onEdited: (MatchupNotes) -> Unit
+) {
+    val viewModel = koinInject<MatchupNotesEditViewModel>()
+    LaunchedEffect(Unit) {
+        if (matchupNotes != null) {
+            viewModel.prepareEdition(matchupNotes)
         }
-        val isCompact = LocalIsCompact.current
-        val navigator = LocalNavigator.currentOrThrow
-        val scrollState = rememberLazyListState()
+    }
+    val isCompact = LocalIsCompact.current
+    val scrollState = rememberLazyListState()
 
-        LaunchedEffect(viewModel.gamePlanStates.size) {
-            val lastIndex =
-                1 + viewModel.gamePlanStates.size // 1 because we created one item before the gamePlanStates
-            scrollState.animateScrollToItem(lastIndex)
-        }
+    LaunchedEffect(viewModel.gamePlanStates.size) {
+        val lastIndex =
+            1 + viewModel.gamePlanStates.size // 1 because we created one item before the gamePlanStates
+        scrollState.animateScrollToItem(lastIndex)
+    }
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(if (matchupNotes != null) "Edit Matchup" else "Create Matchup") },
-                    navigationIcon = {
-                        BackIconButton(navigator)
-                    }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(if (matchupNotes != null) "Edit Matchup" else "Create Matchup") },
+                navigationIcon = {
+                    BackIconButton(onCancel)
+                }
+            )
+        },
+    ) { scaffoldPadding ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(scaffoldPadding)
+                .padding(
+                    if (isCompact) PaddingValues(start = 16.dp, end = 16.dp)
+                    else PaddingValues(16.dp)
                 )
-            },
-        ) { scaffoldPadding ->
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(scaffoldPadding)
-                    .padding(
-                        if (isCompact) PaddingValues(start = 16.dp, end = 16.dp)
-                        else PaddingValues(16.dp)
-                    )
+        ) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                state = scrollState,
             ) {
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    state = scrollState,
-                ) {
-                    item {
-                        SectionTitle("Matchup Name")
-                        VerticalSpacer()
+                item {
+                    SectionTitle("Matchup Name")
+                    VerticalSpacer()
 
-                        NameInput(viewModel)
-                        VerticalSpacer()
+                    NameInput(viewModel)
+                    VerticalSpacer()
 
-                        PokePasteInput(viewModel)
-                        VerticalSpacer(24.dp)
+                    PokePasteInput(viewModel)
+                    VerticalSpacer(24.dp)
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            SectionTitle("Game Plans")
-                            Spacer(Modifier.width(16.dp))
-                            OutlinedIconButton(onClick = { viewModel.createGamePlan() }) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.add),
-                                    contentDescription = "Add New Game Plan",
-                                    tint = MaterialTheme.colorScheme.defaultIconColor
-                                )
-                            }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        SectionTitle("Game Plans")
+                        Spacer(Modifier.width(16.dp))
+                        OutlinedIconButton(onClick = { viewModel.createGamePlan() }) {
+                            Icon(
+                                painter = painterResource(Res.drawable.add),
+                                contentDescription = "Add New Game Plan",
+                                tint = MaterialTheme.colorScheme.defaultIconColor
+                            )
                         }
                     }
-
-                    itemsIndexed(viewModel.gamePlanStates) { index, gamePlanState ->
-                        SectionTitle("Game Plan ${index + 1}", fontSize = 23.sp)
-                        VerticalSpacer()
-
-                        GamePlanComposition(viewModel, gamePlanState)
-                        VerticalSpacer()
-
-                        SectionSubTitle("Description")
-                        VerticalSpacer()
-                        OutlinedTextField(
-                            value = gamePlanState.description,
-                            onValueChange = gamePlanState::updateDescription,
-                            placeholder = { Text("Type your game plan") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 150.dp),
-                            singleLine = false,
-                        )
-                        VerticalSpacer(32.dp)
-                    }
                 }
-                ButtonsBar(navigator, viewModel)
-            }
-        }
-        viewModel.compositionDialogFor?.let { AddToCompositionDialog(viewModel, team, it) }
-    }
 
-    @Composable
-    private fun ButtonsBar(
-        navigator: Navigator,
-        viewModel: MatchupNotesEditViewModel,
+                itemsIndexed(viewModel.gamePlanStates) { index, gamePlanState ->
+                    SectionTitle("Game Plan ${index + 1}", fontSize = 23.sp)
+                    VerticalSpacer()
+
+                    GamePlanComposition(viewModel, gamePlanState)
+                    VerticalSpacer()
+
+                    SectionSubTitle("Description")
+                    VerticalSpacer()
+                    OutlinedTextField(
+                        value = gamePlanState.description,
+                        onValueChange = gamePlanState::updateDescription,
+                        placeholder = { Text("Type your game plan") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 150.dp),
+                        singleLine = false,
+                    )
+                    VerticalSpacer(32.dp)
+                }
+            }
+            ButtonsBar(viewModel, matchupNotes, onCancel, onEdited)
+        }
+    }
+    viewModel.compositionDialogFor?.let { AddToCompositionDialog(viewModel, team, it) }
+}
+
+@Composable
+private fun ButtonsBar(
+    viewModel: MatchupNotesEditViewModel,
+    matchupNotes: MatchupNotes?,
+    onCancel: () -> Unit,
+    onEdited: (MatchupNotes) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        OutlinedButton(
+            onClick = onCancel,
+            modifier = Modifier.weight(1f)
         ) {
-            OutlinedButton(
-                onClick = { navigator.pop() },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Cancel")
-            }
+            Text("Cancel")
+        }
 
-            val snackBar = LocalSnackBar.current
-            Button(
-                onClick = {
-                    viewModel.saveMatchupNotes(team, matchupNotes, snackBar) {
-                        navigator.pop()
-                    }
-                },
-                modifier = Modifier.weight(1f),
-                enabled = viewModel.isFormValid,
-            ) {
-                Text(
-                    if (matchupNotes != null) "Update Matchup" else "Create Matchup",
-                    // important
-                    color = LocalContentColor.current
-                )
-            }
+        Button(
+            onClick = { onEdited(viewModel.generateMatchupNotes()) },
+            modifier = Modifier.weight(1f),
+            enabled = viewModel.isFormValid,
+        ) {
+            Text(
+                if (matchupNotes != null) "Update Matchup" else "Create Matchup",
+                // important
+                color = LocalContentColor.current
+            )
         }
     }
-
 }
 
 @Composable

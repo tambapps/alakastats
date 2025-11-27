@@ -21,29 +21,46 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit.MatchupNotesEditScreen
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit.MatchupNotesEdit
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
 
 
 @Composable
 fun MatchupNotesTab(viewModel: MatchupNotesViewModel) {
-    FabLayout(
-        fab = {
+    val snackBar = LocalSnackBar.current
+    when (val mode = viewModel.editMatchupMode) {
+        NoEdit -> {
+            FabLayout(
+                fab = {
 
+                }
+            ) {
+                if (!viewModel.hasMatchupNotes) {
+                    NoNotes(viewModel)
+                } else if (LocalIsCompact.current)  {
+                    MatchupNotesTabMobile(viewModel)
+                } else {
+                    MatchupNotesTabDesktop(viewModel)
+                }
+            }
         }
-    ) {
-        if (!viewModel.hasMatchupNotes) {
-            NoNotes(viewModel)
-        } else if (LocalIsCompact.current)  {
-            MatchupNotesTabMobile(viewModel)
-        } else {
-            MatchupNotesTabDesktop(viewModel)
-        }
+        CreateMatchup, is EditMatchup -> MatchupNotesEdit(
+            team = viewModel.team,
+            matchupNotes = (mode as? EditMatchup)?.matchupNotes,
+            onCancel = { viewModel.editMatchupMode = NoEdit },
+            onEdited = { editedMatchup ->
+                viewModel.saveMatchup(
+                    editedMatchup,
+                    onSuccess = { snackBar.show("Successfully created matchup", SnackBar.Severity.SUCCESS) },
+                    onError = { snackBar.show("Error: ${it.message}", SnackBar.Severity.ERROR) }
+                )
+            }
+        )
     }
 }
 
@@ -54,11 +71,8 @@ fun NoNotes(viewModel: MatchupNotesViewModel) {
             Text("Add your gameplay per matchup to remember how to handle the meta with your team",
                 style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(8.dp))
-            val navigator = LocalNavigator.currentOrThrow
 
-            Button(onClick = {
-                navigator.push(MatchupNotesEditScreen(viewModel.team))
-            }) {
+            Button(onClick = { viewModel.editMatchupMode = CreateMatchup }) {
                 Icon(
                     painter = painterResource(Res.drawable.add),
                     contentDescription = "Add",
