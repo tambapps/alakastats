@@ -312,7 +312,6 @@ private fun GamePlanComposition(
             composition.forEach { pokemonName ->
                 viewModel.pokemonImageService.PokemonSprite(
                     pokemonName,
-                    facingDirection = FacingDirection.RIGHT,
                     modifier = Modifier.then(
                         if (isCompact) Modifier.weight(1f) else Modifier.size(
                             64.dp
