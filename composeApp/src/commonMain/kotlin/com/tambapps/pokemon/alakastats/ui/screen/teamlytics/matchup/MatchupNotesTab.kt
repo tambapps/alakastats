@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -19,12 +20,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
@@ -67,9 +71,10 @@ fun MatchupNotesTab(viewModel: MatchupNotesViewModel) {
             matchupNotes = (mode as? EditMatchup)?.matchupNotes,
             onCancel = { viewModel.editMatchupMode = NoEdit },
             onEdited = { editedMatchup ->
+                val verb = if (mode == CreateMatchup) "created" else "edited"
                 viewModel.saveMatchup(
                     editedMatchup,
-                    onSuccess = { snackBar.show("Successfully created matchup", SnackBar.Severity.SUCCESS) },
+                    onSuccess = { snackBar.show("Successfully $verb matchup", SnackBar.Severity.SUCCESS) },
                     onError = { snackBar.show("Error: ${it.message}", SnackBar.Severity.ERROR) }
                 )
             }
@@ -81,7 +86,7 @@ fun MatchupNotesTab(viewModel: MatchupNotesViewModel) {
 fun NoNotes(viewModel: MatchupNotesViewModel) {
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.align(Alignment.Center).padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Add your game plans per matchup to remember how to handle the meta with your team",
+            Text("Add your game plans per matchup to remember how to handle the meta",
                 style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(8.dp))
 
@@ -110,4 +115,39 @@ internal fun ColumnScope.Composition(compositions: List<PokemonName>, pokemonIma
             }
         }
     }
+}
+
+@Composable
+internal fun DeleteMatchupDialog(viewModel: MatchupNotesViewModel, matchupNotes: MatchupNotes, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Delete Matchup ${matchupNotes.name}") },
+        text = {
+            Column {
+                Text(
+                    text = "Are you sure you want to delete this matchup?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+        },
+        confirmButton = {
+            val snackBar = LocalSnackBar.current
+            TextButton(
+                onClick = {
+                    viewModel.deleteMatchup(matchupNotes,
+                        onSuccess = { snackBar.show("Successfully deleted matchup", SnackBar.Severity.SUCCESS) },
+                        onError = { snackBar.show("Error: ${it.message}", SnackBar.Severity.ERROR) })
+                    onDismiss.invoke()
+                },
+            ) {
+                Text("Delete", color = Color.Red)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

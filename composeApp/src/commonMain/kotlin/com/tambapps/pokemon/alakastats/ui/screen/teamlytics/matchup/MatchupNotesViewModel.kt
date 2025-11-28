@@ -45,4 +45,14 @@ class MatchupNotesViewModel(
             }
         }
     }
+
+    fun deleteMatchup(matchupNotes: MatchupNotes, onSuccess: () -> Unit, onError: (DomainError) -> Unit) {
+        scope.launch {
+            // don't care about the result. I am la
+            val either = useCase.setMatchupNotes(team.matchupNotes.filter { it.id != matchupNotes.id })
+            withContext(Dispatchers.Main) {
+                either.fold(onError, { onSuccess.invoke(); editMatchupMode = NoEdit })
+            }
+        }
+    }
 }

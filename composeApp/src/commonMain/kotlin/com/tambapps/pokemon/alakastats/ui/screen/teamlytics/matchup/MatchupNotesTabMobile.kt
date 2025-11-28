@@ -13,14 +13,23 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,6 +58,7 @@ fun MatchupNotesTabMobile(viewModel: MatchupNotesViewModel) {
 
 @Composable
 private fun MatchNotesMobile(viewModel: MatchupNotesViewModel, matchupNotes: MatchupNotes, modifier: Modifier) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
     MyCard(
         modifier = modifier,
         gradientBackgroundColors = cardGradientColors,
@@ -63,14 +73,29 @@ private fun MatchNotesMobile(viewModel: MatchupNotesViewModel, matchupNotes: Mat
                     maxLines = 1
                 )
                 Spacer(Modifier.weight(1f))
+                var isMenuExpanded by remember { mutableStateOf(false) }
                 IconButton(
-                    onClick = {  },
+                    onClick = { isMenuExpanded = true },
                     colors = IconButtonDefaults.iconButtonColors().copy(contentColor = MaterialTheme.typography.headlineLarge.color)
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.more_horiz),
                         contentDescription = "More"
                     )
+
+                    DropdownMenu(
+                        expanded = isMenuExpanded,
+                        onDismissRequest = { isMenuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Edit") },
+                            onClick = { viewModel.editMatchupMode = EditMatchup(matchupNotes) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            onClick = { showDeleteDialog = true }
+                        )
+                    }
                 }
             }
             matchupNotes.pokePaste?.let { pokePaste -> PokemonTeamPreview(viewModel.pokemonImageService, pokePaste.pokemons.map { it.name }, fillWidth = true) }
@@ -92,4 +117,9 @@ private fun MatchNotesMobile(viewModel: MatchupNotesViewModel, matchupNotes: Mat
             Spacer(Modifier.height(8.dp))
         }
     }
+
+    if (showDeleteDialog) {
+        DeleteMatchupDialog(viewModel, matchupNotes, onDismiss = { showDeleteDialog = false })
+    }
 }
+
