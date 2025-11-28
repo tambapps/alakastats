@@ -86,7 +86,7 @@ fun MatchupNotesTab(viewModel: MatchupNotesViewModel) {
 fun NoNotes(viewModel: MatchupNotesViewModel) {
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.align(Alignment.Center).padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Add your game plans per matchup to remember how to handle the meta",
+            Text("Add your game plans for each matchup to remember how to play against the meta",
                 style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(8.dp))
 
