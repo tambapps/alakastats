@@ -144,6 +144,10 @@ fun MatchupNotesEdit(
                     )
                     VerticalSpacer(32.dp)
                 }
+
+                item {
+                    VerticalSpacer(32.dp)
+                }
             }
             ButtonsBar(viewModel, matchupNotes, onCancel, onEdited)
         }
