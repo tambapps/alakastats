@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
@@ -59,47 +60,36 @@ fun MatchupNotesTabMobile(viewModel: MatchupNotesViewModel) {
 @Composable
 private fun MatchNotesMobile(viewModel: MatchupNotesViewModel, matchupNotes: MatchupNotes, modifier: Modifier) {
     var showDeleteDialog by remember { mutableStateOf(false) }
-    MyCard(
-        modifier = modifier,
+
+    ExpansionTile(
         gradientBackgroundColors = cardGradientColors,
+        title = {
+            Text(
+                text = matchupNotes.name,
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        subtitle = {
+            matchupNotes.pokePaste?.let { pokePaste -> PokemonTeamPreview(viewModel.pokemonImageService, pokePaste.pokemons.map { it.name }, fillWidth = true) }
+        },
+        menu = { isMenuExpandedState ->
+            DropdownMenu(
+                expanded = isMenuExpandedState.value,
+                onDismissRequest = { isMenuExpandedState.value = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Edit") },
+                    onClick = { viewModel.editMatchupMode = EditMatchup(matchupNotes) }
+                )
+                DropdownMenuItem(
+                    text = { Text("Delete") },
+                    onClick = { showDeleteDialog = true }
+                )
+            }
+        }
     ) {
         Column(Modifier.padding(all = 8.dp).fillMaxWidth()) {
-            Row {
-                Text(
-                    text = "VS " + matchupNotes.name,
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
-                )
-                Spacer(Modifier.weight(1f))
-                var isMenuExpanded by remember { mutableStateOf(false) }
-                IconButton(
-                    onClick = { isMenuExpanded = true },
-                    colors = IconButtonDefaults.iconButtonColors().copy(contentColor = MaterialTheme.typography.headlineLarge.color)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.more_horiz),
-                        contentDescription = "More"
-                    )
-
-                    DropdownMenu(
-                        expanded = isMenuExpanded,
-                        onDismissRequest = { isMenuExpanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Edit") },
-                            onClick = { viewModel.editMatchupMode = EditMatchup(matchupNotes) }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Delete") },
-                            onClick = { showDeleteDialog = true }
-                        )
-                    }
-                }
-            }
-            matchupNotes.pokePaste?.let { pokePaste -> PokemonTeamPreview(viewModel.pokemonImageService, pokePaste.pokemons.map { it.name }, fillWidth = true) }
-            Spacer(Modifier.height(8.dp))
             matchupNotes.gamePlans.forEachIndexed { index, gamePlan ->
                 Text(
                     text = "Game Plan ${index + 1}",
@@ -117,7 +107,6 @@ private fun MatchNotesMobile(viewModel: MatchupNotesViewModel, matchupNotes: Mat
             Spacer(Modifier.height(8.dp))
         }
     }
-
     if (showDeleteDialog) {
         DeleteMatchupDialog(viewModel, matchupNotes, onDismiss = { showDeleteDialog = false })
     }

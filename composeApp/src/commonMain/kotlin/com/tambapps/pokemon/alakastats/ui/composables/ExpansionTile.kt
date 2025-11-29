@@ -62,6 +62,7 @@ fun ExpansionTile(
     menu: @Composable (MutableState<Boolean>) -> Unit,
     subtitle: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
+    gradientBackgroundColors: List<Color>? = null,
     content: @Composable () -> Unit,
 ) {
     AbstractExpansionTile(
@@ -69,6 +70,7 @@ fun ExpansionTile(
         title = title,
         subtitle = subtitle,
         content = content,
+        gradientBackgroundColors = gradientBackgroundColors,
         expandButton = { isCardExpandedState ->
             Box {
                 val expandButtonScale by animateFloatAsState(
@@ -98,6 +100,7 @@ private fun AbstractExpansionTile(
     title: @Composable RowScope.(Boolean) -> Unit,
     subtitle: @Composable () -> Unit = {},
     expandButton: @Composable (MutableState<Boolean>) -> Unit,
+    gradientBackgroundColors: List<Color>? = null,
     content: @Composable () -> Unit,
 ) {
     val isCardExpandedState = remember { mutableStateOf(false) }
@@ -109,6 +112,7 @@ private fun AbstractExpansionTile(
             width = 2.dp,
             color = MaterialTheme.colorScheme.outline
         ),
+        gradientBackgroundColors = gradientBackgroundColors,
         onClick = { isCardExpandedState.value = !isCardExpandedState.value }
     ) {
         Column(Modifier.padding(all = 8.dp)) {
@@ -122,7 +126,7 @@ private fun AbstractExpansionTile(
                     title(isCardExpandedState.value)
                 }
                 Row(
-                    modifier = Modifier.weight(1 - titleWeight),
+                    modifier = Modifier.weight(1 - titleWeight).align(Alignment.Top),
                     horizontalArrangement = Arrangement.End,
                 ) {
                     expandButton(isCardExpandedState)
