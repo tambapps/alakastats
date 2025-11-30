@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -23,16 +26,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
+import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit.MatchupNotesEdit
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
@@ -103,6 +114,56 @@ fun NoNotes(viewModel: MatchupNotesViewModel) {
                 ))
             }
         }
+    }
+}
+
+@Composable
+internal fun MatchNotes(
+    viewModel: MatchupNotesViewModel,
+    matchupNotes: MatchupNotes,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    ExpansionTile(
+        modifier = modifier,
+        gradientBackgroundColors = cardGradientColors,
+        title = {
+            Text(
+                text = matchupNotes.name,
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        subtitle = {
+            matchupNotes.pokePaste?.let { pokePaste ->
+                PokemonTeamPreview(
+                    viewModel.pokemonImageService,
+                    pokePaste.pokemons.map { it.name },
+                    fillWidth = true
+                )
+            }
+        },
+        menu = { isMenuExpandedState ->
+            DropdownMenu(
+                expanded = isMenuExpandedState.value,
+                onDismissRequest = { isMenuExpandedState.value = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Edit") },
+                    onClick = { viewModel.editMatchupMode = EditMatchup(matchupNotes) }
+                )
+                DropdownMenuItem(
+                    text = { Text("Delete") },
+                    onClick = { showDeleteDialog = true }
+                )
+            }
+        },
+        content = content
+    )
+    if (showDeleteDialog) {
+        DeleteMatchupDialog(viewModel, matchupNotes, onDismiss = { showDeleteDialog = false })
     }
 }
 
