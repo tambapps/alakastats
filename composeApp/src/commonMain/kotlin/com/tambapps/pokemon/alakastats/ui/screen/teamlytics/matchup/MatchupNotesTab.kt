@@ -170,7 +170,13 @@ internal fun MatchNotes(
 @Composable
 internal fun Composition(composition: List<PokemonName>, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
-        composition.chunked(2).forEachIndexed { index, chunk ->
+        val chunks = buildList {
+            add(composition.take(2))
+            if (composition.size > 2) {
+                add(composition.drop(2))
+            }
+        }
+        chunks.forEachIndexed { index, chunk ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
