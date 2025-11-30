@@ -54,17 +54,17 @@ private fun MatchNotesDesktop(
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
-
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(gamePlan.description, style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(6f))
                     gamePlan.composition
                         ?.takeIf { it.isNotEmpty() }
                         ?.let { composition ->
                             Composition(
                                 composition, viewModel.pokemonImageService,
-                                Modifier.padding(end = 8.dp)
+                                Modifier.padding(end = 8.dp).weight(4f)
                             )
                         }
-                    Text(gamePlan.description, style = MaterialTheme.typography.bodyLarge)
                 }
                 Spacer(Modifier.height(16.dp))
             }
