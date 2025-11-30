@@ -193,14 +193,16 @@ private fun AddToCompositionDialog(
     team: Teamlytics,
     gamePlanState: GamePlanState
 ) {
-    val index = remember(gamePlanState) { viewModel.gamePlanStates.indexOf(gamePlanState) + 1 }
     val pokemons = team.pokePaste.pokemons.map { it.name }
     val selectedPokemons =
         remember { gamePlanState.composition.filter { pokemons.contains(it) }.toMutableStateList() }
 
     AlertDialog(
         onDismissRequest = { viewModel.compositionDialogFor = null },
-        title = { Text("Game Plan $index Composition") },
+        title = {
+            val no = remember(gamePlanState) { viewModel.gamePlanStates.indexOf(gamePlanState) + 1 }
+            Text("Game Plan $no Composition")
+        },
         text = {
             Column {
                 Text(
@@ -219,7 +221,8 @@ private fun AddToCompositionDialog(
                             pokemonImageService = viewModel.pokemonImageService,
                             onClick = {
                                 when {
-                                    selectedPokemons.size < 4 && !isSelected -> selectedPokemons.add(
+                                    // 5 and not 4 because I allow the user to have many back pokemon options
+                                    selectedPokemons.size < 5 && !isSelected -> selectedPokemons.add(
                                         pokemonName
                                     )
 
