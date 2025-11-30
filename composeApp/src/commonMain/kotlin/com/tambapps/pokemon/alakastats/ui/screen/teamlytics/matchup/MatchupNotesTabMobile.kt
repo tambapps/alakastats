@@ -24,6 +24,7 @@ import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 
 
 @Composable
@@ -63,6 +64,8 @@ private fun MatchNotesMobile(
                     ?.let { composition ->
                         Composition(
                             composition, viewModel.pokemonImageService,
+                            pokemonSize = 80.dp,
+                            facingDirection = FacingDirection.RIGHT,
                             Modifier.align(Alignment.CenterHorizontally).padding(vertical = 8.dp)
                         )
                     }

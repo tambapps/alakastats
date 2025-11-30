@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 
 
 @Composable
@@ -62,6 +63,8 @@ private fun MatchNotesDesktop(
                         ?.let { composition ->
                             Composition(
                                 composition, viewModel.pokemonImageService,
+                                pokemonSize = 120.dp,
+                                facingDirection = FacingDirection.LEFT,
                                 Modifier.padding(end = 8.dp).weight(4f)
                             )
                         }

@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
@@ -142,7 +143,8 @@ internal fun MatchNotes(
                 PokemonTeamPreview(
                     viewModel.pokemonImageService,
                     pokePaste.pokemons.map { it.name },
-                    fillWidth = true
+                    fillWidth = true,
+                    facingDirection = if (LocalIsCompact.current) FacingDirection.LEFT else FacingDirection.RIGHT
                 )
             }
         },
@@ -169,7 +171,11 @@ internal fun MatchNotes(
 }
 
 @Composable
-internal fun Composition(composition: List<PokemonName>, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+internal fun Composition(composition: List<PokemonName>,
+                         pokemonImageService: PokemonImageService,
+                         pokemonSize: Dp,
+                         facingDirection: FacingDirection,
+                         modifier: Modifier = Modifier) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
         val chunks = buildList {
             add(composition.take(2))
@@ -196,8 +202,8 @@ internal fun Composition(composition: List<PokemonName>, pokemonImageService: Po
                 Text(if (index == 0) "Lead" else "Back", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.width(16.dp))
                 chunk.forEach { pokemonName ->
-                    pokemonImageService.PokemonArtwork(pokemonName, Modifier.size(80.dp).padding(horizontal = 4.dp)
-                        , facingDirection = FacingDirection.RIGHT)
+                    pokemonImageService.PokemonArtwork(pokemonName, Modifier.size(pokemonSize).padding(horizontal = 4.dp)
+                        , facingDirection = facingDirection)
                 }
             }
             if (index == 0 && composition.size > 1) {
