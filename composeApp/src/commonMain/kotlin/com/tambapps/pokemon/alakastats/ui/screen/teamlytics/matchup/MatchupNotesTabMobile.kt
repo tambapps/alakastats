@@ -98,7 +98,10 @@ private fun MatchNotesMobile(viewModel: MatchupNotesViewModel, matchupNotes: Mat
                 )
                 gamePlan.composition
                     ?.takeIf { it.isNotEmpty() }
-                    ?.let { composition -> Composition(composition, viewModel.pokemonImageService) }
+                    ?.let { composition ->
+                        Composition(composition, viewModel.pokemonImageService)
+                        Spacer(Modifier.height(8.dp))
+                    }
 
                 Text(gamePlan.description, style = MaterialTheme.typography.bodyLarge)
 
