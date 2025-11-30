@@ -6,12 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -109,27 +107,29 @@ fun NoNotes(viewModel: MatchupNotesViewModel) {
 }
 
 @Composable
-internal fun ColumnScope.Composition(compositions: List<PokemonName>, pokemonImageService: PokemonImageService) {
-    compositions.chunked(2).forEachIndexed { index, chunk ->
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceContainer,
-                    shape = RoundedCornerShape(50.dp)
-                )
-                .align(Alignment.CenterHorizontally)
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            Text(if (index == 0) "Lead" else "Back", style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.width(16.dp))
-            chunk.forEach { pokemonName ->
-                pokemonImageService.PokemonSprite(pokemonName, Modifier.size(80.dp)
-                    .offset(y = (-8).dp), facingDirection = FacingDirection.RIGHT)
+internal fun Composition(composition: List<PokemonName>, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
+        composition.chunked(2).forEachIndexed { index, chunk ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(50.dp)
+                    )
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Text(if (index == 0) "Lead" else "Back", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.width(16.dp))
+                chunk.forEach { pokemonName ->
+                    pokemonImageService.PokemonArtwork(pokemonName, Modifier.size(80.dp).padding(horizontal = 4.dp)
+                        , facingDirection = FacingDirection.RIGHT)
+                }
             }
-        }
-        if (index == 0) {
-            Spacer(Modifier.height(12.dp))
+            if (index == 0 && composition.size > 1) {
+                Spacer(Modifier.height(12.dp))
+            }
         }
     }
 }

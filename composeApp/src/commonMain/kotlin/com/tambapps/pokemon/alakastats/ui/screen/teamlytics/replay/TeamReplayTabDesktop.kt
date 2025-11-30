@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.more_vert
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,9 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +50,8 @@ import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import org.jetbrains.compose.resources.painterResource
 import kotlin.Boolean
+import kotlin.collections.chunked
+import kotlin.collections.forEach
 
 @Composable
 internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel) {
@@ -179,28 +183,50 @@ private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String
     ) {
         PlayerNameEloText(player, playerName)
         Spacer(Modifier.height(8.dp))
+        DesktopSelection(player, viewModel, isYouPlayer)
+        Spacer(Modifier.height(8.dp))
+    }
+}
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            var selectionChunks = player.selection.chunked(2)
-            if (isYouPlayer) selectionChunks = selectionChunks.reversed()
-            selectionChunks.forEachIndexed { index, selectionChunk ->
-                if (index < selectionChunks.lastIndex) {
-                    Spacer(Modifier.width(8.dp))
+@Composable
+private fun DesktopSelection(player: Player, viewModel: TeamReplayViewModel, isYouPlayer: Boolean = false) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        player.selection.chunked(2).forEachIndexed { index, chunk ->
+            if (index == 1) {
+                Spacer(Modifier.height(12.dp))
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(50.dp)
+                    )
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .width(400.dp)
+            ) {
+                if (isYouPlayer) {
+                    Text(if (index == 0) "Lead" else "Back", style = MaterialTheme.typography.titleLarge)
+                    Spacer(Modifier.width(16.dp))
                 }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    for (pokemon in selectionChunk) {
-                        val teraType = player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
-                        SelectedPokemon(
-                            pokemon = pokemon,
-                            teraType = teraType,
-                            pokemonImageService = viewModel.pokemonImageService,
-                            isYouPlayer = isYouPlayer
-                        )
+                chunk.forEachIndexed { cIndex, pokemon ->
+                    if (cIndex == 1) {
+                        Spacer(Modifier.width(16.dp))
                     }
+                    val teraType = player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
+                    SelectedPokemon(
+                        modifier = Modifier.widthIn(max = 175.dp),
+                        pokemon = pokemon,
+                        teraType = teraType,
+                        pokemonImageService = viewModel.pokemonImageService,
+                        isYouPlayer = isYouPlayer
+                    )
+                }
+                if (!isYouPlayer) {
+                    Spacer(Modifier.width(16.dp))
+                    Text(if (index == 0) "Lead" else "Back", style = MaterialTheme.typography.titleLarge)
                 }
             }
         }
