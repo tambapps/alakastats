@@ -118,7 +118,9 @@ abstract class AbstractPokemonImageService(
         }
     }
 
-    internal fun getPokemonImageData(name: PokemonName, type: ImageType) = when (type) {
+    // needs to be @Composable to listen to the map changes
+    @Composable
+    protected fun getPokemonImageData(name: PokemonName, type: ImageType) = when (type) {
         ImageType.SPRITE -> pokemonImages[name.normalized.value]?.sprite
         ImageType.ARTWORK -> pokemonImages[name.normalized.value]?.artwork
     }
@@ -206,9 +208,7 @@ abstract class AbstractPokemonImageService(
             DefaultIcon(modifier = iconModifier)
             return
         }
-        val (_, category, type) = data
-
-        MoveTypeImage(type, modifier = iconModifier, disableTooltip = true)
+        MoveTypeImage(data.type, modifier = iconModifier, disableTooltip = true)
         /*
           val categoryRes = when(category.lowercase()) {
             "physical" -> Res.drawable.move_physical
@@ -310,7 +310,7 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
     @Composable
     override fun PokemonSprite(name: PokemonName, modifier: Modifier, disableTooltip: Boolean, facingDirection: FacingDirection) = PokemonImage(
         name,
-        getPokemonImageData(name, ImageType.SPRITE),
+        ImageType.SPRITE,
         modifier,
         disableTooltip = disableTooltip,
         facingDirection = facingDirection)
@@ -323,12 +323,13 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
         facingDirection: FacingDirection
     ) = PokemonImage(
         name,
-        getPokemonImageData(name, ImageType.ARTWORK),
+        ImageType.ARTWORK,
         modifier, disableTooltip = disableTooltip,
         facingDirection = facingDirection)
 
     @Composable
-    private fun PokemonImage(pokemonName: PokemonName, imageData: PokemonImageData?, modifier: Modifier, disableTooltip: Boolean = false, facingDirection: FacingDirection) {
+    private fun PokemonImage(pokemonName: PokemonName, imageType: ImageType, modifier: Modifier, disableTooltip: Boolean = false, facingDirection: FacingDirection) {
+        val imageData = getPokemonImageData(pokemonName, imageType)
         val prettyName = pokemonName.pretty
         TooltipIfEnabled(disableTooltip, prettyName, modifier) { mod ->
             val imageUrl = imageData?.url
@@ -396,6 +397,7 @@ private suspend inline fun <reified T> readMappingFile(json: Json, filename: Str
     return json.decodeFromString<T>(text)
 }
 
+// these below class need to be public in order for state listening to work properly
 @Serializable
 data class ItemData(
     val name: String,
@@ -412,19 +414,19 @@ data class MoveData(
 
 
 @Serializable
-internal data class PokemonImages(
+data class PokemonImages(
     val name: String,
     val sprite: PokemonImageData,
     val artwork: PokemonImageData,
 )
 
 @Serializable
-internal data class PokemonImageData(
+data class PokemonImageData(
     val url: String,
     val direction: FacingDirection = FacingDirection.LEFT
 )
 
-internal enum class ImageType {
+enum class ImageType {
     SPRITE, ARTWORK
 }
 
