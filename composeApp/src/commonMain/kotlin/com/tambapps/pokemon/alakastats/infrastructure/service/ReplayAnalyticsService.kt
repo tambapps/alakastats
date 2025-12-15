@@ -150,7 +150,8 @@ private class ReplayAnalyticsBuilderVisitor(
     }
 
     override fun visitDragLog(pokemonSlot: String, pokemonName: String, hpPercentage: Int?) {
-        getPlayer(pokemonSlot).selection(pokemonName)
+        val player = getPlayer(pokemonSlot)
+        player.selection(getActualPokemonName(player, pokemonName))
     }
 
     override fun visitSwitchLog(pokemonSlot: String, pokemonName: String, hpPercentage: Int?) =
