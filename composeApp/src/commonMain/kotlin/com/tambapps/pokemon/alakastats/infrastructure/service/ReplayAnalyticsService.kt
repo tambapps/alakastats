@@ -88,7 +88,7 @@ private fun getActualPokemonName(player: PlayerBuilderEntityBuilder, pokemonName
     return player.selection.find { PokemonNormalizer.baseMatches(it, pokemonName) } ?: pokemonName
 }
 
-private class ReplayAnalyticsBuilderVisitor(
+internal class ReplayAnalyticsBuilderVisitor(
     private val otsPokemonTransformer: OtsPokemonTransformer,
     private val playerNames: List<String>
 ): SdReplayLogVisitor {
