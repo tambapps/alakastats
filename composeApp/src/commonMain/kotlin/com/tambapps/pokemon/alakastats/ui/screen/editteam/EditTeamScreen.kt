@@ -47,6 +47,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import com.tambapps.pokemon.alakastats.util.isSdNameValid
 import org.jetbrains.compose.resources.painterResource
 
 data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
@@ -208,6 +209,7 @@ private fun ButtonBar(
 @Composable
 private fun ShowdownNameDialog(viewModel: EditTeamViewModel) {
     val newName = viewModel.newSdNameInput
+    val isSdNameValid = isSdNameValid(newName)
     AlertDialog(
         onDismissRequest = { viewModel.hideAddNameDialog() },
         title = { Text("Add Showdown Name") },
@@ -220,7 +222,7 @@ private fun ShowdownNameDialog(viewModel: EditTeamViewModel) {
                     placeholder = { Text("Enter your Showdown name") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    isError = !viewModel.isNewNameValid && newName.isNotBlank(),
+                    isError = !isSdNameValid && !newName.isEmpty(),
                     supportingText = {
                         when {
                             newName.contains('/') -> Text("Name cannot contain slash characters")
@@ -235,11 +237,11 @@ private fun ShowdownNameDialog(viewModel: EditTeamViewModel) {
         confirmButton = {
             TextButton(
                 onClick = { viewModel.addShowdownName() },
-                enabled = newName.isNotEmpty() && viewModel.isNewNameValid
+                enabled = isSdNameValid
             ) {
                 Text(
                     "OK",
-                    color = if (viewModel.isNewNameValid) Color.Unspecified else Color.LightGray
+                    color = if (isSdNameValid) Color.Unspecified else Color.LightGray
                 )
             }
         },

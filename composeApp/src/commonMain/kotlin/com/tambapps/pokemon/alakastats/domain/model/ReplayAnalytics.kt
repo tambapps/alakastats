@@ -4,6 +4,7 @@ import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.TeraType
+import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 
 fun Teamlytics.getOpponentPlayer(replay: ReplayAnalytics) =
@@ -35,6 +36,10 @@ class TeamlyticsContext(val team: Teamlytics) {
         get() = team.getOpponentPlayer(this)
 
 
+    fun ReplayFilters.matches(replay: ReplayAnalytics): Boolean = matches(
+        opponentPlayer = replay.opponentPlayer,
+        youPlayer = replay.youPlayer
+    )
 }
 
 inline fun <R> Teamlytics.withContext(block: TeamlyticsContext.() -> R): R {

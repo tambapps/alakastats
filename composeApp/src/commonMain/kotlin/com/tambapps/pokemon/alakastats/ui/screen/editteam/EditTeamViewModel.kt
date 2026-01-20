@@ -10,6 +10,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
+import com.tambapps.pokemon.alakastats.util.isSdNameValid
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.launch
@@ -41,11 +42,6 @@ class EditTeamViewModel(
         teamName = name
     }
 
-    val isNewNameValid: Boolean
-        get() = newSdNameInput.isNotBlank() &&
-                !newSdNameInput.contains('/') &&
-                newSdNameInput.length <= 30
-
     fun showAddNameDialog() {
         showNewSdNameDialog = true
         newSdNameInput = ""
@@ -61,7 +57,7 @@ class EditTeamViewModel(
     }
 
     fun addShowdownName() {
-        if (isNewNameValid && !sdNames.contains(newSdNameInput)) {
+        if (isSdNameValid(newSdNameInput) && !sdNames.contains(newSdNameInput)) {
             sdNames.add(newSdNameInput.trim())
             hideAddNameDialog()
         }

@@ -8,7 +8,6 @@ import arrow.core.raise.either
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
-import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
@@ -19,7 +18,6 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
@@ -157,40 +155,9 @@ class TeamlyticsViewModel(
 
     private fun reloadFilteredTeam() {
         _filteredTeam =
-            if (hasFilteredReplays) originalTeam.copy(replays = originalTeam.replays.filter { filters.matches(it) })
+            if (hasFilteredReplays) originalTeam.copy(
+                replays = originalTeam.withContext { originalTeam.replays.filter { filters.matches(it) } }
+            )
             else originalTeam
     }
-
-    private fun ReplayFilters.matches(replay: ReplayAnalytics) = originalTeam.withContext {
-        when {
-            opponentTeam.isNotEmpty() && !teamMatches(replay.opponentPlayer, opponentTeam) -> false
-            opponentSelection.isNotEmpty() && !selectionMatches(replay.opponentPlayer, opponentSelection) -> false
-            yourSelection.isNotEmpty() && !selectionMatches(replay.youPlayer, yourSelection) -> false
-            else -> true
-        }
-    }
-}
-
-private fun teamMatches(player: Player, pokemonFilters: List<PokemonFilter>): Boolean {
-    for (pokemonFilter in pokemonFilters) {
-        if (player.teamPreview.pokemons.none { it.name.matches(pokemonFilter.name) }) {
-            return false
-        }
-        if (pokemonFilter.asLead && player.lead.none { it.matches(pokemonFilter.name) }) {
-            return false
-        }
-    }
-    return true
-}
-
-private fun selectionMatches(player: Player, pokemonFilters: List<PokemonFilter>): Boolean {
-    for (pokemonFilter in pokemonFilters) {
-        if (player.selection.none { it.matches(pokemonFilter.name) }) {
-            return false
-        }
-        if (pokemonFilter.asLead && player.lead.none { it.matches(pokemonFilter.name) }) {
-            return false
-        }
-    }
-    return true
 }
