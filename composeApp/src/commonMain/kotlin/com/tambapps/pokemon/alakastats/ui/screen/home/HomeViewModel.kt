@@ -17,6 +17,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.downloadToFile
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
@@ -192,6 +193,34 @@ class HomeViewModel(
                     }
                 )
             }
+        }
+        hideMenu()
+    }
+
+    fun exportTeam(preview: TeamlyticsPreview, snackBar: SnackBar) {
+        if (isLoading) {
+            return
+        }
+        isLoading = true
+        scope.launch {
+            useCase.get(preview.id).fold(
+                ifLeft = {
+                    withContext(Dispatchers.Main) {
+                        isLoading = false
+                        snackBar.show("Error: Couldn't retrieve team", SnackBar.Severity.ERROR)
+                    }
+                },
+                ifRight = { team ->
+                    val success = downloadToFile(team.name, "json", useCase.export(team))
+
+                    withContext(Dispatchers.Main) {
+                        isLoading = false
+                        if (success) {
+                            snackBar.show("Successfully exported team", SnackBar.Severity.SUCCESS)
+                        }
+                    }
+                }
+            )
         }
         hideMenu()
     }

@@ -31,6 +31,8 @@ class ManageTeamlyticsListUseCase(
     suspend fun create(team: Teamlytics): Either<GetTeamlyticsError, Teamlytics> =
         repository.save(team.copy(id = Uuid.random()))
 
+    fun export(team: Teamlytics) = serializer.export(team)
+
     fun listSamplePreviews(): List<TeamlyticsPreview> = listOf(
         samplePreview(
             name = "Electrizer",

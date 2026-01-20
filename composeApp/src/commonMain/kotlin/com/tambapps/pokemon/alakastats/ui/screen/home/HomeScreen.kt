@@ -167,6 +167,10 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
                             onClick = { viewModel.editTeam(team, navigator, snackBar) }
                         )
                         DropdownMenuItem(
+                            text = { Text("Export") },
+                            onClick = { viewModel.exportTeam(team, snackBar) }
+                        )
+                        DropdownMenuItem(
                             text = { Text("Reload replays") },
                             onClick = { viewModel.reloadReplays(team, snackBar) }
                         )
