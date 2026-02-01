@@ -40,6 +40,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
@@ -52,6 +54,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
+import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
@@ -258,6 +261,16 @@ internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: St
         onClick = { uriHandler.openUri(url) },
     ) {
         Text("Replay")
+    }
+}
+
+@Composable
+internal fun EditSdNamesButton(viewModel: TeamReplayViewModel) {
+    val navigator = LocalNavigator.currentOrThrow
+
+    // don't push because when coming to the screen, this screen doesn't recompose and take into account the updated team
+    OutlinedButton(onClick = { navigator.replace(EditTeamScreen(viewModel.team))}) {
+        Text("Edit Showdown Names")
     }
 }
 

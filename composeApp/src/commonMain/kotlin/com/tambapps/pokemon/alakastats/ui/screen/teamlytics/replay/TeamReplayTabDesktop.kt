@@ -168,14 +168,6 @@ private fun DesktopSdNamesWarning(viewModel: TeamReplayViewModel) {
 }
 
 @Composable
-internal fun EditSdNamesButton(viewModel: TeamReplayViewModel) {
-    val navigator = LocalNavigator.currentOrThrow
-
-    OutlinedButton(onClick = { navigator.push(EditTeamScreen(viewModel.team))}) {
-        Text("Edit Showdown Names")
-    }
-}
-@Composable
 private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String, viewModel: TeamReplayViewModel, isYouPlayer: Boolean = false) {
     Column(
         modifier,
