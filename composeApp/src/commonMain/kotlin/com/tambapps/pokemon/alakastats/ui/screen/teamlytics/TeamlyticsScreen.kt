@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -149,12 +150,24 @@ internal fun Pager(
 }
 
 @Composable
+fun ScrollToTopIfNeeded(viewModel: TeamlyticsTabViewModel, scrollState: ScrollState) {
+    viewModel.scrollToTopSignal.Listen {
+        if (scrollState.value != 0) {
+            scrollState.animateScrollTo(
+                value = 0,
+                animationSpec = tween(durationMillis = 500)
+            )
+        }
+    }
+}
+
+@Composable
 private inline fun <reified USE_CASE, reified T: TeamlyticsTabViewModel> koinInjectUseCase(viewModel: TeamlyticsViewModel, index: Int) = koinInject<T> {
     parametersOf(viewModel as USE_CASE)
 }.apply {
     LaunchedEffect(viewModel.scrollToTopIndex) {
         if (index == viewModel.scrollToTopIndex) {
-            signalScrollToTop()
+            scrollToTopSignal.emit()
             viewModel.scrollToTopIndex = null
         }
     }

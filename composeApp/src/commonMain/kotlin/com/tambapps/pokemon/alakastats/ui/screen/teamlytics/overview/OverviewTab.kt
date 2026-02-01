@@ -41,6 +41,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemon
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
@@ -56,14 +57,7 @@ fun OverviewTab(viewModel: OverviewViewModel) {
     } else {
         OverviewTabDesktop(viewModel, scrollState)
     }
-    LaunchedEffect(viewModel.scrollToTopSignal) {
-        if (viewModel.scrollToTopSignal > 0) {
-            scrollState.animateScrollTo(
-                value = 0,
-                animationSpec = tween(durationMillis = 750)
-            )
-        }
-    }
+    ScrollToTopIfNeeded(viewModel, scrollState)
 }
 
 @Composable
