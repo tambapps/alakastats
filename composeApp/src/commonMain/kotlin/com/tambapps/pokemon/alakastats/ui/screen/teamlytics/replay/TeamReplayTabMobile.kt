@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +37,7 @@ import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 
 @Composable
-internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
+internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: LazyListState) {
     val team = viewModel.team
 
     if (viewModel.hasNoReplaysToShow) {
@@ -44,7 +45,6 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel) {
         return
     }
     Column(Modifier.fillMaxSize()) {
-        val scrollState = rememberLazyListState()
         LaunchedEffect(viewModel.useCase.filters) {
             scrollState.scrollToItem(index = 0, scrollOffset = 0)
         }

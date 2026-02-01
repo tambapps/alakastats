@@ -1,11 +1,11 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,13 +19,13 @@ import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
-internal fun UsagesTabMobile(viewModel: UsagesViewModel) {
+internal fun UsagesTabMobile(viewModel: UsagesViewModel, scrollState: ScrollState) {
     Column(
         Modifier.fillMaxWidth()
     ) {
         Column(Modifier.weight(1f)
             .padding(horizontal = 4.dp)
-            .verticalScroll(rememberScrollState())) {
+            .verticalScroll(scrollState)) {
             Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
             NbReplaysText(viewModel.useCase, modifier = Modifier.fillMaxWidth()) // fill maxWidth to center text
             Spacer(Modifier.height(16.dp))

@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,10 +26,10 @@ import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 
 
 @Composable
-fun MatchupNotesTabDesktop(viewModel: MatchupNotesViewModel) {
+fun MatchupNotesTabDesktop(viewModel: MatchupNotesViewModel, scrollState: LazyListState) {
     val matchupNotes = viewModel.matchupNotes
 
-    LazyColumn(Modifier.padding(horizontal = 16.dp)) {
+    LazyColumn(Modifier.padding(horizontal = 16.dp), state = scrollState) {
         item { Spacer(Modifier.height(32.dp)) }
         items(matchupNotes) {
             MatchNotesDesktop(viewModel, it, modifier = Modifier.fillMaxWidth())

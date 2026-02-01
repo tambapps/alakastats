@@ -34,6 +34,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonCard
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollableRow
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlin.math.pow
@@ -49,13 +50,15 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
             FiltersButton(viewModel.useCase)
         }
     ) {
+        val scrollState = rememberScrollState()
         if (!viewModel.isLoading && viewModel.hasNoData) {
             NoData(viewModel)
         } else if (isCompact) {
-            LeadStatsTabMobile(viewModel)
+            LeadStatsTabMobile(viewModel, scrollState)
         } else {
-            LeadStatsTabDesktop(viewModel)
+            LeadStatsTabDesktop(viewModel, scrollState)
         }
+        ScrollToTopIfNeeded(viewModel, scrollState)
     }
 }
 

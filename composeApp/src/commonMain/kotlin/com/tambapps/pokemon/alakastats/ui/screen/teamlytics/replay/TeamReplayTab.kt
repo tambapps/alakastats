@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -57,6 +58,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -75,11 +77,13 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
             }
         }
     ) {
+        val scrollState = rememberLazyListState()
         if (isCompact) {
-            TeamReplayTabMobile(viewModel)
+            TeamReplayTabMobile(viewModel, scrollState)
         } else {
-            TeamReplayTabDesktop(viewModel)
+            TeamReplayTabDesktop(viewModel, scrollState)
         }
+        ScrollToTopIfNeeded(viewModel, scrollState)
 
         if (viewModel.showAddReplayDialog) {
             AddReplayDialog(viewModel)

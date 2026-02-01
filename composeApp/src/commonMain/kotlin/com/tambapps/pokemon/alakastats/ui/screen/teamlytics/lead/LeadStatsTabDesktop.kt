@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,12 +17,12 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 
 @Composable
-internal fun LeadStatsTabDesktop(viewModel: LeadStatsViewModel) {
+internal fun LeadStatsTabDesktop(viewModel: LeadStatsViewModel, scrollState: ScrollState) {
     Column(Modifier.fillMaxSize()) {
         LinearProgressBarIfEnabled(viewModel.isLoading)
         Column(Modifier.fillMaxWidth()
             .weight(1f)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .padding(top = 16.dp, bottom = 8.dp)) {
             NbReplaysText(viewModel.useCase, modifier = Modifier.fillMaxWidth()) // fill maxWidth to center text
             Spacer(Modifier.height(64.dp))

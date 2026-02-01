@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -157,6 +158,15 @@ fun ScrollToTopIfNeeded(viewModel: TeamlyticsTabViewModel, scrollState: ScrollSt
                 value = 0,
                 animationSpec = tween(durationMillis = 500)
             )
+        }
+    }
+}
+
+@Composable
+fun ScrollToTopIfNeeded(viewModel: TeamlyticsTabViewModel, scrollState: LazyListState) {
+    viewModel.scrollToTopSignal.Listen {
+        if (scrollState.firstVisibleItemIndex != 0) {
+            scrollState.animateScrollToItem(index = 0)
         }
     }
 }

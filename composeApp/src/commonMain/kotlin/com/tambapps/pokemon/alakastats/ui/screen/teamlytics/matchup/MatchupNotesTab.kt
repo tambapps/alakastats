@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,6 +48,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit.MatchupNotesEdit
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -71,13 +73,15 @@ fun MatchupNotesTab(viewModel: MatchupNotesViewModel) {
                     }
                 }
             ) {
+                val scrollState = rememberLazyListState()
                 if (!viewModel.hasMatchupNotes) {
                     NoNotes(viewModel)
                 } else if (LocalIsCompact.current)  {
-                    MatchupNotesTabMobile(viewModel)
+                    MatchupNotesTabMobile(viewModel, scrollState)
                 } else {
-                    MatchupNotesTabDesktop(viewModel)
+                    MatchupNotesTabDesktop(viewModel, scrollState)
                 }
+                ScrollToTopIfNeeded(viewModel, scrollState)
             }
         }
         CreateMatchup, is EditMatchup -> MatchupNotesEdit(
