@@ -69,7 +69,7 @@ fun MatchupNotesEdit(
     val viewModel = koinInject<MatchupNotesEditViewModel>()
     LaunchedEffect(Unit) {
         if (matchupNotes != null) {
-            viewModel.prepareEdition(team, matchupNotes)
+            viewModel.prepareEdition(matchupNotes)
         }
     }
     val isCompact = LocalIsCompact.current

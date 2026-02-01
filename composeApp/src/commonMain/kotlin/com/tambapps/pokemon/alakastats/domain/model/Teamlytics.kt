@@ -29,7 +29,7 @@ data class MatchupNotes(
 data class GamePlan(
     val description: String,
     val composition: List<PokemonName>?, // the 4 pokemons to bring
-    val exampleReplays: List<String>
+    val exampleReplays: List<ReplayAnalytics>
 )
 data class TeamlyticsNotes(
     val teamNotes: String,

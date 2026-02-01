@@ -66,6 +66,10 @@ private fun MatchNotesMobile(
                         )
                     }
                 Text(gamePlan.description, style = MaterialTheme.typography.bodyLarge)
+                if (gamePlan.exampleReplays.isNotEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                    ExampleReplays(viewModel, gamePlan)
+                }
                 Spacer(Modifier.height(16.dp))
             }
             Spacer(Modifier.height(8.dp))

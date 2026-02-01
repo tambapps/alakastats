@@ -38,12 +38,12 @@ class MatchupNotesEditViewModel(
         gamePlans = gamePlanStates.map { it.toGamePlan() }
     )
 
-    fun prepareEdition(team: Teamlytics, matchupNotes: MatchupNotes) {
+    fun prepareEdition(matchupNotes: MatchupNotes) {
         name = matchupNotes.name
         pokepaste = matchupNotes.pokePaste?.toPokePasteString() ?: ""
         validPokepaste()
         gamePlanStates.clear()
-        gamePlanStates.addAll(matchupNotes.gamePlans.map { GamePlanState.from(team, it) })
+        gamePlanStates.addAll(matchupNotes.gamePlans.map { GamePlanState.from(it) })
     }
 
     fun updateName(name: String) {
@@ -79,13 +79,13 @@ class GamePlanState() {
         this.exampleReplays = exampleReplays
     }
 
-    fun toGamePlan() = GamePlan(description = description, composition = composition, exampleReplays = exampleReplays.map { it.reference })
+    fun toGamePlan() = GamePlan(description = description, composition = composition, exampleReplays = exampleReplays)
 
     companion object {
-        fun from(team: Teamlytics, gamePlan: GamePlan) = GamePlanState().apply {
+        fun from(gamePlan: GamePlan) = GamePlanState().apply {
             description = gamePlan.description
             gamePlan.composition?.let { composition = it }
-            exampleReplays = team.replays.filter { gamePlan.exampleReplays.contains(it.reference) }
+            exampleReplays = gamePlan.exampleReplays
         }
     }
 }

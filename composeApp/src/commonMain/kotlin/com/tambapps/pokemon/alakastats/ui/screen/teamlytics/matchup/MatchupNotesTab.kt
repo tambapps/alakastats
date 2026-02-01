@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,7 +39,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.GamePlan
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
@@ -50,6 +51,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit.MatchupNotesEdit
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.ReplayCompact
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -214,6 +216,22 @@ internal fun Composition(composition: List<PokemonName>,
                 Spacer(Modifier.height(12.dp))
             }
         }
+    }
+}
+
+@Composable
+internal fun ExampleReplays(viewModel: MatchupNotesViewModel, gamePlan: GamePlan) {
+    Text(
+        text = "Example Replays",
+        style = MaterialTheme.typography.headlineSmall,
+        fontWeight = FontWeight.Bold
+    )
+
+    Spacer(Modifier.height(16.dp))
+    gamePlan.exampleReplays.forEach { replay ->
+        // TODO make the DesktopReplay expandable and use it here, for desktop
+        ReplayCompact(viewModel.team, replay, viewModel.pokemonImageService)
+        Spacer(Modifier.height(16.dp))
     }
 }
 
