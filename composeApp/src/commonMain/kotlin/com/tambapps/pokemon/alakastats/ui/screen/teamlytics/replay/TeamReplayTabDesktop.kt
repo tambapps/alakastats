@@ -110,7 +110,7 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
 
                 opponentPlayer.ots?.let { openTeamSheet ->
                     Spacer(Modifier.width(16.dp))
-                    OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
+                    OtsButton(opponentPlayer, opponentPlayer.ots, viewModel.pokemonImageService)
                 }
             }
             replay.url?.let { replayUrl ->

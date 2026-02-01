@@ -32,6 +32,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +64,8 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.util.copyToClipboard
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -279,7 +282,7 @@ internal fun EditSdNamesButton(viewModel: TeamReplayViewModel) {
 }
 
 @Composable
-internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplayViewModel, modifier: Modifier = Modifier) {
+internal fun OtsButton(player: Player, ots: OpenTeamSheet, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
     var showDialog by remember { mutableStateOf(false) }
     OutlinedButton(
         modifier = modifier,
@@ -301,7 +304,7 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplay
             ) {
                 // Mobile on purpose because we want a vertical pokepaste display on desktop too, as
                 // for some mysterious reason the dialog can't have full screen width
-                VerticalPokepaste(pokepaste, viewModel.pokemonImageService,)
+                VerticalPokepaste(pokepaste, pokemonImageService,)
             }
         },
         confirmButton = {
@@ -312,9 +315,19 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, viewModel: TeamReplay
         dismissButton = {
             val snackbar = LocalSnackBar.current
             val clipboardManager = LocalClipboard.current
+            val scope = rememberCoroutineScope()
             TextButton(onClick = {
                 showDialog = false
-                viewModel.copyToClipboard(clipboardManager, snackbar, "${player.name}'s OTS", ots.toPokepaste().toPokePasteString())
+                scope.launch {
+                    if (copyToClipboard(
+                            clipboardManager,
+                            label = "${player.name}'s OTS",
+                            text = ots.toPokepaste().toPokePasteString())) {
+                        snackbar.show("Copied to clipboard")
+                    } else {
+                        snackbar.show("Copy to clipboard not supported")
+                    }
+                }
             }) {
                 Text("COPY")
             }

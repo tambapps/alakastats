@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
@@ -52,6 +53,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.ReplayCompact
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
@@ -205,9 +207,34 @@ private fun AddReplayExampleDialog(
             Text("Pick Replays")
         },
         text = {
-            // TODO
+            Column(
+                Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(when(val replaysCount = selectedReplays.size) {
+                    0 -> "No replays selected"
+                    1 -> "1 replay selected"
+                    else -> "$replaysCount replays selected"
+                }, style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(20.dp))
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f),
+                    state = rememberLazyListState(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(team.replays) { replay ->
+                        ReplayCompact(team, replay, viewModel.pokemonImageService)
+                        Spacer(Modifier.height(20.dp))
+                    }
+                }
+            }
         },
         dismissButton = {
+            TextButton(onClick = { selectedReplays.clear() }) {
+                Text("Clear")
+            }
+
             TextButton(onClick = { viewModel.compositionDialogFor = null }) {
                 Text("Cancel")
             }

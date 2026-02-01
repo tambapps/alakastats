@@ -33,6 +33,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 
@@ -92,8 +93,12 @@ private fun MobileSdNamesWarning(viewModel: TeamReplayViewModel) {
 
 @Composable
 private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
-    val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
+    ReplayCompact(team, replay, viewModel.pokemonImageService, viewModel)
+}
 
+@Composable
+fun ReplayCompact(team: Teamlytics, replay: ReplayAnalytics, pokemonImageService: PokemonImageService, viewModel: TeamReplayViewModel? = null) {
+    val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
     val gameOutput = team.getGameOutput(replay)
     ExpansionTile(
         title = { isExpanded ->
@@ -102,11 +107,11 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
         },
         subtitle = {
             if (gameOutput != GameOutput.UNKNOWN) {
-                PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer, fillWidth = true)
+                PokemonTeamPreview(pokemonImageService, opponentPlayer, fillWidth = true)
             }
         },
         menu = { isMenuExpandedState ->
-            ReplayDropDownMenu(isMenuExpandedState, viewModel, replay)
+            viewModel?.let { ReplayDropDownMenu(isMenuExpandedState, it, replay) }
         },
     ) {
         Column {
@@ -115,19 +120,19 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                 Row(Modifier.fillMaxWidth()
                     .padding(horizontal = 8.dp)) {
                     Spacer(Modifier.weight(1f))
-                    OtsButton(opponentPlayer, opponentPlayer.ots, viewModel)
+                    OtsButton(opponentPlayer, opponentPlayer.ots, pokemonImageService)
                     Spacer(Modifier.width(32.dp))
                     ViewReplayButton(team, replay, replay.url)
                     Spacer(Modifier.weight(1f))
                 }
             } else if (gameOutput != GameOutput.UNKNOWN && opponentPlayer.ots != null) {
-                OtsButton(opponentPlayer, opponentPlayer.ots, viewModel, modifier = Modifier.align(Alignment.CenterHorizontally))
+                OtsButton(opponentPlayer, opponentPlayer.ots, pokemonImageService, modifier = Modifier.align(Alignment.CenterHorizontally))
             } else if (replay.url != null) {
                 ViewReplayButton(team, replay, replay.url, modifier = Modifier.align(Alignment.CenterHorizontally))
             }
             Spacer(Modifier.height(8.dp))
 
-            if (gameOutput == GameOutput.UNKNOWN) {
+            if (viewModel != null && gameOutput == GameOutput.UNKNOWN) {
                 MobileSdNamesWarning(viewModel)
             } else {
                 Spacer(Modifier.height(8.dp))
@@ -136,7 +141,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                         modifier = Modifier.weight(1f),
                         player = currentPlayer,
                         playerName = "You",
-                        viewModel = viewModel,
+                        pokemonImageService = pokemonImageService,
                         isYouPlayer = true
                     )
 
@@ -144,7 +149,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
                         modifier = Modifier.weight(1f),
                         player = opponentPlayer,
                         playerName = "Opponent",
-                        viewModel = viewModel
+                        pokemonImageService = pokemonImageService
                     )
                 }
             }
@@ -162,7 +167,7 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
 }
 
 @Composable
-private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String, viewModel: TeamReplayViewModel, isYouPlayer: Boolean = false) {
+private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String, pokemonImageService: PokemonImageService, isYouPlayer: Boolean = false) {
     Column(
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -175,7 +180,7 @@ private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String,
             SelectedPokemon(
                 pokemon = pokemon,
                 teraType = teraType,
-                pokemonImageService = viewModel.pokemonImageService,
+                pokemonImageService = pokemonImageService,
                 isYouPlayer = isYouPlayer
             )
         }
