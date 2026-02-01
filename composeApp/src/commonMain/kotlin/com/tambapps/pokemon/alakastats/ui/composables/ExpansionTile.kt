@@ -51,7 +51,8 @@ fun ExpansionTile(
         content = content,
         expandButton = { isCardExpandedState ->
             ExpandButton(isCardExpandedState, translateX = false)
-        }
+        },
+        shrinkTitleWeightOnExpanded=false
     )
 }
 
@@ -59,10 +60,12 @@ fun ExpansionTile(
 @Composable
 fun ExpansionTile(
     title: @Composable RowScope.(Boolean) -> Unit,
-    menu: @Composable (MutableState<Boolean>) -> Unit,
+    menu: @Composable ((MutableState<Boolean>) -> Unit)?,
     subtitle: @Composable () -> Unit = {},
     modifier: Modifier = Modifier,
     gradientBackgroundColors: List<Color>? = null,
+    onClick: (() -> Unit)? = null,
+    borderColor: Color? = null,
     content: @Composable () -> Unit,
 ) {
     AbstractExpansionTile(
@@ -77,20 +80,23 @@ fun ExpansionTile(
                     targetValue = if (isCardExpandedState.value) 1f else 0f
                 )
                 val isMenuExpanded = remember { mutableStateOf(false) }
-                IconButton(onClick = { isMenuExpanded.value = !isMenuExpanded.value }, enabled = isCardExpandedState.value) {
-                    Icon(
-                        modifier = Modifier.scale(expandButtonScale),
-                        painter = painterResource(Res.drawable.more_vert),
-                        contentDescription = "More",
-                        tint = MaterialTheme.colorScheme.defaultIconColor
-                    )
+                if (menu != null) {
+                    IconButton(onClick = { isMenuExpanded.value = !isMenuExpanded.value }, enabled = isCardExpandedState.value) {
+                        Icon(
+                            modifier = Modifier.scale(expandButtonScale),
+                            painter = painterResource(Res.drawable.more_vert),
+                            contentDescription = "More",
+                            tint = MaterialTheme.colorScheme.defaultIconColor
+                        )
+                    }
                 }
-
-
-                ExpandButton(isCardExpandedState, translateX = true)
-                menu(isMenuExpanded)
+                ExpandButton(isCardExpandedState, translateX = menu != null)
+                menu?.invoke(isMenuExpanded)
             }
-        }
+        },
+        onClick=onClick,
+        borderColor=borderColor,
+        shrinkTitleWeightOnExpanded=menu != null
     )
 }
 
@@ -102,6 +108,9 @@ private fun AbstractExpansionTile(
     expandButton: @Composable (MutableState<Boolean>) -> Unit,
     gradientBackgroundColors: List<Color>? = null,
     content: @Composable () -> Unit,
+    shrinkTitleWeightOnExpanded: Boolean,
+    onClick: (() -> Unit)? = null,
+    borderColor: Color? = null,
 ) {
     val isCardExpandedState = remember { mutableStateOf(false) }
 
@@ -110,17 +119,17 @@ private fun AbstractExpansionTile(
             .fillMaxWidth(),
         border = BorderStroke(
             width = 2.dp,
-            color = MaterialTheme.colorScheme.outline
+            color = borderColor ?: MaterialTheme.colorScheme.outline
         ),
         gradientBackgroundColors = gradientBackgroundColors,
-        onClick = { isCardExpandedState.value = !isCardExpandedState.value }
+        onClick = onClick ?: { isCardExpandedState.value = !isCardExpandedState.value }
     ) {
         Column(Modifier.padding(all = 8.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val titleWeight by animateFloatAsState(
-                    targetValue = if (isCardExpandedState.value) 0.725f else 0.85f
+                    targetValue = if (shrinkTitleWeightOnExpanded && isCardExpandedState.value) 0.725f else 0.85f
                 )
                 Row(Modifier.weight(titleWeight), verticalAlignment = Alignment.CenterVertically) {
                     title(isCardExpandedState.value)

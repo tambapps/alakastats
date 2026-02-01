@@ -38,10 +38,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -53,6 +55,8 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
+import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
+import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.ReplayCompact
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -200,7 +204,7 @@ private fun AddReplayExampleDialog(
     team: Teamlytics,
     gamePlanState: GamePlanState
 ) {
-    val selectedReplays = mutableStateListOf<ReplayAnalytics>()
+    val selectedReplays = mutableStateSetOf<ReplayAnalytics>()
     AlertDialog(
         onDismissRequest = { viewModel.compositionDialogFor = null },
         title = {
@@ -217,14 +221,30 @@ private fun AddReplayExampleDialog(
                     else -> "$replaysCount replays selected"
                 }, style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(20.dp))
+                // TODO filter already added replays
+                val replays = remember { team.replays }
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f),
                     state = rememberLazyListState(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    items(team.replays) { replay ->
-                        ReplayCompact(team, replay, viewModel.pokemonImageService)
+                    items(replays) { replay ->
+                        val isSelected = selectedReplays.contains(replay)
+                        ReplayCompact(
+                            team,
+                            replay,
+                            viewModel.pokemonImageService,
+                            onClick = {
+                                if (isSelected) {
+                                    selectedReplays.remove(replay)
+                                } else {
+                                    selectedReplays.add(replay)
+                                }
+                            },
+                            gradientBackgroundColors = if (isSelected) cardGradientColors else null,
+                            borderColor = if (isSelected) Color.Green else null
+                        )
                         Spacer(Modifier.height(20.dp))
                     }
                 }
@@ -244,7 +264,7 @@ private fun AddReplayExampleDialog(
                 // TODO update replaysgamePlanState.updateComposition(selectedPokemons)
                 viewModel.compositionDialogFor = null
             }) {
-                Text("Select")
+                Text("Add")
             }
         }
     )

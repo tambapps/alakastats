@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -97,7 +98,15 @@ private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, repla
 }
 
 @Composable
-fun ReplayCompact(team: Teamlytics, replay: ReplayAnalytics, pokemonImageService: PokemonImageService, viewModel: TeamReplayViewModel? = null) {
+fun ReplayCompact(
+    team: Teamlytics,
+    replay: ReplayAnalytics,
+    pokemonImageService: PokemonImageService,
+    viewModel: TeamReplayViewModel? = null,
+    onClick: (() -> Unit)? = null,
+    gradientBackgroundColors: List<Color>? = null,
+    borderColor: Color? = null
+    ) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
     val gameOutput = team.getGameOutput(replay)
     ExpansionTile(
@@ -110,9 +119,12 @@ fun ReplayCompact(team: Teamlytics, replay: ReplayAnalytics, pokemonImageService
                 PokemonTeamPreview(pokemonImageService, opponentPlayer, fillWidth = true)
             }
         },
-        menu = { isMenuExpandedState ->
-            viewModel?.let { ReplayDropDownMenu(isMenuExpandedState, it, replay) }
-        },
+        menu = if (viewModel != null) ({ isMenuExpandedState ->
+            ReplayDropDownMenu(isMenuExpandedState, viewModel, replay)
+        }) else null,
+        onClick=onClick,
+        gradientBackgroundColors=gradientBackgroundColors,
+        borderColor=borderColor
     ) {
         Column {
             Spacer(Modifier.height(8.dp))
