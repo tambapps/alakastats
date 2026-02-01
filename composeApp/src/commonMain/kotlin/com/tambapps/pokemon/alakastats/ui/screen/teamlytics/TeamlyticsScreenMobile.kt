@@ -27,7 +27,7 @@ internal fun ColumnScope.TeamlyticsScreenMobile(
             selectedTabIndex = pagerState.currentPage,
             edgePadding = 16.dp
         ) {
-            TabRowContent(pagerState, tabs)
+            TabRowContent(viewModel, pagerState, tabs)
         }
 
     }

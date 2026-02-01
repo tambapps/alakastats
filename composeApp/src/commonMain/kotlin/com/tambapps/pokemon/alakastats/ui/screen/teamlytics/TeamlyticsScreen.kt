@@ -125,23 +125,23 @@ internal fun Pager(
     ) { page ->
         when (page) {
             0 -> {
-                val viewModel = koinInjectUseCase<ManageTeamOverviewUseCase, OverviewViewModel>(viewModel)
+                val viewModel = koinInjectUseCase<ManageTeamOverviewUseCase, OverviewViewModel>(viewModel, page)
                 OverviewTab(viewModel)
             }
             1 -> {
-                val viewModel = koinInjectUseCase<ManageTeamReplaysUseCase, TeamReplayViewModel>(viewModel)
+                val viewModel = koinInjectUseCase<ManageTeamReplaysUseCase, TeamReplayViewModel>(viewModel, page)
                 TeamReplayTab(viewModel)
             }
             2 -> {
-                val viewModel = koinInjectUseCase<ConsultTeamlyticsUseCase, UsagesViewModel>(viewModel)
+                val viewModel = koinInjectUseCase<ConsultTeamlyticsUseCase, UsagesViewModel>(viewModel, page)
                 UsagesTab(viewModel)
             }
             3 -> {
-                val viewModel = koinInjectUseCase<ConsultTeamlyticsUseCase, LeadStatsViewModel>(viewModel)
+                val viewModel = koinInjectUseCase<ConsultTeamlyticsUseCase, LeadStatsViewModel>(viewModel, page)
                 LeadStatsTab(viewModel)
             }
             4 -> {
-                val viewModel = koinInjectUseCase<ManageMatchupNotesUseCase, MatchupNotesViewModel>(viewModel)
+                val viewModel = koinInjectUseCase<ManageMatchupNotesUseCase, MatchupNotesViewModel>(viewModel, page)
                 MatchupNotesTab(viewModel)
             }
         }
@@ -149,12 +149,20 @@ internal fun Pager(
 }
 
 @Composable
-private inline fun <reified USE_CASE, reified T> koinInjectUseCase(viewModel: TeamlyticsViewModel) = koinInject<T> {
+private inline fun <reified USE_CASE, reified T: TeamlyticsTabViewModel> koinInjectUseCase(viewModel: TeamlyticsViewModel, index: Int) = koinInject<T> {
     parametersOf(viewModel as USE_CASE)
+}.apply {
+    LaunchedEffect(viewModel.scrollToTopIndex) {
+        if (index == viewModel.scrollToTopIndex) {
+            signalScrollToTop()
+            viewModel.scrollToTopIndex = null
+        }
+    }
 }
 
 @Composable
 internal fun TabRowContent(
+    viewModel: TeamlyticsViewModel,
     pagerState: PagerState,
     tabs: List<String>
 ) {
@@ -163,8 +171,12 @@ internal fun TabRowContent(
         Tab(
             selected = pagerState.currentPage == index,
             onClick = {
-                scope.launch {
-                    pagerState.animateScrollToPage(index)
+                if (pagerState.currentPage == index) {
+                    viewModel.scrollToTopIndex = index
+                } else {
+                    scope.launch {
+                        pagerState.animateScrollToPage(index)
+                    }
                 }
             },
             text = { Text(title) }

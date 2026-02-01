@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.more_vert
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -20,6 +22,7 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,10 +50,19 @@ import kotlin.collections.set
 @Composable
 fun OverviewTab(viewModel: OverviewViewModel) {
     val isCompact = LocalIsCompact.current
+    val scrollState = rememberScrollState()
     if (isCompact) {
-        OverviewTabMobile(viewModel)
+        OverviewTabMobile(viewModel, scrollState)
     } else {
-        OverviewTabDesktop(viewModel)
+        OverviewTabDesktop(viewModel, scrollState)
+    }
+    LaunchedEffect(viewModel.scrollToTopSignal) {
+        if (viewModel.scrollToTopSignal > 0) {
+            scrollState.animateScrollTo(
+                value = 0,
+                animationSpec = tween(durationMillis = 750)
+            )
+        }
     }
 }
 

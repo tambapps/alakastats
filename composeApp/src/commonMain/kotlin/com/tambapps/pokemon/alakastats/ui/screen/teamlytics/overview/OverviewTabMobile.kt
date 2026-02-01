@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +20,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.verticalPokemonSpace
 
 @Composable
-internal fun OverviewTabMobile(viewModel: OverviewViewModel) {
+internal fun OverviewTabMobile(viewModel: OverviewViewModel, scrollState: ScrollState) {
     val team = viewModel.team
     Column(Modifier.fillMaxSize()) {
         Column(
@@ -27,7 +28,7 @@ internal fun OverviewTabMobile(viewModel: OverviewViewModel) {
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ) {
             if (viewModel.isEditingNotes) {
                 Row(Modifier.align(Alignment.CenterHorizontally)) {

@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,10 +20,11 @@ class EditMatchup(val matchupNotes: MatchupNotes): EditMatchupMode()
 object CreateMatchup: EditMatchupMode()
 
 class MatchupNotesViewModel(
-    val useCase: ManageMatchupNotesUseCase,
+    override val useCase: ManageMatchupNotesUseCase,
     val pokemonImageService: PokemonImageService,
-) {
+): TeamlyticsTabViewModel() {
 
+    override val isTabLoading = false
     val team get() = useCase.originalTeam
     val matchupNotes get() = team.matchupNotes
     val hasMatchupNotes get() = matchupNotes.isNotEmpty()

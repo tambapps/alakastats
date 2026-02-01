@@ -46,6 +46,8 @@ class TeamlyticsViewModel(
         private set
     var showFiltersDialog by mutableStateOf(false)
 
+    var scrollToTopIndex by mutableStateOf<Int?>(null)
+
     override val originalTeam: Teamlytics
         get() = (teamState as TeamState.Loaded).team
 

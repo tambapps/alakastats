@@ -24,7 +24,7 @@ internal fun ColumnScope.TeamlyticsScreenDesktop(
         TabRow(
             selectedTabIndex = pagerState.currentPage
         ) {
-            TabRowContent(pagerState, tabs)
+            TabRowContent(viewModel, pagerState, tabs)
         }
     }
     Pager(Modifier.weight(1f), viewModel, pagerState)
