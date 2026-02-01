@@ -36,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
@@ -142,6 +144,8 @@ fun MatchupNotesEdit(
                             .heightIn(min = 150.dp),
                         singleLine = false,
                     )
+                    VerticalSpacer()
+                    ReplayExamples(viewModel, gamePlanState)
                     VerticalSpacer(32.dp)
                 }
 
@@ -153,6 +157,7 @@ fun MatchupNotesEdit(
         }
     }
     viewModel.compositionDialogFor?.let { AddToCompositionDialog(viewModel, team, it) }
+    viewModel.addReplayDialogFor?.let { AddReplayExampleDialog(viewModel, team, it) }
 }
 
 @Composable
@@ -185,6 +190,38 @@ private fun ButtonsBar(
             )
         }
     }
+}
+
+@Composable
+private fun AddReplayExampleDialog(
+    viewModel: MatchupNotesEditViewModel,
+    team: Teamlytics,
+    gamePlanState: GamePlanState
+) {
+    val selectedReplays = mutableStateListOf<ReplayAnalytics>()
+    AlertDialog(
+        onDismissRequest = { viewModel.compositionDialogFor = null },
+        title = {
+            Text("Pick Replays")
+        },
+        text = {
+            // TODO
+        },
+        dismissButton = {
+            TextButton(onClick = { viewModel.compositionDialogFor = null }) {
+                Text("Cancel")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                // TODO update replaysgamePlanState.updateComposition(selectedPokemons)
+                viewModel.compositionDialogFor = null
+            }) {
+                Text("Select")
+            }
+        }
+    )
+
 }
 
 @Composable
@@ -326,5 +363,27 @@ private fun GamePlanComposition(
     }
 }
 
+@Composable
+private fun ReplayExamples(
+    viewModel: MatchupNotesEditViewModel,
+    gamePlanState: GamePlanState
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        SectionSubTitle(text = "Replay examples")
+        Spacer(Modifier.width(16.dp))
+        OutlinedIconButton(
+            onClick = { viewModel.addReplayDialogFor = gamePlanState },
+            modifier = Modifier.size(32.dp)
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.add),
+                modifier = Modifier.size(16.dp),
+                contentDescription = "Add Replay",
+                tint = MaterialTheme.colorScheme.defaultIconColor
+            )
+        }
+    }
+
+}
 @Composable
 private fun VerticalSpacer(height: Dp = 16.dp) = Spacer(Modifier.height(height))

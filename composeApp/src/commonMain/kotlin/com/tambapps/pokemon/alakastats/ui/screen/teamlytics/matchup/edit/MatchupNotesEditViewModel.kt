@@ -27,6 +27,7 @@ class MatchupNotesEditViewModel(
     val gamePlanStates = mutableStateListOf<GamePlanState>()
 
     var compositionDialogFor by mutableStateOf<GamePlanState?>(null)
+    var addReplayDialogFor by mutableStateOf<GamePlanState?>(null)
 
     fun generateMatchupNotes() = MatchupNotes(
         id = Uuid.random(),
