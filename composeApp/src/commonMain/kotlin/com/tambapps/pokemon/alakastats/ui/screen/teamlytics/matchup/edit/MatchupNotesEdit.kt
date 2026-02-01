@@ -37,8 +37,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
@@ -50,15 +48,12 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
-import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
-import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.ReplayCompact
-import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -74,7 +69,7 @@ fun MatchupNotesEdit(
     val viewModel = koinInject<MatchupNotesEditViewModel>()
     LaunchedEffect(Unit) {
         if (matchupNotes != null) {
-            viewModel.prepareEdition(matchupNotes)
+            viewModel.prepareEdition(team, matchupNotes)
         }
     }
     val isCompact = LocalIsCompact.current
@@ -151,7 +146,7 @@ fun MatchupNotesEdit(
                         singleLine = false,
                     )
                     VerticalSpacer()
-                    ReplayExamples(viewModel, gamePlanState)
+                    ReplayExamples(viewModel, team, gamePlanState)
                     VerticalSpacer(32.dp)
                 }
 
@@ -163,7 +158,7 @@ fun MatchupNotesEdit(
         }
     }
     viewModel.compositionDialogFor?.let { AddToCompositionDialog(viewModel, team, it) }
-    viewModel.addReplayDialogFor?.let { AddReplayExampleDialog(viewModel, team, it) }
+    viewModel.addReplayDialogFor?.let { SelectReplayExampleDialog(viewModel, team, it) }
 }
 
 @Composable
@@ -185,7 +180,7 @@ private fun ButtonsBar(
         }
 
         Button(
-            onClick = { onEdited(viewModel.generateMatchupNotes()) },
+            onClick = { onEdited(viewModel.generateMatchupNotes(matchupNotes)) },
             modifier = Modifier.weight(1f),
             enabled = viewModel.isFormValid,
         ) {
@@ -199,16 +194,16 @@ private fun ButtonsBar(
 }
 
 @Composable
-private fun AddReplayExampleDialog(
+private fun SelectReplayExampleDialog(
     viewModel: MatchupNotesEditViewModel,
     team: Teamlytics,
     gamePlanState: GamePlanState
 ) {
-    val selectedReplays = mutableStateSetOf<ReplayAnalytics>()
+    val selectedReplays = gamePlanState.exampleReplays.toMutableStateList()
     AlertDialog(
-        onDismissRequest = { viewModel.compositionDialogFor = null },
+        onDismissRequest = { viewModel.addReplayDialogFor = null },
         title = {
-            Text("Pick Replays")
+            Text("Select Replays")
         },
         text = {
             Column(
@@ -221,8 +216,11 @@ private fun AddReplayExampleDialog(
                     else -> "$replaysCount replays selected"
                 }, style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(20.dp))
-                // TODO filter already added replays
-                val replays = remember { team.replays }
+                val replays = remember {
+                    // doing this to display selected replays first
+                    val (alreadySelected, others) = team.replays.partition { gamePlanState.exampleReplays.contains(it) }
+                    alreadySelected + others
+                }
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f),
@@ -255,16 +253,16 @@ private fun AddReplayExampleDialog(
                 Text("Clear")
             }
 
-            TextButton(onClick = { viewModel.compositionDialogFor = null }) {
+            TextButton(onClick = { viewModel.addReplayDialogFor = null }) {
                 Text("Cancel")
             }
         },
         confirmButton = {
             TextButton(onClick = {
-                // TODO update replaysgamePlanState.updateComposition(selectedPokemons)
-                viewModel.compositionDialogFor = null
+                gamePlanState.updateExampleReplays(selectedReplays.toList())
+                viewModel.addReplayDialogFor = null
             }) {
-                Text("Add")
+                Text("Select")
             }
         }
     )
@@ -413,22 +411,28 @@ private fun GamePlanComposition(
 @Composable
 private fun ReplayExamples(
     viewModel: MatchupNotesEditViewModel,
+    team: Teamlytics,
     gamePlanState: GamePlanState
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        SectionSubTitle(text = "Replay examples")
+        SectionSubTitle(text = "Example Replays")
         Spacer(Modifier.width(16.dp))
         OutlinedIconButton(
             onClick = { viewModel.addReplayDialogFor = gamePlanState },
             modifier = Modifier.size(32.dp)
         ) {
             Icon(
-                painter = painterResource(Res.drawable.add),
+                painter = painterResource(Res.drawable.edit),
                 modifier = Modifier.size(16.dp),
-                contentDescription = "Add Replay",
+                contentDescription = "Select Replays",
                 tint = MaterialTheme.colorScheme.defaultIconColor
             )
         }
+    }
+    VerticalSpacer()
+    gamePlanState.exampleReplays.forEach { replay ->
+        ReplayCompact(team, replay, viewModel.pokemonImageService)
+        VerticalSpacer()
     }
 
 }

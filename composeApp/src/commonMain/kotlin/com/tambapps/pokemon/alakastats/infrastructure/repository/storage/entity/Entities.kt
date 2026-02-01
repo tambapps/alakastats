@@ -45,7 +45,8 @@ data class MatchupNotesEntity(
 @Serializable
 data class GamePlanEntity(
     val description: String,
-    val composition: List<String>? = null
+    val composition: List<String>? = null,
+    val exampleReplays: List<String>? = null
 )
 
 @Serializable

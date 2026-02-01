@@ -140,11 +140,13 @@ class GamePlanTransformer {
 
     fun toEntity(domain: GamePlan) = GamePlanEntity(
         description = domain.description,
-        composition = domain.composition?.map { it.value }
+        composition = domain.composition?.map { it.value },
+        exampleReplays = domain.exampleReplays
     )
 
     fun toDomain(entity: GamePlanEntity) = GamePlan(
         description = entity.description,
-        composition = entity.composition?.map { PokemonName(it) }
+        composition = entity.composition?.map { PokemonName(it) },
+        exampleReplays = entity.exampleReplays ?: emptyList()
     )
 }

@@ -8,6 +8,8 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
@@ -29,19 +31,19 @@ class MatchupNotesEditViewModel(
     var compositionDialogFor by mutableStateOf<GamePlanState?>(null)
     var addReplayDialogFor by mutableStateOf<GamePlanState?>(null)
 
-    fun generateMatchupNotes() = MatchupNotes(
-        id = Uuid.random(),
+    fun generateMatchupNotes(matchupNotes: MatchupNotes?) = MatchupNotes(
+        id = matchupNotes?.id ?: Uuid.random(),
         name = name,
         pokePaste = pokepasteParser.tryParse(pokepaste),
         gamePlans = gamePlanStates.map { it.toGamePlan() }
     )
 
-    fun prepareEdition(matchupNotes: MatchupNotes) {
+    fun prepareEdition(team: Teamlytics, matchupNotes: MatchupNotes) {
         name = matchupNotes.name
         pokepaste = matchupNotes.pokePaste?.toPokePasteString() ?: ""
         validPokepaste()
         gamePlanStates.clear()
-        gamePlanStates.addAll(matchupNotes.gamePlans.map(GamePlanState::from))
+        gamePlanStates.addAll(matchupNotes.gamePlans.map { GamePlanState.from(team, it) })
     }
 
     fun updateName(name: String) {
@@ -53,11 +55,14 @@ class MatchupNotesEditViewModel(
     }
 }
 
-class GamePlanState {
+class GamePlanState() {
     var description by mutableStateOf("")
         private set
 
     var composition by mutableStateOf(listOf<PokemonName>())
+        private set
+
+    var exampleReplays by mutableStateOf(emptyList<ReplayAnalytics>())
         private set
 
     val isValid get() = description.isNotBlank() && composition.isNotEmpty()
@@ -70,12 +75,17 @@ class GamePlanState {
         this.composition = composition
     }
 
-    fun toGamePlan() = GamePlan(description = description, composition = composition)
+    fun updateExampleReplays(exampleReplays: List<ReplayAnalytics>) {
+        this.exampleReplays = exampleReplays
+    }
+
+    fun toGamePlan() = GamePlan(description = description, composition = composition, exampleReplays = exampleReplays.map { it.reference })
 
     companion object {
-        fun from(gamePlan: GamePlan) = GamePlanState().apply {
+        fun from(team: Teamlytics, gamePlan: GamePlan) = GamePlanState().apply {
             description = gamePlan.description
             gamePlan.composition?.let { composition = it }
+            exampleReplays = team.replays.filter { gamePlan.exampleReplays.contains(it.reference) }
         }
     }
 }

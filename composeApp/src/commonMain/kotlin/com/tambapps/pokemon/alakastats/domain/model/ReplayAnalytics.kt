@@ -55,8 +55,10 @@ data class ReplayAnalytics(
     val format: String,
     val rating: Int?,
     val version: String,
+    // TODO create inline class PlayerName
     val winner: String?,
     val url: String?,
+    // TODO create inline class ReferenceId
     val reference: String,
     val nextBattleRef: String?,
     val notes: String?,
