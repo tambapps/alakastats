@@ -320,7 +320,7 @@ private fun ShowdownNameDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onAdd(newName); onDismissRequest.invoke() },
+                onClick = { onAdd(newName.trim()); onDismissRequest.invoke() },
                 enabled = isSdNameValid(newName)
             ) {
                 Text(
