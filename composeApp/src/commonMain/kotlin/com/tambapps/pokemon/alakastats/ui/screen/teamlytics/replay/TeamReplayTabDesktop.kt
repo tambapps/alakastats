@@ -40,6 +40,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.getGameOutput
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
+import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
@@ -47,6 +48,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import org.jetbrains.compose.resources.painterResource
@@ -90,6 +92,20 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: L
 }
 
 @Composable
+fun ExpandableDesktopReplay(team: Teamlytics, replay: ReplayAnalytics, pokemonImageService: PokemonImageService) {
+    val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
+    val gameOutput = team.getGameOutput(replay)
+
+    ExpansionTile(
+        title = {
+            HeadRow(team, replay, gameOutput, currentPlayer=currentPlayer, opponentPlayer=opponentPlayer, pokemonImageService = pokemonImageService, viewModel = null)
+        },
+    ) {
+        ReplayContent(replay, gameOutput, currentPlayer=currentPlayer, opponentPlayer=opponentPlayer, pokemonImageService, viewModel = null)
+    }
+}
+
+@Composable
 fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
     val gameOutput = team.getGameOutput(replay)
@@ -97,91 +113,114 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
         modifier = Modifier.fillMaxWidth(),
         gradientBackgroundColors = cardGradientColors
         ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        ) {
-            GameOutputCard(gameOutput)
-            VsText(currentPlayer, opponentPlayer, gameOutput)
-            Spacer(Modifier.width(16.dp))
-            if (gameOutput != GameOutput.UNKNOWN) {
-                PokemonTeamPreview(viewModel.pokemonImageService, opponentPlayer,
-                    childModifier = Modifier.size(100.dp).padding(bottom = 16.dp))
-
-                opponentPlayer.ots?.let { openTeamSheet ->
-                    Spacer(Modifier.width(16.dp))
-                    OtsButton(opponentPlayer, opponentPlayer.ots, viewModel.pokemonImageService)
-                }
-            }
-            replay.url?.let { replayUrl ->
-                Spacer(Modifier.width(20.dp))
-                ViewReplayButton(team, replay, replayUrl)
-            }
-            Spacer(Modifier.weight(1f))
-
-            val isMenuExpandedState = remember { mutableStateOf(false) }
-            IconButton(onClick = { isMenuExpandedState.value = !isMenuExpandedState.value }) {
-                Icon(
-                    modifier = Modifier.size(64.dp),
-                    painter = painterResource(Res.drawable.more_vert),
-                    contentDescription = "More",
-                    tint = MaterialTheme.colorScheme.defaultIconColor
-                )
-                ReplayDropDownMenu(isMenuExpandedState, viewModel, replay)
-            }
-            Spacer(Modifier.width(8.dp))
-        }
-
-        if (gameOutput == GameOutput.UNKNOWN) {
-            DesktopSdNamesWarning(viewModel)
-        } else {
-            Row(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                DesktopPlayer(modifier = Modifier.weight(1f), player = currentPlayer, playerName = "You", viewModel = viewModel, isYouPlayer = true)
-                Spacer(Modifier.width(8.dp))
-                DesktopPlayer(modifier = Modifier.weight(1f), player = opponentPlayer, playerName = "Opponent", viewModel = viewModel)
-            }
-        }
-
-        if (!replay.notes.isNullOrBlank()) {
-            Spacer(Modifier.height(4.dp))
-            Text(
-                replay.notes,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(16.dp))
-        }
+        HeadRow(team, replay, gameOutput, currentPlayer=currentPlayer, opponentPlayer=opponentPlayer, pokemonImageService = viewModel.pokemonImageService, viewModel)
+        ReplayContent(replay, gameOutput, currentPlayer=currentPlayer, opponentPlayer=opponentPlayer, viewModel.pokemonImageService, viewModel)
     }
 }
 
 @Composable
-private fun DesktopSdNamesWarning(viewModel: TeamReplayViewModel) {
+private fun HeadRow(
+    team: Teamlytics,
+    replay: ReplayAnalytics,
+    gameOutput: GameOutput,
+    currentPlayer: Player,
+    opponentPlayer: Player,
+    pokemonImageService: PokemonImageService,
+    viewModel: TeamReplayViewModel?
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(horizontal = 8.dp)
+    ) {
+        GameOutputCard(gameOutput)
+        VsText(currentPlayer, opponentPlayer, gameOutput)
+        Spacer(Modifier.width(16.dp))
+        if (gameOutput != GameOutput.UNKNOWN) {
+            PokemonTeamPreview(pokemonImageService, opponentPlayer,
+                childModifier = Modifier.size(100.dp).padding(bottom = 16.dp))
+
+            opponentPlayer.ots?.let { openTeamSheet ->
+                Spacer(Modifier.width(16.dp))
+                OtsButton(opponentPlayer, opponentPlayer.ots, pokemonImageService)
+            }
+        }
+        replay.url?.let { replayUrl ->
+            Spacer(Modifier.width(20.dp))
+            ViewReplayButton(team, replay, replayUrl)
+        }
+        Spacer(Modifier.weight(1f))
+
+        val isMenuExpandedState = remember { mutableStateOf(false) }
+        IconButton(onClick = { isMenuExpandedState.value = !isMenuExpandedState.value }) {
+            Icon(
+                modifier = Modifier.size(64.dp),
+                painter = painterResource(Res.drawable.more_vert),
+                contentDescription = "More",
+                tint = MaterialTheme.colorScheme.defaultIconColor
+            )
+            viewModel?.let { ReplayDropDownMenu(isMenuExpandedState, it, replay) }
+        }
+        Spacer(Modifier.width(8.dp))
+    }
+}
+
+@Composable
+private fun ReplayContent(
+    replay: ReplayAnalytics,
+    gameOutput: GameOutput,
+    currentPlayer: Player,
+    opponentPlayer: Player,
+    pokemonImageService: PokemonImageService,
+    viewModel: TeamReplayViewModel?,
+) {
+    if (gameOutput == GameOutput.UNKNOWN) {
+        DesktopSdNamesWarning(viewModel)
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            DesktopPlayer(modifier = Modifier.weight(1f), player = currentPlayer, playerName = "You", pokemonImageService = pokemonImageService, isYouPlayer = true)
+            Spacer(Modifier.width(8.dp))
+            DesktopPlayer(modifier = Modifier.weight(1f), player = opponentPlayer, playerName = "Opponent", pokemonImageService = pokemonImageService)
+        }
+    }
+    if (!replay.notes.isNullOrBlank()) {
+        Spacer(Modifier.height(4.dp))
+        Text(
+            replay.notes,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun DesktopSdNamesWarning(viewModel: TeamReplayViewModel?) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text("⚠\uFE0F your showdown names didn't match with any player of this game", style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.width(16.dp))
-        EditSdNamesButton(viewModel)
+        viewModel?.let { EditSdNamesButton(it) }
     }
 }
 
 @Composable
-private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String, viewModel: TeamReplayViewModel, isYouPlayer: Boolean = false) {
+private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String, pokemonImageService: PokemonImageService, isYouPlayer: Boolean = false) {
     Column(
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         PlayerNameEloText(player, playerName)
         Spacer(Modifier.height(8.dp))
-        DesktopSelection(player, viewModel, isYouPlayer)
+        DesktopSelection(player, pokemonImageService, isYouPlayer)
         Spacer(Modifier.height(8.dp))
     }
 }
 
 @Composable
-private fun DesktopSelection(player: Player, viewModel: TeamReplayViewModel, isYouPlayer: Boolean = false) {
+private fun DesktopSelection(player: Player, pokemonImageService: PokemonImageService, isYouPlayer: Boolean = false) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         player.selection.chunked(2).forEachIndexed { index, chunk ->
             if (index == 1) {
@@ -212,7 +251,7 @@ private fun DesktopSelection(player: Player, viewModel: TeamReplayViewModel, isY
                         modifier = Modifier.widthIn(max = 175.dp),
                         pokemon = pokemon,
                         teraType = teraType,
-                        pokemonImageService = viewModel.pokemonImageService,
+                        pokemonImageService = pokemonImageService,
                         isYouPlayer = isYouPlayer
                     )
                 }

@@ -51,6 +51,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit.MatchupNotesEdit
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.ExpandableDesktopReplay
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.ReplayCompact
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -229,8 +230,11 @@ internal fun ExampleReplays(viewModel: MatchupNotesViewModel, gamePlan: GamePlan
 
     Spacer(Modifier.height(16.dp))
     gamePlan.exampleReplays.forEach { replay ->
-        // TODO make the DesktopReplay expandable and use it here, for desktop
-        ReplayCompact(viewModel.team, replay, viewModel.pokemonImageService)
+        if (LocalIsCompact.current) {
+            ReplayCompact(viewModel.team, replay, viewModel.pokemonImageService)
+        } else {
+            ExpandableDesktopReplay(viewModel.team, replay, viewModel.pokemonImageService)
+        }
         Spacer(Modifier.height(16.dp))
     }
 }
