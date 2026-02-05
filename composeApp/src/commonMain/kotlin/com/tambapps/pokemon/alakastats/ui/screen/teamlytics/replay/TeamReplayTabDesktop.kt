@@ -100,6 +100,7 @@ fun ExpandableDesktopReplay(team: Teamlytics, replay: ReplayAnalytics, pokemonIm
         title = {
             HeadRow(team, replay, gameOutput, currentPlayer=currentPlayer, opponentPlayer=opponentPlayer, pokemonImageService = pokemonImageService, viewModel = null)
         },
+        disableWhenOpened = true
     ) {
         ReplayContent(replay, gameOutput, currentPlayer=currentPlayer, opponentPlayer=opponentPlayer, pokemonImageService, viewModel = null)
     }

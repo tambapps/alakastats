@@ -41,6 +41,7 @@ import org.jetbrains.compose.resources.painterResource
 fun ExpansionTile(
     title: @Composable RowScope.(Boolean) -> Unit,
     subtitle: @Composable () -> Unit = {},
+    disableWhenOpened: Boolean = false,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -52,6 +53,7 @@ fun ExpansionTile(
         expandButton = { isCardExpandedState ->
             ExpandButton(isCardExpandedState, translateX = false)
         },
+        disableWhenOpened=disableWhenOpened,
         shrinkTitleWeightOnExpanded=false
     )
 }
@@ -66,6 +68,7 @@ fun ExpansionTile(
     gradientBackgroundColors: List<Color>? = null,
     onClick: (() -> Unit)? = null,
     borderColor: Color? = null,
+    disableWhenOpened: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     AbstractExpansionTile(
@@ -74,6 +77,7 @@ fun ExpansionTile(
         subtitle = subtitle,
         content = content,
         gradientBackgroundColors = gradientBackgroundColors,
+        disableWhenOpened=disableWhenOpened,
         expandButton = { isCardExpandedState ->
             Box {
                 val expandButtonScale by animateFloatAsState(
@@ -109,12 +113,14 @@ private fun AbstractExpansionTile(
     gradientBackgroundColors: List<Color>? = null,
     content: @Composable () -> Unit,
     shrinkTitleWeightOnExpanded: Boolean,
+    disableWhenOpened: Boolean = false,
     onClick: (() -> Unit)? = null,
     borderColor: Color? = null,
 ) {
     val isCardExpandedState = remember { mutableStateOf(false) }
 
     MyCard(
+        enabled = !disableWhenOpened || !isCardExpandedState.value,
         modifier = modifier
             .fillMaxWidth(),
         border = BorderStroke(

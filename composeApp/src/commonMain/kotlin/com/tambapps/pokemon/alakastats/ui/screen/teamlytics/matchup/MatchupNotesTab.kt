@@ -170,6 +170,7 @@ internal fun MatchNotes(
                 )
             }
         },
+        disableWhenOpened = !LocalIsCompact.current, // useful to prevent color changing on hover which can be annoying
         content = content
     )
     if (showDeleteDialog) {
