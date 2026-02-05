@@ -167,18 +167,21 @@ class HomeViewModel(
         scope.launch {
             val either = either {
                 val team = useCase.get(preview.id).bind()
-                val reloadedReplays = team.replays.map { replay ->
-                    async {
-                        replay.url?.let { replayUrl ->
-                            replayAnalyticsService.fetch(replayUrl).getOrElse { error ->
-                                withContext(Dispatchers.Main) {
-                                    snackBar.show("Failed to fetch replay: ${error.message}", SnackBar.Severity.ERROR)
+                val reloadedReplays = team.replays
+                    .distinctBy { it.reference } // just in case there were some duplicates
+                    .map { replay ->
+                        async {
+                            replay.url?.let { replayUrl ->
+                                replayAnalyticsService.fetch(replayUrl).getOrElse { error ->
+                                    withContext(Dispatchers.Main) {
+                                        snackBar.show("Failed to fetch replay: ${error.message}", SnackBar.Severity.ERROR)
+                                    }
+                                    null
                                 }
-                                null
-                            }
-                        }?.completedWith(replay) ?: replay
+                            }?.completedWith(replay) ?: replay
+                        }
                     }
-                }.awaitAll()
+                    .awaitAll()
                 useCase.save(team.copy(replays = reloadedReplays.withComputedElo())).bind()
                 doLoadTeams()
             }

@@ -142,7 +142,9 @@ class TeamReplayViewModel(
                         null
                     }
                 }
-            }.awaitAll().filterNotNull()
+            }.awaitAll()
+                .filterNotNull()
+                .distinctBy { it.reference }
 
             val duplicates = results.filter { resultReplay -> useCase.originalTeam.replays.any { it.reference == resultReplay.reference } }
             val error =
