@@ -150,7 +150,7 @@ internal fun MatchNotes(
                     viewModel.pokemonImageService,
                     pokePaste.pokemons.map { it.name },
                     fillWidth = true,
-                    facingDirection = if (LocalIsCompact.current) FacingDirection.LEFT else FacingDirection.RIGHT
+                    facingDirection = FacingDirection.LEFT
                 )
             }
         },

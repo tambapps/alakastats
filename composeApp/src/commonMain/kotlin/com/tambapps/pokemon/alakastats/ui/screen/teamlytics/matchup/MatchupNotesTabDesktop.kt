@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
+import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
 
 @Composable
@@ -58,24 +59,26 @@ private fun MatchNotesDesktop(
                     fontWeight = FontWeight.Bold
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(gamePlan.description, style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(6f))
                     gamePlan.composition
                         ?.takeIf { it.isNotEmpty() }
                         ?.let { composition ->
                             Composition(
                                 composition, viewModel.pokemonImageService,
                                 pokemonSize = 120.dp,
-                                facingDirection = FacingDirection.LEFT,
+                                facingDirection = FacingDirection.RIGHT,
                                 Modifier.padding(end = 8.dp).weight(4f)
                             )
                         }
+                    Text(
+                        gamePlan.description,
+                        style = if (LocalIsCompact.current) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(6f))
                 }
                 if (gamePlan.exampleReplays.isNotEmpty()) {
                     Spacer(Modifier.height(8.dp))
                     ExampleReplays(viewModel, gamePlan)
                 }
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(32.dp))
 
             }
             Spacer(Modifier.height(8.dp))
