@@ -150,15 +150,17 @@ private fun HeadRow(
         }
         Spacer(Modifier.weight(1f))
 
-        val isMenuExpandedState = remember { mutableStateOf(false) }
-        IconButton(onClick = { isMenuExpandedState.value = !isMenuExpandedState.value }) {
-            Icon(
-                modifier = Modifier.size(64.dp),
-                painter = painterResource(Res.drawable.more_vert),
-                contentDescription = "More",
-                tint = MaterialTheme.colorScheme.defaultIconColor
-            )
-            viewModel?.let { ReplayDropDownMenu(isMenuExpandedState, it, replay) }
+        if (viewModel != null) {
+            val isMenuExpandedState = remember { mutableStateOf(false) }
+            IconButton(onClick = { isMenuExpandedState.value = !isMenuExpandedState.value }) {
+                Icon(
+                    modifier = Modifier.size(64.dp),
+                    painter = painterResource(Res.drawable.more_vert),
+                    contentDescription = "More",
+                    tint = MaterialTheme.colorScheme.defaultIconColor
+                )
+                ReplayDropDownMenu(isMenuExpandedState, viewModel, replay)
+            }
         }
         Spacer(Modifier.width(8.dp))
     }
@@ -179,9 +181,9 @@ private fun ReplayContent(
         Row(
             modifier = Modifier.fillMaxWidth()
         ) {
-            DesktopPlayer(modifier = Modifier.weight(1f), player = currentPlayer, playerName = "You", pokemonImageService = pokemonImageService, isYouPlayer = true)
+            DesktopPlayer(modifier = Modifier.weight(1f), player = currentPlayer, playerName = "You", pokemonImageService = pokemonImageService, useAlternativeSurfaceContainer = viewModel == null, isYouPlayer = true)
             Spacer(Modifier.width(8.dp))
-            DesktopPlayer(modifier = Modifier.weight(1f), player = opponentPlayer, playerName = "Opponent", pokemonImageService = pokemonImageService)
+            DesktopPlayer(modifier = Modifier.weight(1f), player = opponentPlayer, playerName = "Opponent", pokemonImageService = pokemonImageService, useAlternativeSurfaceContainer = viewModel == null)
         }
     }
     if (!replay.notes.isNullOrBlank()) {
@@ -207,20 +209,24 @@ private fun DesktopSdNamesWarning(viewModel: TeamReplayViewModel?) {
 }
 
 @Composable
-private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String, pokemonImageService: PokemonImageService, isYouPlayer: Boolean = false) {
+private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String, pokemonImageService: PokemonImageService, useAlternativeSurfaceContainer: Boolean, isYouPlayer: Boolean = false) {
     Column(
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         PlayerNameEloText(player, playerName)
         Spacer(Modifier.height(8.dp))
-        DesktopSelection(player, pokemonImageService, isYouPlayer)
+        DesktopSelection(player, pokemonImageService, useAlternativeSurfaceContainer=useAlternativeSurfaceContainer, isYouPlayer=isYouPlayer)
         Spacer(Modifier.height(8.dp))
     }
 }
 
 @Composable
-private fun DesktopSelection(player: Player, pokemonImageService: PokemonImageService, isYouPlayer: Boolean = false) {
+private fun DesktopSelection(
+    player: Player,
+    pokemonImageService: PokemonImageService,
+    useAlternativeSurfaceContainer: Boolean,
+    isYouPlayer: Boolean = false) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         player.selection.chunked(2).forEachIndexed { index, chunk ->
             if (index == 1) {
@@ -231,7 +237,7 @@ private fun DesktopSelection(player: Player, pokemonImageService: PokemonImageSe
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        color = if (useAlternativeSurfaceContainer) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainer,
                         shape = RoundedCornerShape(50.dp)
                     )
                     .align(Alignment.CenterHorizontally)
