@@ -37,7 +37,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
@@ -216,11 +220,31 @@ private fun SelectReplayExampleDialog(
                     else -> "$replaysCount replays selected"
                 }, style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(20.dp))
-                val replays = remember {
+                val allReplays = remember {
                     // doing this to display selected replays first
                     val (alreadySelected, others) = team.replays.partition { gamePlanState.exampleReplays.contains(it) }
                     alreadySelected + others
                 }
+                var replays by remember { mutableStateOf(allReplays) }
+                var usernameText by remember { mutableStateOf("") }
+                OutlinedTextField(
+                    value = usernameText,
+                    onValueChange = {
+                        usernameText = it
+                        replays = if (usernameText.isNotBlank()) {
+                            team.withContext {
+                                allReplays.filter { replay ->
+                                    replay.opponentPlayer.name.startsWith(usernameText, ignoreCase = true)
+                                }
+                            }
+                        } else {
+                            allReplays
+                        }
+                    },
+                    placeholder = { Text("Filter by Username") },
+                    maxLines = 1
+                    )
+                Spacer(Modifier.height(20.dp))
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f),
