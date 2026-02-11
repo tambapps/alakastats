@@ -2,11 +2,9 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -43,23 +40,21 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
-import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
-import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.isSdNameValid
 import org.jetbrains.compose.resources.painterResource
+import kotlin.jvm.JvmInline
 
 @Composable
 fun FiltersDialog(viewModel: FiltersViewModel) {
@@ -112,7 +107,7 @@ fun OpponentFilters(viewModel: FiltersViewModel) {
             viewModel = viewModel,
             pokemons = viewModel.opponentTeamFilters,
             max = 6,
-            preventLeadOption = true
+            proposeLead = false
         )
         Spacer(Modifier.height(12.dp))
 
@@ -121,6 +116,7 @@ fun OpponentFilters(viewModel: FiltersViewModel) {
             viewModel = viewModel,
             pokemons = viewModel.opponentSelectionFilters,
             max = 4,
+            proposeLead = true
         )
 
         Spacer(Modifier.height(12.dp))
@@ -143,6 +139,7 @@ fun YouFilters(viewModel: FiltersViewModel) {
             viewModel = viewModel,
             pokemons = viewModel.yourSelectionFilters,
             max = 4,
+            proposeLead = true
         )
     }
 }
@@ -215,15 +212,18 @@ private fun OpponentUsernamesFilter(viewModel: FiltersViewModel) {
     }
 }
 
+@JvmInline
+value class AddPokemonDialogState(val asLead: Boolean)
+
 @Composable
 private fun PokemonsFiltersTile(
     title: String,
     viewModel: FiltersViewModel,
     pokemons: SnapshotStateList<PokemonFilter>,
     max: Int,
-    preventLeadOption: Boolean = false
+    proposeLead: Boolean
 ) {
-    var showAddDialog by remember { mutableStateOf(false) }
+    var addPokemonDialogState by remember { mutableStateOf<AddPokemonDialogState?>(null) }
     ExpansionTile(
         title = {
             BadgedBox(
@@ -258,10 +258,27 @@ private fun PokemonsFiltersTile(
                         )
                     }
                 }
+                if (proposeLead && pokemons.count { it.asLead } < 2) {
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = { addPokemonDialogState = AddPokemonDialogState(asLead = true) },
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.add),
+                            contentDescription = "Add Lead Pokemon",
+                            tint = MaterialTheme.colorScheme.defaultIconColor
+                        )
+                        Text("Add Lead Pokemon")
+                        Spacer(Modifier.width(8.dp))
+                    }
+                }
+
                 if (pokemons.size < max) {
                     Spacer(Modifier.height(8.dp))
                     OutlinedButton(
-                        onClick = { showAddDialog = true },
+                        onClick = { addPokemonDialogState = AddPokemonDialogState(asLead = false) },
                         shape = CircleShape,
                         contentPadding = PaddingValues(0.dp),
                     ) {
@@ -278,14 +295,15 @@ private fun PokemonsFiltersTile(
         }
     )
 
-    if (showAddDialog) {
+
+    addPokemonDialogState?.let {
         AddPokemonNameDialog(
             pokemonImageService = viewModel.pokemonImageService,
             containsValidator = { pName -> pokemons.isNotEmpty() && pokemons.any { it.name.matches(pName) } },
-            onDismissRequest = { showAddDialog = false },
-            proposeLeadOption = !preventLeadOption && pokemons.count { it.asLead } < 2,
+            onDismissRequest = { addPokemonDialogState = null },
+            asLead = it.asLead,
             onAdd = { pokemons.add(it) }
-            )
+        )
     }
 }
 
@@ -344,12 +362,11 @@ private fun ShowdownNameDialog(
 private fun AddPokemonNameDialog(
     pokemonImageService: PokemonImageService,
     containsValidator: (PokemonName) -> Boolean,
-    proposeLeadOption: Boolean,
+    asLead: Boolean,
     onAdd: (PokemonFilter) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     var pokemonName by remember { mutableStateOf(PokemonName("")) }
-    var asLead by remember { mutableStateOf(false) }
 
     val alreadyContains = remember(pokemonName) { containsValidator.invoke(pokemonName) }
     val isValid = pokemonName.value.isNotBlank() && !alreadyContains
@@ -368,20 +385,6 @@ private fun AddPokemonNameDialog(
                     onValueChange = { pokemonName = it },
                     pokemonImageService = pokemonImageService,
                 )
-                if (proposeLeadOption) {
-                    Spacer(Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.clickable { asLead = !asLead },
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = asLead,
-                            onCheckedChange = { asLead = it}
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Text("as lead", style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
             }
         },
         confirmButton = {
