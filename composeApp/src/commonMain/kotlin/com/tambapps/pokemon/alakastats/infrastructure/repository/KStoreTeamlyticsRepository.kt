@@ -1,12 +1,12 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository
 
 import arrow.core.Either
-import arrow.core.flatMap
 import arrow.core.raise.either
 import com.tambapps.pokemon.alakastats.domain.error.GetTeamlyticsError
 import com.tambapps.pokemon.alakastats.domain.error.TeamlyticsNotFound
 import com.tambapps.pokemon.alakastats.domain.error.StorageError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsTransformer
@@ -44,7 +44,8 @@ class KStoreTeamlyticsRepository(
             }.bind()
 
         // save preview
-        previewsStorage.save(teamlyticsTransformer.toPreview(savedTeam))
+        val winrate = computeWinRatePercentage(teamlytics.sdNames, teamlytics.replays)
+        previewsStorage.save(teamlyticsTransformer.toPreview(savedTeam, winrate))
             .mapLeft { error ->
                 StorageError("Failed to save team. No more space left?", error.throwable)
             }
@@ -56,7 +57,8 @@ class KStoreTeamlyticsRepository(
     override suspend fun delete(teamlytics: Teamlytics) {
         val entity = teamlyticsTransformer.toEntity(teamlytics)
         teamsStorage.delete(entity)
-        previewsStorage.delete(teamlyticsTransformer.toPreview(entity))
+        val winrate = computeWinRatePercentage(teamlytics.sdNames, teamlytics.replays)
+        previewsStorage.delete(teamlyticsTransformer.toPreview(entity, winrate))
     }
 
     override suspend fun delete(id: Uuid) {

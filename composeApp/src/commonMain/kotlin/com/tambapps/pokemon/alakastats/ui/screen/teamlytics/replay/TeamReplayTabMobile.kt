@@ -219,8 +219,8 @@ private fun NoReplaysMobile(viewModel: TeamReplayViewModel) {
 @Composable
 private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutput: GameOutput, modifier: Modifier = Modifier) {
     val text =
-        if (gameOutput != GameOutput.UNKNOWN) "VS ${opponentPlayer.name}"
-        else "${currentPlayer.name}\nVS\n${opponentPlayer.name}"
+        if (gameOutput != GameOutput.UNKNOWN) "VS ${opponentPlayer.name.value}"
+        else "${currentPlayer.name.value}\nVS\n${opponentPlayer.name.value}"
     Text(
         text = text,
         style = MaterialTheme.typography.titleLarge,

@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
@@ -176,7 +177,7 @@ private fun OpponentUsernamesFilter(viewModel: FiltersViewModel) {
                     opponentUsernamesFilters.forEach { name ->
                         FilterChip(
                             onClick = { opponentUsernamesFilters.remove(name) },
-                            label = { Text(name) },
+                            label = { Text(name.value) },
                             selected = false,
                             trailingIcon = {
                                 Text(
@@ -208,7 +209,7 @@ private fun OpponentUsernamesFilter(viewModel: FiltersViewModel) {
 
     if (showAddDialog) {
         ShowdownNameDialog(
-            onAdd = { opponentUsernamesFilters.add(it) },
+            onAdd = { opponentUsernamesFilters.add(UserName(it.trim())) },
             onDismissRequest = { showAddDialog = false }
         )
     }
@@ -412,7 +413,7 @@ class FiltersViewModel(
 
     val opponentTeamFilters = useCase.filters.opponentTeam.toMutableStateList()
     val opponentSelectionFilters = useCase.filters.opponentSelection.toMutableStateList()
-    val opponentUsernamesFilters = mutableStateSetOf<String>().apply {
+    val opponentUsernamesFilters = mutableStateSetOf<UserName>().apply {
         addAll(useCase.filters.opponentUsernames)
     }
     val yourSelectionFilters = useCase.filters.yourSelection.toMutableStateList()

@@ -10,6 +10,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamPreview
 import com.tambapps.pokemon.alakastats.domain.model.TeamPreviewPokemon
 import com.tambapps.pokemon.alakastats.domain.model.Terastallization
+import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PlayerEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamPreviewEntity
@@ -29,7 +30,7 @@ class ReplayAnalyticsTransformer(
             format = domain.format,
             rating = domain.rating,
             version = domain.version,
-            winner = domain.winner,
+            winner = domain.winner?.value,
             url = domain.url,
             reference = domain.reference,
             nextBattleRef = domain.nextBattleRef,
@@ -44,7 +45,7 @@ class ReplayAnalyticsTransformer(
             format = entity.format,
             rating = entity.rating,
             version = entity.version,
-            winner = entity.winner,
+            winner = entity.winner?.let(::UserName),
             url = entity.url,
             reference = entity.reference,
             nextBattleRef = entity.nextBattleRef,
@@ -61,7 +62,7 @@ class PlayerTransformer(
     
     fun toEntity(domain: Player): PlayerEntity {
         return PlayerEntity(
-            name = domain.name,
+            name = domain.name.value,
             teamPreview = teamPreviewTransformer.toEntity(domain.teamPreview),
             selection = domain.selection.map { it.value },
             beforeElo = domain.beforeElo,
@@ -74,7 +75,7 @@ class PlayerTransformer(
     
     fun toDomain(entity: PlayerEntity): Player {
         return Player(
-            name = entity.name,
+            name = UserName(entity.name),
             teamPreview = teamPreviewTransformer.toDomain(entity.teamPreview),
             selection = entity.selection.map { PokemonName(it) },
             beforeElo = entity.beforeElo,

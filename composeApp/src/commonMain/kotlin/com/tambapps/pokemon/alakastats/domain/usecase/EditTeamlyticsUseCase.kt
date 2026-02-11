@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.domain.usecase
 import arrow.core.Either
 import com.tambapps.pokemon.alakastats.domain.error.GetTeamlyticsError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import kotlin.time.Clock
@@ -16,7 +17,7 @@ class EditTeamlyticsUseCase(
         team: Teamlytics,
         name: String,
         pokePaste: PokePaste,
-        sdNames: List<String>
+        sdNames: List<UserName>
     ): Either<GetTeamlyticsError, Teamlytics> = teamlyticsRepository.save(team.copy(
         name = name,
         pokePaste = pokePaste,
@@ -26,7 +27,7 @@ class EditTeamlyticsUseCase(
     suspend fun create(
         name: String,
         pokePaste: PokePaste,
-        sdNames: List<String>
+        sdNames: List<UserName>
     ): Either<GetTeamlyticsError, Teamlytics> {
         val teamlytics = Teamlytics(
             id = Uuid.random(),

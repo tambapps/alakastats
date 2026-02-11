@@ -6,6 +6,7 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
+import kotlin.jvm.JvmInline
 
 fun Teamlytics.getOpponentPlayer(replay: ReplayAnalytics) =
     if (sdNames.contains(replay.player1.name)) replay.player2
@@ -55,8 +56,7 @@ data class ReplayAnalytics(
     val format: String,
     val rating: Int?,
     val version: String,
-    // TODO create inline class PlayerName
-    val winner: String?,
+    val winner: UserName?,
     val url: String?,
     // TODO create inline class ReferenceId
     val reference: String,
@@ -74,7 +74,7 @@ data class ReplayAnalytics(
 
     fun hasWon(player: Player) = winner == player.name
 
-    // complete information of replay from another one. Useful when reloading replys
+    // complete information of replay from another one. Useful when reloading replays
     fun completedWith(oldReplay: ReplayAnalytics) = copy(
         notes = notes ?: oldReplay.notes,
         players = players.mapIndexed { index, player ->
@@ -164,8 +164,16 @@ data class TeamPreviewPokemon(
     val level: Int?
 )
 
+@JvmInline
+value class UserName(val value: String) {
+
+    fun matches(other: UserName) = value.equals(other.value, ignoreCase = true)
+
+    fun startsWith(str: String) = value.startsWith(str, ignoreCase = true)
+}
+
 data class Player(
-    val name: String,
+    val name: UserName,
     val teamPreview: TeamPreview,
     val selection: List<PokemonName>,
     val beforeElo: Int?,

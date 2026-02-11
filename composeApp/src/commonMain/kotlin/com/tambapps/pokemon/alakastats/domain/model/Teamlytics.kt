@@ -10,7 +10,7 @@ data class Teamlytics(
     val name: String,
     val pokePaste: PokePaste,
     val replays: List<ReplayAnalytics>,
-    val sdNames: List<String>,
+    val sdNames: List<UserName>,
     val lastUpdatedAt: Instant,
     val notes: TeamlyticsNotes?,
     val matchupNotes: List<MatchupNotes>
@@ -48,7 +48,7 @@ data class TeamlyticsPreview(
 
 fun Teamlytics.computeWinRatePercentage() = computeWinRatePercentage(sdNames, replays)
 
-fun computeWinRatePercentage(sdNames: List<String>, replays: List<ReplayAnalytics>): Int {
+fun computeWinRatePercentage(sdNames: List<UserName>, replays: List<ReplayAnalytics>): Int {
     if (replays.isEmpty()) return 0
     val nbGames = replays.size
     val wonGames = replays.count { replay ->

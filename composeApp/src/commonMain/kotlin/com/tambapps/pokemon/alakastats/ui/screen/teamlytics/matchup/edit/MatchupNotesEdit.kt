@@ -234,7 +234,7 @@ private fun SelectReplayExampleDialog(
                         replays = if (usernameText.isNotBlank()) {
                             team.withContext {
                                 allReplays.filter { replay ->
-                                    replay.opponentPlayer.name.startsWith(usernameText, ignoreCase = true)
+                                    replay.opponentPlayer.name.startsWith(usernameText)
                                 }
                             }
                         } else {

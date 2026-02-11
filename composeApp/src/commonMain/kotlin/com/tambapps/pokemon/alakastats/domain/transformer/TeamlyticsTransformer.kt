@@ -7,6 +7,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
+import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.GamePlanEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.MatchupNotesEntity
@@ -31,7 +32,7 @@ class TeamlyticsTransformer(
             name = domain.name,
             pokePaste = domain.pokePaste.toPokePasteString(),
             replays = domain.replays.map { replayAnalyticsTransformer.toEntity(it) },
-            sdNames = domain.sdNames,
+            sdNames = domain.sdNames.map { it.value },
             lastUpdatedAt = domain.lastUpdatedAt,
             notes = domain.notes?.let(notesTransformer::toEntity),
             matchupNotes = domain.matchupNotes.map(matchupNotesTransformer::toEntity)
@@ -46,20 +47,20 @@ class TeamlyticsTransformer(
             name = entity.name,
             pokePaste = pokepaste,
             replays = replays,
-            sdNames = entity.sdNames,
+            sdNames = entity.sdNames.map(::UserName),
             lastUpdatedAt = entity.lastUpdatedAt ?: Clock.System.now(),
             notes = entity.notes?.let { notesTransformer.toDomain(pokepaste, it) },
             matchupNotes = entity.matchupNotes?.map { matchupNotesTransformer.toDomain(replays, it) } ?: emptyList()
         )
     }
 
-    fun toPreview(team: TeamlyticsEntity) = TeamlyticsPreviewEntity(
+    fun toPreview(team: TeamlyticsEntity, winrate: Int) = TeamlyticsPreviewEntity(
         id = team.id,
         name = team.name,
         sdNames = team.sdNames,
         pokemons = pokepasteParser.tryParse(team.pokePaste)?.pokemons?.map { it.name.value } ?: emptyList(),
         nbReplays = team.replays.size,
-        winrate = computeWinRatePercentage(team.sdNames, team.replays.map(replayAnalyticsTransformer::toDomain)),
+        winrate = winrate,
         lastUpdatedAt = team.lastUpdatedAt
     )
 

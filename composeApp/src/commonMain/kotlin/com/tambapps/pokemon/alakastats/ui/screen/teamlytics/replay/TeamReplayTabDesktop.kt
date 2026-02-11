@@ -292,8 +292,8 @@ private fun NoReplaysDesktop(viewModel: TeamReplayViewModel) {
 @Composable
 private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutput: GameOutput) {
     val text =
-        if (gameOutput != GameOutput.UNKNOWN) "VS ${opponentPlayer.name}"
-        else "${currentPlayer.name} VS ${opponentPlayer.name}"
+        if (gameOutput != GameOutput.UNKNOWN) "VS ${opponentPlayer.name.value}"
+        else "${currentPlayer.name.value} VS ${opponentPlayer.name.value}"
     Text(
         text = text,
         style = MaterialTheme.typography.titleLarge,

@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
@@ -75,13 +76,13 @@ class EditTeamViewModel(
                     editTeamlyticsUseCase.edit(
                         editingTeam!!,
                         name = teamName,
-                        sdNames = sdNames,
+                        sdNames = sdNames.map(::UserName),
                         pokePaste = pokepaste
                     ).getOrNull()
                 } else {
                     editTeamlyticsUseCase.create(
                         name = teamName,
-                        sdNames = sdNames,
+                        sdNames = sdNames.map(::UserName),
                         pokePaste = pokepaste
                     ).getOrNull()
                 }
@@ -100,6 +101,6 @@ class EditTeamViewModel(
         pokepaste = teamlytics.pokePaste.toPokePasteString()
         validPokepaste()
         sdNames.clear()
-        sdNames.addAll(teamlytics.sdNames)
+        sdNames.addAll(teamlytics.sdNames.map { it.value })
     }
 }
