@@ -119,9 +119,9 @@ private fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageServ
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val iconModifier = Modifier.size(32.dp)
-                pokemonImageService.MoveSpecImages(move, disableTooltip = true, iconModifier = iconModifier)
+                pokemonImageService.MoveSpecImages(move, disableTooltip = disableTooltip, iconModifier = iconModifier)
                 Spacer(Modifier.width(8.dp))
-                val prettyMove = PokemonNormalizer.pretty(move)
+                val prettyMove = move.pretty
                 Text(prettyMove, textAlign = TextAlign.Start, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
             }
             if (index < pokemon.moves.lastIndex) {
@@ -250,7 +250,7 @@ private fun PokepastePokemon(
                     pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp), disableTooltip = disableTooltip)
                 }
                 Spacer(Modifier.width(4.dp))
-                Text((pokemon.item ?: "<no item>") + " | " + (pokemon.ability ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
+                Text((pokemon.item?.pretty ?: "<no item>") + " | " + (pokemon.ability?.pretty ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
             }
             Spacer(Modifier.height(16.dp))
             PokemonMoves(pokemon, pokemonImageService, disableTooltip = disableTooltip)

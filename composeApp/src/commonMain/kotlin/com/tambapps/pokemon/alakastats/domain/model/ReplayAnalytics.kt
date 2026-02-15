@@ -1,5 +1,8 @@
 package com.tambapps.pokemon.alakastats.domain.model
 
+import com.tambapps.pokemon.AbilityName
+import com.tambapps.pokemon.ItemName
+import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
@@ -148,9 +151,9 @@ data class OpenTeamSheet(
 
 data class OtsPokemon(
     val name: PokemonName,
-    val item: String,
-    val ability: String,
-    val moves: List<String>,
+    val item: ItemName,
+    val ability: AbilityName,
+    val moves: List<MoveName>,
     val level: Int,
     val teraType: TeraType?
 )

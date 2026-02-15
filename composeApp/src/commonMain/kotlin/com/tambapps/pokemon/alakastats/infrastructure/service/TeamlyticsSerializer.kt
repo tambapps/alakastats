@@ -4,12 +4,15 @@ import arrow.core.Either
 import arrow.core.flatMap
 import arrow.core.getOrElse
 import arrow.core.raise.either
+import com.tambapps.pokemon.AbilityName
 import com.tambapps.pokemon.alakastats.domain.error.JsonError
 import com.tambapps.pokemon.alakastats.domain.error.LoadTeamError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.transformer.ReplayAnalyticsTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsTransformer
 import com.tambapps.pokemon.Gender
+import com.tambapps.pokemon.ItemName
+import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
@@ -169,13 +172,13 @@ private fun PssPokepastePokemon.toPokemon(): Pokemon {
         surname = null,
         gender = gender?.let { parseGender(it) },
         nature = nature?.let { parseNature(it) },
-        item = item,
+        item = item?.let(::ItemName),
         shiny = false,
         happiness = 255,
-        ability = ability,
+        ability = ability.let(::AbilityName),
         teraType = teraType?.let { parseTeraType(it) },
         level = level ?: 100,
-        moves = moves,
+        moves = moves.map(::MoveName),
         ivs = ivs?.toPokeStats() ?: PokeStats.default(31),
         evs = evs?.toPokeStats() ?: PokeStats.default(0)
     )

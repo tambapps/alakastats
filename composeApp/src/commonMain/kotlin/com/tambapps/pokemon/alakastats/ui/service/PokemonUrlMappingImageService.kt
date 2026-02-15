@@ -49,6 +49,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
+import com.tambapps.pokemon.ItemName
+import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
@@ -90,10 +92,10 @@ interface PokemonImageService {
     fun MoveTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier)
 
     @Composable
-    fun MoveSpecImages(move: String, disableTooltip: Boolean = false, iconModifier: Modifier = Modifier)
+    fun MoveSpecImages(move: MoveName, disableTooltip: Boolean = false, iconModifier: Modifier = Modifier)
 
     @Composable
-    fun ItemImage(item: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
+    fun ItemImage(item: ItemName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
 }
 
 abstract class AbstractPokemonImageService(
@@ -196,14 +198,14 @@ abstract class AbstractPokemonImageService(
     }
 
     @Composable
-    override fun MoveSpecImages(move: String, disableTooltip: Boolean, iconModifier: Modifier) {
+    override fun MoveSpecImages(move: MoveName, disableTooltip: Boolean, iconModifier: Modifier) {
         // lazy loading
         if (movesData.isEmpty()) {
             loadMoves()
             DefaultIcon(modifier = iconModifier)
             return
         }
-        val data = movesData[PokemonNormalizer.normalize(move)]
+        val data = movesData[move.normalized.value]
         if (data == null) {
             DefaultIcon(modifier = iconModifier)
             return
@@ -272,14 +274,15 @@ class PokemonLocalUrlImageService(
 
     @Composable
     override fun ItemImage(
-        item: String,
+        item: ItemName,
         modifier: Modifier,
         disableTooltip: Boolean
     ) {
-        val formattedItemName = PokemonNormalizer.normalize(item)
-        TooltipIfEnabled(disableTooltip, item, modifier) { mod ->
+        val prettyItemName = item.pretty
+        val formattedItemName = item.normalized.value
+        TooltipIfEnabled(disableTooltip, prettyItemName, modifier) { mod ->
             MyImage(url = "$baseUrl/images/items/$formattedItemName.png",
-                contentDescription = item,
+                contentDescription = prettyItemName,
                 modifier = modifier,
             )
         }
@@ -348,15 +351,15 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
     }
 
     @Composable
-    override fun ItemImage(item: String, modifier: Modifier, disableTooltip: Boolean) {
-        TooltipIfEnabled(disableTooltip, item, modifier) { mod ->
+    override fun ItemImage(item: ItemName, modifier: Modifier, disableTooltip: Boolean) {
+        TooltipIfEnabled(disableTooltip, item.pretty, modifier) { mod ->
             // lazy loading
             if (itemsData.isEmpty()) {
                 loadItems()
                 DefaultIcon()
                 return@TooltipIfEnabled
             }
-            val data = itemsData[PokemonNormalizer.normalize(item)]
+            val data = itemsData[item.normalized.value]
             if (data == null) {
                 DefaultIcon()
                 return@TooltipIfEnabled
