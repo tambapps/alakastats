@@ -153,7 +153,7 @@ private fun PokemonStatColumn(
             Stat.HP -> "HP"
         }
         val textColor = when {
-            pokemon.nature?.bonusStat == stat -> Color.Red
+            pokemon.nature?.bonusStat == stat -> if (isDarkThemeEnabled()) Color(0xFFE57373) else Color.Red
             pokemon.nature?.malusStat == stat -> if (isDarkThemeEnabled()) Color.Cyan else Color.Blue
             else -> Color.Unspecified
         }
