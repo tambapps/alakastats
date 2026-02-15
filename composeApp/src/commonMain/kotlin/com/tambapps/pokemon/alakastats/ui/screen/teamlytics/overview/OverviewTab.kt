@@ -151,7 +151,8 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
                 text = { Text("Edit team") },
                 onClick = {
                     isMenuExpanded = false
-                    navigator.push(EditTeamScreen(viewModel.team))
+                    // don't push because when coming to the screen, this screen doesn't recompose and take into account the updated team
+                    navigator.replace(EditTeamScreen(viewModel.team))
                 }
             )
 
