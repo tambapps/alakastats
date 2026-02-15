@@ -49,6 +49,7 @@ import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
+import com.tambapps.pokemon.alakastats.ui.screen.about.AboutScreen
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
@@ -65,9 +66,9 @@ object HomeScreen : Screen {
         val isCompact = LocalIsCompact.current
 
         if (isCompact) {
-            HomeScreenMobile(isDarkTheme, viewModel)
+            HomeScreenMobile(viewModel)
         } else {
-            HomeScreenDesktop(isDarkTheme, viewModel)
+            HomeScreenDesktop(viewModel)
         }
 
         if (viewModel.isLoading) {
@@ -224,10 +225,19 @@ internal fun ImportTeamButton(viewModel: HomeViewModel, modifier: Modifier = Mod
         Text("Import", style = buttonTextStyle)
     }
 }
+
 @Composable
 internal fun SampleTeamButton(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
     OutlinedButton(onClick = { viewModel.showSamplesDialog() }, modifier = modifier) {
         Text("Sample", style = buttonTextStyle)
+    }
+}
+
+@Composable
+internal fun AboutButton(modifier: Modifier = Modifier) {
+    val navigator = LocalNavigator.currentOrThrow
+    TextButton(onClick = { navigator.push(AboutScreen) }, modifier = modifier) {
+        Text("About", style = buttonTextStyle)
     }
 }
 

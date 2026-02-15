@@ -5,6 +5,7 @@ import alakastats.composeapp.generated.resources.alakastats
 import alakastats.composeapp.generated.resources.alakastats_dark
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,11 +27,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.jetbrains.compose.resources.painterResource
 
 
 @Composable
-internal fun HomeScreenMobile(isDarkTheme: Boolean, viewModel: HomeViewModel) {
+internal fun HomeScreenMobile(viewModel: HomeViewModel) {
     Column(
         Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -41,12 +43,15 @@ internal fun HomeScreenMobile(isDarkTheme: Boolean, viewModel: HomeViewModel) {
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(if (isDarkTheme) Res.drawable.alakastats_dark else Res.drawable.alakastats),
-                contentDescription = "Alakastats logo",
-                modifier = Modifier.size(80.dp),
-                contentScale = ContentScale.Fit
-            )
+            Box(Modifier.fillMaxWidth()) {
+                Image(
+                    painter = painterResource(if (isDarkThemeEnabled()) Res.drawable.alakastats_dark else Res.drawable.alakastats),
+                    contentDescription = "Alakastats logo",
+                    modifier = Modifier.size(80.dp).align(Alignment.Center),
+                    contentScale = ContentScale.Fit
+                )
+                AboutButton(Modifier.align(Alignment.TopEnd))
+            }
             Text("Alakastats", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             CatchPhrase(skipLine = true, textAlign = TextAlign.Center)
 
