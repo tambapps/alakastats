@@ -185,12 +185,13 @@ internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
                           pokemon: Pokemon,
                           modifier: Modifier = Modifier,
                           ) {
+    val team = viewModel.team
     val notes = viewModel.pokemonNotes[pokemon]
     if (viewModel.isEditingNotes) {
         PokepastePokemon(
-            isOts = viewModel.team.pokePaste.isOts,
+            isOts = team.pokePaste.isOts,
             pokemon = pokemon,
-            pokemonData = viewModel.pokemonsData[pokemon.name],
+            pokemonData = team.data.pokemonData[pokemon.name],
             pokemonImageService = viewModel.pokemonImageService,
             modifier = modifier,
             onNotesChanged = { viewModel.pokemonNotes[pokemon] = it },
@@ -198,9 +199,9 @@ internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
         )
     } else {
         PokepastePokemon(
-            isOts = viewModel.team.pokePaste.isOts,
+            isOts = team.pokePaste.isOts,
             pokemon = pokemon,
-            pokemonData = viewModel.pokemonsData[pokemon.name],
+            pokemonData = team.data.pokemonData[pokemon.name],
             pokemonImageService = viewModel.pokemonImageService,
             modifier = modifier,
             notes = notes,

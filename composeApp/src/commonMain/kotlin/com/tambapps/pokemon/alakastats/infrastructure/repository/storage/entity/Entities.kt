@@ -12,6 +12,7 @@ data class TeamlyticsEntity(
     val pokePaste: String,
     val replays: List<ReplayAnalyticsEntity>,
     val sdNames: List<String>,
+    val data: TeamlyticsDataEntity? = null,
     val notes: TeamlyticsNotesEntity? = null,
     val lastUpdatedAt: Instant?,
     val matchupNotes: List<MatchupNotesEntity>? = null
@@ -21,6 +22,26 @@ data class TeamlyticsEntity(
 data class TeamlyticsNotesEntity(
     val teamNotes: String,
     val pokemonNotes: Map<String, String>
+)
+
+@Serializable
+data class TeamlyticsDataEntity(
+    val pokemonData: Map<String, PokemonDataEntity>
+)
+
+@Serializable
+data class PokemonDataEntity(
+    val name: String,
+    val moves: Map<String, PokemonMoveEntity>,
+    val stats: List<Int>
+)
+
+@Serializable
+data class PokemonMoveEntity(
+    val type: String,
+    val damageClass: String,
+    val power: Int,
+    val accuracy: Int
 )
 
 @Serializable

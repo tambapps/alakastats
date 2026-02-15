@@ -1,5 +1,7 @@
 package com.tambapps.pokemon.alakastats.domain.model
 
+import com.tambapps.pokemon.MoveName
+import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import kotlin.time.Instant
@@ -12,6 +14,7 @@ data class Teamlytics(
     val replays: List<ReplayAnalytics>,
     val sdNames: List<UserName>,
     val lastUpdatedAt: Instant,
+    val data: TeamlyticsData,
     val notes: TeamlyticsNotes?,
     val matchupNotes: List<MatchupNotes>
 ) {
@@ -31,10 +34,22 @@ data class GamePlan(
     val composition: List<PokemonName>?, // the 4 pokemons to bring
     val exampleReplays: List<ReplayAnalytics>
 )
+
 data class TeamlyticsNotes(
     val teamNotes: String,
     val pokemonNotes: Map<PokemonName, String>
 )
+
+data class TeamlyticsData(
+    val pokemonData: Map<PokemonName, PokemonData>
+)
+
+data class PokemonData(
+    val name: PokemonName,
+    val moves: Map<MoveName, PokemonMove>,
+    val stats: PokeStats
+)
+
 
 data class TeamlyticsPreview(
     val id: Uuid,

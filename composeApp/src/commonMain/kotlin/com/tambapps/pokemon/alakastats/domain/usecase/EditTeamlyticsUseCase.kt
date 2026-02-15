@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.domain.usecase
 import arrow.core.Either
 import com.tambapps.pokemon.alakastats.domain.error.GetTeamlyticsError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsData
 import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
@@ -37,7 +38,8 @@ class EditTeamlyticsUseCase(
             sdNames = sdNames,
             lastUpdatedAt = Clock.System.now(),
             notes = null,
-            matchupNotes = emptyList()
+            matchupNotes = emptyList(),
+            data = TeamlyticsData(emptyMap())
         )
         return teamlyticsRepository.save(teamlytics)
     }

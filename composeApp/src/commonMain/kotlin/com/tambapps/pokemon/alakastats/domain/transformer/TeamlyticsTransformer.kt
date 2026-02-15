@@ -1,17 +1,25 @@
 package com.tambapps.pokemon.alakastats.domain.transformer
 
+import com.tambapps.pokemon.MoveName
+import com.tambapps.pokemon.PokeStats
+import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.DamageClass
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.domain.model.PokemonData
+import com.tambapps.pokemon.alakastats.domain.model.PokemonMove
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsData
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.model.UserName
-import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.GamePlanEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.MatchupNotesEntity
-import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PokemonDataEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PokemonMoveEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsDataEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsNotesEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
@@ -35,7 +43,8 @@ class TeamlyticsTransformer(
             sdNames = domain.sdNames.map { it.value },
             lastUpdatedAt = domain.lastUpdatedAt,
             notes = domain.notes?.let(notesTransformer::toEntity),
-            matchupNotes = domain.matchupNotes.map(matchupNotesTransformer::toEntity)
+            matchupNotes = domain.matchupNotes.map(matchupNotesTransformer::toEntity),
+            data = domain.data.toEntity()
         )
     }
     
@@ -50,7 +59,8 @@ class TeamlyticsTransformer(
             sdNames = entity.sdNames.map(::UserName),
             lastUpdatedAt = entity.lastUpdatedAt ?: Clock.System.now(),
             notes = entity.notes?.let { notesTransformer.toDomain(pokepaste, it) },
-            matchupNotes = entity.matchupNotes?.map { matchupNotesTransformer.toDomain(replays, it) } ?: emptyList()
+            matchupNotes = entity.matchupNotes?.map { matchupNotesTransformer.toDomain(replays, it) } ?: emptyList(),
+            data = entity.data?.toDomain() ?: TeamlyticsData(emptyMap())
         )
     }
 
@@ -156,3 +166,45 @@ class GamePlanTransformer {
         } ?: emptyList()
     )
 }
+
+private fun TeamlyticsData.toEntity() = TeamlyticsDataEntity(
+    pokemonData = pokemonData.entries.associate { (key, value) -> key.value to value.toEntity() }
+)
+
+private fun PokemonData.toEntity() = PokemonDataEntity(
+    name = name.value,
+    moves = moves.entries.associate { (key, value) -> key.value to PokemonMoveEntity(
+        type = value.type.name,
+        damageClass = value.damageClass.name,
+        power = value.power,
+        accuracy = value.accuracy
+    )
+    },
+    stats = listOf(stats.hp, stats.attack, stats.defense, stats.specialAttack, stats.specialDefense, stats.speed)
+)
+
+private fun TeamlyticsDataEntity.toDomain() = TeamlyticsData(
+    pokemonData = pokemonData.entries.associate { (key, value) -> PokemonName(key) to value.toDomain() }
+)
+
+private fun PokemonDataEntity.toDomain() = PokemonData(
+    name = PokemonName(name),
+    moves = moves.entries.associate { (moveName, moveEntity) ->
+        val move = PokemonMove(
+            name = MoveName(moveName),
+            type = PokeType.valueOf(moveEntity.type),
+            damageClass = DamageClass.valueOf(moveEntity.damageClass),
+            power = moveEntity.power,
+            accuracy = moveEntity.accuracy
+        )
+        move.name to move
+    },
+    stats = PokeStats(
+        hp = stats.getOrElse(0) { 0 },
+        attack = stats.getOrElse(1) { 0 },
+        defense = stats.getOrElse(2) { 0 },
+        specialAttack = stats.getOrElse(3) { 0 },
+        specialDefense = stats.getOrElse(4) { 0 },
+        speed = stats.getOrElse(5) { 0 }
+    )
+)

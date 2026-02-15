@@ -10,6 +10,7 @@ import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsData
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.domain.model.withContext
@@ -142,6 +143,14 @@ class TeamlyticsViewModel(
     override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?): Either<DomainError, Unit> {
         val currentTeam = this.originalTeam
         return save(currentTeam.copy(notes = notes))
+    }
+
+    override suspend fun setData(
+        team: Teamlytics,
+        data: TeamlyticsData
+    ): Either<DomainError, Unit> {
+        val currentTeam = this.originalTeam
+        return save(currentTeam.copy(data = data))
     }
 
     private suspend fun save(team: Teamlytics): Either<DomainError, Unit> = either {

@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsData
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
@@ -33,8 +34,6 @@ class OverviewViewModel(
     override var isTabLoading by mutableStateOf(false)
 
     private val scope = CoroutineScope(Dispatchers.Default)
-
-    var pokemonsData by mutableStateOf(mapOf<PokemonName, PokemonData>())
 
     init {
         initNotesState()
@@ -122,6 +121,10 @@ class OverviewViewModel(
 
 
     private fun loadPokemonData() {
+        val data = team.data
+        if (team.pokePaste.pokemons.all { data.pokemonData.containsKey(it.name) }) {
+            return
+        }
         isTabLoading = true
         scope.launch {
             val either = pokemonDataRepository.bulkGet(team.pokePaste.pokemons)
@@ -130,11 +133,12 @@ class OverviewViewModel(
                     ifLeft = {
 
                     },
-                    ifRight = {
-                        pokemonsData = it.associateBy { it.name }
+                    ifRight = { data ->
+                        useCase.setData(team, TeamlyticsData(
+                            pokemonData = data.associateBy { it.name }
+                        ))
                     }
                 )
-                val value = either.getOrNull()
                 isTabLoading = false
             }
         }
