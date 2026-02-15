@@ -34,6 +34,10 @@ class PokemonDetailViewModel(
         private set
     private val scope = CoroutineScope(Dispatchers.Default)
 
+    init {
+        loadTeamPokemon()
+    }
+
     private fun loadTeamPokemon() {
         scope.launch {
             val teamlyticsResult = useCase.get(teamId)

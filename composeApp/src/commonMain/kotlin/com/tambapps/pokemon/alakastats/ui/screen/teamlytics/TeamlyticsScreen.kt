@@ -39,6 +39,8 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
+import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.MatchupNotesTab
@@ -73,7 +75,7 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.systemBars)
         ) {
-            when (viewModel.teamState) {
+            when (val state = viewModel.teamState) {
                 is TeamState.Loading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.size(48.dp).align(Alignment.Center)
@@ -82,10 +84,10 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
                 }
                 is TeamState.Error -> {
                     val navigator = LocalNavigator.currentOrThrow
+                    val snackBar = LocalSnackBar.current
                     LaunchedEffect(Unit) {
-                        if (viewModel.teamState is TeamState.Error) {
-                            navigator.pop()
-                        }
+                        snackBar.show("Error: ${state.error.message}", SnackBar.Severity.ERROR)
+                        navigator.pop()
                     }
                 }
                 is TeamState.Loaded -> {
