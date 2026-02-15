@@ -43,12 +43,11 @@ object AboutScreen : Screen {
                 .background(MaterialTheme.colorScheme.background)
                 .then(
                     if (isCompact) Modifier.safeContentPadding().padding(horizontal = 4.dp)
-                    else Modifier.padding(all = 16.dp)
+                    else Modifier.padding(all = 32.dp)
                 )
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AlakastatsLabel()
+            AlakastatsLabel(Modifier.align(Alignment.CenterHorizontally))
             VerticalSpacer(8.dp)
             AboutMe()
             VerticalSpacer()
@@ -57,7 +56,7 @@ object AboutScreen : Screen {
             Credits()
             VerticalSpacer()
             val navigator = LocalNavigator.currentOrThrow
-            OutlinedButton(onClick = { navigator.pop() }) {
+            OutlinedButton(onClick = { navigator.pop() }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 Text("OK")
             }
         }
