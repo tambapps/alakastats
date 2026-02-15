@@ -6,8 +6,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -15,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,8 +41,13 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonMoves
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatsRow
+import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonHeader
+import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonItemAndAbility
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.koin.core.parameter.parametersOf
@@ -81,7 +90,7 @@ data class PokemonDetailsScreen(
                         visible = visible,
                         enter = fadeIn(animationSpec = tween(durationMillis = 1000))
                     ) {
-                        PokemonDetails(viewModel, state.pokemon, state.pokemonData)
+                        PokemonDetails(state.team, viewModel, state.pokemon, state.pokemonData, state.notes)
                     }
                 }
             }
@@ -91,9 +100,11 @@ data class PokemonDetailsScreen(
 
 @Composable
 private fun PokemonDetails(
+    team: Teamlytics,
     viewModel: PokemonDetailViewModel,
     pokemon: Pokemon,
-    pokemonData: PokemonData?
+    pokemonData: PokemonData?,
+    notes: String?
 ) {
     var dimensions by remember { mutableStateOf(0.dp to 0.dp) }
     val (contentWidth, _) = dimensions
@@ -104,8 +115,36 @@ private fun PokemonDetails(
             with(density) { dimensions = size.width.toDp() to size.height.toDp() }
         }
     ) {
-        Column(Modifier.fillMaxSize()) {
-            Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
+        val isCompact = LocalIsCompact.current
+        Column(
+            Modifier.fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .then(
+                    if (isCompact) Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+                    else Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+                )
+        ) {
+            PokepastePokemonHeader(pokemon, viewModel.pokemonImageService)
+            Spacer(Modifier.height(16.dp))
+            PokepastePokemonItemAndAbility(pokemon, viewModel.pokemonImageService)
+            Spacer(Modifier.height(16.dp))
+            if (!notes.isNullOrBlank()) {
+                Text(notes, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(bottom = 16.dp))
+            }
+            if (!team.pokePaste.isOts) {
+                if (pokemonData != null) {
+                    Text("Stats", style = MaterialTheme.typography.headlineSmall)
+                    PokemonStatsRow(pokemon, pokemonData, Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(16.dp))
+                }
+                Text("Investments", style = MaterialTheme.typography.headlineSmall)
+                PokemonStatsRow(pokemon, pokemonData=null, Modifier.fillMaxWidth())
+                Spacer(Modifier.height(16.dp))
+            }
+
+            Text("Moves", style = MaterialTheme.typography.headlineSmall)
+            Spacer(Modifier.height(8.dp))
+            PokemonMoves(pokemon, viewModel.pokemonImageService)
         }
 
         viewModel.pokemonImageService.PokemonArtwork(

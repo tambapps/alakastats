@@ -105,7 +105,7 @@ private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonI
 }
 
 @Composable
-private fun PokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, modifier: Modifier = Modifier) {
+fun PokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, modifier: Modifier = Modifier) {
     Row(modifier) {
         for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
             val modifier = if (LocalIsCompact.current) Modifier.weight(1f) else Modifier.padding(horizontal = 4.dp)
@@ -114,7 +114,7 @@ private fun PokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, modifie
     }
 }
 @Composable
-private fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageService, disableTooltip: Boolean, modifier: Modifier = Modifier) {
+fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageService, disableTooltip: Boolean = false, modifier: Modifier = Modifier) {
     Column(modifier) {
         pokemon.moves.forEachIndexed { index, move ->
             Row(
@@ -225,19 +225,9 @@ fun PokepastePokemon(
         Column(
             verticalArrangement = Arrangement.Center,
         ) {
-            pokemon.teraType?.let {
-                pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(45.dp), disableTooltip = disableTooltip)
-            }
-            Spacer(Modifier.height(4.dp))
-            Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
+            PokepastePokemonHeader(pokemon, pokemonImageService, disableTooltip=disableTooltip)
             Spacer(Modifier.height(16.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                pokemon.item?.let {
-                    pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp), disableTooltip = disableTooltip)
-                }
-                Spacer(Modifier.width(4.dp))
-                Text((pokemon.item?.pretty ?: "<no item>") + " | " + (pokemon.ability?.pretty ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
-            }
+            PokepastePokemonItemAndAbility(pokemon, pokemonImageService, disableTooltip=disableTooltip)
             Spacer(Modifier.height(16.dp))
 
             if (notes != null) {
@@ -252,6 +242,27 @@ fun PokepastePokemon(
     }
 }
 
+@Composable
+fun PokepastePokemonHeader(pokemon: Pokemon, pokemonImageService: PokemonImageService, disableTooltip: Boolean = false) {
+    Row(Modifier.fillMaxWidth()) {
+        Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.weight(1f))
+        pokemon.teraType?.let {
+            pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(45.dp), disableTooltip = disableTooltip)
+        }
+    }
+}
+
+@Composable
+fun PokepastePokemonItemAndAbility(pokemon: Pokemon, pokemonImageService: PokemonImageService, disableTooltip: Boolean = false) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        pokemon.item?.let {
+            pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp), disableTooltip = disableTooltip)
+        }
+        Spacer(Modifier.width(4.dp))
+        Text((pokemon.item?.pretty ?: "<no item>") + " | " + (pokemon.ability?.pretty ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
+    }
+
+}
 @Composable
 fun PokePasteInput(viewModel: PokepasteEditingViewModel) {
     Column {

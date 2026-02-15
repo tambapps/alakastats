@@ -23,7 +23,8 @@ sealed class TeamPokemonStateState {
     data class Loaded(
         val team: Teamlytics,
         val pokemon: Pokemon,
-        val pokemonData: PokemonData?
+        val pokemonData: PokemonData?,
+        val notes: String?
     ) : TeamPokemonStateState()
     data class Error(val error: DomainError) : TeamPokemonStateState()
 }
@@ -52,8 +53,9 @@ class PokemonDetailViewModel(
                     ifRight = { team ->
                         val pokemon = team.pokePaste.pokemons.find { it.name.matches(pokemonName) }
                         val data = team.data.pokemonData[pokemonName]
+                        val notes = team.notes?.pokemonNotes?.get(pokemon?.name)
                         if (pokemon == null) TeamPokemonStateState.Error(GetPokemonDataError("Could not find pokemon on team"))
-                        else TeamPokemonStateState.Loaded(team, pokemon, data)
+                        else TeamPokemonStateState.Loaded(team, pokemon, data, notes)
                     }
                 )
             }
