@@ -18,6 +18,11 @@ data class NetworkError(
 
 sealed interface GetTeamlyticsError : DomainError
 
+data class GetPokemonDataError(
+    override val message: String,
+    override val cause: Throwable?
+) : DomainError
+
 data class LoadTeamError(
     override val message: String,
     override val cause: Throwable?

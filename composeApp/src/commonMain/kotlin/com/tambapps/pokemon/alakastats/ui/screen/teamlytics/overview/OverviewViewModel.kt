@@ -5,7 +5,10 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.Pokemon
+import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
+import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.downloadToFile
 import com.tambapps.pokemon.alakastats.ui.SnackBar
@@ -19,6 +22,7 @@ import kotlinx.coroutines.withContext
 class OverviewViewModel(
     override val useCase: ManageTeamOverviewUseCase,
     val pokemonImageService: PokemonImageService,
+    private val pokemonDataRepository: PokemonDataRepository
 ): TeamlyticsTabViewModel() {
     // important. In this tab we don't want to consider filters
     val team get() = useCase.originalTeam
@@ -30,13 +34,17 @@ class OverviewViewModel(
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
+    var pokemonsData by mutableStateOf(mapOf<PokemonName, PokemonData>())
+
     init {
         initNotesState()
+        loadPokemonData()
     }
 
     fun editNotes() {
         isEditingNotes = true
         initNotesState()
+        loadPokemonData()
     }
 
     fun exportTeam(snackBar: SnackBar) {
@@ -110,6 +118,27 @@ class OverviewViewModel(
                 isTabLoading = false
             }
         }
+    }
+
+
+    private fun loadPokemonData() {
+        isTabLoading = true
+        scope.launch {
+            val either = pokemonDataRepository.bulkGet(team.pokePaste.pokemons)
+            withContext(Dispatchers.Main) {
+                either.fold(
+                    ifLeft = {
+
+                    },
+                    ifRight = {
+                        pokemonsData = it.associateBy { it.name }
+                    }
+                )
+                val value = either.getOrNull()
+                isTabLoading = false
+            }
+        }
+
     }
 }
 

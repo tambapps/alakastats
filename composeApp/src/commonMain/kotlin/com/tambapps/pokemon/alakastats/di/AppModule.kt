@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.di
 
+import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.alakastats.domain.transformer.GamePlanTransformer
 import com.tambapps.pokemon.alakastats.domain.transformer.MatchupNotesTransformer
@@ -25,6 +26,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonDataRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsPreviewKStorage
@@ -38,6 +40,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit.Matchup
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.TeamReplayViewModel
+import com.tambapps.pokemon.pokeapi.client.PokeApiGqlClient
 import kotlinx.serialization.json.Json
 import kotlin.uuid.Uuid
 import org.koin.core.qualifier.named
@@ -47,6 +50,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 
 private val appModule = module {
     single { Json { ignoreUnknownKeys = true } }
@@ -59,6 +63,8 @@ private val appModule = module {
     }
     single<PokepasteParser> { PokepasteParser() }
     single<ReplayAnalyticsService> { ReplayAnalyticsService(get(), get(), get()) }
+    single { PokeApiGqlClient(get()) }
+    singleOf(::PokeApiPokemonDataRepository).bind(PokemonDataRepository::class)
 
     // need to name them as they have both the same signature after generic type erasure
     single<KStorage<Uuid, TeamlyticsEntity>>(named("teamsStorage")) { createTeamlyticsKStorage() }
@@ -85,7 +91,7 @@ private val appModule = module {
         TeamlyticsViewModel(teamId, get(), get())
     }
     factory { (useCase: ManageTeamOverviewUseCase) ->
-        OverviewViewModel(useCase, get())
+        OverviewViewModel(useCase, get(), get())
     }
     factory { (useCase: ManageTeamReplaysUseCase) ->
         TeamReplayViewModel(useCase, get(), get())

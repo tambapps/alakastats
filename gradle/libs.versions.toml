@@ -53,6 +53,7 @@ kstore-file = { module = "io.github.xxfast:kstore-file", version.ref = "kstore" 
 kstore-storage = { module = "io.github.xxfast:kstore-storage", version.ref = "kstore" }
 pokemon-sdReplayLogVisitor = { module = "com.tambapps.pokemon:pokemon-sd-replay-log-visitor", version.ref = "tambappsPokemon" }
 pokemon-pokepasteParser = { module = "com.tambapps.pokemon:pokepaste-parser", version.ref = "tambappsPokemon" }
+pokemon-pokeApi-client = { module = "com.tambapps.pokemon:pokeapi-client", version.ref = "tambappsPokemon" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }

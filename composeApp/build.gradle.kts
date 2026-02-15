@@ -84,6 +84,7 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinxJson)
             implementation(libs.pokemon.sdReplayLogVisitor)
             implementation(libs.pokemon.pokepasteParser)
+            implementation(libs.pokemon.pokeApi.client)
             implementation(libs.serialization.json)
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.screenmodel)
