@@ -31,6 +31,7 @@ import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.PlatformType
+import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.getPlatform
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -65,7 +66,7 @@ fun VerticalPokepaste(
         Spacer(Modifier.height(verticalPokemonSpace))
         for (pokemon in pokePaste.pokemons) {
             val notes = pokemonNotes?.get(pokemon)
-            PokepastePokemon(pokePaste.isOts, pokemon, pokemonImageService, Modifier.fillMaxWidth(), notes)
+            PokepastePokemon(pokePaste.isOts, pokemon, pokemonData = null, pokemonImageService, Modifier.fillMaxWidth(), notes)
             Spacer(Modifier.height(verticalPokemonSpace))
         }
 
@@ -97,17 +98,17 @@ private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonI
                 Spacer(Modifier.width(16.dp))
             }
             val notes = pokemonNotes?.get(pokemon)
-            PokepastePokemon(isOts, pokemon, pokemonImageService, Modifier.weight(1f), notes)
+            PokepastePokemon(isOts, pokemon, pokemonData = null, pokemonImageService, Modifier.weight(1f), notes)
         }
     }
 }
 
 @Composable
-private fun PokemonStatsRow(pokemon: Pokemon, modifier: Modifier = Modifier) {
+private fun PokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, modifier: Modifier = Modifier) {
     Row(modifier) {
         for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
             val modifier = if (LocalIsCompact.current) Modifier.weight(1f) else Modifier.padding(horizontal = 4.dp)
-            PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, modifier)
+            PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, pokemonData?.stats, modifier)
         }
     }
 }
@@ -137,6 +138,7 @@ private fun PokemonStatColumn(
     stat: Stat,
     ivs: PokeStats,
     evs: PokeStats,
+    stats: PokeStats?, // computed stats
     modifier: Modifier = Modifier) {
     Column(
         modifier,
@@ -150,44 +152,31 @@ private fun PokemonStatColumn(
             Stat.SPEED -> "Spe"
             Stat.HP -> "HP"
         }
-        pokemon.nature?.bonusStat
         val textColor = when {
             pokemon.nature?.bonusStat == stat -> Color.Red
             pokemon.nature?.malusStat == stat -> if (isDarkThemeEnabled()) Color.Cyan else Color.Blue
             else -> Color.Unspecified
         }
         Text(txt, color = textColor, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
-        val statValueStyle = MaterialTheme.typography.titleMedium
-        Text(evs[stat].toString(), color = textColor, textAlign = TextAlign.Center, style = statValueStyle)
-        Text(ivs[stat].toString(), color = textColor, textAlign = TextAlign.Center, style = statValueStyle)
+        if (stats != null) {
+            StatText(stats[stat], textColor)
+        } else {
+            StatText(evs[stat], textColor)
+            StatText(ivs[stat], textColor)
+        }
     }
 }
 
 @Composable
-fun PokepastePokemon(
-    isOts: Boolean,
-    pokemon: Pokemon,
-    pokemonImageService: PokemonImageService,
-    modifier: Modifier = Modifier,
-    onNotesChanged: (String) -> Unit,
-    notes: String? = null,
-) = PokepastePokemon(
-    isOts = isOts,
-    pokemon = pokemon,
-    pokemonImageService = pokemonImageService,
-    modifier = modifier,
-    notes= notes,
-    onClick = null
-) {
-    OutlinedTextField(notes ?: "", onValueChange = onNotesChanged, placeholder = {
-        Text("Tap notes")
-    }, textStyle = MaterialTheme.typography.bodyLarge)
+private fun StatText(value: Int, textColor: Color) {
+    Text(value.toString(), color = textColor, textAlign = TextAlign.Center, style = MaterialTheme.typography.titleMedium)
 }
 
 @Composable
 fun PokepastePokemon(
     isOts: Boolean,
     pokemon: Pokemon,
+    pokemonData: PokemonData?,
     pokemonImageService: PokemonImageService,
     modifier: Modifier = Modifier,
     notes: String? = null,
@@ -195,6 +184,7 @@ fun PokepastePokemon(
 ) = PokepastePokemon(
     isOts,
     pokemon,
+    pokemonData,
     pokemonImageService,
     modifier,
     notes,
@@ -204,9 +194,10 @@ fun PokepastePokemon(
 }
 
 @Composable
-private fun PokepastePokemon(
+fun PokepastePokemon(
     isOts: Boolean,
     pokemon: Pokemon,
+    pokemonData: PokemonData?,
     pokemonImageService: PokemonImageService,
     modifier: Modifier = Modifier,
     notes: String? = null,
@@ -242,7 +233,7 @@ private fun PokepastePokemon(
             if (!isOts) {
                 // only want margin if above element is not headline text because headline already has a lot of margin
                 if (notes != null) Spacer(Modifier.height(8.dp))
-                PokemonStatsRow(pokemon, Modifier.fillMaxWidth())
+                PokemonStatsRow(pokemon, pokemonData, Modifier.fillMaxWidth())
             }
             if (notes != null || !isOts) Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.Pokemon
+import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
@@ -43,6 +44,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -188,6 +190,7 @@ internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
         PokepastePokemon(
             isOts = viewModel.team.pokePaste.isOts,
             pokemon = pokemon,
+            pokemonData = viewModel.pokemonsData[pokemon.name],
             pokemonImageService = viewModel.pokemonImageService,
             modifier = modifier,
             onNotesChanged = { viewModel.pokemonNotes[pokemon] = it },
@@ -197,6 +200,7 @@ internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
         PokepastePokemon(
             isOts = viewModel.team.pokePaste.isOts,
             pokemon = pokemon,
+            pokemonData = viewModel.pokemonsData[pokemon.name],
             pokemonImageService = viewModel.pokemonImageService,
             modifier = modifier,
             notes = notes,
@@ -204,6 +208,30 @@ internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
         )
     }
 
+}
+
+
+@Composable
+fun PokepastePokemon(
+    isOts: Boolean,
+    pokemon: Pokemon,
+    pokemonData: PokemonData?,
+    pokemonImageService: PokemonImageService,
+    modifier: Modifier = Modifier,
+    onNotesChanged: (String) -> Unit,
+    notes: String? = null,
+) = PokepastePokemon(
+    isOts = isOts,
+    pokemon = pokemon,
+    pokemonData = pokemonData,
+    pokemonImageService = pokemonImageService,
+    modifier = modifier,
+    notes= notes,
+    onClick = null
+) {
+    OutlinedTextField(notes ?: "", onValueChange = onNotesChanged, placeholder = {
+        Text("Tap notes")
+    }, textStyle = MaterialTheme.typography.bodyLarge)
 }
 
 private val noteTextFieldTextStyle

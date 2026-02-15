@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.infrastructure.repository
 
 import arrow.core.Either
 import com.tambapps.pokemon.MoveName
+import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.Pokemon
@@ -46,13 +47,24 @@ class PokeApiPokemonDataRepository(
         result: GqlBatchResult
     ): List<PokemonData> {
         return pokemons.map { pokemon ->
+            val baseStats = result.pokemons.find { it.name == pokemon.name.pokeApiNormalized.value }
+                ?.toPokeStats()
+            val stats = baseStats?.let {
+                PokeStats.compute(
+                    baseStats = it,
+                    evs = pokemon.evs,
+                    ivs = pokemon.ivs,
+                    nature = pokemon.nature ?: Nature.QUIRKY,
+                    level = pokemon.level
+                )
+            } ?: PokeStats.default(0)
+
             PokemonData(
                 name = pokemon.name,
                 moves = result.moves.filter { pokemon.moves.any { m -> m.normalized.value == it.name } }
                     .map { it.toMove() }
                     .associateBy { it.name },
-                result.pokemons.find { it.name == pokemon.name.pokeApiNormalized.value }
-                    ?.toPokeStats() ?: PokeStats.default(0)
+                stats
             )
         }
     }

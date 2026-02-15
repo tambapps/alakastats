@@ -9,7 +9,7 @@ import com.tambapps.pokemon.PokemonName
 data class PokemonData(
     val name: PokemonName,
     val moves: Map<MoveName, PokemonMove>,
-    val baseStats: PokeStats
+    val stats: PokeStats
 )
 
 enum class DamageClass {
