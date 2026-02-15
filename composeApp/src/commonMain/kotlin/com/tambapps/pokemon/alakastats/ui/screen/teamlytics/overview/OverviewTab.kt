@@ -230,9 +230,12 @@ fun PokepastePokemon(
     notes= notes,
     onClick = null
 ) {
-    OutlinedTextField(notes ?: "", onValueChange = onNotesChanged, placeholder = {
-        Text("Tap notes")
-    }, textStyle = MaterialTheme.typography.bodyLarge)
+    OutlinedTextField(notes ?: "",
+        onValueChange = onNotesChanged,
+        placeholder = { Text("Tap notes") },
+        textStyle = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(bottom = 16.dp)
+    )
 }
 
 private val noteTextFieldTextStyle

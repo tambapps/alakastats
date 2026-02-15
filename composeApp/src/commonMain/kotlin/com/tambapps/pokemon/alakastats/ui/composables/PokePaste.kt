@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.ui.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -190,7 +191,9 @@ fun PokepastePokemon(
     notes,
     onClick
 ) {
-    Text(notes ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 4.dp))
+    if (!notes.isNullOrBlank()) {
+        Text(notes, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(bottom = 16.dp))
+    }
 }
 
 @Composable
@@ -202,7 +205,7 @@ fun PokepastePokemon(
     modifier: Modifier = Modifier,
     notes: String? = null,
     onClick: (() -> Unit)? = null,
-    notesComposer: @Composable () -> Unit
+    notesComposer: @Composable ColumnScope.() -> Unit
 ) {
     PokemonCard(
         modifier = modifier,
@@ -227,15 +230,7 @@ fun PokepastePokemon(
             }
             Spacer(Modifier.height(4.dp))
             Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
-            if (notes != null) {
-                notesComposer.invoke()
-            }
-            if (!isOts) {
-                // only want margin if above element is not headline text because headline already has a lot of margin
-                if (notes != null) Spacer(Modifier.height(8.dp))
-                PokemonStatsRow(pokemon, pokemonData, Modifier.fillMaxWidth())
-            }
-            if (notes != null || !isOts) Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(16.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 pokemon.item?.let {
                     pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp), disableTooltip = disableTooltip)
@@ -244,6 +239,14 @@ fun PokepastePokemon(
                 Text((pokemon.item?.pretty ?: "<no item>") + " | " + (pokemon.ability?.pretty ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
             }
             Spacer(Modifier.height(16.dp))
+
+            if (notes != null) {
+                notesComposer.invoke(this)
+            }
+            if (!isOts) {
+                PokemonStatsRow(pokemon, pokemonData, Modifier.fillMaxWidth())
+                Spacer(Modifier.height(16.dp))
+            }
             PokemonMoves(pokemon, pokemonImageService, disableTooltip = disableTooltip)
         }
     }
