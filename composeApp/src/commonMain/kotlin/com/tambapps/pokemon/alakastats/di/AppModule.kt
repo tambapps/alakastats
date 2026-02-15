@@ -1,7 +1,9 @@
 package com.tambapps.pokemon.alakastats.di
 
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
+import com.tambapps.pokemon.alakastats.domain.usecase.ConsultPokemonDetailUseCase
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
@@ -21,6 +23,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.infrastructure.service.TeamlyticsSerializer
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.MatchupNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit.MatchupNotesEditViewModel
@@ -65,6 +68,7 @@ val appModules = listOf(module {
     }
 
     singleOf(::EditTeamlyticsUseCase)
+    singleOf(::ConsultPokemonDetailUseCase)
     singleOf(::ManageTeamlyticsListUseCase)
     singleOf(::ManageTeamlyticsUseCase)
     singleOf(::TeamlyticsSerializer)
@@ -75,6 +79,9 @@ val appModules = listOf(module {
 
     factory { (teamId: Uuid) ->
         TeamlyticsViewModel(teamId, get(), get())
+    }
+    factory { (teamId: Uuid, pokemonName: PokemonName) ->
+        PokemonDetailViewModel(teamId, pokemonName, get())
     }
     factory { (useCase: ManageTeamOverviewUseCase) ->
         OverviewViewModel(useCase, get(), get())

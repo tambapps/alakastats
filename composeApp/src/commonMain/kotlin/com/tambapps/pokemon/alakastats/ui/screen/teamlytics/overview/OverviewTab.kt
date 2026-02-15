@@ -44,6 +44,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailsScreen
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
@@ -199,6 +200,7 @@ internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
             notes = notes
         )
     } else {
+        val navigator = LocalNavigator.currentOrThrow
         PokepastePokemon(
             isOts = team.pokePaste.isOts,
             pokemon = pokemon,
@@ -206,7 +208,7 @@ internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
             pokemonImageService = viewModel.pokemonImageService,
             modifier = modifier,
             notes = notes,
-            onClick = { /* TODO */ }
+            onClick = { navigator.push(PokemonDetailsScreen(team.id, pokemon.name.value)) }
         )
     }
 
