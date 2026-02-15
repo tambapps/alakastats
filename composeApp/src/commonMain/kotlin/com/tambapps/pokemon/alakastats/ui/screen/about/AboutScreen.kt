@@ -2,7 +2,6 @@ package com.tambapps.pokemon.alakastats.ui.screen.about
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -32,6 +31,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.ui.screen.home.AlakastatsLabel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 
 
 object AboutScreen : Screen {
@@ -64,10 +64,11 @@ object AboutScreen : Screen {
     }
 }
 
-private val linkStyle = SpanStyle(
-    color = Color(0xFF1565C0),
-    textDecoration = TextDecoration.Underline
-)
+private val linkStyle: SpanStyle
+    @Composable get() = SpanStyle(
+        color = if (isDarkThemeEnabled()) Color(0xFF90CAF9) else Color(0xFF1565C0),
+        textDecoration = TextDecoration.Underline
+    )
 
 @Composable
 private fun AboutMe() = Section(
@@ -86,19 +87,23 @@ private fun AboutMe() = Section(
 
 )
 
-
-
 @Composable
 private fun AboutAlakastats() = Section(
     title = "About Alakastats",
     text = buildAnnotatedString {
-        append("\t\tI built Alakastats to have a single place where I can analyze how I use my team, track my decisions, and take structured notes on matchups. ")
-        append("My goal was to better understand my habits, identify mistakes, and continuously improve my competitive play.\n\n")
-        append("The app ")
+        append("\t\tAlakastats is a competitive Pokémon battle analysis tool designed to help you improve your performance.\nIt allows you to:\n")
+        append("• Track how you use your team\n")
+        append("• Analyze matchup performance\n")
+        append("• Review patterns in your decisions\n")
+        append("• Take structured notes to refine your strategy\n\n")
+
+        append("Whether you’re preparing for a tournament or reviewing past games, Alakastats helps you turn your battles into actionable insights.\n\n")
+
+        append("Alakastats ")
         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
             append("does not collect any personal data")
         }
-        append(". Everything is stored locally on your device (in your browser or on your smartphone).\n\n")
+        append(".\nEverything is stored locally on your device (in your browser or on your smartphone).\n\n")
 
         append("You can consult the full source code ")
         withLink(LinkAnnotation.Url("https://github.com/tambapps/alakastats")) {
@@ -114,19 +119,19 @@ private fun Credits() = Section(
     text = buildAnnotatedString {
         append("\t\tSpecial thanks to\n")
 
-        append("- ")
+        append("• ")
         withLink(LinkAnnotation.Url("https://deviantart.com/jormxdos")) {
             withStyle(linkStyle) { append("jormxdos") }
         }
         append(" to have designed the tera type logos\n")
 
-        append("- ")
+        append("• ")
         withLink(LinkAnnotation.Url("https://pokeapi.co/")) {
             withStyle(linkStyle) { append("PokeApi") }
         }
         append(" allowing the app to fetch Pokemon-related data to display in the app\n")
 
-        append("- myself to have designed the whole app from scratch")
+        append("• myself to have designed the whole app from scratch")
     }
 )
 
