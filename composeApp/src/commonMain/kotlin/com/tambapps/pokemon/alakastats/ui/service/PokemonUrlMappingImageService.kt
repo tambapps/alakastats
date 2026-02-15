@@ -90,7 +90,7 @@ interface PokemonImageService {
     fun MoveTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier)
 
     @Composable
-    fun MoveSpecImages(move: String, iconModifier: Modifier = Modifier)
+    fun MoveSpecImages(move: String, disableTooltip: Boolean = false, iconModifier: Modifier = Modifier)
 
     @Composable
     fun ItemImage(item: String, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
@@ -196,7 +196,7 @@ abstract class AbstractPokemonImageService(
     }
 
     @Composable
-    override fun MoveSpecImages(move: String, iconModifier: Modifier) {
+    override fun MoveSpecImages(move: String, disableTooltip: Boolean, iconModifier: Modifier) {
         // lazy loading
         if (movesData.isEmpty()) {
             loadMoves()
@@ -208,7 +208,7 @@ abstract class AbstractPokemonImageService(
             DefaultIcon(modifier = iconModifier)
             return
         }
-        MoveTypeImage(data.type, modifier = iconModifier, disableTooltip = true)
+        MoveTypeImage(data.type, modifier = iconModifier, disableTooltip = disableTooltip)
         /*
           val categoryRes = when(category.lowercase()) {
             "physical" -> Res.drawable.move_physical

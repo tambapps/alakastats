@@ -112,19 +112,17 @@ private fun PokemonStatsRow(pokemon: Pokemon, modifier: Modifier = Modifier) {
     }
 }
 @Composable
-private fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+private fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageService, disableTooltip: Boolean, modifier: Modifier = Modifier) {
     Column(modifier) {
         pokemon.moves.forEachIndexed { index, move ->
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val iconModifier = Modifier.size(32.dp)
-                pokemonImageService.MoveSpecImages(move, iconModifier)
+                pokemonImageService.MoveSpecImages(move, disableTooltip = true, iconModifier = iconModifier)
                 Spacer(Modifier.width(8.dp))
                 val prettyMove = PokemonNormalizer.pretty(move)
-                Tooltip(prettyMove) {
-                    Text(prettyMove, textAlign = TextAlign.Start, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
-                }
+                Text(prettyMove, textAlign = TextAlign.Start, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
             }
             if (index < pokemon.moves.lastIndex) {
                 Spacer(Modifier.height(8.dp))
@@ -229,11 +227,12 @@ private fun PokepastePokemon(
             )
         }
     ) {
+        val disableTooltip = onClick != null
         Column(
             verticalArrangement = Arrangement.Center,
         ) {
             pokemon.teraType?.let {
-                pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(45.dp))
+                pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(45.dp), disableTooltip = disableTooltip)
             }
             Spacer(Modifier.height(4.dp))
             Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
@@ -248,14 +247,13 @@ private fun PokepastePokemon(
             if (notes != null || !isOts) Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 pokemon.item?.let {
-                    pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp)
-                    )
+                    pokemonImageService.ItemImage(it, modifier = Modifier.size(32.dp), disableTooltip = disableTooltip)
                 }
                 Spacer(Modifier.width(4.dp))
                 Text((pokemon.item ?: "<no item>") + " | " + (pokemon.ability ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
             }
             Spacer(Modifier.height(16.dp))
-            PokemonMoves(pokemon, pokemonImageService)
+            PokemonMoves(pokemon, pokemonImageService, disableTooltip = disableTooltip)
         }
     }
 }
