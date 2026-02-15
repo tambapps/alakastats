@@ -52,7 +52,6 @@ import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.about.AboutScreen
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
-import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.jetbrains.compose.resources.painterResource
 
 object HomeScreen : Screen {
@@ -62,7 +61,6 @@ object HomeScreen : Screen {
         LaunchedEffect(Unit) {
             viewModel.loadTeams()
         }
-        val isDarkTheme = isDarkThemeEnabled()
         val isCompact = LocalIsCompact.current
 
         if (isCompact) {
