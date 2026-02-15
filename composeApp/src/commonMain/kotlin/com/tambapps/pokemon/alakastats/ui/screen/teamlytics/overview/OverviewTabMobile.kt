@@ -55,11 +55,7 @@ internal fun OverviewTabMobile(viewModel: OverviewViewModel, scrollState: Scroll
 
             PokePasteTitle()
             Spacer(Modifier.height(16.dp))
-            if (viewModel.isEditingNotes || team.notes != null) {
-                NotedPokePaste(viewModel)
-            } else {
-                Pokepaste(team.pokePaste, viewModel.pokemonImageService, pokemonNotes = viewModel.pokemonNotes)
-            }
+            NotedPokePaste(viewModel)
             Spacer(Modifier.height(12.dp))
         }
         LinearProgressBarIfEnabled(viewModel.isLoading)

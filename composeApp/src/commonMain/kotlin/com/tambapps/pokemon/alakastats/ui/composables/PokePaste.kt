@@ -174,11 +174,12 @@ fun PokepastePokemon(
     onNotesChanged: (String) -> Unit,
     notes: String? = null,
 ) = PokepastePokemon(
-    isOts,
-    pokemon,
-    pokemonImageService,
-    modifier,
-    notes
+    isOts = isOts,
+    pokemon = pokemon,
+    pokemonImageService = pokemonImageService,
+    modifier = modifier,
+    notes= notes,
+    onClick = null
 ) {
     OutlinedTextField(notes ?: "", onValueChange = onNotesChanged, placeholder = {
         Text("Tap notes")
@@ -191,13 +192,15 @@ fun PokepastePokemon(
     pokemon: Pokemon,
     pokemonImageService: PokemonImageService,
     modifier: Modifier = Modifier,
-    notes: String? = null
+    notes: String? = null,
+    onClick: (() -> Unit)? = null,
 ) = PokepastePokemon(
     isOts,
     pokemon,
     pokemonImageService,
     modifier,
-    notes
+    notes,
+    onClick
 ) {
     Text(notes ?: "", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 4.dp))
 }
@@ -209,10 +212,12 @@ private fun PokepastePokemon(
     pokemonImageService: PokemonImageService,
     modifier: Modifier = Modifier,
     notes: String? = null,
+    onClick: (() -> Unit)? = null,
     notesComposer: @Composable () -> Unit
 ) {
     PokemonCard(
         modifier = modifier,
+        onClick=onClick,
         pokemonArtwork = { contentWidth, contentHeight ->
             pokemonImageService.PokemonArtwork(
                 name = pokemon.name,

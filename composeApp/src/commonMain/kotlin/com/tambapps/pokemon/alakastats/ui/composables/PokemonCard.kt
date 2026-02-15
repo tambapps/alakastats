@@ -1,10 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +21,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun PokemonCard(
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
     pokemonArtwork: @Composable BoxScope.(Dp, Dp) -> Unit,
     cardContent: @Composable BoxScope.() -> Unit
 ) {
@@ -33,9 +31,13 @@ fun PokemonCard(
     ) {
         var dimensions by remember { mutableStateOf(0.dp to 0.dp) }
         val (contentWidth, contentHeight) = dimensions
-        MyCard(modifier = Modifier.fillMaxWidth(0.9f)
-            // + for padding
-            .height(remember(contentHeight) { contentHeight + 16.dp }), gradientBackgroundColors = elevatedCardGradientColors) {}
+        MyCard(
+            modifier = Modifier.fillMaxWidth(0.9f)
+                // + for padding
+                .height(remember(contentHeight) { contentHeight + 16.dp }),
+            gradientBackgroundColors = elevatedCardGradientColors,
+            onClick = onClick
+        ) {}
 
         pokemonArtwork.invoke(this, contentWidth, contentHeight)
 
