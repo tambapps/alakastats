@@ -20,7 +20,7 @@ sealed interface GetTeamlyticsError : DomainError
 
 data class GetPokemonDataError(
     override val message: String,
-    override val cause: Throwable?
+    override val cause: Throwable? = null
 ) : DomainError
 
 data class LoadTeamError(

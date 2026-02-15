@@ -8,15 +8,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,14 +26,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.koin.core.parameter.parametersOf
 import kotlin.uuid.Uuid
@@ -47,7 +54,7 @@ data class PokemonDetailsScreen(
         val viewModel = koinScreenModel<PokemonDetailViewModel> { parametersOf(teamId, PokemonName(pokemonNameStr)) }
         Box(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
+                .background(Brush.verticalGradient(elevatedCardGradientColors))
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.systemBars)
         ) {
@@ -74,7 +81,7 @@ data class PokemonDetailsScreen(
                         visible = visible,
                         enter = fadeIn(animationSpec = tween(durationMillis = 1000))
                     ) {
-                        PokemonDetails(viewModel)
+                        PokemonDetails(viewModel, state.pokemon, state.pokemonData)
                     }
                 }
             }
@@ -83,6 +90,33 @@ data class PokemonDetailsScreen(
 }
 
 @Composable
-private fun PokemonDetails(viewModel: PokemonDetailViewModel) {
+private fun PokemonDetails(
+    viewModel: PokemonDetailViewModel,
+    pokemon: Pokemon,
+    pokemonData: PokemonData?
+) {
+    var dimensions by remember { mutableStateOf(0.dp to 0.dp) }
+    val (contentWidth, _) = dimensions
+    val density = LocalDensity.current
 
+    Box(Modifier.fillMaxSize()
+        .onSizeChanged { size ->
+            with(density) { dimensions = size.width.toDp() to size.height.toDp() }
+        }
+    ) {
+        Column(Modifier.fillMaxSize()) {
+            Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge)
+        }
+
+        viewModel.pokemonImageService.PokemonArtwork(
+            name = pokemon.name,
+            modifier = Modifier.align(Alignment.BottomEnd)
+                .padding(bottom = 16.dp, end = 8.dp)
+                .height(if (LocalIsCompact.current) 175.dp else 200.dp)
+                // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
+                .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
+                .offset(y = 16.dp)
+        )
+
+    }
 }
