@@ -22,174 +22,113 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.OtsPokemonEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TerastallizationEntity
 
-class ReplayAnalyticsTransformer(
-    private val playerTransformer: PlayerTransformer
-) {
-    
-    fun toEntity(domain: ReplayAnalytics): ReplayAnalyticsEntity {
-        return ReplayAnalyticsEntity(
-            players = domain.players.map { playerTransformer.toEntity(it) },
-            uploadTime = domain.uploadTime,
-            format = domain.format,
-            rating = domain.rating,
-            version = domain.version,
-            winner = domain.winner?.value,
-            url = domain.url,
-            reference = domain.reference,
-            nextBattleRef = domain.nextBattleRef,
-            notes = domain.notes
-        )
-    }
-    
-    fun toDomain(entity: ReplayAnalyticsEntity): ReplayAnalytics {
-        return ReplayAnalytics(
-            players = entity.players.map { playerTransformer.toDomain(it) },
-            uploadTime = entity.uploadTime,
-            format = entity.format,
-            rating = entity.rating,
-            version = entity.version,
-            winner = entity.winner?.let(::UserName),
-            url = entity.url,
-            reference = entity.reference,
-            nextBattleRef = entity.nextBattleRef,
-            notes = entity.notes
-        )
-    }
-}
+fun ReplayAnalytics.toEntity() = ReplayAnalyticsEntity(
+    players = players.map { it.toEntity() },
+    uploadTime = uploadTime,
+    format = format,
+    rating = rating,
+    version = version,
+    winner = winner?.value,
+    url = url,
+    reference = reference,
+    nextBattleRef = nextBattleRef,
+    notes = notes
+)
 
-class PlayerTransformer(
-    private val teamPreviewTransformer: TeamPreviewTransformer,
-    private val terastallizationTransformer: TerastallizationTransformer,
-    private val openTeamSheetTransformer: OpenTeamSheetTransformer
-) {
-    
-    fun toEntity(domain: Player): PlayerEntity {
-        return PlayerEntity(
-            name = domain.name.value,
-            teamPreview = teamPreviewTransformer.toEntity(domain.teamPreview),
-            selection = domain.selection.map { it.value },
-            beforeElo = domain.beforeElo,
-            afterElo = domain.afterElo,
-            terastallization = domain.terastallization?.let { terastallizationTransformer.toEntity(it) },
-            ots = domain.ots?.let { openTeamSheetTransformer.toEntity(it) },
-            movesUsage = domain.movesUsage.mapKeys { (k, _) -> k.value }
-        )
-    }
-    
-    fun toDomain(entity: PlayerEntity): Player {
-        return Player(
-            name = UserName(entity.name),
-            teamPreview = teamPreviewTransformer.toDomain(entity.teamPreview),
-            selection = entity.selection.map { PokemonName(it) },
-            beforeElo = entity.beforeElo,
-            afterElo = entity.afterElo,
-            terastallization = entity.terastallization?.let { terastallizationTransformer.toDomain(it) },
-            ots = entity.ots?.let { openTeamSheetTransformer.toDomain(it) },
-            movesUsage = entity.movesUsage.mapKeys { (k, _) -> PokemonName(k) }
-        )
-    }
-}
+fun ReplayAnalyticsEntity.toDomain() = ReplayAnalytics(
+    players = players.map { it.toDomain() },
+    uploadTime = uploadTime,
+    format = format,
+    rating = rating,
+    version = version,
+    winner = winner?.let(::UserName),
+    url = url,
+    reference = reference,
+    nextBattleRef = nextBattleRef,
+    notes = notes
+)
 
-class TeamPreviewTransformer(
-    private val teamPreviewPokemonTransformer: TeamPreviewPokemonTransformer
-) {
-    
-    fun toEntity(domain: TeamPreview): TeamPreviewEntity {
-        return TeamPreviewEntity(
-            pokemons = domain.pokemons.map { teamPreviewPokemonTransformer.toEntity(it) }
-        )
-    }
-    
-    fun toDomain(entity: TeamPreviewEntity): TeamPreview {
-        return TeamPreview(
-            pokemons = entity.pokemons.map { teamPreviewPokemonTransformer.toDomain(it) }
-        )
-    }
-}
+fun Player.toEntity() = PlayerEntity(
+    name = name.value,
+    teamPreview = teamPreview.toEntity(),
+    selection = selection.map { it.value },
+    beforeElo = beforeElo,
+    afterElo = afterElo,
+    terastallization = terastallization?.toEntity(),
+    ots = ots?.toEntity(),
+    movesUsage = movesUsage.mapKeys { (k, _) -> k.value }
+)
 
-class TeamPreviewPokemonTransformer {
+fun PlayerEntity.toDomain() = Player(
+    name = UserName(name),
+    teamPreview = teamPreview.toDomain(),
+    selection = selection.map { PokemonName(it) },
+    beforeElo = beforeElo,
+    afterElo = afterElo,
+    terastallization = terastallization?.toDomain(),
+    ots = ots?.toDomain(),
+    movesUsage = movesUsage.mapKeys { (k, _) -> PokemonName(k) }
+)
 
-    fun toEntity(domain: TeamPreviewPokemon): TeamPreviewPokemonEntity {
-        return TeamPreviewPokemonEntity(
-            name = domain.name.value,
-            level = domain.level
-        )
-    }
+fun TeamPreview.toEntity() = TeamPreviewEntity(
+    pokemons = pokemons.map { it.toEntity() }
+)
 
-    fun toDomain(entity: TeamPreviewPokemonEntity): TeamPreviewPokemon {
-        return TeamPreviewPokemon(
-            name = PokemonName(entity.name),
-            level = entity.level
-        )
-    }
-}
+fun TeamPreviewEntity.toDomain() = TeamPreview(
+    pokemons = pokemons.map { it.toDomain() }
+)
 
-class OpenTeamSheetTransformer(
-    private val otsPokemonTransformer: OtsPokemonTransformer
-) {
-    
-    fun toEntity(domain: OpenTeamSheet): OpenTeamSheetEntity {
-        return OpenTeamSheetEntity(
-            pokemons = domain.pokemons.map { otsPokemonTransformer.toEntity(it) }
-        )
-    }
+fun TeamPreviewPokemon.toEntity() = TeamPreviewPokemonEntity(
+    name = name.value,
+    level = level
+)
 
-    fun toDomain(entity: OpenTeamSheetEntity): OpenTeamSheet {
-        return OpenTeamSheet(
-            pokemons = entity.pokemons.map { otsPokemonTransformer.toDomain(it) }
-        )
-    }
-}
+fun TeamPreviewPokemonEntity.toDomain() = TeamPreviewPokemon(
+    name = PokemonName(name),
+    level = level
+)
 
-class OtsPokemonTransformer {
+fun OpenTeamSheet.toEntity() = OpenTeamSheetEntity(
+    pokemons = pokemons.map { it.toEntity() }
+)
 
-    fun toEntity(domain: OtsPokemon): OtsPokemonEntity {
-        return OtsPokemonEntity(
-            name = domain.name.value,
-            item = domain.item.value,
-            ability = domain.ability.value,
-            moves = domain.moves.map { it.value },
-            level = domain.level,
-            teraType = domain.teraType?.name
-        )
-    }
+fun OpenTeamSheetEntity.toDomain() = OpenTeamSheet(
+    pokemons = pokemons.map { it.toDomain() }
+)
 
-    fun toEntity(domain: SdOtsPokemon): OtsPokemonEntity {
-        return OtsPokemonEntity(
-            name = domain.name.value,
-            item = domain.item,
-            ability = domain.ability,
-            moves = domain.moves,
-            level = domain.level,
-            teraType = domain.teraType?.name
-        )
-    }
+fun OtsPokemon.toEntity() = OtsPokemonEntity(
+    name = name.value,
+    item = item.value,
+    ability = ability.value,
+    moves = moves.map { it.value },
+    level = level,
+    teraType = teraType?.name
+)
 
-    fun toDomain(entity: OtsPokemonEntity): OtsPokemon {
-        return OtsPokemon(
-            name = PokemonName(entity.name),
-            item = entity.item.let(::ItemName),
-            ability = entity.ability.let(::AbilityName),
-            moves = entity.moves.map(::MoveName),
-            level = entity.level,
-            teraType = entity.teraType?.let(TeraType::valueOf)
-        )
-    }
-}
+fun SdOtsPokemon.toEntity() = OtsPokemonEntity(
+    name = name.value,
+    item = item,
+    ability = ability,
+    moves = moves,
+    level = level,
+    teraType = teraType?.name
+)
 
-class TerastallizationTransformer {
+fun OtsPokemonEntity.toDomain() = OtsPokemon(
+    name = PokemonName(name),
+    item = ItemName(item),
+    ability = AbilityName(ability),
+    moves = moves.map(::MoveName),
+    level = level,
+    teraType = teraType?.let(TeraType::valueOf)
+)
 
-    fun toEntity(domain: Terastallization): TerastallizationEntity {
-        return TerastallizationEntity(
-            pokemon = domain.pokemon.value,
-            type = domain.type.name
-        )
-    }
+fun Terastallization.toEntity() = TerastallizationEntity(
+    pokemon = pokemon.value,
+    type = type.name
+)
 
-    fun toDomain(entity: TerastallizationEntity): Terastallization {
-        return Terastallization(
-            pokemon = PokemonName(entity.pokemon),
-            type = entity.type.let(TeraType::valueOf)
-        )
-    }
-}
+fun TerastallizationEntity.toDomain() = Terastallization(
+    pokemon = PokemonName(pokemon),
+    type = TeraType.valueOf(type)
+)

@@ -8,8 +8,8 @@ import com.tambapps.pokemon.AbilityName
 import com.tambapps.pokemon.alakastats.domain.error.JsonError
 import com.tambapps.pokemon.alakastats.domain.error.LoadTeamError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.domain.transformer.ReplayAnalyticsTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsTransformer
+import com.tambapps.pokemon.alakastats.domain.transformer.toDomain
+import com.tambapps.pokemon.alakastats.domain.transformer.toEntity
 import com.tambapps.pokemon.Gender
 import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.MoveName
@@ -28,6 +28,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsNotesEntity
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
+import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -45,14 +46,13 @@ import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 class TeamlyticsSerializer(
-    private val transformer: TeamlyticsTransformer,
-    private val replayTransformer: ReplayAnalyticsTransformer,
+    private val pokepasteParser: PokepasteParser,
     private val json: Json,
     private val replayService: ReplayAnalyticsService
 ) {
 
     fun export(teamlytics: Teamlytics): ByteArray {
-        return json.encodeToString(transformer.toEntity(teamlytics)).toByteArray()
+        return json.encodeToString(teamlytics.toEntity()).toByteArray()
     }
 
     suspend fun loadTeam(byteArray: ByteArray): Either<LoadTeamError, Teamlytics> = either {
@@ -60,7 +60,7 @@ class TeamlyticsSerializer(
             .bind()
         val entity = if (jsonObject["saveName"] != null) loadFromPokeShowStatsSave(jsonObject).bind()
         else loadTeamFromJson(jsonObject).bind()
-        val team = transformer.toDomain(entity)
+        val team = entity.toDomain(pokepasteParser)
         team.copy(
             replays = team.replays.withComputedElo()
         )
@@ -106,11 +106,11 @@ class TeamlyticsSerializer(
         val replays = withContext(Dispatchers.Default) {
             replayUrlsWithNotes.map { (url, notes) ->
                 async {
-                    replayService.fetch(url).getOrElse { error -> null }?.copy(notes = notes)
+                    replayService.fetch(url).getOrElse { null }?.copy(notes = notes)
                 }
             }.awaitAll().filterNotNull()
         }
-        return replays.map { replayTransformer.toEntity(it) }
+        return replays.map { it.toEntity() }
     }
 
     private inline fun <T> jsonAccess(run: () -> T) = Either.catch { run() }

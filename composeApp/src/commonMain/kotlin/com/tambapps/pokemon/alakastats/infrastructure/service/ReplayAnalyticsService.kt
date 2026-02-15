@@ -8,8 +8,8 @@ import com.tambapps.pokemon.PokemonNormalizer.normalize
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.error.NetworkError
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
-import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.ReplayAnalyticsTransformer
+import com.tambapps.pokemon.alakastats.domain.transformer.toDomain
+import com.tambapps.pokemon.alakastats.domain.transformer.toEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.OpenTeamSheetEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PlayerEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
@@ -26,9 +26,7 @@ import kotlinx.serialization.Serializable
 
 class ReplayAnalyticsService(
     private val httpClient: HttpClient,
-    private val otsPokemonTransformer: OtsPokemonTransformer,
-    private val replayAnalyticsTransformer: ReplayAnalyticsTransformer
-    ) {
+) {
 
     suspend fun fetch(sdReplayUrl: String): Either<DomainError, ReplayAnalytics> {
         return try {
@@ -36,7 +34,7 @@ class ReplayAnalyticsService(
             val reference = jsonReplayUrl.substring(jsonReplayUrl.lastIndexOf('/') + 1).removeSuffix(".json")
             val rawReplay = httpClient.get(jsonReplayUrl).body<RawSdReplay>()
 
-            val visitor = ReplayAnalyticsBuilderVisitor(otsPokemonTransformer, rawReplay.players)
+            val visitor = ReplayAnalyticsBuilderVisitor(rawReplay.players)
             visitor.visitLogs(rawReplay.logs)
             val players = visitor.players
             ReplayAnalyticsEntity(
@@ -50,7 +48,7 @@ class ReplayAnalyticsService(
                 url = jsonReplayUrl,
                 reference = reference,
                 notes = null,
-            ).let(replayAnalyticsTransformer::toDomain).right()
+            ).toDomain().right()
         } catch (e: Exception) {
             // could have better error handling but MEH
             NetworkError(
@@ -89,7 +87,6 @@ private fun getActualPokemonName(player: PlayerBuilderEntityBuilder, pokemonName
 }
 
 internal class ReplayAnalyticsBuilderVisitor(
-    private val otsPokemonTransformer: OtsPokemonTransformer,
     private val playerNames: List<String>
 ): SdReplayLogVisitor {
 
@@ -171,7 +168,7 @@ internal class ReplayAnalyticsBuilderVisitor(
 
     override fun visitShowTeamLog(playerSlot: String, otsPokemons: List<OtsPokemon>) {
         getPlayer(playerSlot).ots = OpenTeamSheetEntity(
-            pokemons = otsPokemons.map(otsPokemonTransformer::toEntity)
+            pokemons = otsPokemons.map { it.toEntity() }
         )
     }
 

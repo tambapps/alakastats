@@ -2,23 +2,10 @@ package com.tambapps.pokemon.alakastats.di
 
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
-import com.tambapps.pokemon.alakastats.domain.transformer.GamePlanTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.MatchupNotesTransformer
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsViewModel
-import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.ReplayAnalyticsTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.PlayerTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.TeamPreviewTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.TeamPreviewPokemonTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.OpenTeamSheetTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.OtsPokemonTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsNotesTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.TeamlyticsPreviewTransformer
-import com.tambapps.pokemon.alakastats.domain.transformer.TerastallizationTransformer
-import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
@@ -52,7 +39,7 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 
-private val appModule = module {
+val appModules = listOf(module {
     single { Json { ignoreUnknownKeys = true } }
     single<HttpClient> {
         HttpClient {
@@ -62,19 +49,18 @@ private val appModule = module {
         }
     }
     single<PokepasteParser> { PokepasteParser() }
-    single<ReplayAnalyticsService> { ReplayAnalyticsService(get(), get(), get()) }
+    single<ReplayAnalyticsService> { ReplayAnalyticsService(get()) }
     single { PokeApiGqlClient(get()) }
     singleOf(::PokeApiPokemonDataRepository).bind(PokemonDataRepository::class)
 
     // need to name them as they have both the same signature after generic type erasure
     single<KStorage<Uuid, TeamlyticsEntity>>(named("teamsStorage")) { createTeamlyticsKStorage() }
     single<KStorage<Uuid, TeamlyticsPreviewEntity>>(named("previewsStorage")) { createTeamlyticsPreviewKStorage() }
-    single<TeamlyticsRepository> { 
+    single<TeamlyticsRepository> {
         KStoreTeamlyticsRepository(
-            teamsStorage = get(named("teamsStorage")), 
-            previewsStorage = get(named("previewsStorage")), 
-            teamlyticsTransformer = get(), 
-            previewTransformer = get(),
+            teamsStorage = get(named("teamsStorage")),
+            previewsStorage = get(named("previewsStorage")),
+            pokepasteParser = get(),
         )
     }
 
@@ -105,21 +91,4 @@ private val appModule = module {
     factory { (useCase: ManageMatchupNotesUseCase) ->
         MatchupNotesViewModel(useCase, get())
     }
-}
-
-private val transformerModule = module {
-    singleOf(::TerastallizationTransformer)
-    singleOf(::TeamPreviewPokemonTransformer)
-    singleOf(::OtsPokemonTransformer)
-    singleOf(::TeamPreviewTransformer)
-    singleOf(::OpenTeamSheetTransformer)
-    singleOf(::PlayerTransformer)
-    singleOf(::ReplayAnalyticsTransformer)
-    singleOf(::TeamlyticsTransformer)
-    singleOf(::TeamlyticsNotesTransformer)
-    singleOf(::TeamlyticsPreviewTransformer)
-    singleOf(::MatchupNotesTransformer)
-    singleOf(::GamePlanTransformer)
-}
-
-val appModules = listOf(appModule, transformerModule)
+})
