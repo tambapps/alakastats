@@ -204,7 +204,7 @@ internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
         PokepastePokemon(
             isOts = team.pokePaste.isOts,
             pokemon = pokemon,
-            pokemonData = team.data.pokemonData[pokemon.name],
+            pokemonData = team.data.pokemonData[pokemon.name.normalized],
             pokemonImageService = viewModel.pokemonImageService,
             modifier = modifier,
             notes = notes,
