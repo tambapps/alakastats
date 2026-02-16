@@ -21,14 +21,6 @@ import com.tambapps.pokemon.pokeapi.client.PokeApiGqlClient
 class PokeApiPokemonDataRepository(
     private val pokeapiClient: PokeApiGqlClient
 ): PokemonDataRepository {
-    companion object {
-        private val nameMappings = mutableMapOf(
-            "ogerpon-cornerstone" to "",
-            "ogerpon-hearthflame" to "",
-            "ogerpon-wellspring" to "",
-            "ogerpon-cornerstone" to "",
-        )
-    }
 
     override suspend fun bulkGet(pokemons: List<Pokemon>): Either<GetPokemonDataError, List<PokemonData>> {
         val moves = pokemons.asSequence()
@@ -63,7 +55,7 @@ class PokeApiPokemonDataRepository(
                 name = pokemon.name,
                 moves = result.moves.filter { pokemon.moves.any { m -> m.normalized.value == it.name } }
                     .map { it.toMove() }
-                    .associateBy { it.name },
+                    .associateBy { it.name.normalized },
                 stats
             )
         }

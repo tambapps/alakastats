@@ -122,7 +122,7 @@ class OverviewViewModel(
 
     private fun loadPokemonData() {
         val data = team.data
-        if (team.pokePaste.pokemons.all { data.pokemonData.containsKey(it.name) }) {
+        if (team.pokePaste.pokemons.all { data.pokemonData.containsKey(it.name.normalized) }) {
             return
         }
         isTabLoading = true
@@ -135,7 +135,7 @@ class OverviewViewModel(
                     },
                     ifRight = { data ->
                         useCase.setData(team, TeamlyticsData(
-                            pokemonData = data.associateBy { it.name }
+                            pokemonData = data.associateBy { it.name.normalized }
                         ))
                     }
                 )
