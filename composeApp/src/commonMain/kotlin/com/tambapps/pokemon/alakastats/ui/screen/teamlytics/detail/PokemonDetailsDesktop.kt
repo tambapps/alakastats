@@ -48,5 +48,6 @@ fun PokemonDetailsDesktop(
                 }
             }
         }
+        Spacer(Modifier.height(64.dp))
     }
 }

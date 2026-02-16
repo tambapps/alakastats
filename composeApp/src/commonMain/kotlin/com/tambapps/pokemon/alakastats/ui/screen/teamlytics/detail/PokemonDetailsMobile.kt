@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -25,6 +26,7 @@ fun PokemonDetailsMobile(
         PokepastePokemonHeader(state.pokemon, viewModel.pokemonImageService)
         Spacer(Modifier.height(16.dp))
 
-        PokemonDetailsOverview(viewModel, state, Modifier.fillMaxSize())
+        PokemonDetailsOverview(viewModel, state, Modifier.fillMaxWidth())
+        Spacer(Modifier.height(64.dp))
     }
 }

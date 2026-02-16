@@ -27,11 +27,11 @@ import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun BackIconButton(navigator: Navigator) = BackIconButton { navigator.pop() }
+fun BackIconButton(navigator: Navigator, modifier: Modifier = Modifier) = BackIconButton(modifier=modifier) { navigator.pop() }
 
 @Composable
-fun BackIconButton(onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
+fun BackIconButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
+    IconButton(modifier = modifier, onClick = onClick) {
         Icon(
             painter = painterResource(Res.drawable.arrow_back),
             contentDescription = "Back",

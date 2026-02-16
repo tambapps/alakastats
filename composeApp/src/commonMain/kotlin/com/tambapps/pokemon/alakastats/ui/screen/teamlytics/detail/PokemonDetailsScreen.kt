@@ -44,6 +44,7 @@ import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonMoves
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatsRow
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonItemAndAbility
@@ -118,7 +119,8 @@ private fun PokemonDetails(
             PokemonDetailsDesktop(viewModel, state)
         }
 
-
+        val navigator = LocalNavigator.currentOrThrow
+        BackIconButton(navigator, Modifier.align(Alignment.BottomStart))
         viewModel.pokemonImageService.PokemonArtwork(
             name = state.pokemon.name,
             modifier = Modifier.align(Alignment.BottomEnd)
@@ -147,7 +149,7 @@ internal fun PokemonDetailsOverview(
         }
         if (!team.pokePaste.isOts) {
             if (pokemonData != null) {
-                Text("Stats", style = MaterialTheme.typography.headlineSmall)
+                Text("Stats (lvl ${pokemon.level})", style = MaterialTheme.typography.headlineSmall)
                 PokemonStatsRow(pokemon, pokemonData, Modifier.fillMaxWidth())
                 Spacer(Modifier.height(16.dp))
             }

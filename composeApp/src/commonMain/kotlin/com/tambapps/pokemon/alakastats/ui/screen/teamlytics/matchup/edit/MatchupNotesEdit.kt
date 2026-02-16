@@ -90,7 +90,7 @@ fun MatchupNotesEdit(
             TopAppBar(
                 title = { Text(if (matchupNotes != null) "Edit Matchup" else "Create Matchup") },
                 navigationIcon = {
-                    BackIconButton(onCancel)
+                    BackIconButton(onClick = onCancel)
                 }
             )
         },
