@@ -67,7 +67,9 @@ class PokemonDetailViewModel(
     }
 
     private fun computeUsages(team: Teamlytics) = team.withContext {
-        team.replays.map { PokemonUsages.from(it, it.youPlayer, pokemonName) }
+        team.replays.asSequence()
+            .filter { it.youPlayer.hasSelected(pokemonName) }
+            .map { PokemonUsages.from(it, it.youPlayer, pokemonName) }
             .reduceOrNull { a, b -> a.mergeWith(b) }
     }
 

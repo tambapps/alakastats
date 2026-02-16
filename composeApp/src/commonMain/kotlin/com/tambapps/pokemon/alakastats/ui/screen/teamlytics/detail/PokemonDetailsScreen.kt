@@ -46,7 +46,6 @@ import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonMoves
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatsRow
-import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonHeader
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonItemAndAbility
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact

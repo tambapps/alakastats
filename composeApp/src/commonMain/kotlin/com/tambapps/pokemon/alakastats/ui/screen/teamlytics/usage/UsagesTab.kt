@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,14 +73,16 @@ fun PokemonUsagesCard(
     replays: List<ReplayAnalytics>,
     name: PokemonName,
     usages: PokemonUsages,
+    title: String = name.pretty,
+    gradientBackgroundColors: List<Color>? = cardGradientColors,
     modifier: Modifier = Modifier,
     ) {
     MyCard(
         modifier = modifier.padding(horizontal = 8.dp),
-        gradientBackgroundColors = cardGradientColors
+        gradientBackgroundColors = gradientBackgroundColors
     ) {
         Spacer(Modifier.height(4.dp))
-        Text(name.pretty, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(horizontal = 8.dp))
+        Text(title, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(horizontal = 8.dp))
         Spacer(Modifier.height(8.dp))
         if (replays.isNotEmpty()) {
             val winRate = if (usages.usageCount > 0) usages.winCount * 100 / usages.usageCount else 0

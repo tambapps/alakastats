@@ -208,10 +208,9 @@ internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
             pokemonImageService = viewModel.pokemonImageService,
             modifier = modifier,
             notes = notes,
-            onClick = { navigator.push(PokemonDetailsScreen(team.id, pokemon.name.value)) }
+            onClick = { navigator.push(PokemonDetailsScreen(team.id, pokemon.name.normalized.value)) }
         )
     }
-
 }
 
 

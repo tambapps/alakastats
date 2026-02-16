@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonHeader
+import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.PokemonUsagesCard
 
 @Composable
@@ -29,15 +31,19 @@ fun PokemonDetailsDesktop(
         PokepastePokemonHeader(state.pokemon, viewModel.pokemonImageService)
         Spacer(Modifier.height(16.dp))
         Row(Modifier.fillMaxWidth()) {
-            PokemonDetailsOverview(viewModel, state, Modifier.weight(1f))
-            Column(Modifier.weight(1f)) {
+            PokemonDetailsOverview(viewModel, state, Modifier.weight(0.6f))
+            Column(Modifier.weight(0.4f)) {
 
                 usages?.let {
                     PokemonUsagesCard(
-                        viewModel.pokemonImageService,
-                        team.replays,
-                        pokemon.name,
-                        it,
+                        pokemonImageService = viewModel.pokemonImageService,
+                        replays = team.replays,
+                        name = pokemon.name,
+                        usages = it,
+                        title = "Usage",
+                        // need to have 2 colors
+                        gradientBackgroundColors = listOf(MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.surfaceContainerHighest)
+
                     )
                 }
             }
