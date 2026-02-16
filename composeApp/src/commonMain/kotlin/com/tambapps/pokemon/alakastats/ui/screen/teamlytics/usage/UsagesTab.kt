@@ -23,11 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import io.github.koalaplot.core.pie.PieChart
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
@@ -65,8 +67,9 @@ internal val UsagesViewModel.sortedPokemonMovesUsageEntries get() =
     }
 
 @Composable
-internal fun PokemonUsagesCard(
-    viewModel: UsagesViewModel,
+fun PokemonUsagesCard(
+    pokemonImageService: PokemonImageService,
+    replays: List<ReplayAnalytics>,
     name: PokemonName,
     usages: PokemonUsages,
     modifier: Modifier = Modifier,
@@ -78,10 +81,9 @@ internal fun PokemonUsagesCard(
         Spacer(Modifier.height(4.dp))
         Text(name.pretty, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(horizontal = 8.dp))
         Spacer(Modifier.height(8.dp))
-        val replays = viewModel.replays
         if (replays.isNotEmpty()) {
             val winRate = if (usages.usageCount > 0) usages.winCount * 100 / usages.usageCount else 0
-            val usageRate = usages.usageCount * 100 / viewModel.replays.size
+            val usageRate = usages.usageCount * 100 / replays.size
             Row(
                 Modifier.padding(horizontal = 8.dp)
             ) {
@@ -93,7 +95,7 @@ internal fun PokemonUsagesCard(
             }
             Spacer(Modifier.height(8.dp))
         }
-        PokemonUsagesDonut(viewModel, name, usages, Modifier.fillMaxWidth())
+        PokemonUsagesDonut(pokemonImageService, name, usages, Modifier.fillMaxWidth())
         Spacer(Modifier.height(8.dp))
         HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
         Spacer(Modifier.height(8.dp))
@@ -129,7 +131,7 @@ private const val MOVE_STRUGGLE = "struggle"
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 private fun PokemonUsagesDonut(
-    viewModel: UsagesViewModel,
+    pokemonImageService: PokemonImageService,
     name: PokemonName,
     usages: PokemonUsages,
     modifier: Modifier = Modifier,
@@ -158,7 +160,7 @@ private fun PokemonUsagesDonut(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                viewModel.pokemonImageService.PokemonSprite(name)
+                pokemonImageService.PokemonSprite(name)
             }
         }
     )

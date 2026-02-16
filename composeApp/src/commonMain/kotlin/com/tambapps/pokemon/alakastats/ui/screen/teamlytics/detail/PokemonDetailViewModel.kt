@@ -10,7 +10,9 @@ import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.error.GetPokemonDataError
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultPokemonDetailUseCase
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.PokemonUsages
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +26,8 @@ sealed class TeamPokemonStateState {
         val team: Teamlytics,
         val pokemon: Pokemon,
         val pokemonData: PokemonData?,
-        val notes: String?
+        val notes: String?,
+        val usages: PokemonUsages?
     ) : TeamPokemonStateState()
     data class Error(val error: DomainError) : TeamPokemonStateState()
 }
@@ -54,11 +57,18 @@ class PokemonDetailViewModel(
                         val pokemon = team.pokePaste.pokemons.find { it.name.matches(pokemonName) }
                         val data = team.data.pokemonData[pokemonName]
                         val notes = team.notes?.pokemonNotes?.get(pokemon?.name)
+                        val usages = computeUsages(team)
                         if (pokemon == null) TeamPokemonStateState.Error(GetPokemonDataError("Could not find pokemon on team"))
-                        else TeamPokemonStateState.Loaded(team, pokemon, data, notes)
+                        else TeamPokemonStateState.Loaded(team, pokemon, data, notes, usages)
                     }
                 )
             }
         }
     }
+
+    private fun computeUsages(team: Teamlytics) = team.withContext {
+        team.replays.map { PokemonUsages.from(it, it.youPlayer, pokemonName) }
+            .reduceOrNull { a, b -> a.mergeWith(b) }
+    }
+
 }

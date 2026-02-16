@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
+import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
@@ -74,17 +75,8 @@ class UsagesViewModel(
 
 private fun TeamlyticsContext.fromReplay(replay: ReplayAnalytics): Map<PokemonName, PokemonUsages> {
     val player = replay.youPlayer
-    val hasWon = replay.hasWon(player)
     return player.selection.asSequence()
-        .associateWith { pokemonName ->
-            val hasTerastallized = player.hasTerastallized(pokemonName)
-            PokemonUsages(
-                movesCount = player.movesUsage[pokemonName] ?: emptyMap(),
-                usageCount = 1,
-                winCount = if (hasWon) 1 else 0,
-                teraCount = if (hasTerastallized) 1 else 0,
-                teraAndWinCount = if (hasWon && hasTerastallized) 1 else 0
-            )
+        .associateWith { pokemonName -> PokemonUsages.from(replay, replay.youPlayer, pokemonName)
         }
 }
 
@@ -96,6 +88,25 @@ data class PokemonUsages(
     val teraAndWinCount: Int
 ) {
 
+    companion object {
+
+        fun from(
+            replay: ReplayAnalytics,
+            player: Player,
+            pokemonName: PokemonName,
+        ): PokemonUsages {
+            val hasWon = replay.hasWon(player)
+            val hasTerastallized = player.hasTerastallized(pokemonName)
+
+            return PokemonUsages(
+                movesCount = player.movesUsage[pokemonName] ?: emptyMap(),
+                usageCount = 1,
+                winCount = if (replay.hasWon(player)) 1 else 0,
+                teraCount = if (hasTerastallized) 1 else 0,
+                teraAndWinCount = if (hasWon && hasTerastallized) 1 else 0
+            )
+        }
+    }
     fun mergeWith(pokemonUsages: PokemonUsages) = PokemonUsages(
         movesCount = (this.movesCount.keys + pokemonUsages.movesCount.keys).associateWith { move ->
             (this.movesCount[move] ?: 0) + (pokemonUsages.movesCount[move] ?: 0)

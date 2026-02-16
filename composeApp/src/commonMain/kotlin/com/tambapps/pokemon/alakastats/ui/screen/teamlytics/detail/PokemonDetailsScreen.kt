@@ -90,7 +90,7 @@ data class PokemonDetailsScreen(
                         visible = visible,
                         enter = fadeIn(animationSpec = tween(durationMillis = 1000))
                     ) {
-                        PokemonDetails(state.team, viewModel, state.pokemon, state.pokemonData, state.notes)
+                        PokemonDetails(viewModel, state)
                     }
                 }
             }
@@ -100,11 +100,8 @@ data class PokemonDetailsScreen(
 
 @Composable
 private fun PokemonDetails(
-    team: Teamlytics,
     viewModel: PokemonDetailViewModel,
-    pokemon: Pokemon,
-    pokemonData: PokemonData?,
-    notes: String?
+    state: TeamPokemonStateState.Loaded
 ) {
     var dimensions by remember { mutableStateOf(0.dp to 0.dp) }
     val (contentWidth, _) = dimensions
@@ -116,46 +113,51 @@ private fun PokemonDetails(
         }
     ) {
         val isCompact = LocalIsCompact.current
-        Column(
-            Modifier.fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .then(
-                    if (isCompact) Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
-                    else Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
-                )
-        ) {
-            PokepastePokemonHeader(pokemon, viewModel.pokemonImageService)
-            Spacer(Modifier.height(16.dp))
-            PokepastePokemonItemAndAbility(pokemon, viewModel.pokemonImageService)
-            Spacer(Modifier.height(16.dp))
-            if (!notes.isNullOrBlank()) {
-                Text(notes, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(bottom = 16.dp))
-            }
-            if (!team.pokePaste.isOts) {
-                if (pokemonData != null) {
-                    Text("Stats", style = MaterialTheme.typography.headlineSmall)
-                    PokemonStatsRow(pokemon, pokemonData, Modifier.fillMaxWidth())
-                    Spacer(Modifier.height(16.dp))
-                }
-                Text("Investments", style = MaterialTheme.typography.headlineSmall)
-                PokemonStatsRow(pokemon, pokemonData=null, Modifier.fillMaxWidth())
-                Spacer(Modifier.height(16.dp))
-            }
-
-            Text("Moves", style = MaterialTheme.typography.headlineSmall)
-            Spacer(Modifier.height(8.dp))
-            PokemonMoves(pokemon, viewModel.pokemonImageService)
+        if (isCompact) {
+            PokemonDetailsMobile(viewModel, state)
+        } else {
+            PokemonDetailsDesktop(viewModel, state)
         }
 
+
         viewModel.pokemonImageService.PokemonArtwork(
-            name = pokemon.name,
+            name = state.pokemon.name,
             modifier = Modifier.align(Alignment.BottomEnd)
                 .padding(bottom = 16.dp, end = 8.dp)
-                .height(if (LocalIsCompact.current) 175.dp else 200.dp)
+                .height(if (LocalIsCompact.current) 175.dp else 250.dp)
                 // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
                 .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
                 .offset(y = 16.dp)
         )
+    }
+}
 
+@Composable
+internal fun PokemonDetailsOverview(
+    viewModel: PokemonDetailViewModel,
+    state: TeamPokemonStateState.Loaded,
+    modifier: Modifier = Modifier
+) {
+    val (team, pokemon, pokemonData, notes) = state
+
+    Column(modifier) {
+        PokepastePokemonItemAndAbility(pokemon, viewModel.pokemonImageService)
+        Spacer(Modifier.height(16.dp))
+        if (!notes.isNullOrBlank()) {
+            Text(notes, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(bottom = 16.dp))
+        }
+        if (!team.pokePaste.isOts) {
+            if (pokemonData != null) {
+                Text("Stats", style = MaterialTheme.typography.headlineSmall)
+                PokemonStatsRow(pokemon, pokemonData, Modifier.fillMaxWidth())
+                Spacer(Modifier.height(16.dp))
+            }
+            Text("Investments", style = MaterialTheme.typography.headlineSmall)
+            PokemonStatsRow(pokemon, pokemonData=null, Modifier.fillMaxWidth())
+            Spacer(Modifier.height(16.dp))
+        }
+        Text("Moves", style = MaterialTheme.typography.headlineSmall)
+        Spacer(Modifier.height(8.dp))
+        PokemonMoves(pokemon, viewModel.pokemonImageService)
     }
 }
