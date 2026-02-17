@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.editteam
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -17,6 +18,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -31,6 +34,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +48,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
@@ -85,6 +93,8 @@ data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
             ) {
                 TeamNameInput(viewModel)
 
+                FormatNameInput(viewModel)
+
                 ShowdownNamesInput(viewModel)
 
                 PokePasteInput(viewModel)
@@ -118,6 +128,39 @@ private fun TeamNameInput(viewModel: EditTeamViewModel) {
     )
 }
 
+@Composable
+private fun FormatNameInput(viewModel: EditTeamViewModel) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "Format",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.width(16.dp))
+
+        Box {
+            var expanded by remember { mutableStateOf(false) }
+            OutlinedButton(onClick = { expanded = true }) {
+                Text(viewModel.format.displayedName)
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                Format.entries.forEach { format ->
+                    DropdownMenuItem(
+                        text = { Text(format.displayedName) },
+                        onClick = {
+                            viewModel.format = format
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun ShowdownNamesInput(viewModel: EditTeamViewModel) {

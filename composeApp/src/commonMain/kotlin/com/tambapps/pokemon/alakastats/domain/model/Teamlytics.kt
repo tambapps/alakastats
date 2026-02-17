@@ -7,6 +7,13 @@ import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
+enum class Format(
+    val displayedName: String
+) {
+    NONE("<none>"), REGULATION_H("Regulation H"), REGULATION_F("Regulation F");
+
+
+}
 data class Teamlytics(
     val id: Uuid,
     val name: String,
@@ -16,7 +23,8 @@ data class Teamlytics(
     val lastUpdatedAt: Instant,
     val data: TeamlyticsData,
     val notes: TeamlyticsNotes?,
-    val matchupNotes: List<MatchupNotes>
+    val matchupNotes: List<MatchupNotes>,
+    val format: Format
 ) {
     val winRate get() = computeWinRatePercentage(sdNames, replays)
 

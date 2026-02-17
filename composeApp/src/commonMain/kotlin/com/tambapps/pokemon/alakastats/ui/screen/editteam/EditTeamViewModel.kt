@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
+import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
@@ -27,6 +28,7 @@ class EditTeamViewModel(
 
     var teamName by mutableStateOf("")
         private set
+    var format by mutableStateOf(Format.NONE)
 
     val sdNames = mutableStateListOf<String>()
 
@@ -77,13 +79,15 @@ class EditTeamViewModel(
                         editingTeam!!,
                         name = teamName,
                         sdNames = sdNames.map(::UserName),
-                        pokePaste = pokepaste
+                        pokePaste = pokepaste,
+                        format = format
                     ).getOrNull()
                 } else {
                     editTeamlyticsUseCase.create(
                         name = teamName,
                         sdNames = sdNames.map(::UserName),
-                        pokePaste = pokepaste
+                        pokePaste = pokepaste,
+                        format = format
                     ).getOrNull()
                 }
                 navigator.pop()
@@ -99,6 +103,7 @@ class EditTeamViewModel(
         editingTeam = teamlytics
         teamName = teamlytics.name
         pokepaste = teamlytics.pokePaste.toPokePasteString()
+        format = teamlytics.format
         validPokepaste()
         sdNames.clear()
         sdNames.addAll(teamlytics.sdNames.map { it.value })

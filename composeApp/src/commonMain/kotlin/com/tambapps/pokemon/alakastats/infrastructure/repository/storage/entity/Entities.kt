@@ -15,7 +15,8 @@ data class TeamlyticsEntity(
     val data: TeamlyticsDataEntity? = null,
     val notes: TeamlyticsNotesEntity? = null,
     val lastUpdatedAt: Instant?,
-    val matchupNotes: List<MatchupNotesEntity>? = null
+    val matchupNotes: List<MatchupNotesEntity>? = null,
+    val format: String? = null
 ): Identifiable<Uuid>
 
 @Serializable

@@ -5,6 +5,7 @@ import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.DamageClass
+import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
@@ -36,7 +37,8 @@ fun Teamlytics.toEntity() = TeamlyticsEntity(
     lastUpdatedAt = lastUpdatedAt,
     notes = notes?.toEntity(),
     matchupNotes = matchupNotes.map { it.toEntity() },
-    data = data.toEntity()
+    data = data.toEntity(),
+    format = format.name
 )
 
 fun TeamlyticsEntity.toDomain(pokepasteParser: PokepasteParser): Teamlytics {
@@ -51,7 +53,14 @@ fun TeamlyticsEntity.toDomain(pokepasteParser: PokepasteParser): Teamlytics {
         lastUpdatedAt = lastUpdatedAt ?: Clock.System.now(),
         notes = notes?.toDomain(pokepaste),
         matchupNotes = matchupNotes?.map { it.toDomain(replays, pokepasteParser) } ?: emptyList(),
-        data = data?.toDomain() ?: TeamlyticsData(emptyMap())
+        data = data?.toDomain() ?: TeamlyticsData(emptyMap()),
+        format = format?.let {
+            try {
+                Format.valueOf(it)
+            } catch (e: IllegalArgumentException) {
+                Format.NONE
+            }
+        } ?: Format.NONE
     )
 }
 
