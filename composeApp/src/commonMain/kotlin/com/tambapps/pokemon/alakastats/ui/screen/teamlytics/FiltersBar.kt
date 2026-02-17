@@ -307,6 +307,7 @@ private fun OppUsernameButton(viewModel: FiltersViewModel) {
     if (showDialog) {
         ShowdownNameDialog(
             onDismissRequest = { showDialog = false },
+            initialValue = viewModel.filters.opponentUsernames.firstOrNull()?.value ?: "",
             onAdd = { viewModel.applyFilters(viewModel.filters.copy(opponentUsernames = setOf(UserName(it)))) }
         )
     }
@@ -367,9 +368,10 @@ private fun AddPokemonNameDialog(
 @Composable
 private fun ShowdownNameDialog(
     onDismissRequest: () -> Unit,
+    initialValue: String,
     onAdd: (String) -> Unit
 ) {
-    var newName by mutableStateOf("")
+    var newName by remember { mutableStateOf(initialValue) }
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text("Showdown Name") },
