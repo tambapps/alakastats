@@ -9,6 +9,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
@@ -20,7 +21,7 @@ import kotlin.collections.component2
 class LeadStatsViewModel(
     override val useCase: ManageReplayFiltersUseCase,
     override val pokemonImageService: PokemonImageService,
-    ): TeamlyticsTabViewModel() {
+    ): TeamlyticsFiltersTabViewModel() {
 
     val hasNoData: Boolean get() = leadAndWinStats.isEmpty() && mostCommonLeadsStats.isEmpty() && mostEffectiveLeadsStats.isEmpty()
     var leadAndWinStats by mutableStateOf(listOf<LeadStats>())

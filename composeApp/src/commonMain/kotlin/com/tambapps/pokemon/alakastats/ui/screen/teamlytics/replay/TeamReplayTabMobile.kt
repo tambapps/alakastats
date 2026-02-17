@@ -59,13 +59,15 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: La
         ) {
             item {
                 Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
-                Header(viewModel.useCase)
-                Spacer(Modifier.height(16.dp))
-            }
-            item {
                 FiltersBar(viewModel)
                 Spacer(Modifier.height(16.dp))
             }
+
+            item {
+                Header(viewModel.useCase)
+                Spacer(Modifier.height(16.dp))
+            }
+
             itemsIndexed(team.replays) { index, replay ->
                 MobileReplay(viewModel, team, replay)
                 if (index < team.replays.size - 1) {
