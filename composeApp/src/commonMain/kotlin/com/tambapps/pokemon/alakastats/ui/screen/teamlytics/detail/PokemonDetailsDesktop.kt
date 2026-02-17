@@ -14,8 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonHeader
-import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.PokemonUsagesCard
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.PokemonUsagesCard
 
 @Composable
 fun PokemonDetailsDesktop(

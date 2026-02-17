@@ -1,9 +1,8 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,37 +15,36 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
+import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 
+
+@OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
-internal fun LeadStatsTabMobile(viewModel: LeadStatsViewModel, scrollState: ScrollState) {
+internal fun UsagesTabMobile(viewModel: UsagesViewModel, scrollState: ScrollState) {
     Column(
-        Modifier.fillMaxSize()
+        Modifier.fillMaxWidth()
     ) {
-        Column(
-            Modifier.fillMaxWidth()
-                .verticalScroll(scrollState)
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-        ) {
-            if (viewModel.isLoading) {
-                return@Column
-            }
+        Column(Modifier.weight(1f)
+            .padding(horizontal = 4.dp)
+            .verticalScroll(scrollState)) {
             Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
             FiltersBar(viewModel)
             Spacer(Modifier.height(16.dp))
             NbReplaysText(viewModel.useCase, modifier = Modifier.fillMaxWidth()) // fill maxWidth to center text
-            Spacer(Modifier.height(64.dp))
-            LeadAndWinRow(viewModel)
-            Space()
-            MostEffectiveLeadRow(viewModel)
-            Space()
-            MostCommonLeadRow(viewModel)
+            Spacer(Modifier.height(16.dp))
+
+            val entries = viewModel.sortedPokemonMovesUsageEntries
+            entries.forEach { (pokemonName, moveUsage) ->
+                PokemonUsagesCard(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    replays = viewModel.replays,
+                    pokemonImageService = viewModel.pokemonImageService,
+                    name = pokemonName,
+                    usages = moveUsage
+                )
+            }
             Spacer(Modifier.height(teamlyticsTabPaddingBottom))
         }
         LinearProgressBarIfEnabled(viewModel.isLoading)
     }
 }
-
-@Composable
-private fun Space() = Spacer(Modifier.height(42.dp))
-

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.edit
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
@@ -57,7 +57,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.ReplayCompact
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ReplayCompact
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource

@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.overview
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.more_vert

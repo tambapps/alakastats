@@ -12,7 +12,7 @@ import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultPokemonDetailUseCase
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.usage.PokemonUsages
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.PokemonUsages
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

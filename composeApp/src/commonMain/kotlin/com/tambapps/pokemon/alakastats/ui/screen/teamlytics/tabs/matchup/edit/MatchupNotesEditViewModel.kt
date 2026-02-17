@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.matchup.edit
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.edit
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf

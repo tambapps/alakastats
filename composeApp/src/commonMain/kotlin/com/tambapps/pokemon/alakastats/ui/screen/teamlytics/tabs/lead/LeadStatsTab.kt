@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.lead
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -33,7 +33,7 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonCard
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollableRow
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.NoReplay
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.NoReplay
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlin.math.pow

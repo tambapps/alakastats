@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.overview
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.overview
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs
 
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase

@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
