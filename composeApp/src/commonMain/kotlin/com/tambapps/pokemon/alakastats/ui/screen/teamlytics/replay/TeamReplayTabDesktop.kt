@@ -48,6 +48,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
@@ -76,6 +77,10 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: L
             state = scrollState,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            item {
+                FiltersBar(viewModel)
+                Spacer(Modifier.padding(16.dp))
+            }
             item {
                 Header(viewModel.useCase)
             }

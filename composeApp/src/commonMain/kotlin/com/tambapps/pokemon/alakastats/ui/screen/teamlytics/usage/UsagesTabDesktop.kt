@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 
@@ -28,6 +29,8 @@ internal fun UsagesTabDesktop(viewModel: UsagesViewModel, scrollState: ScrollSta
                 .padding(16.dp)
                 .verticalScroll(scrollState)
         ) {
+            FiltersBar(viewModel)
+            Spacer(Modifier.padding(16.dp))
             NbReplaysText(viewModel.useCase, modifier = Modifier.fillMaxWidth()) // fill maxWidth to center text
             Spacer(Modifier.height(32.dp))
             val entryBlocks = viewModel.sortedPokemonMovesUsageEntries.chunked(3)

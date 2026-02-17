@@ -28,29 +28,33 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
 import kotlin.jvm.JvmInline
 
+private class FiltersViewModel(
+    private val useCase: ManageReplayFiltersUseCase,
+    val pokemonImageService: PokemonImageService
+) {
+    fun applyFilters(filters: ReplayFilters) = useCase.applyFilters(filters)
+}
 
 @JvmInline
-value class AddPokemonDialogState(val asLead: Boolean)
+private value class AddPokemonDialogState(val asLead: Boolean)
 
 private data class PokemonsFilter(
     val shortTitle: String,
@@ -63,7 +67,7 @@ private data class PokemonsFilter(
 @Composable
 fun FiltersBar(parentViewModel: TeamlyticsFiltersTabViewModel) {
     val filters = parentViewModel.filters
-    val viewModel = remember(filters) { FiltersViewModel2(parentViewModel.useCase, parentViewModel.pokemonImageService) }
+    val viewModel = remember(filters) { FiltersViewModel(parentViewModel.useCase, parentViewModel.pokemonImageService) }
     val opponentTeamFilter = remember(filters) {
         PokemonsFilter("Opp. Team", "Opponent's Team", filters.opponentTeam, allowLead = false, max = 6)
     }
@@ -98,7 +102,7 @@ fun FiltersBar(parentViewModel: TeamlyticsFiltersTabViewModel) {
                     pokemonImageService = viewModel.pokemonImageService,
                     filter = yourSelectionFilter,
                     dialogState = showPokemonDialogFilterState,
-                    onClear = { viewModel.applyFilters(filters.copy(opponentSelection = emptyList())) }
+                    onClear = { viewModel.applyFilters(filters.copy(yourSelection = emptyList())) }
                 )
             }
             Spacer(Modifier.height(16.dp))
@@ -229,6 +233,7 @@ private fun PokemonFilterButton(
     filter: PokemonsFilter,
 ) {
     val pokemons = filter.pokemons
+    val isCompact = LocalIsCompact.current
     OutlinedButton(
         onClick = {
             if (filter.pokemons.isNotEmpty()) {
@@ -238,23 +243,24 @@ private fun PokemonFilterButton(
             }
         },
         shape = RoundedCornerShape(8.dp),
-        contentPadding = if (pokemons.isEmpty()) ButtonDefaults.ContentPadding else PaddingValues(horizontal = 10.dp, vertical = 8.dp),
-        modifier = Modifier.padding(horizontal = 4.dp)) {
+        contentPadding = if (!isCompact || pokemons.isEmpty()) ButtonDefaults.ContentPadding else PaddingValues(horizontal = 10.dp, vertical = 8.dp),
+        modifier = Modifier.padding(horizontal = if (isCompact) 4.dp else 16.dp)) {
         Text(filter.shortTitle)
 
         if (pokemons.isNotEmpty()) {
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(if (isCompact) 4.dp else 8.dp))
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 pokemons.chunked(3).forEach { pokemonChunk ->
                     Row {
                         pokemonChunk.forEach { p ->
-                            pokemonImageService.PokemonSprite(p.name, Modifier.size(32.dp), disableTooltip = true)
+                            pokemonImageService.PokemonSprite(p.name, Modifier.size(if (isCompact) 32.dp else 40.dp)
+                                , disableTooltip = true)
                         }
                     }
                 }
             }
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(if (isCompact) 8.dp else 16.dp))
             Text("x", style = MaterialTheme.typography.titleLarge)
         }
     }
@@ -269,7 +275,7 @@ private fun FilterButton(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun AddPokemonNameDialog(
+private fun AddPokemonNameDialog(
     pokemonImageService: PokemonImageService,
     containsValidator: (PokemonName) -> Boolean,
     asLead: Boolean,
@@ -317,21 +323,4 @@ fun AddPokemonNameDialog(
             }
         }
     )
-}
-
-
-class FiltersViewModel2(
-    private val useCase: ManageReplayFiltersUseCase,
-    val pokemonImageService: PokemonImageService
-) {
-
-    val opponentTeamFilters = useCase.filters.opponentTeam.toMutableStateList()
-    val opponentSelectionFilters = useCase.filters.opponentSelection.toMutableStateList()
-    val opponentUsernamesFilters = mutableStateSetOf<UserName>().apply {
-        addAll(useCase.filters.opponentUsernames)
-    }
-    val yourSelectionFilters = useCase.filters.yourSelection.toMutableStateList()
-
-
-    fun applyFilters(filters: ReplayFilters) = useCase.applyFilters(filters)
 }
