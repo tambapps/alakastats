@@ -27,7 +27,6 @@ internal fun OverviewTabMobile(viewModel: OverviewViewModel, scrollState: Scroll
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .padding(16.dp)
                 .verticalScroll(scrollState)
         ) {
             if (viewModel.isEditingNotes) {
