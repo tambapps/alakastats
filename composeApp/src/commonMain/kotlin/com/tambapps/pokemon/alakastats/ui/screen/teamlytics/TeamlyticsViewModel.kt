@@ -45,7 +45,6 @@ class TeamlyticsViewModel(
         private set
     override var filters by mutableStateOf(ReplayFilters())
         private set
-    var showFiltersDialog by mutableStateOf(false)
 
     var scrollToTopIndex by mutableStateOf<Int?>(null)
 
@@ -80,7 +79,6 @@ class TeamlyticsViewModel(
 
     override fun applyFilters(filters: ReplayFilters) {
         this.filters = filters
-        closeFilters()
         isApplyingFiltersLoading = true
         scope.launch {
             reloadFilteredTeam()
@@ -88,13 +86,6 @@ class TeamlyticsViewModel(
                 isApplyingFiltersLoading = false
             }
         }
-    }
-    override fun openFilters() {
-        showFiltersDialog = true
-    }
-
-    override fun closeFilters() {
-        showFiltersDialog = false
     }
 
     override suspend fun addReplays(replays: List<ReplayAnalytics>): Either<DomainError, Unit> {

@@ -57,7 +57,6 @@ import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
@@ -73,11 +72,7 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
     val isCompact = LocalIsCompact.current
     FabLayout(
         fab = {
-            Row {
-                FiltersButton(viewModel.useCase)
-                Spacer(Modifier.width(32.dp))
-                AddReplayButton(viewModel)
-            }
+            AddReplayButton(viewModel)
         }
     ) {
         val scrollState = rememberLazyListState()

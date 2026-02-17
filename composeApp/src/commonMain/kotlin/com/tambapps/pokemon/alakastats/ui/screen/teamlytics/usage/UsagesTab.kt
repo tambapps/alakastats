@@ -25,10 +25,8 @@ import androidx.compose.ui.unit.sp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
-import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -43,11 +41,7 @@ fun UsagesTab(viewModel: UsagesViewModel) {
     LaunchedEffect(viewModel.useCase.filters) {
         viewModel.loadStats()
     }
-    FabLayout(
-        fab = {
-            FiltersButton(viewModel.useCase)
-        }
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
         if (!viewModel.isLoading && viewModel.pokemonPokemonUsages.isEmpty()) {
             NoData(viewModel)

@@ -30,10 +30,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonCard
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollableRow
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersButton
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -45,11 +43,7 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
     LaunchedEffect(viewModel.useCase.filters) {
         viewModel.loadStats()
     }
-    FabLayout(
-        fab = {
-            FiltersButton(viewModel.useCase)
-        }
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
         if (!viewModel.isLoading && viewModel.hasNoData) {
             NoData(viewModel)

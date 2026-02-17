@@ -7,7 +7,4 @@ interface ManageReplayFiltersUseCase: ConsultTeamlyticsUseCase {
 
     fun applyFilters(filters: ReplayFilters)
 
-    fun openFilters()
-
-    fun closeFilters()
 }

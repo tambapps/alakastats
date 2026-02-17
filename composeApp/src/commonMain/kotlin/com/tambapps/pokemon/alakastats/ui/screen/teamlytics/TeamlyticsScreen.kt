@@ -107,10 +107,6 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
                             }
                         }
                     }
-                    if (viewModel.showFiltersDialog) {
-                        val filtersViewModel = remember(viewModel.filters) { FiltersViewModel(viewModel, viewModel.imageService) }
-                        FiltersDialog(filtersViewModel)
-                    }
                 }
             }
         }

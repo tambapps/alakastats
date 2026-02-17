@@ -34,16 +34,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
+import kotlin.jvm.JvmInline
 
+
+@JvmInline
+value class AddPokemonDialogState(val asLead: Boolean)
 
 private data class PokemonsFilter(
     val shortTitle: String,
@@ -261,6 +268,58 @@ private fun FilterButton(text: String, onClick: () -> Unit) {
     }
 }
 
+@Composable
+fun AddPokemonNameDialog(
+    pokemonImageService: PokemonImageService,
+    containsValidator: (PokemonName) -> Boolean,
+    asLead: Boolean,
+    onAdd: (PokemonFilter) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    var pokemonName by remember { mutableStateOf(PokemonName("")) }
+
+    val alreadyContains = remember(pokemonName) { containsValidator.invoke(pokemonName) }
+    val isValid = pokemonName.value.isNotBlank() && !alreadyContains
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Add Pokemon Filter") },
+        text = {
+            Column {
+                PokemonNameTextField(
+                    value = pokemonName,
+                    placeholder = "Pokemon Name",
+                    isError = alreadyContains,
+                    supportingText = if (alreadyContains) ({
+                        Text("${pokemonName.pretty} was already added")
+                    }) else null,
+                    onValueChange = { pokemonName = it },
+                    pokemonImageService = pokemonImageService,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onAdd.invoke(PokemonFilter(pokemonName, asLead))
+                    onDismissRequest.invoke()
+                },
+                enabled = isValid
+            ) {
+                Text(
+                    "Add",
+                    color = if (isValid) Color.Unspecified else Color.LightGray
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+
 class FiltersViewModel2(
     private val useCase: ManageReplayFiltersUseCase,
     val pokemonImageService: PokemonImageService
@@ -273,13 +332,6 @@ class FiltersViewModel2(
     }
     val yourSelectionFilters = useCase.filters.yourSelection.toMutableStateList()
 
-    fun clearFilters() {
-        opponentTeamFilters.clear()
-        opponentSelectionFilters.clear()
-        opponentUsernamesFilters.clear()
-        yourSelectionFilters.clear()
-    }
 
     fun applyFilters(filters: ReplayFilters) = useCase.applyFilters(filters)
-    fun closeFilters() = useCase.closeFilters()
 }
