@@ -2,6 +2,8 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
+import alakastats.composeapp.generated.resources.more_vert
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -20,6 +22,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -34,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -239,13 +243,7 @@ private fun PokemonFilterButton(
     val pokemons = filter.pokemons
     val isCompact = LocalIsCompact.current
     OutlinedButton(
-        onClick = {
-            if (filter.pokemons.isNotEmpty()) {
-                onClear.invoke()
-            } else {
-                dialogState.value = filter
-            }
-        },
+        onClick = { dialogState.value = filter },
         shape = RoundedCornerShape(8.dp),
         contentPadding = if (!isCompact || pokemons.isEmpty()) ButtonDefaults.ContentPadding else PaddingValues(horizontal = 10.dp, vertical = 8.dp),
         modifier = Modifier.padding(horizontal = if (isCompact) 4.dp else 16.dp)) {
@@ -270,8 +268,15 @@ private fun PokemonFilterButton(
                     }
                 }
             }
-            Spacer(Modifier.width(if (isCompact) 8.dp else 16.dp))
-            Text("x", style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.width(18.dp))
+
+            Icon(
+                modifier = Modifier.size(if (isCompact) 25.dp else 25.dp).rotate(45f).clickable(onClick = { onClear.invoke() }),
+                painter = painterResource(Res.drawable.add),
+                contentDescription = "More",
+                tint = MaterialTheme.colorScheme.defaultIconColor
+            )
+
         }
     }
 }
@@ -281,13 +286,7 @@ private fun OppUsernameButton(viewModel: FiltersViewModel) {
     val text = "Opp. Username"
     val isCompact = LocalIsCompact.current
     var showDialog by remember { mutableStateOf(false) }
-    OutlinedButton(onClick = {
-        if (viewModel.filters.opponentUsernames.isNotEmpty()) {
-            viewModel.applyFilters(viewModel.filters.copy(opponentUsernames = emptySet()))
-        } else {
-            showDialog = true
-        }
-    }, shape = RoundedCornerShape(8.dp),
+    OutlinedButton(onClick = { showDialog = true }, shape = RoundedCornerShape(8.dp),
         modifier = Modifier.padding(horizontal = if (isCompact) 4.dp else 16.dp)) {
         val text = when {
             viewModel.filters.opponentUsernames.isNotEmpty() -> "$text: " + viewModel.filters.opponentUsernames.joinToString(separator = ", ", transform = { it.value })
@@ -295,8 +294,14 @@ private fun OppUsernameButton(viewModel: FiltersViewModel) {
         }
         Text(text)
         if (viewModel.filters.opponentUsernames.isNotEmpty()) {
-            Spacer(Modifier.width(if (isCompact) 8.dp else 16.dp))
-            Text("x", style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.width(18.dp))
+            Icon(
+                modifier = Modifier.size(if (isCompact) 25.dp else 25.dp).rotate(45f).clickable(onClick = { viewModel.applyFilters(viewModel.filters.copy(opponentUsernames = emptySet())) }),
+                painter = painterResource(Res.drawable.add),
+                contentDescription = "More",
+                tint = MaterialTheme.colorScheme.defaultIconColor
+            )
+
         }
     }
     if (showDialog) {
@@ -395,7 +400,7 @@ private fun ShowdownNameDialog(
                 enabled = isSdNameValid(newName)
             ) {
                 Text(
-                    "OK",
+                    "Apply",
                     color = if (isSdNameValid(newName)) Color.Unspecified else Color.LightGray
                 )
             }
