@@ -21,7 +21,7 @@ object CreateMatchup: EditMatchupMode()
 
 class MatchupNotesViewModel(
     override val useCase: ManageMatchupNotesUseCase,
-    val pokemonImageService: PokemonImageService,
+    override val pokemonImageService: PokemonImageService,
 ): TeamlyticsTabViewModel() {
 
     override val isTabLoading = false

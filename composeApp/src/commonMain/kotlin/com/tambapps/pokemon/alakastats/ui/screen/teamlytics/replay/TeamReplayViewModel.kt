@@ -9,6 +9,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import io.ktor.http.Url
@@ -22,8 +23,8 @@ import kotlinx.coroutines.withContext
 class TeamReplayViewModel(
     override val useCase: ManageTeamReplaysUseCase,
     private val replayService: ReplayAnalyticsService,
-    val pokemonImageService: PokemonImageService,
-): TeamlyticsTabViewModel() {
+    override val pokemonImageService: PokemonImageService,
+): TeamlyticsFiltersTabViewModel() {
     val team get() = useCase.filteredTeam
 
     private companion object {

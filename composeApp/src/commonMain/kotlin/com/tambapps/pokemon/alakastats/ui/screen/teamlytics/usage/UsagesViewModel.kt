@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 
 class UsagesViewModel(
     override val useCase: ManageTeamReplaysUseCase,
-    val pokemonImageService: PokemonImageService,
+    override val pokemonImageService: PokemonImageService,
 ): TeamlyticsTabViewModel() {
 
     override var isTabLoading by mutableStateOf(false)

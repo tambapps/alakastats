@@ -359,7 +359,7 @@ private fun ShowdownNameDialog(
 }
 
 @Composable
-private fun AddPokemonNameDialog(
+fun AddPokemonNameDialog(
     pokemonImageService: PokemonImageService,
     containsValidator: (PokemonName) -> Boolean,
     asLead: Boolean,

@@ -22,7 +22,7 @@ import kotlinx.coroutines.withContext
 
 class OverviewViewModel(
     override val useCase: ManageTeamOverviewUseCase,
-    val pokemonImageService: PokemonImageService,
+    override val pokemonImageService: PokemonImageService,
     private val pokemonDataRepository: PokemonDataRepository
 ): TeamlyticsTabViewModel() {
     // important. In this tab we don't want to consider filters

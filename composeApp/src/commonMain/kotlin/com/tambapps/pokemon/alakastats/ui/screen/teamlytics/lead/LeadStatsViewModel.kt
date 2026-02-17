@@ -19,7 +19,7 @@ import kotlin.collections.component2
 
 class LeadStatsViewModel(
     override val useCase: ManageReplayFiltersUseCase,
-    val pokemonImageService: PokemonImageService,
+    override val pokemonImageService: PokemonImageService,
     ): TeamlyticsTabViewModel() {
 
     val hasNoData: Boolean get() = leadAndWinStats.isEmpty() && mostCommonLeadsStats.isEmpty() && mostEffectiveLeadsStats.isEmpty()
