@@ -4,7 +4,6 @@ import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.more_vert
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,12 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,8 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
@@ -47,24 +42,15 @@ import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
-import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import org.jetbrains.compose.resources.painterResource
-import kotlin.Boolean
-import kotlin.collections.chunked
-import kotlin.collections.forEach
 
 @Composable
 internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: LazyListState) {
     val team = viewModel.team
-
-    if (viewModel.hasNoReplaysToShow) {
-        NoReplaysDesktop(viewModel)
-        return
-    }
     Column(Modifier.fillMaxSize()) {
         LinearProgressBarIfEnabled(viewModel.isLoading)
         LaunchedEffect(viewModel.useCase.filters) {
@@ -97,17 +83,36 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: L
 }
 
 @Composable
-fun ExpandableDesktopReplay(team: Teamlytics, replay: ReplayAnalytics, pokemonImageService: PokemonImageService) {
+fun ExpandableDesktopReplay(
+    team: Teamlytics,
+    replay: ReplayAnalytics,
+    pokemonImageService: PokemonImageService
+) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
     val gameOutput = team.getGameOutput(replay)
 
     ExpansionTile(
         title = {
-            HeadRow(team, replay, gameOutput, currentPlayer=currentPlayer, opponentPlayer=opponentPlayer, pokemonImageService = pokemonImageService, viewModel = null)
+            HeadRow(
+                team,
+                replay,
+                gameOutput,
+                currentPlayer = currentPlayer,
+                opponentPlayer = opponentPlayer,
+                pokemonImageService = pokemonImageService,
+                viewModel = null
+            )
         },
         disableWhenOpened = true
     ) {
-        ReplayContent(replay, gameOutput, currentPlayer=currentPlayer, opponentPlayer=opponentPlayer, pokemonImageService, viewModel = null)
+        ReplayContent(
+            replay,
+            gameOutput,
+            currentPlayer = currentPlayer,
+            opponentPlayer = opponentPlayer,
+            pokemonImageService,
+            viewModel = null
+        )
     }
 }
 
@@ -118,9 +123,24 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
     MyCard(
         modifier = Modifier.fillMaxWidth(),
         gradientBackgroundColors = cardGradientColors
-        ) {
-        HeadRow(team, replay, gameOutput, currentPlayer=currentPlayer, opponentPlayer=opponentPlayer, pokemonImageService = viewModel.pokemonImageService, viewModel)
-        ReplayContent(replay, gameOutput, currentPlayer=currentPlayer, opponentPlayer=opponentPlayer, viewModel.pokemonImageService, viewModel)
+    ) {
+        HeadRow(
+            team,
+            replay,
+            gameOutput,
+            currentPlayer = currentPlayer,
+            opponentPlayer = opponentPlayer,
+            pokemonImageService = viewModel.pokemonImageService,
+            viewModel
+        )
+        ReplayContent(
+            replay,
+            gameOutput,
+            currentPlayer = currentPlayer,
+            opponentPlayer = opponentPlayer,
+            viewModel.pokemonImageService,
+            viewModel
+        )
     }
 }
 
@@ -142,8 +162,10 @@ private fun HeadRow(
         VsText(currentPlayer, opponentPlayer, gameOutput)
         Spacer(Modifier.width(16.dp))
         if (gameOutput != GameOutput.UNKNOWN) {
-            PokemonTeamPreview(pokemonImageService, opponentPlayer,
-                childModifier = Modifier.size(100.dp).padding(bottom = 16.dp))
+            PokemonTeamPreview(
+                pokemonImageService, opponentPlayer,
+                childModifier = Modifier.size(100.dp).padding(bottom = 16.dp)
+            )
 
             opponentPlayer.ots?.let { openTeamSheet ->
                 Spacer(Modifier.width(16.dp))
@@ -187,9 +209,22 @@ private fun ReplayContent(
         Row(
             modifier = Modifier.fillMaxWidth()
         ) {
-            DesktopPlayer(modifier = Modifier.weight(1f), player = currentPlayer, playerName = "You", pokemonImageService = pokemonImageService, useAlternativeSurfaceContainer = viewModel == null, isYouPlayer = true)
+            DesktopPlayer(
+                modifier = Modifier.weight(1f),
+                player = currentPlayer,
+                playerName = "You",
+                pokemonImageService = pokemonImageService,
+                useAlternativeSurfaceContainer = viewModel == null,
+                isYouPlayer = true
+            )
             Spacer(Modifier.width(8.dp))
-            DesktopPlayer(modifier = Modifier.weight(1f), player = opponentPlayer, playerName = "Opponent", pokemonImageService = pokemonImageService, useAlternativeSurfaceContainer = viewModel == null)
+            DesktopPlayer(
+                modifier = Modifier.weight(1f),
+                player = opponentPlayer,
+                playerName = "Opponent",
+                pokemonImageService = pokemonImageService,
+                useAlternativeSurfaceContainer = viewModel == null
+            )
         }
     }
     if (!replay.notes.isNullOrBlank()) {
@@ -208,21 +243,36 @@ private fun DesktopSdNamesWarning(viewModel: TeamReplayViewModel?) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("⚠\uFE0F your showdown names didn't match with any player of this game", style = MaterialTheme.typography.bodyLarge)
+        Text(
+            "⚠\uFE0F your showdown names didn't match with any player of this game",
+            style = MaterialTheme.typography.bodyLarge
+        )
         Spacer(Modifier.width(16.dp))
         viewModel?.let { EditSdNamesButton(it) }
     }
 }
 
 @Composable
-private fun DesktopPlayer(modifier: Modifier, player: Player, playerName: String, pokemonImageService: PokemonImageService, useAlternativeSurfaceContainer: Boolean, isYouPlayer: Boolean = false) {
+private fun DesktopPlayer(
+    modifier: Modifier,
+    player: Player,
+    playerName: String,
+    pokemonImageService: PokemonImageService,
+    useAlternativeSurfaceContainer: Boolean,
+    isYouPlayer: Boolean = false
+) {
     Column(
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         PlayerNameEloText(player, playerName)
         Spacer(Modifier.height(8.dp))
-        DesktopSelection(player, pokemonImageService, useAlternativeSurfaceContainer=useAlternativeSurfaceContainer, isYouPlayer=isYouPlayer)
+        DesktopSelection(
+            player,
+            pokemonImageService,
+            useAlternativeSurfaceContainer = useAlternativeSurfaceContainer,
+            isYouPlayer = isYouPlayer
+        )
         Spacer(Modifier.height(8.dp))
     }
 }
@@ -232,7 +282,8 @@ private fun DesktopSelection(
     player: Player,
     pokemonImageService: PokemonImageService,
     useAlternativeSurfaceContainer: Boolean,
-    isYouPlayer: Boolean = false) {
+    isYouPlayer: Boolean = false
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         player.selection.chunked(2).forEachIndexed { index, chunk ->
             if (index == 1) {
@@ -251,14 +302,18 @@ private fun DesktopSelection(
                     .width(400.dp)
             ) {
                 if (isYouPlayer) {
-                    Text(if (index == 0) "Lead" else "Back", style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        if (index == 0) "Lead" else "Back",
+                        style = MaterialTheme.typography.titleLarge
+                    )
                     Spacer(Modifier.width(16.dp))
                 }
                 chunk.forEachIndexed { cIndex, pokemon ->
                     if (cIndex == 1) {
                         Spacer(Modifier.width(16.dp))
                     }
-                    val teraType = player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
+                    val teraType =
+                        player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
                     SelectedPokemon(
                         modifier = Modifier.widthIn(max = 175.dp),
                         pokemon = pokemon,
@@ -269,28 +324,13 @@ private fun DesktopSelection(
                 }
                 if (!isYouPlayer) {
                     Spacer(Modifier.width(16.dp))
-                    Text(if (index == 0) "Lead" else "Back", style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        if (index == 0) "Lead" else "Back",
+                        style = MaterialTheme.typography.titleLarge
+                    )
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun NoReplaysDesktop(viewModel: TeamReplayViewModel) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(if (!viewModel.useCase.hasFilteredReplays) "No replays were found" else "No replays matched the filters")
-        }
-
-        LinearProgressBarIfEnabled(viewModel.isLoading, modifier = Modifier
-            .align(Alignment.TopStart))
     }
 }
 

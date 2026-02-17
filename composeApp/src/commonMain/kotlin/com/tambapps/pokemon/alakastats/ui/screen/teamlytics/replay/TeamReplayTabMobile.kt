@@ -1,7 +1,5 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,11 +39,6 @@ import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 @Composable
 internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: LazyListState) {
     val team = viewModel.team
-
-    if (viewModel.hasNoReplaysToShow) {
-        NoReplaysMobile(viewModel)
-        return
-    }
     Column(Modifier.fillMaxSize()) {
         LaunchedEffect(viewModel.useCase.filters) {
             scrollState.scrollToItem(index = 0, scrollOffset = 0)
@@ -205,22 +198,6 @@ private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String,
     }
 }
 
-@Composable
-private fun NoReplaysMobile(viewModel: TeamReplayViewModel) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(if (!viewModel.useCase.hasFilteredReplays) "No replays were found" else "No replays matched the filters")
-        }
-        LinearProgressBarIfEnabled(viewModel.isLoading, modifier = Modifier
-            .align(Alignment.BottomStart))
-    }
-}
 
 @Composable
 private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutput: GameOutput, modifier: Modifier = Modifier) {

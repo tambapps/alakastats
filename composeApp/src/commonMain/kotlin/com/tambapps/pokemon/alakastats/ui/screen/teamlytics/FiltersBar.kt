@@ -71,7 +71,7 @@ private data class PokemonsFilter(
 )
 
 @Composable
-fun FiltersBar(parentViewModel: TeamlyticsFiltersTabViewModel) {
+fun FiltersBar(parentViewModel: TeamlyticsFiltersTabViewModel, modifier: Modifier = Modifier) {
     val filters = parentViewModel.filters
     val viewModel = remember(filters) { FiltersViewModel(parentViewModel.useCase, parentViewModel.pokemonImageService) }
     val opponentTeamFilter = remember(filters) {
@@ -81,9 +81,7 @@ fun FiltersBar(parentViewModel: TeamlyticsFiltersTabViewModel) {
     val yourSelectionFilter = remember(filters) { PokemonsFilter("Your Selection", "Your Selection", filters.yourSelection, allowLead = true, max = 4) }
     val showPokemonDialogFilterState = remember { mutableStateOf<PokemonsFilter?>(null) }
 
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
             Text("Filters", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))

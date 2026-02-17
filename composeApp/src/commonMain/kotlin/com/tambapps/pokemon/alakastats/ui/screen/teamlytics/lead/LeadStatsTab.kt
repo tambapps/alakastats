@@ -33,6 +33,7 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonCard
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollableRow
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.NoReplay
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlin.math.pow
@@ -46,7 +47,7 @@ fun LeadStatsTab(viewModel: LeadStatsViewModel) {
     Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
         if (!viewModel.isLoading && viewModel.hasNoData) {
-            NoData(viewModel)
+            NoReplay(viewModel)
         } else if (isCompact) {
             LeadStatsTabMobile(viewModel, scrollState)
         } else {
@@ -227,13 +228,5 @@ private fun LeadCard(
             modifier = Modifier.align(if (pokemonName2 != null) Alignment.BottomCenter else Alignment.BottomStart).padding(bottom = 8.dp),
             style = MaterialTheme.typography.headlineMedium
         )
-    }
-}
-
-
-@Composable
-private fun NoData(viewModel: LeadStatsViewModel) {
-    Box(Modifier.fillMaxSize()) {
-        Text(if (!viewModel.useCase.hasFilteredReplays) "No data" else "No replays matched the filters", style = MaterialTheme.typography.titleSmall, modifier = Modifier.align(Alignment.Center))
     }
 }

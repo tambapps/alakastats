@@ -3,11 +3,13 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.arrow_forward
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -54,11 +56,14 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
+import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -76,7 +81,9 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
         }
     ) {
         val scrollState = rememberLazyListState()
-        if (isCompact) {
+        if (viewModel.hasNoReplaysToShow) {
+            NoReplay(viewModel)
+        } else if (isCompact) {
             TeamReplayTabMobile(viewModel, scrollState)
         } else {
             TeamReplayTabDesktop(viewModel, scrollState)
@@ -420,4 +427,26 @@ internal fun Header(useCase: ConsultTeamlyticsUseCase) {
         Spacer(Modifier.weight(1f))
     }
     Spacer(Modifier.height(32.dp))
+}
+
+
+@Composable
+fun NoReplay(viewModel: TeamlyticsFiltersTabViewModel) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(if (!viewModel.useCase.hasFilteredReplays) "No replays were found" else "No replays matched the filters")
+        }
+
+        LinearProgressBarIfEnabled(viewModel.isLoading, modifier = Modifier
+            .align(if (LocalIsCompact.current) Alignment.BottomStart else Alignment.TopStart))
+
+        FiltersBar(viewModel, Modifier.align(Alignment.TopStart).padding(16.dp))
+    }
+
 }

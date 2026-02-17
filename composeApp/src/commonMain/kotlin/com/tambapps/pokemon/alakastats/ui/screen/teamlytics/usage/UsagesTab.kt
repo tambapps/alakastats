@@ -28,6 +28,7 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.replay.NoReplay
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import io.github.koalaplot.core.pie.PieChart
@@ -44,7 +45,7 @@ fun UsagesTab(viewModel: UsagesViewModel) {
     Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
         if (!viewModel.isLoading && viewModel.pokemonPokemonUsages.isEmpty()) {
-            NoData(viewModel)
+            NoReplay(viewModel)
         } else if (isCompact) {
             UsagesTabMobile(viewModel, scrollState)
         } else {
@@ -161,11 +162,4 @@ private fun PokemonUsagesDonut(
             }
         }
     )
-}
-
-@Composable
-private fun NoData(viewModel: UsagesViewModel) {
-    Box(Modifier.fillMaxSize()) {
-        Text(if (!viewModel.useCase.hasFilteredReplays) "No data" else "No replays matched the filters", style = MaterialTheme.typography.titleSmall, modifier = Modifier.align(Alignment.Center))
-    }
 }
