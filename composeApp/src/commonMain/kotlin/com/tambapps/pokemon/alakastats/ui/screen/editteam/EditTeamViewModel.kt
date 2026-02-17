@@ -15,7 +15,10 @@ import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
 import com.tambapps.pokemon.alakastats.util.isSdNameValid
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.uuid.Uuid
 
 class EditTeamViewModel(
     pokepasteParser: PokepasteParser,
@@ -95,13 +98,23 @@ class EditTeamViewModel(
         }
     }
 
-    fun prepareEdition(teamlytics: Teamlytics) {
-        editingTeam = teamlytics
-        teamName = teamlytics.name
-        pokepaste = teamlytics.pokePaste.toPokePasteString()
-        format = teamlytics.format
-        validPokepaste()
-        sdNames.clear()
-        sdNames.addAll(teamlytics.sdNames.map { it.value })
+    fun prepareEdition(teamlyticsId: Uuid, onFailure: () -> Unit) {
+        scope.launch {
+            val either = editTeamlyticsUseCase.get(teamlyticsId)
+            withContext(Dispatchers.Main) {
+                val teamlytics = either.getOrNull()
+                if (teamlytics == null) {
+                    onFailure.invoke()
+                    return@withContext
+                }
+                editingTeam = teamlytics
+                teamName = teamlytics.name
+                pokepaste = teamlytics.pokePaste.toPokePasteString()
+                format = teamlytics.format
+                validPokepaste()
+                sdNames.clear()
+                sdNames.addAll(teamlytics.sdNames.map { it.value })
+            }
+        }
     }
 }

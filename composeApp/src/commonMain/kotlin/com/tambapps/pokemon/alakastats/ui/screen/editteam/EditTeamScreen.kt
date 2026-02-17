@@ -59,28 +59,28 @@ import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.isSdNameValid
 import org.jetbrains.compose.resources.painterResource
+import kotlin.uuid.Uuid
 
-// TODO needs to be an UUID otherwise state might be wierd
 data class EditTeamScreen(
-    val teamlytics: Teamlytics? = null,
+    val teamlyticsId: Uuid? = null,
     val redirectToTeamlyticsScreen: Boolean = false
 ) : Screen {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
     override fun Content() {
         val viewModel = koinScreenModel<EditTeamViewModel>()
+        val navigator = LocalNavigator.currentOrThrow
         LaunchedEffect(Unit) {
-            if (teamlytics != null) {
-                viewModel.prepareEdition(teamlytics)
+            if (teamlyticsId != null) {
+                viewModel.prepareEdition(teamlyticsId, onFailure = { exitScreen(navigator) })
             }
         }
-        val navigator = LocalNavigator.currentOrThrow
         val isCompact = LocalIsCompact.current
 
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(if (teamlytics != null) "Edit Team" else "Create Team") },
+                    title = { Text(if (teamlyticsId != null) "Edit Team" else "Create Team") },
                     navigationIcon = {
                         BackIconButton(onClick = { exitScreen(navigator) })
                     }
@@ -107,7 +107,7 @@ data class EditTeamScreen(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                ButtonBar(navigator, viewModel, teamlytics != null)
+                ButtonBar(navigator, viewModel, teamlyticsId != null)
             }
         }
 
@@ -155,8 +155,8 @@ data class EditTeamScreen(
     }
 
     private fun exitScreen(navigator: Navigator) {
-        if (teamlytics != null && redirectToTeamlyticsScreen) {
-            navigator.replace(TeamlyticsScreen(teamlytics.id))
+        if (teamlyticsId != null && redirectToTeamlyticsScreen) {
+            navigator.replace(TeamlyticsScreen(teamlyticsId))
         } else {
             navigator.pop()
         }

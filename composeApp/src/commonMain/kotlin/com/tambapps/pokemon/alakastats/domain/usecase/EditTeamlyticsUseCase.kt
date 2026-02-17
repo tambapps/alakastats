@@ -15,6 +15,8 @@ class EditTeamlyticsUseCase(
     private val teamlyticsRepository: TeamlyticsRepository
 ) {
 
+    suspend fun get(id: Uuid) = teamlyticsRepository.get(id)
+
     suspend fun edit(
         team: Teamlytics,
         name: String,

@@ -239,7 +239,7 @@ class HomeViewModel(
                 },
                 ifRight = { fullTeam ->
                     withContext(Dispatchers.Main) {
-                        navigator.push(EditTeamScreen(fullTeam))
+                        navigator.push(EditTeamScreen(fullTeam.id))
                     }
                 }
             )

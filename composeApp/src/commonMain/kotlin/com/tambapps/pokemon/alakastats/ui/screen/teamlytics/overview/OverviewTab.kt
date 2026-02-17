@@ -153,7 +153,7 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
                 onClick = {
                     isMenuExpanded = false
                     // don't push because when coming to the screen, this screen doesn't recompose and take into account the updated team
-                    navigator.replace(EditTeamScreen(viewModel.team, redirectToTeamlyticsScreen = true))
+                    navigator.replace(EditTeamScreen(viewModel.team.id, redirectToTeamlyticsScreen = true))
                 }
             )
 
