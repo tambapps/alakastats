@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.tambapps.pokemon.alakastats.ui.screen.editteam
 
 import alakastats.composeapp.generated.resources.Res
@@ -21,10 +23,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
@@ -190,13 +195,20 @@ private fun FormatNameInput(viewModel: EditTeamViewModel) {
         )
         Spacer(Modifier.width(16.dp))
 
-        Box {
-            var expanded by remember { mutableStateOf(false) }
-            OutlinedButton(onClick = { expanded = true }) {
-                Text(viewModel.format.displayedName)
-            }
+        var expanded by remember { mutableStateOf(false) }
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = it }
+        ) {
+            OutlinedTextField(
+                value = viewModel.format.displayedName,
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable)
+            )
 
-            DropdownMenu(
+            ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
@@ -211,6 +223,7 @@ private fun FormatNameInput(viewModel: EditTeamViewModel) {
                 }
             }
         }
+
     }
 }
 
