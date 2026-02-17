@@ -299,7 +299,7 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, pokemonImageService: 
     val pokepaste = ots.toPokepaste()
     AlertDialog(
         onDismissRequest = { showDialog = false },
-        title = { Text("${player.name}'s team") },
+        title = { Text("${player.name.value}'s team") },
         text = {
             Column(
                 Modifier.verticalScroll(rememberScrollState()),
@@ -323,7 +323,7 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, pokemonImageService: 
                 scope.launch {
                     if (copyToClipboard(
                             clipboardManager,
-                            label = "${player.name}'s OTS",
+                            label = "${player.name.value}'s OTS",
                             text = ots.toPokepaste().toPokePasteString())) {
                         snackbar.show("Copied to clipboard")
                     } else {
