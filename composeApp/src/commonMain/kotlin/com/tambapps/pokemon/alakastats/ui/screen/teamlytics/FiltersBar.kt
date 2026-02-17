@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,6 +22,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,9 +34,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
@@ -43,6 +47,7 @@ import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import com.tambapps.pokemon.alakastats.util.isSdNameValid
 import org.jetbrains.compose.resources.painterResource
 import kotlin.jvm.JvmInline
 
@@ -50,6 +55,7 @@ private class FiltersViewModel(
     private val useCase: ManageReplayFiltersUseCase,
     val pokemonImageService: PokemonImageService
 ) {
+    val filters get() = useCase.filters
     fun applyFilters(filters: ReplayFilters) = useCase.applyFilters(filters)
 }
 
@@ -96,7 +102,7 @@ fun FiltersBar(parentViewModel: TeamlyticsFiltersTabViewModel) {
                     onClear = { viewModel.applyFilters(filters.copy(opponentSelection = emptyList())) }
                 )
 
-                FilterButton("Opp. Username", onClick = {})
+                OppUsernameButton(viewModel)
 
                 PokemonFilterButton(
                     pokemonImageService = viewModel.pokemonImageService,
@@ -251,10 +257,16 @@ private fun PokemonFilterButton(
             Spacer(Modifier.width(if (isCompact) 4.dp else 8.dp))
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                val iconSize = if (isCompact) 32.dp else 40.dp
+                val offset = iconSize * - 0.2f
                 pokemons.chunked(3).forEach { pokemonChunk ->
                     Row {
                         pokemonChunk.forEach { p ->
-                            pokemonImageService.PokemonSprite(p.name, Modifier.size(if (isCompact) 32.dp else 40.dp)
+                            pokemonImageService.PokemonSprite(
+                                p.name,
+                                Modifier.size(iconSize)
+                                    .scale(1.5f)
+                                    .offset(y = offset)
                                 , disableTooltip = true)
                         }
                     }
@@ -264,13 +276,36 @@ private fun PokemonFilterButton(
             Text("x", style = MaterialTheme.typography.titleLarge)
         }
     }
-
 }
+
 @Composable
-private fun FilterButton(text: String, onClick: () -> Unit) {
-    OutlinedButton(onClick, shape = RoundedCornerShape(8.dp),
-        modifier = Modifier.padding(horizontal = 4.dp)) {
+private fun OppUsernameButton(viewModel: FiltersViewModel) {
+    val text = "Opp. Username"
+    val isCompact = LocalIsCompact.current
+    var showDialog by remember { mutableStateOf(false) }
+    OutlinedButton(onClick = {
+        if (viewModel.filters.opponentUsernames.isNotEmpty()) {
+            viewModel.applyFilters(viewModel.filters.copy(opponentUsernames = emptySet()))
+        } else {
+            showDialog = true
+        }
+    }, shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.padding(horizontal = if (isCompact) 4.dp else 16.dp)) {
+        val text = when {
+            viewModel.filters.opponentUsernames.isNotEmpty() -> "$text: " + viewModel.filters.opponentUsernames.joinToString(separator = ", ", transform = { it.value })
+            else -> text
+        }
         Text(text)
+        if (viewModel.filters.opponentUsernames.isNotEmpty()) {
+            Spacer(Modifier.width(if (isCompact) 8.dp else 16.dp))
+            Text("x", style = MaterialTheme.typography.titleLarge)
+        }
+    }
+    if (showDialog) {
+        ShowdownNameDialog(
+            onDismissRequest = { showDialog = false },
+            onAdd = { viewModel.applyFilters(viewModel.filters.copy(opponentUsernames = setOf(UserName(it)))) }
+        )
     }
 }
 
@@ -319,6 +354,58 @@ private fun AddPokemonNameDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismissRequest) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+
+@Composable
+private fun ShowdownNameDialog(
+    onDismissRequest: () -> Unit,
+    onAdd: (String) -> Unit
+) {
+    var newName by mutableStateOf("")
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Showdown Name") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = { Text("Name") },
+                    placeholder = { Text("Enter a Showdown username") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = !isSdNameValid(newName) && !newName.isEmpty(),
+                    supportingText = {
+                        when {
+                            newName.contains('/') -> Text("Name cannot contain slash characters")
+                            newName.length > 30 -> Text("Name must be 30 characters or less")
+                            newName.isNotEmpty() && newName.isBlank() -> Text("Name cannot be empty")
+                            else -> null
+                        }
+                    }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onAdd(newName.trim()); onDismissRequest.invoke() },
+                enabled = isSdNameValid(newName)
+            ) {
+                Text(
+                    "OK",
+                    color = if (isSdNameValid(newName)) Color.Unspecified else Color.LightGray
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismissRequest
+            ) {
                 Text("Cancel")
             }
         }
