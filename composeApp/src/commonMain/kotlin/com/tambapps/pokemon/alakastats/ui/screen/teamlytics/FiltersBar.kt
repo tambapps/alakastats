@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,19 +46,23 @@ import org.jetbrains.compose.resources.painterResource
 
 
 private data class PokemonsFilter(
+    val shortTitle: String,
     val title: String,
     val pokemons: List<PokemonFilter>,
     val allowLead: Boolean,
-    val max: Int
+    val max: Int,
 )
 
 @Composable
 fun FiltersBar(parentViewModel: TeamlyticsFiltersTabViewModel) {
     val filters = parentViewModel.filters
     val viewModel = remember(filters) { FiltersViewModel2(parentViewModel.useCase, parentViewModel.pokemonImageService) }
-   val opponentTeamFilter = remember(filters) { PokemonsFilter("Oponent's Team", filters.opponentTeam, allowLead = false, max = 6) }
-    val pokemonsFilters = remember { listOf(opponentTeamFilter) }
-    var showOpponentTeamDialog by remember { mutableStateOf(false) }
+    val opponentTeamFilter = remember(filters) {
+        PokemonsFilter("Opp. Team", "Opponent's Team", filters.opponentTeam, allowLead = false, max = 6)
+    }
+    val opponentSelectionFilter = remember(filters) { PokemonsFilter("Opp. Selection", "Opponent's Selection", filters.opponentSelection, allowLead = true, max = 4) }
+    val yourSelectionFilter = remember(filters) { PokemonsFilter("Your Selection", "Your Selection", filters.yourSelection, allowLead = true, max = 4) }
+    val showPokemonDialogFilterState = remember { mutableStateOf<PokemonsFilter?>(null) }
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth()
@@ -67,33 +72,44 @@ fun FiltersBar(parentViewModel: TeamlyticsFiltersTabViewModel) {
             Spacer(Modifier.height(8.dp))
             FlowRow {
                 PokemonFilterButton(
-                    viewModel,
-                    opponentTeamFilter,
-                    onClick = {
-                        if (filters.opponentTeam.isNotEmpty()) {
-                            viewModel.applyFilters(filters.copy(opponentTeam = emptyList()))
-                        } else {
-                            showOpponentTeamDialog = true
-                        }
-                    }
+                    pokemonImageService = viewModel.pokemonImageService,
+                    filter = opponentTeamFilter,
+                    dialogState = showPokemonDialogFilterState,
+                    onClear = { viewModel.applyFilters(filters.copy(opponentTeam = emptyList())) }
                 )
 
+                PokemonFilterButton(
+                    pokemonImageService = viewModel.pokemonImageService,
+                    filter = opponentSelectionFilter,
+                    dialogState = showPokemonDialogFilterState,
+                    onClear = { viewModel.applyFilters(filters.copy(opponentSelection = emptyList())) }
+                )
 
                 FilterButton("Opp. Username", onClick = {})
 
-
+                PokemonFilterButton(
+                    pokemonImageService = viewModel.pokemonImageService,
+                    filter = yourSelectionFilter,
+                    dialogState = showPokemonDialogFilterState,
+                    onClear = { viewModel.applyFilters(filters.copy(opponentSelection = emptyList())) }
+                )
             }
             Spacer(Modifier.height(16.dp))
-
         }
     }
 
-    if (showOpponentTeamDialog) {
+    showPokemonDialogFilterState.value?.let { filter ->
         SetPokemonFilterDialog(
-            filter = opponentTeamFilter,
+            filter = filter,
             pokemonImageService = viewModel.pokemonImageService,
-            onComplete = { viewModel.applyFilters(filters.copy(opponentTeam = it)) },
-            onDismiss = { showOpponentTeamDialog = false }
+            onComplete = {
+                when(filter) {
+                    opponentTeamFilter -> viewModel.applyFilters(filters.copy(opponentTeam = it))
+                    opponentSelectionFilter -> viewModel.applyFilters(filters.copy(opponentSelection = it))
+                    yourSelectionFilter -> viewModel.applyFilters(filters.copy(yourSelection = it))
+                }
+            },
+            onDismiss = { showPokemonDialogFilterState.value = null }
         )
     }
 }
@@ -162,7 +178,6 @@ private fun SetPokemonFilterDialog(
                         Spacer(Modifier.width(8.dp))
                     }
                 }
-
             }
         },
         confirmButton = {
@@ -201,26 +216,33 @@ private fun SetPokemonFilterDialog(
 
 @Composable
 private fun PokemonFilterButton(
-    viewModel: FiltersViewModel2,
+    pokemonImageService: PokemonImageService,
+    onClear: () -> Unit,
+    dialogState: MutableState<PokemonsFilter?>,
     filter: PokemonsFilter,
-    onClick: () -> Unit
 ) {
     val pokemons = filter.pokemons
     OutlinedButton(
-        onClick = onClick,
+        onClick = {
+            if (filter.pokemons.isNotEmpty()) {
+                onClear.invoke()
+            } else {
+                dialogState.value = filter
+            }
+        },
         shape = RoundedCornerShape(8.dp),
         contentPadding = if (pokemons.isEmpty()) ButtonDefaults.ContentPadding else PaddingValues(horizontal = 10.dp, vertical = 8.dp),
         modifier = Modifier.padding(horizontal = 4.dp)) {
-        Text(filter.title)
+        Text(filter.shortTitle)
 
         if (pokemons.isNotEmpty()) {
             Spacer(Modifier.width(4.dp))
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                (pokemons + pokemons+ pokemons +pokemons+ pokemons+ pokemons).chunked(3).forEach { pokemonChunk ->
+                pokemons.chunked(3).forEach { pokemonChunk ->
                     Row {
                         pokemonChunk.forEach { p ->
-                            viewModel.pokemonImageService.PokemonSprite(p.name, Modifier.size(32.dp), disableTooltip = true)
+                            pokemonImageService.PokemonSprite(p.name, Modifier.size(32.dp), disableTooltip = true)
                         }
                     }
                 }
@@ -237,7 +259,6 @@ private fun FilterButton(text: String, onClick: () -> Unit) {
         modifier = Modifier.padding(horizontal = 4.dp)) {
         Text(text)
     }
-
 }
 
 class FiltersViewModel2(

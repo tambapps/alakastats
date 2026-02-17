@@ -55,7 +55,7 @@ import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.isSdNameValid
 import org.jetbrains.compose.resources.painterResource
 import kotlin.jvm.JvmInline
-
+// TODO delete this
 @Composable
 fun FiltersDialog(viewModel: FiltersViewModel) {
     Dialog(onDismissRequest = { viewModel.closeFilters() }) {
