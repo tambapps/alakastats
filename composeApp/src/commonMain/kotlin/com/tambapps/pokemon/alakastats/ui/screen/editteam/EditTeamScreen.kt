@@ -51,14 +51,20 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.isSdNameValid
 import org.jetbrains.compose.resources.painterResource
 
-data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
+// TODO needs to be an UUID otherwise state might be wierd
+data class EditTeamScreen(
+    val teamlytics: Teamlytics? = null,
+    val redirectToTeamlyticsScreen: Boolean = false
+) : Screen {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
     override fun Content() {
@@ -76,7 +82,7 @@ data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
                 TopAppBar(
                     title = { Text(if (teamlytics != null) "Edit Team" else "Create Team") },
                     navigationIcon = {
-                        BackIconButton(navigator)
+                        BackIconButton(onClick = { exitScreen(navigator) })
                     }
                 )
             }
@@ -107,6 +113,52 @@ data class EditTeamScreen(val teamlytics: Teamlytics? = null) : Screen {
 
         if (viewModel.showNewSdNameDialog) {
             ShowdownNameDialog(viewModel)
+        }
+    }
+
+    @Composable
+    private fun ButtonBar(
+        navigator: Navigator,
+        viewModel: EditTeamViewModel,
+        isEditing: Boolean = false
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = { exitScreen(navigator) },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Cancel")
+            }
+
+            val snackBar = LocalSnackBar.current
+            Button(
+                onClick = { viewModel.saveTeam(onSuccess = {
+                    exitScreen(navigator)
+                    snackBar.show(
+                        if (isEditing) "Updated team successfully"
+                        else "Created team successfully", SnackBar.Severity.SUCCESS
+                    )
+                }) },
+                modifier = Modifier.weight(1f),
+                enabled = viewModel.isFormValid,
+            ) {
+                Text(
+                    if (isEditing) "Update Team" else "Create Team",
+                    // important
+                    color = LocalContentColor.current
+                )
+            }
+        }
+    }
+
+    private fun exitScreen(navigator: Navigator) {
+        if (teamlytics != null && redirectToTeamlyticsScreen) {
+            navigator.replace(TeamlyticsScreen(teamlytics.id))
+        } else {
+            navigator.pop()
         }
     }
 }
@@ -217,37 +269,6 @@ private fun ShowdownNamesInput(viewModel: EditTeamViewModel) {
     }
 }
 
-@Composable
-private fun ButtonBar(
-    navigator: Navigator,
-    viewModel: EditTeamViewModel,
-    isEditing: Boolean = false
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        OutlinedButton(
-            onClick = { navigator.pop() },
-            modifier = Modifier.weight(1f)
-        ) {
-            Text("Cancel")
-        }
-
-        val snackBar = LocalSnackBar.current
-        Button(
-            onClick = { viewModel.saveTeam(navigator, snackBar) },
-            modifier = Modifier.weight(1f),
-            enabled = viewModel.isFormValid,
-        ) {
-            Text(
-                if (isEditing) "Update Team" else "Create Team",
-                // important
-                color = LocalContentColor.current
-            )
-        }
-    }
-}
 
 @Composable
 private fun ShowdownNameDialog(viewModel: EditTeamViewModel) {

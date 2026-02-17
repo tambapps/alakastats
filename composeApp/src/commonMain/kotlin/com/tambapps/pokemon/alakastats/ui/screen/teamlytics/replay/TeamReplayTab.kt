@@ -278,7 +278,7 @@ internal fun EditSdNamesButton(viewModel: TeamReplayViewModel) {
     val navigator = LocalNavigator.currentOrThrow
 
     // don't push because when coming to the screen, this screen doesn't recompose and take into account the updated team
-    OutlinedButton(onClick = { navigator.replace(EditTeamScreen(viewModel.team))}) {
+    OutlinedButton(onClick = { navigator.replace(EditTeamScreen(viewModel.team, redirectToTeamlyticsScreen = true))}) {
         Text("Edit Showdown Names")
     }
 }

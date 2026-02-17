@@ -70,7 +70,7 @@ class EditTeamViewModel(
         sdNames.remove(name)
     }
 
-    fun saveTeam(navigator: Navigator, snackBar: SnackBar) {
+    fun saveTeam(onSuccess: () -> Unit) {
         if (isFormValid) {
             val pokepaste = pokepasteParser.tryParse(pokepaste) ?: return
             scope.launch {
@@ -90,11 +90,7 @@ class EditTeamViewModel(
                         format = format
                     ).getOrNull()
                 }
-                navigator.pop()
-                snackBar.show(
-                    if (isEditing) "Updated team successfully"
-                    else "Created team successfully", SnackBar.Severity.SUCCESS
-                )
+                onSuccess.invoke()
             }
         }
     }
