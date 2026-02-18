@@ -8,7 +8,13 @@ import io.github.vinceglb.filekit.dialogs.openFileSaver
 import io.github.vinceglb.filekit.write
 import io.github.xxfast.kstore.file.extensions.listStoreOf
 import io.github.xxfast.kstore.file.extensions.storeOf
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.io.files.Path
 import kotlinx.serialization.Serializable
+import platform.Foundation.NSDocumentDirectory
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSUserDomainMask
+import platform.Foundation.NSURL
 import kotlin.uuid.Uuid
 import org.koin.core.component.KoinComponent
 
@@ -27,15 +33,40 @@ private inline fun <reified ID: @Serializable Any, reified T: @Serializable Iden
     }.let { koinComponent ->
         KStorageImpl(
             listStoreOf(
-                file = TODO("Implement Ios KStorage"),
+                file = getIdsPath(resourceName),
                 enableCache = false
             )
         ) { id ->
             storeOf(
-                file = TODO("Implement Ios KStorage"),
+                file = getEntityPath(resourceName, id),
                 enableCache = false,
                 version = 0
             )
         }
     }
 }
+
+@OptIn(ExperimentalForeignApi::class)
+private fun getRepositoryDir(resourceName: String): String {
+    val fileManager = NSFileManager.defaultManager
+    val documentDirectory = fileManager.URLsForDirectory(
+        directory = NSDocumentDirectory,
+        inDomains = NSUserDomainMask
+    ).first() as NSURL
+
+    val repositoryPath = documentDirectory.path + "/repositories/$resourceName/"
+
+    // Create directory if it doesn't exist
+    fileManager.createDirectoryAtPath(
+        path = repositoryPath,
+        withIntermediateDirectories = true,
+        attributes = null,
+        error = null
+    )
+
+    return repositoryPath
+}
+
+private fun getIdsPath(resourceName: String) = Path(getRepositoryDir(resourceName), "ids.kstore")
+
+private fun <ID: @Serializable Any> getEntityPath(resourceName: String, id: ID) = Path(getRepositoryDir(resourceName), "$id.kstore")
