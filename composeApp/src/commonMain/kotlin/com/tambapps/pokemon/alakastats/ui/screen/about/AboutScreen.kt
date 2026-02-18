@@ -49,9 +49,9 @@ object AboutScreen : Screen {
         ) {
             AlakastatsLabel(Modifier.align(Alignment.CenterHorizontally))
             VerticalSpacer(8.dp)
-            AboutMe()
-            VerticalSpacer()
             AboutAlakastats()
+            VerticalSpacer()
+            AboutMe()
             VerticalSpacer()
             Credits()
             VerticalSpacer()
@@ -98,7 +98,7 @@ private fun AboutAlakastats() = Section(
 
         append("Whether you’re preparing for a tournament or reviewing past games, Alakastats helps you turn your battles into actionable insights.\n\n")
 
-        append("Alakastats ")
+        append("This app ")
         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
             append("does not collect any personal data")
         }
