@@ -18,6 +18,8 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 kotlin-js-store/yarn.lock
 
+composeApp/release/
+
 CLAUDE.md
 
 pokemon-sprites.yaml
