@@ -415,22 +415,6 @@ internal fun ReplayDropDownMenu(isMenuExpandedState: MutableState<Boolean>, view
 }
 
 @Composable
-internal fun Header(useCase: ConsultTeamlyticsUseCase) {
-    Row(
-        Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Spacer(Modifier.weight(1f))
-        NbReplaysText(useCase)
-        Spacer(Modifier.width(32.dp))
-        WinRateText(useCase)
-        Spacer(Modifier.weight(1f))
-    }
-    Spacer(Modifier.height(32.dp))
-}
-
-
-@Composable
 fun NoReplay(viewModel: TeamlyticsFiltersTabViewModel) {
     Box(
         modifier = Modifier.fillMaxSize(),

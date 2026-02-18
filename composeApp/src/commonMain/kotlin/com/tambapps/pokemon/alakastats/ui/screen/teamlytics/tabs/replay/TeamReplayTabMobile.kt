@@ -32,6 +32,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.Header
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
@@ -58,7 +59,6 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: La
 
             item {
                 Header(viewModel.useCase)
-                Spacer(Modifier.height(16.dp))
             }
 
             itemsIndexed(team.replays) { index, replay ->
