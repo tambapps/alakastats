@@ -1,7 +1,9 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +55,22 @@ fun UsagesTab(viewModel: UsagesViewModel) {
             UsagesTabDesktop(viewModel, scrollState)
         }
         ScrollToTopIfNeeded(viewModel, scrollState)
+    }
+}
+
+@Composable
+internal fun ColumnScope.OnlyPokePasteMovesSwitch(viewModel: UsagesViewModel) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable(onClick = { viewModel.onlyPokePasteMoves = !viewModel.onlyPokePasteMoves })
+            .align(Alignment.CenterHorizontally)
+    ) {
+        Switch(
+            checked = viewModel.onlyPokePasteMoves,
+            onCheckedChange = { viewModel.onlyPokePasteMoves = it },
+        )
+        Spacer(Modifier.padding(horizontal = 8.dp))
+        Text("Only PokePaste\nMoves")
     }
 }
 

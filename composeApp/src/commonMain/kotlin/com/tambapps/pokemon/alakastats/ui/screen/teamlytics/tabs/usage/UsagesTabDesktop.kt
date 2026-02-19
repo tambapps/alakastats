@@ -10,7 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -30,7 +36,9 @@ internal fun UsagesTabDesktop(viewModel: UsagesViewModel, scrollState: ScrollSta
                 .padding(16.dp)
                 .verticalScroll(scrollState)
         ) {
-            FiltersBar(viewModel)
+            FiltersBar(viewModel) {
+                OnlyPokePasteMovesSwitch(viewModel)
+            }
             Spacer(Modifier.padding(16.dp))
             Header(viewModel.useCase)
             val entryBlocks = viewModel.sortedPokemonMovesUsageEntries.chunked(3)

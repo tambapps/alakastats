@@ -5,6 +5,7 @@ import alakastats.composeapp.generated.resources.add
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -74,7 +75,11 @@ private data class PokemonsFilter(
 )
 
 @Composable
-fun FiltersBar(parentViewModel: TeamlyticsFiltersTabViewModel, modifier: Modifier = Modifier) {
+fun FiltersBar(
+    parentViewModel: TeamlyticsFiltersTabViewModel,
+    modifier: Modifier = Modifier,
+    additionalFilters: (@Composable ColumnScope.() -> Unit)? = null
+) {
     val filters = parentViewModel.filters
     val viewModel = remember(filters) { FiltersViewModel(parentViewModel.useCase, parentViewModel.pokemonImageService) }
     val opponentTeamFilter = remember(filters) {
@@ -113,6 +118,10 @@ fun FiltersBar(parentViewModel: TeamlyticsFiltersTabViewModel, modifier: Modifie
                 )
             }
             Spacer(Modifier.height(16.dp))
+            if (additionalFilters != null) {
+                additionalFilters.invoke(this)
+                Spacer(Modifier.height(16.dp))
+            }
         }
     }
 

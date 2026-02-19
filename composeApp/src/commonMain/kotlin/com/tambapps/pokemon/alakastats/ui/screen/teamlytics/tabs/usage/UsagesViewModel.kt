@@ -4,15 +4,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.Player
+import com.tambapps.pokemon.alakastats.domain.model.PokemonMove
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,6 +27,16 @@ class UsagesViewModel(
 
     override var isTabLoading by mutableStateOf(false)
         private set
+    private var _onlyPokePasteMoves by mutableStateOf(false)
+    var onlyPokePasteMoves: Boolean
+        get() = _onlyPokePasteMoves
+        set(value) {
+            if (isTabLoading) {
+                return
+            }
+            _onlyPokePasteMoves = value
+            loadStats()
+        }
 
     val team get() = useCase.filteredTeam
     val replays get() = useCase.filteredTeam.replays
@@ -39,7 +52,10 @@ class UsagesViewModel(
         pokemonPokemonUsages.clear()
         scope.launch {
             val result = useCase.filteredTeam.withContext {
-                val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
+                var replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
+                if (onlyPokePasteMoves) {
+                    replays = replays.map { it.onlyWithPokePasteMoves(it.youPlayer, team.pokePaste) }
+                }
                 computeStats(replays)
             }
             kotlinx.coroutines.withContext(Dispatchers.Main) {
@@ -72,6 +88,16 @@ class UsagesViewModel(
         }
     }
 }
+
+private fun ReplayAnalytics.onlyWithPokePasteMoves(youPlayer: Player, pokePaste: PokePaste) = copy(
+    players = players.map { if (it.name == youPlayer.name) youPlayer.onlyWithPokePasteMoves(pokePaste) else it }
+)
+
+private fun Player.onlyWithPokePasteMoves(pokePaste: PokePaste) = copy(
+    movesUsage = movesUsage.mapValues { (pokemonName, usages) ->
+        val pokemon = pokePaste.pokemons.find { it.name.matches(pokemonName) } ?: return@mapValues usages
+        usages.filterKeys { move -> pokemon.moves.any { it.matches(MoveName(move)) } }
+    })
 
 private fun TeamlyticsContext.fromReplay(replay: ReplayAnalytics): Map<PokemonName, PokemonUsages> {
     val player = replay.youPlayer

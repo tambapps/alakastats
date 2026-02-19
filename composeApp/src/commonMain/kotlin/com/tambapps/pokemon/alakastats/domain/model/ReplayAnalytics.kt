@@ -182,6 +182,7 @@ data class Player(
     val afterElo: Int?,
     val terastallization: Terastallization?,
     val ots: OpenTeamSheet?,
+    // TODO convert it to MoveName
     val movesUsage: Map<PokemonName, Map<String, Int>>
 ) {
     // sorted to always have the same order

@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.Header
 import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
@@ -29,7 +28,9 @@ internal fun UsagesTabMobile(viewModel: UsagesViewModel, scrollState: ScrollStat
             .padding(horizontal = 4.dp)
             .verticalScroll(scrollState)) {
             Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
-            FiltersBar(viewModel)
+            FiltersBar(viewModel) {
+                OnlyPokePasteMovesSwitch(viewModel)
+            }
             Spacer(Modifier.height(16.dp))
             Header(viewModel.useCase)
 
