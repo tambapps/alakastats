@@ -24,6 +24,8 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.infrastructure.service.TeamlyticsSerializer
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.TeamPokemonStateState
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailOverviewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.MatchupNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.edit.MatchupNotesEditViewModel
@@ -85,6 +87,9 @@ val appModules = listOf(module {
     }
     factory { (useCase: ManageTeamOverviewUseCase) ->
         OverviewViewModel(useCase, get(), get())
+    }
+    factory { (state: TeamPokemonStateState.Loaded) ->
+        PokemonDetailOverviewModel(get(), state.team, state.pokemon, state.pokemonData, state.notes, state.usages)
     }
     factory { (useCase: ManageTeamReplaysUseCase) ->
         TeamReplayViewModel(useCase, get(), get())

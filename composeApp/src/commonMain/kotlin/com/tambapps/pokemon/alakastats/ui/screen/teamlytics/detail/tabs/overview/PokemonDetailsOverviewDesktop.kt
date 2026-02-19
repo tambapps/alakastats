@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,27 +17,25 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonHeader
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.PokemonUsagesCard
 
 @Composable
-fun PokemonDetailsDesktop(
-    viewModel: PokemonDetailViewModel,
-    state: TeamPokemonStateState.Loaded
+fun PokemonDetailsOverviewDesktop(
+    viewModel: PokemonDetailOverviewModel,
 ) {
-    val (team, pokemon, pokemonData, notes, usages) = state
     Column(
         Modifier.fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
-        PokepastePokemonHeader(state.pokemon, viewModel.pokemonImageService)
+        PokepastePokemonHeader(viewModel.pokemon, viewModel.pokemonImageService)
         Spacer(Modifier.height(16.dp))
         Row(Modifier.fillMaxWidth()) {
-            PokemonDetailsOverview(viewModel, state, Modifier.weight(0.6f))
+            PokemonDetailsOverview(viewModel, Modifier.weight(0.6f))
             Column(Modifier.weight(0.4f)) {
 
-                usages?.let {
+                viewModel.usages?.let {
                     PokemonUsagesCard(
                         pokemonImageService = viewModel.pokemonImageService,
-                        replays = team.replays,
-                        name = pokemon.name,
+                        replays = viewModel.team.replays,
+                        name = viewModel.pokemon.name,
                         usages = it,
                         title = "Usage",
                         // need to have 2 colors

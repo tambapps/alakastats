@@ -47,7 +47,10 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatsRow
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonItemAndAbility
 import com.tambapps.pokemon.alakastats.ui.composables.TabRowWithBackButton
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailOverviewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailsOverviewTab
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import kotlin.uuid.Uuid
 
@@ -120,6 +123,7 @@ private fun PokemonDetails(
             Pager(isCompact, viewModel, pagerState, state, Modifier.fillMaxSize())
             viewModel.pokemonImageService.PokemonArtwork(
                 name = state.pokemon.name,
+                disableTooltip = true,
                 modifier = Modifier.align(Alignment.BottomEnd)
                     .padding(bottom = 16.dp, end = 8.dp)
                     .height(if (LocalIsCompact.current) 175.dp else 250.dp)
@@ -148,11 +152,15 @@ private fun Pager(
         modifier = modifier
     ) { page ->
 
-        // TODO emit signal
-        if (isCompact) {
-            PokemonDetailsMobile(viewModel, state)
-        } else {
-            PokemonDetailsDesktop(viewModel, state)
+        when(page) {
+            0 -> {
+                // TODO emit signal
+
+                val viewModel = koinInject<PokemonDetailOverviewModel> {
+                    parametersOf(state)
+                }
+                PokemonDetailsOverviewTab(viewModel)
+            }
         }
     }
 }
@@ -163,34 +171,4 @@ private fun getPagerTabs(isCompact: Boolean) = buildList {
         add("Usage")
     }
     add("Speed Scale")
-}
-
-@Composable
-internal fun PokemonDetailsOverview(
-    viewModel: PokemonDetailViewModel,
-    state: TeamPokemonStateState.Loaded,
-    modifier: Modifier = Modifier
-) {
-    val (team, pokemon, pokemonData, notes) = state
-
-    Column(modifier) {
-        PokepastePokemonItemAndAbility(pokemon, viewModel.pokemonImageService)
-        Spacer(Modifier.height(16.dp))
-        if (!notes.isNullOrBlank()) {
-            Text(notes, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(bottom = 16.dp))
-        }
-        if (!team.pokePaste.isOts) {
-            if (pokemonData != null) {
-                Text("Stats (lvl ${pokemon.level})", style = MaterialTheme.typography.headlineSmall)
-                PokemonStatsRow(pokemon, pokemonData, Modifier.fillMaxWidth())
-                Spacer(Modifier.height(16.dp))
-            }
-            Text("Investments", style = MaterialTheme.typography.headlineSmall)
-            PokemonStatsRow(pokemon, pokemonData=null, Modifier.fillMaxWidth())
-            Spacer(Modifier.height(16.dp))
-        }
-        Text("Moves", style = MaterialTheme.typography.headlineSmall)
-        Spacer(Modifier.height(8.dp))
-        PokemonMoves(pokemon, viewModel.pokemonImageService)
-    }
 }
