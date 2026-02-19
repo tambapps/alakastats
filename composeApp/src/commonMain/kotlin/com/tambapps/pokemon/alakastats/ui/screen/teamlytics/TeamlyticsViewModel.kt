@@ -19,6 +19,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.ui.composables.PagerViewModel
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
@@ -38,7 +39,7 @@ class TeamlyticsViewModel(
     private val useCase: ManageTeamlyticsUseCase,
     val imageService: PokemonImageService,
 ) : ScreenModel, ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase,
-    ManageMatchupNotesUseCase {
+    ManageMatchupNotesUseCase, PagerViewModel {
 
     private val scope = CoroutineScope(Dispatchers.Default)
     var teamState by mutableStateOf<TeamState>(TeamState.Loading)
@@ -46,7 +47,7 @@ class TeamlyticsViewModel(
     override var filters by mutableStateOf(ReplayFilters())
         private set
 
-    var scrollToTopIndex by mutableStateOf<Int?>(null)
+    override var scrollToTopIndex by mutableStateOf<Int?>(null)
 
     override val originalTeam: Teamlytics
         get() = (teamState as TeamState.Loaded).team

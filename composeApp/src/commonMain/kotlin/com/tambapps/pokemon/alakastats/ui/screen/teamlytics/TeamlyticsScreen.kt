@@ -181,27 +181,3 @@ private inline fun <reified USE_CASE, reified T: TeamlyticsTabViewModel> koinInj
         }
     }
 }
-
-@Composable
-internal fun TabRowContent(
-    viewModel: TeamlyticsViewModel,
-    pagerState: PagerState,
-    tabs: List<String>
-) {
-    val scope = rememberCoroutineScope()
-    tabs.forEachIndexed { index, title ->
-        Tab(
-            selected = pagerState.currentPage == index,
-            onClick = {
-                if (pagerState.currentPage == index) {
-                    viewModel.scrollToTopIndex = index
-                } else {
-                    scope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
-                }
-            },
-            text = { Text(title) }
-        )
-    }
-}

@@ -17,8 +17,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,16 +39,13 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.domain.model.PokemonData
-import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
-import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonMoves
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatsRow
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonItemAndAbility
+import com.tambapps.pokemon.alakastats.ui.composables.TabRowWithBackButton
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.koin.core.parameter.parametersOf
@@ -106,31 +104,65 @@ private fun PokemonDetails(
     var dimensions by remember { mutableStateOf(0.dp to 0.dp) }
     val (contentWidth, _) = dimensions
     val density = LocalDensity.current
+    val isCompact = LocalIsCompact.current
+    val tabs = remember { getPagerTabs(isCompact) }
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
 
-    Box(Modifier.fillMaxSize()
-        .onSizeChanged { size ->
-            with(density) { dimensions = size.width.toDp() to size.height.toDp() }
+    Column(Modifier.fillMaxSize()) {
+        if (!isCompact) {
+            TabRowWithBackButton(viewModel, pagerState, tabs, Modifier.fillMaxWidth())
         }
-    ) {
-        val isCompact = LocalIsCompact.current
+        Box(Modifier.fillMaxWidth().weight(1f)
+            .onSizeChanged { size ->
+                with(density) { dimensions = size.width.toDp() to size.height.toDp() }
+            }
+        ) {
+            Pager(isCompact, viewModel, pagerState, state, Modifier.fillMaxSize())
+            viewModel.pokemonImageService.PokemonArtwork(
+                name = state.pokemon.name,
+                modifier = Modifier.align(Alignment.BottomEnd)
+                    .padding(bottom = 16.dp, end = 8.dp)
+                    .height(if (LocalIsCompact.current) 175.dp else 250.dp)
+                    // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
+                    .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
+                    .offset(y = 16.dp)
+            )
+        }
+        if (isCompact) {
+            TabRowWithBackButton(viewModel, pagerState, tabs, Modifier.fillMaxWidth())
+        }
+    }
+}
+
+@Composable
+private fun Pager(
+    isCompact: Boolean,
+    viewModel: PokemonDetailViewModel,
+    pagerState: PagerState,
+    state: TeamPokemonStateState.Loaded,
+
+    modifier: Modifier = Modifier
+) {
+    HorizontalPager(
+        state = pagerState,
+        modifier = modifier
+    ) { page ->
+
+        // TODO emit signal
         if (isCompact) {
             PokemonDetailsMobile(viewModel, state)
         } else {
             PokemonDetailsDesktop(viewModel, state)
         }
-
-        val navigator = LocalNavigator.currentOrThrow
-        BackIconButton(navigator, Modifier.align(Alignment.BottomStart))
-        viewModel.pokemonImageService.PokemonArtwork(
-            name = state.pokemon.name,
-            modifier = Modifier.align(Alignment.BottomEnd)
-                .padding(bottom = 16.dp, end = 8.dp)
-                .height(if (LocalIsCompact.current) 175.dp else 250.dp)
-                // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
-                .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
-                .offset(y = 16.dp)
-        )
     }
+}
+
+private fun getPagerTabs(isCompact: Boolean) = buildList {
+    add("Overview")
+    if (isCompact) {
+        add("Usage")
+    }
+    add("Speed Scale")
 }
 
 @Composable

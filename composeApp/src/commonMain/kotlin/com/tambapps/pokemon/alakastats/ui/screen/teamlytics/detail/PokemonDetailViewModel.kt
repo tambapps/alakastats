@@ -12,6 +12,7 @@ import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultPokemonDetailUseCase
+import com.tambapps.pokemon.alakastats.ui.composables.PagerViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.PokemonUsages
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
@@ -37,10 +38,12 @@ class PokemonDetailViewModel(
     private val pokemonName: PokemonName,
     private val useCase: ConsultPokemonDetailUseCase,
     val pokemonImageService: PokemonImageService
-): ScreenModel {
+): ScreenModel, PagerViewModel {
 
     var state by mutableStateOf<TeamPokemonStateState>(TeamPokemonStateState.Loading)
         private set
+    override var scrollToTopIndex by mutableStateOf<Int?>(null)
+
     private val scope = CoroutineScope(Dispatchers.Default)
 
     init {
