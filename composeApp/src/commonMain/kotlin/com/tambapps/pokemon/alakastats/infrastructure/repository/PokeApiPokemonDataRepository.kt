@@ -85,10 +85,12 @@ private fun GqlPokemon.findStat(pokeStat: Stat) = stats.find {
 
 private val PokemonName.pokeApiNormalized: PokemonName get() {
     val n = normalized
+    val name = n.value
     return when {
-        n.value.startsWith("ogerpon-") -> PokemonName("ogerpon")
-        n.value.endsWith("-f") -> PokemonName(n.value + "emale")
-        n.value == "indeedee" -> PokemonName("indeedee-male")
+        name == "landorus" || name == "thundurus" || name == "enamorus" || name == "tornadus" -> PokemonName("$name-incarnate")
+        name.startsWith("ogerpon-") -> PokemonName("ogerpon")
+        name.endsWith("-f") -> PokemonName(name + "emale")
+        name == "indeedee" -> PokemonName("indeedee-male") // TODO all pokemons with male/females versions
         else -> n
     }
 }
