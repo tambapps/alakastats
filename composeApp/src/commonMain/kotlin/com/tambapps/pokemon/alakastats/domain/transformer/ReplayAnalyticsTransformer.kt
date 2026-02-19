@@ -56,7 +56,9 @@ fun Player.toEntity() = PlayerEntity(
     afterElo = afterElo,
     terastallization = terastallization?.toEntity(),
     ots = ots?.toEntity(),
-    movesUsage = movesUsage.mapKeys { (k, _) -> k.value }
+    movesUsage = movesUsage.entries.associate { (pName, usages) ->
+        pName.value to usages.mapKeys { (key, _) -> key.value }
+    }
 )
 
 fun PlayerEntity.toDomain() = Player(
@@ -67,7 +69,11 @@ fun PlayerEntity.toDomain() = Player(
     afterElo = afterElo,
     terastallization = terastallization?.toDomain(),
     ots = ots?.toDomain(),
-    movesUsage = movesUsage.mapKeys { (k, _) -> PokemonName(k) }
+    movesUsage = movesUsage.entries.associate { (pName, usages) ->
+        PokemonName(pName) to usages.mapKeys { (key, _) ->
+            MoveName(key)
+        }
+    }
 )
 
 fun TeamPreview.toEntity() = TeamPreviewEntity(

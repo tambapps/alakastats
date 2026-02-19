@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
@@ -144,7 +145,7 @@ fun PokemonUsagesCard(
     }
 }
 
-private const val MOVE_STRUGGLE = "struggle"
+private val MOVE_STRUGGLE = MoveName("struggle")
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 private fun PokemonUsagesDonut(
@@ -153,11 +154,11 @@ private fun PokemonUsagesDonut(
     usages: PokemonUsages,
     modifier: Modifier = Modifier,
 ) {
-    val rawEntries = usages.movesCount.entries.filter { PokemonNormalizer.normalize(it.key) != MOVE_STRUGGLE }
+    val rawEntries = usages.movesCount.entries.filter { !it.key.matches(MOVE_STRUGGLE) }
     val total = rawEntries.sumOf { it.value }
     val entries = rawEntries.map {
         val percentage = if (total > 0) it.value * 100 / total else 0
-        Triple(PokemonNormalizer.pretty(it.key), it.value, percentage)
+        Triple(it.key.pretty, it.value, percentage)
     }
 
     val diameter = if (LocalIsCompact.current) 150.dp else 200.dp

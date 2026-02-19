@@ -96,7 +96,7 @@ private fun ReplayAnalytics.onlyWithPokePasteMoves(youPlayer: Player, pokePaste:
 private fun Player.onlyWithPokePasteMoves(pokePaste: PokePaste) = copy(
     movesUsage = movesUsage.mapValues { (pokemonName, usages) ->
         val pokemon = pokePaste.pokemons.find { it.name.matches(pokemonName) } ?: return@mapValues usages
-        usages.filterKeys { move -> pokemon.moves.any { it.matches(MoveName(move)) } }
+        usages.filterKeys { move -> pokemon.moves.any { it.matches(move) } }
     })
 
 private fun TeamlyticsContext.fromReplay(replay: ReplayAnalytics): Map<PokemonName, PokemonUsages> {
@@ -107,7 +107,7 @@ private fun TeamlyticsContext.fromReplay(replay: ReplayAnalytics): Map<PokemonNa
 }
 
 data class PokemonUsages(
-    val movesCount: Map<String, Int> = emptyMap(),
+    val movesCount: Map<MoveName, Int> = emptyMap(),
     val usageCount: Int,
     val winCount: Int,
     val teraCount: Int,
