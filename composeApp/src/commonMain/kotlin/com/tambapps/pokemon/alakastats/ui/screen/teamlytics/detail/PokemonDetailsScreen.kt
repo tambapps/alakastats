@@ -42,6 +42,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.EmitScrollEffect
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonMoves
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatsRow
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonItemAndAbility
@@ -120,7 +121,7 @@ private fun PokemonDetails(
                 with(density) { dimensions = size.width.toDp() to size.height.toDp() }
             }
         ) {
-            Pager(isCompact, viewModel, pagerState, state, Modifier.fillMaxSize())
+            Pager(viewModel, pagerState, state, Modifier.fillMaxSize())
             viewModel.pokemonImageService.PokemonArtwork(
                 name = state.pokemon.name,
                 disableTooltip = true,
@@ -140,8 +141,7 @@ private fun PokemonDetails(
 
 @Composable
 private fun Pager(
-    isCompact: Boolean,
-    viewModel: PokemonDetailViewModel,
+    pagerViewModel: PokemonDetailViewModel,
     pagerState: PagerState,
     state: TeamPokemonStateState.Loaded,
 
@@ -151,14 +151,12 @@ private fun Pager(
         state = pagerState,
         modifier = modifier
     ) { page ->
-
         when(page) {
             0 -> {
-                // TODO emit signal
-
                 val viewModel = koinInject<PokemonDetailOverviewModel> {
                     parametersOf(state)
                 }
+                EmitScrollEffect(pagerViewModel, viewModel, page)
                 PokemonDetailsOverviewTab(viewModel)
             }
         }

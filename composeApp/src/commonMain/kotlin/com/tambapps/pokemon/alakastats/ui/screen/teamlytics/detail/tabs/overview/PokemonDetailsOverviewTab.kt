@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonMoves
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatsRow
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonItemAndAbility
+import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
 
@@ -20,11 +22,13 @@ import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 fun PokemonDetailsOverviewTab(
     viewModel: PokemonDetailOverviewModel,
 ) {
+    val scrollState = rememberScrollState()
     if (LocalIsCompact.current) {
-        PokemonDetailsOverviewMobile(viewModel)
+        PokemonDetailsOverviewMobile(viewModel, scrollState)
     } else {
-        PokemonDetailsOverviewDesktop(viewModel)
+        PokemonDetailsOverviewDesktop(viewModel, scrollState)
     }
+    ScrollToTopIfNeeded(viewModel, scrollState)
 }
 
 @Composable

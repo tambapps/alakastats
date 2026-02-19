@@ -41,6 +41,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.EmitScrollEffect
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
@@ -150,34 +151,8 @@ internal fun Pager(
 }
 
 @Composable
-fun ScrollToTopIfNeeded(viewModel: TeamlyticsTabViewModel, scrollState: ScrollState) {
-    viewModel.scrollToTopSignal.Listen {
-        if (scrollState.value != 0) {
-            scrollState.animateScrollTo(
-                value = 0,
-                animationSpec = tween(durationMillis = 500)
-            )
-        }
-    }
-}
-
-@Composable
-fun ScrollToTopIfNeeded(viewModel: TeamlyticsTabViewModel, scrollState: LazyListState) {
-    viewModel.scrollToTopSignal.Listen {
-        if (scrollState.firstVisibleItemIndex != 0) {
-            scrollState.animateScrollToItem(index = 0)
-        }
-    }
-}
-
-@Composable
 private inline fun <reified USE_CASE, reified T: TeamlyticsTabViewModel> koinInjectUseCase(viewModel: TeamlyticsViewModel, index: Int) = koinInject<T> {
     parametersOf(viewModel as USE_CASE)
 }.apply {
-    LaunchedEffect(viewModel.scrollToTopIndex) {
-        if (index == viewModel.scrollToTopIndex) {
-            scrollToTopSignal.emit()
-            viewModel.scrollToTopIndex = null
-        }
-    }
+    EmitScrollEffect(viewModel, this, index)
 }

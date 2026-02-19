@@ -1,8 +1,11 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.SecondaryTabRow
@@ -10,17 +13,25 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.ui.util.VoidSignal
 import kotlinx.coroutines.launch
 
 interface PagerViewModel {
 
     var scrollToTopIndex: Int?
+}
+
+interface TabViewModel {
+
+    val scrollToTopSignal: VoidSignal
+
 }
 
 @Composable
@@ -73,5 +84,37 @@ private fun TabRowContent(
             },
             text = { Text(title) }
         )
+    }
+}
+
+
+@Composable
+fun EmitScrollEffect(pagerViewModel: PagerViewModel, tabViewModel: TabViewModel, page: Int) {
+    LaunchedEffect(pagerViewModel.scrollToTopIndex) {
+        if (page == pagerViewModel.scrollToTopIndex) {
+            tabViewModel.scrollToTopSignal.emit()
+            pagerViewModel.scrollToTopIndex = null
+        }
+    }
+}
+
+@Composable
+fun ScrollToTopIfNeeded(viewModel: TabViewModel, scrollState: ScrollState) {
+    viewModel.scrollToTopSignal.Listen {
+        if (scrollState.value != 0) {
+            scrollState.animateScrollTo(
+                value = 0,
+                animationSpec = tween(durationMillis = 500)
+            )
+        }
+    }
+}
+
+@Composable
+fun ScrollToTopIfNeeded(viewModel: TabViewModel, scrollState: LazyListState) {
+    viewModel.scrollToTopSignal.Listen {
+        if (scrollState.firstVisibleItemIndex != 0) {
+            scrollState.animateScrollToItem(index = 0)
+        }
     }
 }

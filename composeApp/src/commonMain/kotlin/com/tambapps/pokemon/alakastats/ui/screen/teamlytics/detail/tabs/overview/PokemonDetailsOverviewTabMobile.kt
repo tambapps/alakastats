@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,10 +17,11 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonHeader
 @Composable
 fun PokemonDetailsOverviewMobile(
     viewModel: PokemonDetailOverviewModel,
+    scrollState: ScrollState,
 ) {
     Column(
         Modifier.fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .then(Modifier.padding(horizontal = 8.dp, vertical = 8.dp))
     ){
         PokepastePokemonHeader(viewModel.pokemon, viewModel.pokemonImageService)

@@ -2,7 +2,6 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.overview
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.more_vert
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +21,6 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,17 +37,16 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemon
+import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailsScreen
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
-import kotlin.collections.set
 
 @Composable
 fun OverviewTab(viewModel: OverviewViewModel) {
@@ -110,9 +107,11 @@ internal fun NoteEditingButtons(viewModel: OverviewViewModel) {
     Button(
         onClick = { viewModel.saveNotes(snackBar) }
     ) {
-        Text("Save Notes", style = buttonTextStyle.copy(
-            color = LocalContentColor.current
-        ))
+        Text(
+            "Save Notes", style = buttonTextStyle.copy(
+                color = LocalContentColor.current
+            )
+        )
     }
     Spacer(Modifier.width(8.dp))
     OutlinedButton(onClick = { viewModel.cancelEditingNotes() }) {
@@ -153,15 +152,22 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
                 onClick = {
                     isMenuExpanded = false
                     // don't push because when coming to the screen, this screen doesn't recompose and take into account the updated team
-                    navigator.replace(EditTeamScreen(viewModel.team.id, redirectToTeamlyticsScreen = true))
+                    navigator.replace(
+                        EditTeamScreen(
+                            viewModel.team.id,
+                            redirectToTeamlyticsScreen = true
+                        )
+                    )
                 }
             )
 
             val alreadyHasNotes = viewModel.team.notes != null
             DropdownMenuItem(
-                text = { Text(
-                    if (!alreadyHasNotes) "Add notes" else "Edit notes"
-                ) },
+                text = {
+                    Text(
+                        if (!alreadyHasNotes) "Add notes" else "Edit notes"
+                    )
+                },
                 onClick = {
                     viewModel.editNotes()
                     isMenuExpanded = false
@@ -183,10 +189,11 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
 }
 
 @Composable
-internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
-                          pokemon: Pokemon,
-                          modifier: Modifier = Modifier,
-                          ) {
+internal fun NotedPokepastePokemon(
+    viewModel: OverviewViewModel,
+    pokemon: Pokemon,
+    modifier: Modifier = Modifier,
+) {
     val team = viewModel.team
     val notes = viewModel.pokemonNotes[pokemon]
     if (viewModel.isEditingNotes) {
@@ -208,7 +215,14 @@ internal fun NotedPokepastePokemon(viewModel: OverviewViewModel,
             pokemonImageService = viewModel.pokemonImageService,
             modifier = modifier,
             notes = notes,
-            onClick = { navigator.push(PokemonDetailsScreen(team.id, pokemon.name.normalized.value)) }
+            onClick = {
+                navigator.push(
+                    PokemonDetailsScreen(
+                        team.id,
+                        pokemon.name.normalized.value
+                    )
+                )
+            }
         )
     }
 }
@@ -229,10 +243,11 @@ fun PokepastePokemon(
     pokemonData = pokemonData,
     pokemonImageService = pokemonImageService,
     modifier = modifier,
-    notes= notes,
+    notes = notes,
     onClick = null
 ) {
-    OutlinedTextField(notes ?: "",
+    OutlinedTextField(
+        notes ?: "",
         onValueChange = onNotesChanged,
         placeholder = { Text("Tap notes") },
         textStyle = MaterialTheme.typography.bodyLarge,

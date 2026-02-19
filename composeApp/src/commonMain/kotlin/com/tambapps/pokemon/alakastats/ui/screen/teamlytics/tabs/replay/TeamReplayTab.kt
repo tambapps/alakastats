@@ -46,25 +46,22 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
+import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -154,7 +151,8 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
             val snackBar = LocalSnackBar.current
             TextButton(
                 onClick = { viewModel.addReplays(snackBar) },
-                enabled = viewModel.replayUrlsText.isNotBlank() && viewModel.getValidationMessage()?.contains("No valid") != true
+                enabled = viewModel.replayUrlsText.isNotBlank() && viewModel.getValidationMessage()
+                    ?.contains("No valid") != true
             ) {
                 Text("Add Replay(s)")
             }
@@ -243,7 +241,7 @@ internal fun ColumnScope.PlayerNameEloText(player: Player, playerName: String) {
             Icon(
                 painter = painterResource(Res.drawable.arrow_forward),
                 contentDescription = "UP/DOWN",
-                modifier = Modifier.rotate(if (won) - 90f else 90f).size(iconSize),
+                modifier = Modifier.rotate(if (won) -90f else 90f).size(iconSize),
                 tint = outputColor
             )
             Spacer(Modifier.width(4.dp))
@@ -257,8 +255,14 @@ internal fun ColumnScope.PlayerNameEloText(player: Player, playerName: String) {
         Text(player.beforeElo.toString(), style = playerNameTextStyle)
     }
 }
+
 @Composable
-internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: String, modifier: Modifier = Modifier) {
+internal fun ViewReplayButton(
+    team: Teamlytics,
+    replay: ReplayAnalytics,
+    url: String,
+    modifier: Modifier = Modifier
+) {
     var url = url.removeSuffix(".json")
     if (!team.sdNames.contains(replay.player1.name)) {
         url += "?p2"
@@ -266,7 +270,7 @@ internal fun ViewReplayButton(team: Teamlytics, replay: ReplayAnalytics, url: St
     val uriHandler = LocalUriHandler.current
 
     OutlinedButton(
-        modifier= modifier,
+        modifier = modifier,
         onClick = { uriHandler.openUri(url) },
     ) {
         Text("Replay")
@@ -278,17 +282,29 @@ internal fun EditSdNamesButton(viewModel: TeamReplayViewModel) {
     val navigator = LocalNavigator.currentOrThrow
 
     // don't push because when coming to the screen, this screen doesn't recompose and take into account the updated team
-    OutlinedButton(onClick = { navigator.replace(EditTeamScreen(viewModel.team.id, redirectToTeamlyticsScreen = true))}) {
+    OutlinedButton(onClick = {
+        navigator.replace(
+            EditTeamScreen(
+                viewModel.team.id,
+                redirectToTeamlyticsScreen = true
+            )
+        )
+    }) {
         Text("Edit Showdown Names")
     }
 }
 
 @Composable
-internal fun OtsButton(player: Player, ots: OpenTeamSheet, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
+internal fun OtsButton(
+    player: Player,
+    ots: OpenTeamSheet,
+    pokemonImageService: PokemonImageService,
+    modifier: Modifier = Modifier
+) {
     var showDialog by remember { mutableStateOf(false) }
     OutlinedButton(
         modifier = modifier,
-        onClick = {showDialog = true },
+        onClick = { showDialog = true },
     ) {
         Text("OTS")
     }
@@ -306,7 +322,7 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, pokemonImageService: 
             ) {
                 // Mobile on purpose because we want a vertical pokepaste display on desktop too, as
                 // for some mysterious reason the dialog can't have full screen width
-                VerticalPokepaste(pokepaste, pokemonImageService,)
+                VerticalPokepaste(pokepaste, pokemonImageService)
             }
         },
         confirmButton = {
@@ -324,7 +340,9 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, pokemonImageService: 
                     if (copyToClipboard(
                             clipboardManager,
                             label = "${player.name.value}'s OTS",
-                            text = ots.toPokepaste().toPokePasteString())) {
+                            text = ots.toPokepaste().toPokePasteString()
+                        )
+                    ) {
                         snackbar.show("Copied to clipboard")
                     } else {
                         snackbar.show("Copy to clipboard not supported")
@@ -338,9 +356,11 @@ internal fun OtsButton(player: Player, ots: OpenTeamSheet, pokemonImageService: 
 }
 
 @Composable
-internal fun SelectedPokemon(pokemon: PokemonName, teraType: TeraType?, pokemonImageService: PokemonImageService,
-                             isYouPlayer: Boolean,
-                             modifier: Modifier = Modifier) {
+internal fun SelectedPokemon(
+    pokemon: PokemonName, teraType: TeraType?, pokemonImageService: PokemonImageService,
+    isYouPlayer: Boolean,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
@@ -353,21 +373,30 @@ internal fun SelectedPokemon(pokemon: PokemonName, teraType: TeraType?, pokemonI
             },
             contentAlignment = Alignment.Center
         ) {
-            pokemonImageService.PokemonArtwork(pokemon, modifier = Modifier.height(128.dp), facingDirection = if (isYouPlayer) FacingDirection.RIGHT else FacingDirection.LEFT)
+            pokemonImageService.PokemonArtwork(
+                pokemon,
+                modifier = Modifier.height(128.dp),
+                facingDirection = if (isYouPlayer) FacingDirection.RIGHT else FacingDirection.LEFT
+            )
         }
         val offset = 16.dp
         teraType?.let {
-            pokemonImageService.TeraTypeImage(it, modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = 0.dp, y = -offset)
-                .size(50.dp)
+            pokemonImageService.TeraTypeImage(
+                it, modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 0.dp, y = -offset)
+                    .size(50.dp)
             )
         }
     }
 }
 
 @Composable
-internal fun ReplayDropDownMenu(isMenuExpandedState: MutableState<Boolean>, viewModel: TeamReplayViewModel, replay: ReplayAnalytics) {
+internal fun ReplayDropDownMenu(
+    isMenuExpandedState: MutableState<Boolean>,
+    viewModel: TeamReplayViewModel,
+    replay: ReplayAnalytics
+) {
     DropdownMenu(
         expanded = isMenuExpandedState.value,
         onDismissRequest = { isMenuExpandedState.value = false }
@@ -375,9 +404,11 @@ internal fun ReplayDropDownMenu(isMenuExpandedState: MutableState<Boolean>, view
         val snackBar = LocalSnackBar.current
         val alreadyHasNotes = !replay.notes.isNullOrBlank()
         DropdownMenuItem(
-            text = { Text(
-                if (!alreadyHasNotes) "Add notes" else "Edit notes"
-            ) },
+            text = {
+                Text(
+                    if (!alreadyHasNotes) "Add notes" else "Edit notes"
+                )
+            },
             onClick = {
                 viewModel.showNoteReplayDialog(replay)
                 isMenuExpandedState.value = false
@@ -427,8 +458,10 @@ fun NoReplay(viewModel: TeamlyticsFiltersTabViewModel) {
             Text(if (!viewModel.useCase.hasFilteredReplays) "No replays were found" else "No replays matched the filters")
         }
 
-        LinearProgressBarIfEnabled(viewModel.isLoading, modifier = Modifier
-            .align(if (LocalIsCompact.current) Alignment.BottomStart else Alignment.TopStart))
+        LinearProgressBarIfEnabled(
+            viewModel.isLoading, modifier = Modifier
+                .align(if (LocalIsCompact.current) Alignment.BottomStart else Alignment.TopStart)
+        )
 
         FiltersBar(viewModel, Modifier.align(Alignment.TopStart).padding(16.dp))
     }
