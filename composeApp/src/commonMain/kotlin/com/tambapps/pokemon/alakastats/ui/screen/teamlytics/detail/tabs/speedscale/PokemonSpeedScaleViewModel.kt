@@ -3,10 +3,13 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedsc
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import arrow.core.Either
 import arrow.core.flatMap
+import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
@@ -24,9 +27,15 @@ data class PokemonSpeed(
     val pokemonName: PokemonName,
     val value: Int,
     val boostNature: Boolean,
-    val ev: Int
+    val ev: Int,
+    val isPokemonOfInterest: Boolean = false
 )
 
+data class SpeedScale(
+    val interestPokemon: PokemonSpeed,
+    // grouped by speed value
+    val speedGroups: List<List<PokemonSpeed>>
+)
 class PokemonSpeedScaleViewModel(
     override val pokemonImageService: PokemonImageService,
     val team: Teamlytics,
@@ -38,9 +47,10 @@ class PokemonSpeedScaleViewModel(
     override var isTabLoading by mutableStateOf(false)
 
     private val scope = CoroutineScope(Dispatchers.Main)
-    private var pokemons by mutableStateOf(emptyList<PokemonData>())
+    private var pokemons by mutableStateOf(emptyMap<PokemonName, PokeStats>())
 
-    var speedScale by mutableStateOf(emptyList<PokemonSpeed>())
+    // grouped by speed value
+    var speedScale by mutableStateOf<SpeedScale?>(null)
         private set
 
     fun loadSpeedScale(onError: (DomainError) -> Unit) {
@@ -48,8 +58,11 @@ class PokemonSpeedScaleViewModel(
         val format = team.format.takeIf { it != Format.NONE } ?: return
         isTabLoading = true
         scope.launch {
-            formatRepository.get(format)
-                .flatMap { pokeApi.bulkGet(it.popularPokemons) }.fold(
+            when {
+                pokemons.isNotEmpty() -> Either.Right(pokemons)
+                else -> formatRepository.get(format)
+                    .flatMap { pokeApi.getBaseStats(it.popularPokemons) }
+            }.fold(
                     ifLeft = {
                         withContext(Dispatchers.Main) {
                             isTabLoading = false
@@ -57,11 +70,10 @@ class PokemonSpeedScaleViewModel(
                         }
                     },
                     ifRight = { resultPokemons ->
-                        val sortedPokemons = resultPokemons.sortedWith(compareBy({ - it.stats.speed }, { it.name.value }))
-                        val scale = computeScale(sortedPokemons)
+                        val scale = computeScale(resultPokemons)
                         withContext(Dispatchers.Main) {
                             isTabLoading = false
-                            pokemons = sortedPokemons
+                            pokemons = resultPokemons
                             speedScale = scale
                         }
                     }
@@ -69,9 +81,42 @@ class PokemonSpeedScaleViewModel(
         }
     }
 
-    private fun computeScale(pokemons: List<PokemonData>): List<PokemonSpeed> {
-        return pokemons.map {
-            PokemonSpeed(it.name, it.stats.speed, false, 0)
+    private fun computeScale(pokemons: Map<PokemonName, PokeStats>): SpeedScale {
+        val pokemonBaseStats = pokemons[pokemon.name.normalized] ?: PokeStats.default(0)
+        val interestPokemon = PokemonSpeed(
+            pokemonName = pokemon.name,
+            value = PokeStats.compute(
+                baseStats = pokemonBaseStats,
+                evs = pokemon.evs,
+                nature = pokemon.nature ?: Nature.QUIRKY,
+                level = 50
+            ).speed,
+            boostNature = pokemon.nature?.bonusStat == Stat.SPEED,
+            ev = pokemon.evs.speed,
+            isPokemonOfInterest = true
+        )
+
+        val pokemonSpeeds = buildList {
+            add(interestPokemon)
+            pokemons.forEach { (pokeName, baseStats) ->
+                val stats = PokeStats.compute(
+                    baseStats,
+                    evs = PokeStats.default(252),
+                    nature = if (baseStats.attack > baseStats.specialAttack) Nature.JOLLY else Nature.MODEST,
+                    level = pokemon.level
+                )
+                add(PokemonSpeed(pokeName, stats.speed, true, 0))
+            }
         }
+        val speedGroups = pokemonSpeeds.groupBy { it.value }
+            .asSequence()
+            .sortedBy { - it.key }
+            .map { it.value }
+            .toList()
+
+        return SpeedScale(
+            interestPokemon = interestPokemon,
+            speedGroups = speedGroups
+        )
     }
 }
