@@ -60,11 +60,10 @@ fun UsagesTab(viewModel: UsagesViewModel) {
 }
 
 @Composable
-internal fun ColumnScope.OnlyPokePasteMovesSwitch(viewModel: UsagesViewModel) {
+internal fun OnlyPokePasteMovesSwitch(viewModel: UsagesViewModel, modifier: Modifier = Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable(onClick = { viewModel.onlyPokePasteMoves = !viewModel.onlyPokePasteMoves })
-            .align(Alignment.CenterHorizontally)
+        modifier = modifier.clickable(onClick = { viewModel.onlyPokePasteMoves = !viewModel.onlyPokePasteMoves })
     ) {
         Switch(
             checked = viewModel.onlyPokePasteMoves,

@@ -78,7 +78,7 @@ private data class PokemonsFilter(
 fun FiltersBar(
     parentViewModel: TeamlyticsFiltersTabViewModel,
     modifier: Modifier = Modifier,
-    additionalFilters: (@Composable ColumnScope.() -> Unit)? = null
+    additionalFilters: (@Composable () -> Unit)? = null
 ) {
     val filters = parentViewModel.filters
     val viewModel = remember(filters) { FiltersViewModel(parentViewModel.useCase, parentViewModel.pokemonImageService) }
@@ -88,6 +88,7 @@ fun FiltersBar(
     val opponentSelectionFilter = remember(filters) { PokemonsFilter("Opp. Selection", "Opponent's Selection", filters.opponentSelection, allowLead = true, max = 4) }
     val yourSelectionFilter = remember(filters) { PokemonsFilter("Your Selection", "Your Selection", filters.yourSelection, allowLead = true, max = 4) }
     val showPokemonDialogFilterState = remember { mutableStateOf<PokemonsFilter?>(null) }
+    val isCompact = LocalIsCompact.current
 
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
@@ -116,10 +117,13 @@ fun FiltersBar(
                     dialogState = showPokemonDialogFilterState,
                     onClear = { viewModel.applyFilters(filters.copy(yourSelection = emptyList())) }
                 )
+                if (!isCompact && additionalFilters != null) {
+                    additionalFilters.invoke()
+                }
             }
             Spacer(Modifier.height(16.dp))
-            if (additionalFilters != null) {
-                additionalFilters.invoke(this)
+            if (isCompact && additionalFilters != null) {
+                additionalFilters.invoke()
                 Spacer(Modifier.height(16.dp))
             }
         }
