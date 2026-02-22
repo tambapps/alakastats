@@ -23,6 +23,11 @@ data class GetPokemonDataError(
     override val cause: Throwable? = null
 ) : DomainError
 
+data class LoadFormatDataError(
+    override val message: String,
+    override val cause: Throwable? = null
+) : DomainError
+
 data class LoadTeamError(
     override val message: String,
     override val cause: Throwable?

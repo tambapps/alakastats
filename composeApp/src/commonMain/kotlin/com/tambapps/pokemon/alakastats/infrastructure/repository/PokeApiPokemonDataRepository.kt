@@ -22,20 +22,38 @@ class PokeApiPokemonDataRepository(
     private val pokeapiClient: PokeApiGqlClient
 ): PokemonDataRepository {
 
-    override suspend fun bulkGet(pokemons: List<Pokemon>, withMoves: Boolean): Either<GetPokemonDataError, List<PokemonData>> {
-        val moves = if (withMoves) pokemons.asSequence()
+    override suspend fun bulkGetWithMoves(pokemons: List<Pokemon>): Either<GetPokemonDataError, List<PokemonData>> {
+        val moves = pokemons.asSequence()
             .flatMap { it.moves }
             .map { it.normalized }
             .distinctBy { it.value }
             .toList()
-        else null
         return Either.catch {
             pokeapiClient.getPokemons(pokemons.map { it.name.pokeApiNormalized }, moves)
+        }.mapLeft { GetPokemonDataError("Couldn't retrieve pokemon data", it) }
+            .map { toPokemonDataWithMoves(pokemons, it) }
+    }
+
+    override suspend fun bulkGet(pokemons: List<PokemonName>): Either<GetPokemonDataError, List<PokemonData>> {
+        return Either.catch {
+            pokeapiClient.getPokemons(pokemons.map { it.pokeApiNormalized })
         }.mapLeft { GetPokemonDataError("Couldn't retrieve pokemon data", it) }
             .map { toPokemonData(pokemons, it) }
     }
 
     private fun toPokemonData(
+        pokemons: List<PokemonName>,
+        result: GqlBatchResult
+    ): List<PokemonData> = pokemons.map { pokemonName ->
+        val pokeApiPokemon = result.pokemons.find { it.name == pokemonName.pokeApiNormalized.value }
+        PokemonData(
+            name = pokemonName,
+            moves = emptyMap(),
+            stats = pokeApiPokemon?.toPokeStats() ?: PokeStats.default(0)
+        )
+    }
+
+    private fun toPokemonDataWithMoves(
         pokemons: List<Pokemon>,
         result: GqlBatchResult
     ): List<PokemonData> {

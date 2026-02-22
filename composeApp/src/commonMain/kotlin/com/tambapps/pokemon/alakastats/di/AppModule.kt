@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.di
 
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultPokemonDetailUseCase
@@ -15,6 +16,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalFormatDataRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonDataRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
@@ -26,6 +28,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.service.TeamlyticsSerializ
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.TeamPokemonStateState
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailOverviewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale.PokemonSpeedScaleViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.MatchupNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.edit.MatchupNotesEditViewModel
@@ -57,6 +60,7 @@ val appModules = listOf(module {
     single<ReplayAnalyticsService> { ReplayAnalyticsService(get()) }
     single { PokeApiGqlClient(get()) }
     singleOf(::PokeApiPokemonDataRepository).bind(PokemonDataRepository::class)
+    singleOf(::LocalFormatDataRepository).bind(FormatDataRepository::class)
 
     // need to name them as they have both the same signature after generic type erasure
     single<KStorage<Uuid, TeamlyticsEntity>>(named("teamsStorage")) { createTeamlyticsKStorage() }
@@ -90,6 +94,9 @@ val appModules = listOf(module {
     }
     factory { (state: TeamPokemonStateState.Loaded) ->
         PokemonDetailOverviewModel(get(), state.team, state.pokemon, state.pokemonData, state.notes, state.usages)
+    }
+    factory { (state: TeamPokemonStateState.Loaded) ->
+        PokemonSpeedScaleViewModel(get(), state.team, state.pokemon, state.pokemonData, get(), get())
     }
     factory { (useCase: ManageTeamReplaysUseCase) ->
         TeamReplayViewModel(useCase, get(), get())

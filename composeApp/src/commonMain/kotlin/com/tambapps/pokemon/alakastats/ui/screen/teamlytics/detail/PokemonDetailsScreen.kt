@@ -41,10 +41,15 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.EmitScrollEffect
+import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.TabRowWithBackButton
+import com.tambapps.pokemon.alakastats.ui.composables.TabViewModel
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.PokemonDetailTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailOverviewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailsOverviewTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale.PokemonSpeedScaleViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale.PokemonSpeedScaleViewTab
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -155,18 +160,28 @@ private fun Pager(
         modifier = modifier
     ) { page ->
         when (page) {
-            0 -> {
-                val viewModel = koinInject<PokemonDetailOverviewModel> {
-                    parametersOf(state)
-                }
-                EmitScrollEffect(pagerViewModel, viewModel, page)
-                PokemonDetailsOverviewTab(viewModel)
+            0 -> PagerTab<PokemonDetailOverviewModel>(pagerViewModel, state, page) {
+                PokemonDetailsOverviewTab(it)
             }
-            1 -> {
-                Box(Modifier.fillMaxSize()) {
-                    Text("Coming soon", Modifier.align(Alignment.Center))
-                }
+            1 -> PagerTab<PokemonSpeedScaleViewModel>(pagerViewModel, state, page) {
+                PokemonSpeedScaleViewTab(it)
             }
         }
+    }
+}
+
+@Composable
+private inline fun <reified T: PokemonDetailTabViewModel> PagerTab(pagerViewModel: PokemonDetailViewModel, state: TeamPokemonStateState.Loaded, page: Int, tab: @Composable (T) -> Unit) {
+    val viewModel = koinInject<T> {
+        parametersOf(state)
+    }
+    EmitScrollEffect(pagerViewModel, viewModel, page)
+    // TODO do same on Teamlytics screen
+    Box(Modifier.fillMaxSize()) {
+        LinearProgressBarIfEnabled(
+            viewModel.isTabLoading, modifier = Modifier
+                .align(if (LocalIsCompact.current) Alignment.BottomStart else Alignment.TopStart)
+        )
+        tab.invoke(viewModel)
     }
 }

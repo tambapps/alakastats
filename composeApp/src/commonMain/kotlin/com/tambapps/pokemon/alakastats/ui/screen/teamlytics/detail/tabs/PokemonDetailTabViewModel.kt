@@ -8,7 +8,7 @@ abstract class PokemonDetailTabViewModel: TabViewModel {
 
     override val scrollToTopSignal = VoidSignal()
 
-    protected abstract val isTabLoading: Boolean
+    abstract val isTabLoading: Boolean
 
     abstract val pokemonImageService: PokemonImageService
 

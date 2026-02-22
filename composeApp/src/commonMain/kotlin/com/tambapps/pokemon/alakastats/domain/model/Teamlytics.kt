@@ -14,6 +14,11 @@ enum class Format(
 
 
 }
+
+data class FormatData(
+    val popularPokemons: List<PokemonName>
+)
+
 data class Teamlytics(
     val id: Uuid,
     val name: String,
