@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -67,7 +68,7 @@ fun PokemonSpeedScaleViewTab(
 private fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyListState, modifier: Modifier) {
     val speedScale = viewModel.speedScale ?: return
     val isCompact = LocalIsCompact.current
-    LazyColumn(modifier = modifier.fillMaxWidth(), state = scrollState) {
+    LazyColumnWithScrollbar(modifier = modifier.fillMaxWidth(), state = scrollState) {
         items(speedScale.speedGroups) { pokemonSpeeds ->
             val speedValue = pokemonSpeeds.first().value
             val backgroundColor = when {
