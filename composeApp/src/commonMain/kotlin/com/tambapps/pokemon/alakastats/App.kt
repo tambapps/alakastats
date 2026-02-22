@@ -6,10 +6,8 @@ import com.tambapps.pokemon.alakastats.ui.SnackBarContext
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeScreen
 import com.tambapps.pokemon.alakastats.ui.theme.AppTheme
 import com.tambapps.pokemon.alakastats.ui.theme.ProvideIsCompact
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-@Preview
 fun App() {
     AppTheme {
         ProvideIsCompact {
