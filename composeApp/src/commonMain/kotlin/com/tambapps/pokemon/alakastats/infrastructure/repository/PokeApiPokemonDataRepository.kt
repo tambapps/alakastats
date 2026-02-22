@@ -22,14 +22,15 @@ class PokeApiPokemonDataRepository(
     private val pokeapiClient: PokeApiGqlClient
 ): PokemonDataRepository {
 
-    override suspend fun bulkGet(pokemons: List<Pokemon>): Either<GetPokemonDataError, List<PokemonData>> {
-        val moves = pokemons.asSequence()
+    override suspend fun bulkGet(pokemons: List<Pokemon>, withMoves: Boolean): Either<GetPokemonDataError, List<PokemonData>> {
+        val moves = if (withMoves) pokemons.asSequence()
             .flatMap { it.moves }
             .map { it.normalized }
             .distinctBy { it.value }
             .toList()
+        else null
         return Either.catch {
-            pokeapiClient.getPokemonsAndMoves(pokemons.map { it.name.pokeApiNormalized }, moves)
+            pokeapiClient.getPokemons(pokemons.map { it.name.pokeApiNormalized }, moves)
         }.mapLeft { GetPokemonDataError("Couldn't retrieve pokemon data", it) }
             .map { toPokemonData(pokemons, it) }
     }

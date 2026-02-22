@@ -125,7 +125,7 @@ class OverviewViewModel(
         }
         isTabLoading = true
         scope.launch {
-            val either = pokemonDataRepository.bulkGet(team.pokePaste.pokemons)
+            val either = pokemonDataRepository.bulkGet(team.pokePaste.pokemons, withMoves = true)
             withContext(Dispatchers.Main) {
                 either.fold(
                     ifLeft = {

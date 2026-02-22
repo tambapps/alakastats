@@ -7,6 +7,6 @@ import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 
 interface PokemonDataRepository {
 
-    suspend fun bulkGet(pokemons: List<Pokemon>): Either<GetPokemonDataError, List<PokemonData>>
+    suspend fun bulkGet(pokemons: List<Pokemon>, withMoves: Boolean = false): Either<GetPokemonDataError, List<PokemonData>>
 
 }
