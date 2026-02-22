@@ -15,8 +15,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,15 +56,18 @@ fun PokemonSpeedScaleViewTab(
         return
     }
     val scrollState = rememberLazyListState()
-    SpeedScale(viewModel, scrollState)
+    Column(Modifier.fillMaxSize()) {
+        SettingsBar(viewModel)
+        SpeedScale(viewModel, scrollState, Modifier.weight(1f))
+    }
     ScrollToTopIfNeeded(viewModel, scrollState)
 }
 
 @Composable
-private fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyListState) {
+private fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyListState, modifier: Modifier) {
     val speedScale = viewModel.speedScale ?: return
     val isCompact = LocalIsCompact.current
-    LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
+    LazyColumn(modifier = modifier.fillMaxWidth(), state = scrollState) {
         items(speedScale.speedGroups) { pokemonSpeeds ->
             val speedValue = pokemonSpeeds.first().value
             val backgroundColor = when {
@@ -74,7 +80,7 @@ private fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyL
                     pokemonSpeeds.forEach { pSpeed ->
                         viewModel.pokemonImageService.PokemonSprite(
                             pSpeed.pokemonName,
-                            modifier = Modifier.size(64.dp).scale(1.5f),
+                            modifier = Modifier.size(64.dp).scale(1.5f).padding(8.dp),
                             facingDirection = if (pSpeed.isPokemonOfInterest) FacingDirection.LEFT else FacingDirection.RIGHT,
                             disableTooltip = false
                         )
@@ -94,7 +100,36 @@ private fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyL
         }
 
         item {
-            Spacer(Modifier.height(128.dp))
+            Spacer(Modifier.height(256.dp))
+        }
+    }
+}
+
+@Composable
+private fun SettingsBar(viewModel: PokemonSpeedScaleViewModel, modifier: Modifier = Modifier) {
+    ElevatedCard(modifier = modifier.fillMaxWidth().padding(8.dp)) {
+        Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+            Text("Opposing Investments", style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.height(8.dp))
+            FlowRow {
+                val padding = if (LocalIsCompact.current) 4.dp else 16.dp
+                FilterChip(
+                    modifier = Modifier.padding(horizontal = padding),
+                    onClick = { viewModel.flipMaxEvs() },
+                    label = {
+                        Text("252 EVs")
+                    },
+                    selected = viewModel.maxEvs
+                )
+
+                FilterChip(
+                    onClick = { viewModel.flipSpeedNature() },
+                    label = {
+                        Text("Speed Nature")
+                    },
+                    selected = viewModel.speedNature
+                )
+            }
         }
     }
 }

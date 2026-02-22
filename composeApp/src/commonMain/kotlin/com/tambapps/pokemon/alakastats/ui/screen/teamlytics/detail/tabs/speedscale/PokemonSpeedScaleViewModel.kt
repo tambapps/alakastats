@@ -45,6 +45,10 @@ class PokemonSpeedScaleViewModel(
     private val formatRepository: FormatDataRepository
 ) : PokemonDetailTabViewModel() {
     override var isTabLoading by mutableStateOf(false)
+    var maxEvs by mutableStateOf(true)
+        private set
+    var speedNature by mutableStateOf(false)
+        private set
 
     private val scope = CoroutineScope(Dispatchers.Main)
     private var pokemons by mutableStateOf(emptyMap<PokemonName, PokeStats>())
@@ -53,7 +57,7 @@ class PokemonSpeedScaleViewModel(
     var speedScale by mutableStateOf<SpeedScale?>(null)
         private set
 
-    fun loadSpeedScale(onError: (DomainError) -> Unit) {
+    fun loadSpeedScale(onError: ((DomainError) -> Unit)? = null) {
         if (isTabLoading) return
         val format = team.format.takeIf { it != Format.NONE } ?: return
         isTabLoading = true
@@ -66,7 +70,7 @@ class PokemonSpeedScaleViewModel(
                     ifLeft = {
                         withContext(Dispatchers.Main) {
                             isTabLoading = false
-                            onError.invoke(it)
+                            onError?.invoke(it)
                         }
                     },
                     ifRight = { resultPokemons ->
@@ -99,13 +103,13 @@ class PokemonSpeedScaleViewModel(
         val pokemonSpeeds = buildList {
             add(interestPokemon)
             pokemons.forEach { (pokeName, baseStats) ->
-                val stats = PokeStats.compute(
+                val speed = PokeStats.compute(
                     baseStats,
-                    evs = PokeStats.default(252),
-                    nature = if (baseStats.attack > baseStats.specialAttack) Nature.JOLLY else Nature.MODEST,
+                    evs = PokeStats.default(if (maxEvs) 252 else 0),
+                    nature = if (speedNature) Nature.JOLLY else Nature.QUIRKY,
                     level = pokemon.level
-                )
-                add(PokemonSpeed(pokeName, stats.speed, true, 0))
+                ).speed
+                add(PokemonSpeed(pokeName, speed, speedNature, 0))
             }
         }
         val speedGroups = pokemonSpeeds.groupBy { it.value }
@@ -118,5 +122,17 @@ class PokemonSpeedScaleViewModel(
             interestPokemon = interestPokemon,
             speedGroups = speedGroups
         )
+    }
+
+    fun flipMaxEvs() {
+        if (isTabLoading) return
+        this.maxEvs = !maxEvs
+        loadSpeedScale()
+    }
+
+    fun flipSpeedNature() {
+        if (isTabLoading) return
+        this.speedNature = !speedNature
+        loadSpeedScale()
     }
 }
