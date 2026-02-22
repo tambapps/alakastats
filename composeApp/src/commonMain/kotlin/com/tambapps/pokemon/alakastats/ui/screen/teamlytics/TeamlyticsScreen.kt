@@ -3,7 +3,6 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,21 +11,17 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +37,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.EmitScrollEffect
+import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
@@ -54,7 +50,6 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.overview.Overvi
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.TeamReplayTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.TeamReplayViewModel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import kotlin.uuid.Uuid
@@ -126,33 +121,36 @@ internal fun Pager(
         modifier = modifier
     ) { page ->
         when (page) {
-            0 -> {
-                val viewModel = koinInjectUseCase<ManageTeamOverviewUseCase, OverviewViewModel>(viewModel, page)
-                OverviewTab(viewModel)
+            0 -> PagerTab<ManageTeamOverviewUseCase, OverviewViewModel>(viewModel, page) {
+                OverviewTab(it)
             }
-            1 -> {
-                val viewModel = koinInjectUseCase<ManageTeamReplaysUseCase, TeamReplayViewModel>(viewModel, page)
-                TeamReplayTab(viewModel)
+            1 -> PagerTab<ManageTeamReplaysUseCase, TeamReplayViewModel>(viewModel, page) {
+                TeamReplayTab(it)
             }
-            2 -> {
-                val viewModel = koinInjectUseCase<ConsultTeamlyticsUseCase, UsagesViewModel>(viewModel, page)
-                UsagesTab(viewModel)
+            2 -> PagerTab<ConsultTeamlyticsUseCase, UsagesViewModel>(viewModel, page) {
+                UsagesTab(it)
             }
-            3 -> {
-                val viewModel = koinInjectUseCase<ConsultTeamlyticsUseCase, LeadStatsViewModel>(viewModel, page)
-                LeadStatsTab(viewModel)
+            3 -> PagerTab<ConsultTeamlyticsUseCase, LeadStatsViewModel>(viewModel, page) {
+                LeadStatsTab(it)
             }
-            4 -> {
-                val viewModel = koinInjectUseCase<ManageMatchupNotesUseCase, MatchupNotesViewModel>(viewModel, page)
-                MatchupNotesTab(viewModel)
+            4 -> PagerTab<ManageMatchupNotesUseCase, MatchupNotesViewModel>(viewModel, page) {
+                MatchupNotesTab(it)
             }
         }
     }
 }
 
 @Composable
-private inline fun <reified USE_CASE, reified T: TeamlyticsTabViewModel> koinInjectUseCase(viewModel: TeamlyticsViewModel, index: Int) = koinInject<T> {
-    parametersOf(viewModel as USE_CASE)
-}.apply {
-    EmitScrollEffect(viewModel, this, index)
+private inline fun <reified USE_CASE, reified T: TeamlyticsTabViewModel> PagerTab(pagerViewModel: TeamlyticsViewModel, index: Int, tab: @Composable (T) -> Unit) {
+    val viewModel = koinInject<T> {
+        parametersOf(pagerViewModel as USE_CASE)
+    }
+    EmitScrollEffect(pagerViewModel, viewModel, index)
+    Box(Modifier.fillMaxSize()) {
+        tab.invoke(viewModel)
+        LinearProgressBarIfEnabled(
+            viewModel.isLoading, modifier = Modifier
+                .align(if (LocalIsCompact.current) Alignment.BottomStart else Alignment.TopStart)
+        )
+    }
 }

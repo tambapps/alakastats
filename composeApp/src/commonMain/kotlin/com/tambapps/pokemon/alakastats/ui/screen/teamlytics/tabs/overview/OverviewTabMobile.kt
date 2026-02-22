@@ -22,42 +22,38 @@ import com.tambapps.pokemon.alakastats.ui.composables.verticalPokemonSpace
 @Composable
 internal fun OverviewTabMobile(viewModel: OverviewViewModel, scrollState: ScrollState) {
     val team = viewModel.team
-    Column(Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .verticalScroll(scrollState)
-        ) {
-            if (viewModel.isEditingNotes) {
-                Row(Modifier.align(Alignment.CenterHorizontally)) {
-                    NoteEditingButtons(viewModel)
-                }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+    ) {
+        if (viewModel.isEditingNotes) {
+            Row(Modifier.align(Alignment.CenterHorizontally)) {
+                NoteEditingButtons(viewModel)
             }
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top
-            ) {
-                TeamName(team, modifier = Modifier.weight(1f))
-
-                if (!viewModel.isEditingNotes) {
-                    MoreActionsButton(viewModel)
-                }
-                Spacer(Modifier.width(4.dp))
-            }
-            Spacer(Modifier.height(4.dp))
-            NoteTextOrTextField(viewModel, viewModel.teamNotes, "Team notes") {
-                viewModel.teamNotes = it
-            }
-            Spacer(Modifier.height(8.dp))
-            Header(team)
-
-            PokePasteTitle()
-            Spacer(Modifier.height(16.dp))
-            NotedPokePaste(viewModel)
-            Spacer(Modifier.height(12.dp))
         }
-        LinearProgressBarIfEnabled(viewModel.isLoading)
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
+        ) {
+            TeamName(team, modifier = Modifier.weight(1f))
+
+            if (!viewModel.isEditingNotes) {
+                MoreActionsButton(viewModel)
+            }
+            Spacer(Modifier.width(4.dp))
+        }
+        Spacer(Modifier.height(4.dp))
+        NoteTextOrTextField(viewModel, viewModel.teamNotes, "Team notes") {
+            viewModel.teamNotes = it
+        }
+        Spacer(Modifier.height(8.dp))
+        Header(team)
+
+        PokePasteTitle()
+        Spacer(Modifier.height(16.dp))
+        NotedPokePaste(viewModel)
+        Spacer(Modifier.height(12.dp))
     }
 }
 

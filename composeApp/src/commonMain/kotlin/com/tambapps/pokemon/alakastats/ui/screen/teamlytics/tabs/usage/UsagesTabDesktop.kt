@@ -29,31 +29,28 @@ import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 
 @Composable
 internal fun UsagesTabDesktop(viewModel: UsagesViewModel, scrollState: ScrollState) {
-    Column(Modifier.fillMaxSize()) {
-        LinearProgressBarIfEnabled(viewModel.isLoading)
-        Column(
-            Modifier.weight(1f)
-                .padding(16.dp)
-                .verticalScroll(scrollState)
-        ) {
-            FiltersBar(viewModel) {
-                OnlyPokePasteMovesSwitch(viewModel)
-            }
-            Spacer(Modifier.padding(16.dp))
-            Header(viewModel.useCase)
-            val entryBlocks = viewModel.sortedPokemonMovesUsageEntries.chunked(3)
-            entryBlocks.forEachIndexed { index, entry ->
-                DesktopRow(
-                    viewModel,
-                    entry,
-                    Modifier
-                )
-                if (index < entryBlocks.lastIndex) {
-                    Spacer(Modifier.height(32.dp))
-                }
-            }
-            Spacer(Modifier.height(teamlyticsTabPaddingBottom))
+    Column(
+        Modifier.fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(scrollState)
+    ) {
+        FiltersBar(viewModel) {
+            OnlyPokePasteMovesSwitch(viewModel)
         }
+        Spacer(Modifier.padding(16.dp))
+        Header(viewModel.useCase)
+        val entryBlocks = viewModel.sortedPokemonMovesUsageEntries.chunked(3)
+        entryBlocks.forEachIndexed { index, entry ->
+            DesktopRow(
+                viewModel,
+                entry,
+                Modifier
+            )
+            if (index < entryBlocks.lastIndex) {
+                Spacer(Modifier.height(32.dp))
+            }
+        }
+        Spacer(Modifier.height(teamlyticsTabPaddingBottom))
     }
 }
 

@@ -176,12 +176,11 @@ private inline fun <reified T: PokemonDetailTabViewModel> PagerTab(pagerViewMode
         parametersOf(state)
     }
     EmitScrollEffect(pagerViewModel, viewModel, page)
-    // TODO do same on Teamlytics screen
     Box(Modifier.fillMaxSize()) {
+        tab.invoke(viewModel)
         LinearProgressBarIfEnabled(
             viewModel.isTabLoading, modifier = Modifier
                 .align(if (LocalIsCompact.current) Alignment.BottomStart else Alignment.TopStart)
         )
-        tab.invoke(viewModel)
     }
 }

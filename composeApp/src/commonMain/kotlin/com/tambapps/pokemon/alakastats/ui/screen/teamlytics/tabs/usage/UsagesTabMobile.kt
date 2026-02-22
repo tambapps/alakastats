@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,31 +22,27 @@ import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 internal fun UsagesTabMobile(viewModel: UsagesViewModel, scrollState: ScrollState) {
-    Column(
-        Modifier.fillMaxWidth()
-    ) {
-        Column(Modifier.weight(1f)
-            .padding(horizontal = 4.dp)
-            .verticalScroll(scrollState)) {
-            Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
-            FiltersBar(viewModel) {
-                OnlyPokePasteMovesSwitch(viewModel)
-            }
-            Spacer(Modifier.height(16.dp))
-            Header(viewModel.useCase)
-
-            val entries = viewModel.sortedPokemonMovesUsageEntries
-            entries.forEach { (pokemonName, moveUsage) ->
-                PokemonUsagesCard(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                    replays = viewModel.replays,
-                    pokemonImageService = viewModel.pokemonImageService,
-                    name = pokemonName,
-                    usages = moveUsage
-                )
-            }
-            Spacer(Modifier.height(teamlyticsTabPaddingBottom))
+    Column(Modifier.fillMaxSize()
+        .padding(horizontal = 4.dp)
+        .verticalScroll(scrollState)) {
+        Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
+        FiltersBar(viewModel) {
+            OnlyPokePasteMovesSwitch(viewModel)
         }
-        LinearProgressBarIfEnabled(viewModel.isLoading)
+        Spacer(Modifier.height(16.dp))
+        Header(viewModel.useCase)
+
+        val entries = viewModel.sortedPokemonMovesUsageEntries
+        entries.forEach { (pokemonName, moveUsage) ->
+            PokemonUsagesCard(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                replays = viewModel.replays,
+                pokemonImageService = viewModel.pokemonImageService,
+                name = pokemonName,
+                usages = moveUsage
+            )
+        }
+        Spacer(Modifier.height(teamlyticsTabPaddingBottom))
     }
+
 }

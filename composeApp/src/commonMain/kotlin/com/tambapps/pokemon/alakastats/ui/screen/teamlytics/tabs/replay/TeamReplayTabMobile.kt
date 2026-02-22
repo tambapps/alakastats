@@ -40,41 +40,39 @@ import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 @Composable
 internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: LazyListState) {
     val team = viewModel.team
-    Column(Modifier.fillMaxSize()) {
-        LaunchedEffect(viewModel.useCase.filters) {
-            scrollState.scrollToItem(index = 0, scrollOffset = 0)
-        }
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 16.dp),
-            state = scrollState,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
-                Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
-                FiltersBar(viewModel)
-                Spacer(Modifier.height(16.dp))
-            }
-
-            item {
-                Header(viewModel.useCase)
-            }
-
-            itemsIndexed(team.replays) { index, replay ->
-                MobileReplay(viewModel, team, replay)
-                if (index < team.replays.size - 1) {
-                    Spacer(Modifier.height(32.dp))
-                }
-            }
-
-            item {
-                // just to be able to scroll past Fab button
-                Spacer(Modifier.height(teamlyticsTabPaddingBottom))
-            }
-        }
-        LinearProgressBarIfEnabled(viewModel.isLoading)
+    LaunchedEffect(viewModel.useCase.filters) {
+        scrollState.scrollToItem(index = 0, scrollOffset = 0)
     }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        state = scrollState,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item {
+            Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
+            FiltersBar(viewModel)
+            Spacer(Modifier.height(16.dp))
+        }
+
+        item {
+            Header(viewModel.useCase)
+        }
+
+        itemsIndexed(team.replays) { index, replay ->
+            MobileReplay(viewModel, team, replay)
+            if (index < team.replays.size - 1) {
+                Spacer(Modifier.height(32.dp))
+            }
+        }
+
+        item {
+            // just to be able to scroll past Fab button
+            Spacer(Modifier.height(teamlyticsTabPaddingBottom))
+        }
+    }
+
 }
 
 @Composable

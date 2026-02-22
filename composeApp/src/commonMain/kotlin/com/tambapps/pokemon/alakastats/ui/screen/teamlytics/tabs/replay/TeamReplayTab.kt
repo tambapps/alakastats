@@ -458,11 +458,6 @@ fun NoReplay(viewModel: TeamlyticsFiltersTabViewModel) {
             Text(if (!viewModel.useCase.hasFilteredReplays) "No replays were found" else "No replays matched the filters")
         }
 
-        LinearProgressBarIfEnabled(
-            viewModel.isLoading, modifier = Modifier
-                .align(if (LocalIsCompact.current) Alignment.BottomStart else Alignment.TopStart)
-        )
-
         FiltersBar(viewModel, Modifier.align(Alignment.TopStart).padding(16.dp))
     }
 

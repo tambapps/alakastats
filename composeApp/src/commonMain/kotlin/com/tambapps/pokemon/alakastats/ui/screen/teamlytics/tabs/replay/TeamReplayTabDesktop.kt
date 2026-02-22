@@ -38,7 +38,6 @@ import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
 import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
-import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
@@ -52,33 +51,30 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: LazyListState) {
     val team = viewModel.team
-    Column(Modifier.fillMaxSize()) {
-        LinearProgressBarIfEnabled(viewModel.isLoading)
-        LaunchedEffect(viewModel.useCase.filters) {
-            scrollState.scrollToItem(index = 0, scrollOffset = 0)
+    LaunchedEffect(viewModel.useCase.filters) {
+        scrollState.scrollToItem(index = 0, scrollOffset = 0)
+    }
+    LazyColumnWithScrollbar(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        state = scrollState,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item {
+            FiltersBar(viewModel)
+            Spacer(Modifier.padding(16.dp))
         }
-        LazyColumnWithScrollbar(
-            modifier = Modifier
-                .weight(1f)
-                .padding(16.dp),
-            state = scrollState,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
-                FiltersBar(viewModel)
-                Spacer(Modifier.padding(16.dp))
-            }
-            item {
-                Header(viewModel.useCase)
-            }
-            itemsIndexed(team.replays) { index, replay ->
-                DesktopReplay(viewModel, team, replay)
-                Spacer(Modifier.height(32.dp))
-            }
-            item {
-                // just to be able to scroll past Fab button
-                Spacer(Modifier.height(teamlyticsTabPaddingBottom))
-            }
+        item {
+            Header(viewModel.useCase)
+        }
+        itemsIndexed(team.replays) { index, replay ->
+            DesktopReplay(viewModel, team, replay)
+            Spacer(Modifier.height(32.dp))
+        }
+        item {
+            // just to be able to scroll past Fab button
+            Spacer(Modifier.height(teamlyticsTabPaddingBottom))
         }
     }
 }

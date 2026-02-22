@@ -28,7 +28,6 @@ internal fun OverviewTabDesktop(viewModel: OverviewViewModel, scrollState: Scrol
             .padding(horizontal = 16.dp)
             .verticalScroll(scrollState)
     ) {
-        LinearProgressBarIfEnabled(viewModel.isLoading)
         Row(
             Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically

@@ -22,29 +22,24 @@ import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 internal fun LeadStatsTabMobile(viewModel: LeadStatsViewModel, scrollState: ScrollState) {
     Column(
         Modifier.fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(horizontal = 8.dp)
     ) {
-        Column(
-            Modifier.fillMaxWidth()
-                .verticalScroll(scrollState)
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-        ) {
-            if (viewModel.isLoading) {
-                return@Column
-            }
-            Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
-            FiltersBar(viewModel)
-            Spacer(Modifier.height(16.dp))
-            Header(viewModel.useCase)
-            LeadAndWinRow(viewModel)
-            Space()
-            MostEffectiveLeadRow(viewModel)
-            Space()
-            MostCommonLeadRow(viewModel)
-            Spacer(Modifier.height(teamlyticsTabPaddingBottom))
+        if (viewModel.isLoading) {
+            return@Column
         }
-        LinearProgressBarIfEnabled(viewModel.isLoading)
+        Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
+        FiltersBar(viewModel)
+        Spacer(Modifier.height(16.dp))
+        Header(viewModel.useCase)
+        LeadAndWinRow(viewModel)
+        Space()
+        MostEffectiveLeadRow(viewModel)
+        Space()
+        MostCommonLeadRow(viewModel)
+        Spacer(Modifier.height(teamlyticsTabPaddingBottom))
     }
+
 }
 
 @Composable

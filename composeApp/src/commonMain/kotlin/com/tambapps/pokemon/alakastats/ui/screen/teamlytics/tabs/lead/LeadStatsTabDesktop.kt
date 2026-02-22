@@ -20,22 +20,18 @@ import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 
 @Composable
 internal fun LeadStatsTabDesktop(viewModel: LeadStatsViewModel, scrollState: ScrollState) {
-    Column(Modifier.fillMaxSize()) {
-        LinearProgressBarIfEnabled(viewModel.isLoading)
-        Column(Modifier.fillMaxWidth()
-            .weight(1f)
-            .verticalScroll(scrollState)
-            .padding(top = 16.dp, bottom = 8.dp)) {
-            FiltersBar(viewModel)
-            Spacer(Modifier.padding(16.dp))
-            Header(viewModel.useCase)
-            LeadAndWinRow(viewModel)
-            Space()
-            MostEffectiveLeadRow(viewModel)
-            Space()
-            MostCommonLeadRow(viewModel)
-            Spacer(Modifier.height(teamlyticsTabPaddingBottom))
-        }
+    Column(Modifier.fillMaxSize()
+        .verticalScroll(scrollState)
+        .padding(top = 16.dp, bottom = 8.dp)) {
+        FiltersBar(viewModel)
+        Spacer(Modifier.padding(16.dp))
+        Header(viewModel.useCase)
+        LeadAndWinRow(viewModel)
+        Space()
+        MostEffectiveLeadRow(viewModel)
+        Space()
+        MostCommonLeadRow(viewModel)
+        Spacer(Modifier.height(teamlyticsTabPaddingBottom))
     }
 }
 
