@@ -10,16 +10,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -159,7 +170,12 @@ private fun SettingsBarContent(viewModel: PokemonSpeedScaleViewModel) {
                 },
                 selected = viewModel.scarfBoost
             )
-            // TODO add speed stage ExposedDropdownMenuBox
+
+            SpeedStageDropDown(
+                modifier = Modifier.padding(flowRowPadding),
+                value = viewModel.stage,
+                onValueChange = { viewModel.updateStage(it) }
+            )
         }
 
         Spacer(Modifier.height(16.dp))
@@ -174,9 +190,76 @@ private fun SettingsBarContent(viewModel: PokemonSpeedScaleViewModel) {
                 },
                 selected = viewModel.ownScarfBoost
             )
-        }
 
-        // TODO add
-        //   - speed stage ExposedDropdownMenuBox
+            SpeedStageDropDown(
+                modifier = Modifier.padding(flowRowPadding),
+                value = viewModel.ownStage,
+                onValueChange = { viewModel.updateOwnStage(it) }
+            )
+        }
+    }
+}
+
+data class StatBoostStage(val level: Int, val multiplier: Float) {
+    val displayedText get() = buildString {
+        if (level == 0) append("Neutral (+0)")
+        else {
+            if (level > 0) append("+")
+            append(level)
+            append(" (x")
+            append(multiplier)
+            append(")")
+        }
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SpeedStageDropDown(value: Int, onValueChange: (Int) -> Unit, modifier: Modifier = Modifier) {
+    var expanded by remember { mutableStateOf(false) }
+    val values = remember {
+        listOf(
+            StatBoostStage(6, 4.0f),
+            StatBoostStage(5, 3.5f),
+            StatBoostStage(4, 3.0f),
+            StatBoostStage(3, 2.5f),
+            StatBoostStage(2, 2.0f),
+            StatBoostStage(1, 1.5f),
+            StatBoostStage(0, 1.0f),
+            StatBoostStage(-1, 0.67f),
+            StatBoostStage(-2, 0.5f),
+            StatBoostStage(-3, 0.4f),
+            StatBoostStage(-4, 0.33f),
+            StatBoostStage(-5, 0.29f),
+            StatBoostStage(-6, 0.25f)
+        )
+    }
+
+    ExposedDropdownMenuBox(
+        modifier = modifier.width(220.dp),
+        expanded = expanded,
+        onExpandedChange = { expanded = it }
+    ) {
+        OutlinedTextField(
+            value = "Stage: " + (values.find { it.level == value } ?: values[6]).displayedText,
+            onValueChange = {},
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            values.forEach { stage ->
+                DropdownMenuItem(
+                    text = { Text(stage.displayedText) },
+                    onClick = {
+                        onValueChange.invoke(stage.level)
+                        expanded = false
+                    }
+                )
+            }
+        }
     }
 }

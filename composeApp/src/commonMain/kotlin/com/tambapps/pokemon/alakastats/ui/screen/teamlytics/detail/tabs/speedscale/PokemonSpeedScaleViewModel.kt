@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import arrow.core.Either
 import arrow.core.flatMap
-import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
@@ -52,7 +51,11 @@ class PokemonSpeedScaleViewModel(
         private set
     var scarfBoost by mutableStateOf(false)
         private set
+    var stage by mutableStateOf(0)
+        private set
     var ownScarfBoost by mutableStateOf(pokemon.isScarfOrBooster(pokemonData))
+        private set
+    var ownStage by mutableStateOf(0)
         private set
 
     private val scope = CoroutineScope(Dispatchers.Main)
@@ -97,7 +100,7 @@ class PokemonSpeedScaleViewModel(
             evs = pokemon.evs,
             nature = pokemon.nature ?: Nature.QUIRKY,
             level = 50
-        ).speed.let { if (ownScarfBoost) (it * 1.5f).toInt() else it }
+        ).speed.let { if (ownScarfBoost) (it * 1.5f).toInt() else it }.toStage(ownStage)
         val interestPokemon = PokemonSpeed(
             pokemonName = pokemon.name,
             value = pokemonSpeed,
@@ -114,7 +117,7 @@ class PokemonSpeedScaleViewModel(
                     evs = PokeStats.default(if (maxEvs) 252 else 0),
                     nature = if (speedNature) Nature.JOLLY else Nature.QUIRKY,
                     level = pokemon.level
-                ).speed.let { if (scarfBoost) (it * 1.5f).toInt()  else it }
+                ).speed.let { if (scarfBoost) (it * 1.5f).toInt()  else it }.toStage(stage)
                 add(PokemonSpeed(pokeName, speed, speedNature, 0))
             }
         }
@@ -152,6 +155,26 @@ class PokemonSpeedScaleViewModel(
         this.ownScarfBoost = !ownScarfBoost
         loadSpeedScale()
     }
+
+    fun updateStage(value: Int) {
+        if (isTabLoading) return
+        this.stage = value
+        loadSpeedScale()
+    }
+
+    fun updateOwnStage(value: Int) {
+        if (isTabLoading) return
+        this.ownStage = value
+        loadSpeedScale()
+    }
+}
+
+fun Int.toStage(level: Int): Int {
+    if (level == 0) return this
+    val (num, denom) = if (level >= 0) 2f + level to 2f
+    else 2f to (2f - level)
+
+    return (this * num / denom).toInt()
 }
 
 private fun Pokemon.isScarfOrBooster(pokemonData: PokemonData?): Boolean {
