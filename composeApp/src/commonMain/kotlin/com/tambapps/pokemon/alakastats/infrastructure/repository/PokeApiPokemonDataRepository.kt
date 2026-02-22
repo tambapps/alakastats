@@ -99,6 +99,7 @@ private fun GqlPokemon.findStat(pokeStat: Stat) = stats.find {
     it.stat.name == pokeStat.pokeApiName
 }?.baseStat ?: 0
 
+private val MALE_POKEMON_NAMES = listOf("indeedee", "basculegion") // TODO all pokemons with male/females versions
 private val PokemonName.pokeApiNormalized: PokemonName get() {
     val n = normalized
     val name = n.value
@@ -106,7 +107,10 @@ private val PokemonName.pokeApiNormalized: PokemonName get() {
         name == "landorus" || name == "thundurus" || name == "enamorus" || name == "tornadus" -> PokemonName("$name-incarnate")
         name.startsWith("ogerpon-") -> PokemonName("ogerpon")
         name.endsWith("-f") -> PokemonName(name + "emale")
-        name == "indeedee" -> PokemonName("indeedee-male") // TODO all pokemons with male/females versions
+        name in MALE_POKEMON_NAMES -> PokemonName("$name-male")
+        name == "maushold" -> PokemonName("maushold-family-of-four")
+        name == "dudunsparce" -> PokemonName("dudunsparce-two-segment")
+        name == "tatsugiri" -> PokemonName("tatsugiri-droopy")
         else -> n
     }
 }
