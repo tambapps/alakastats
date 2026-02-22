@@ -39,12 +39,13 @@ fun TabRowWithBackButton(
     viewModel: PagerViewModel,
     pagerState: PagerState,
     tabs: List<String>,
+    scrollable: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Row(Modifier.fillMaxWidth().background(TabRowDefaults.secondaryContainerColor)) {
         val navigator = LocalNavigator.currentOrThrow
         BackIconButton(navigator)
-        if (LocalIsCompact.current) {
+        if (scrollable) {
             SecondaryScrollableTabRow(
                 modifier = modifier,
                 selectedTabIndex = pagerState.currentPage,

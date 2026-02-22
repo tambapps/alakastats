@@ -122,7 +122,7 @@ private fun PokemonDetails(
 
     Column(Modifier.fillMaxSize()) {
         if (!isCompact) {
-            TabRowWithBackButton(viewModel, pagerState, TABS, Modifier.fillMaxWidth())
+            TabRowWithBackButton(viewModel, pagerState, TABS, modifier = Modifier.fillMaxWidth())
         }
         Box(
             Modifier.fillMaxWidth().weight(1f)
@@ -143,7 +143,7 @@ private fun PokemonDetails(
             )
         }
         if (isCompact) {
-            TabRowWithBackButton(viewModel, pagerState, TABS, Modifier.fillMaxWidth())
+            TabRowWithBackButton(viewModel, pagerState, TABS, modifier = Modifier.fillMaxWidth())
         }
     }
 }

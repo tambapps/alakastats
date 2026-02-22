@@ -13,5 +13,5 @@ internal fun ColumnScope.TeamlyticsScreenMobile(
     pagerState: PagerState,
 ) {
     Pager(Modifier.weight(1f), viewModel, pagerState)
-    TabRowWithBackButton(viewModel, pagerState, tabs, Modifier.weight(1f))
+    TabRowWithBackButton(viewModel, pagerState, tabs, scrollable = true, Modifier.weight(1f))
 }
