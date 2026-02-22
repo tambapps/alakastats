@@ -77,10 +77,12 @@ private fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyL
             }
             Column(Modifier.fillMaxSize().background(backgroundColor)) {
                 FlowRow(Modifier.padding(horizontal = if (isCompact) 8.dp else 32.dp)) {
+
                     pokemonSpeeds.forEach { pSpeed ->
                         viewModel.pokemonImageService.PokemonSprite(
                             pSpeed.pokemonName,
-                            modifier = Modifier.size(64.dp).scale(1.5f).padding(8.dp),
+                            modifier = if (isCompact) Modifier.size(64.dp).scale(1.5f).padding(8.dp)
+                            else Modifier.size(128.dp).scale(1.5f).padding(16.dp),
                             facingDirection = if (pSpeed.isPokemonOfInterest) FacingDirection.LEFT else FacingDirection.RIGHT,
                             disableTooltip = false
                         )
@@ -125,7 +127,7 @@ private fun SettingsBar(viewModel: PokemonSpeedScaleViewModel, modifier: Modifie
                 FilterChip(
                     onClick = { viewModel.flipSpeedNature() },
                     label = {
-                        Text("Speed Nature")
+                        Text("+Speed Nature")
                     },
                     selected = viewModel.speedNature
                 )
