@@ -82,7 +82,7 @@ private fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyL
                     pokemonSpeeds.forEach { pSpeed ->
                         viewModel.pokemonImageService.PokemonSprite(
                             pSpeed.pokemonName,
-                            modifier = if (isCompact) Modifier.size(64.dp).scale(1.5f).padding(8.dp)
+                            modifier = if (isCompact) Modifier.size(75.dp).scale(1.5f).padding(8.dp)
                             else Modifier.size(128.dp).scale(1.5f).padding(16.dp),
                             facingDirection = if (pSpeed.isPokemonOfInterest) FacingDirection.LEFT else FacingDirection.RIGHT,
                             disableTooltip = false
@@ -110,12 +110,13 @@ private fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyL
 
 @Composable
 private fun SettingsBar(viewModel: PokemonSpeedScaleViewModel, modifier: Modifier = Modifier) {
+    // TODO make this expandable card for mobile
     ElevatedCard(modifier = modifier.fillMaxWidth().padding(8.dp)) {
         Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
             Text("Opposing Investments", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
             FlowRow {
-                val padding = if (LocalIsCompact.current) 4.dp else 16.dp
+                val padding = if (LocalIsCompact.current) 8.dp else 16.dp
                 FilterChip(
                     modifier = Modifier.padding(horizontal = padding),
                     onClick = { viewModel.flipMaxEvs() },
@@ -126,13 +127,30 @@ private fun SettingsBar(viewModel: PokemonSpeedScaleViewModel, modifier: Modifie
                 )
 
                 FilterChip(
+                    modifier = Modifier.padding(horizontal = padding),
                     onClick = { viewModel.flipSpeedNature() },
                     label = {
-                        Text("+Speed Nature")
+                        Text("+Speed\nNature")
                     },
                     selected = viewModel.speedNature
                 )
+
+                FilterChip(
+                    modifier = Modifier.padding(horizontal = padding),
+                    onClick = { viewModel.flipScarfBoostNature() },
+                    label = {
+                        Text("Scarf")
+                    },
+                    selected = viewModel.scarfBoost
+                )
+                // TODO add speed stage ExposedDropdownMenuBox
             }
+
+            Spacer(Modifier.height(16.dp))
+            Text("${viewModel.pokemon.name.value}'s Boosts", style = MaterialTheme.typography.titleLarge)
+            // TODO add
+            //   - scarf enabled by default is pokemon's item is scarf or speed booster
+            //   - speed stage ExposedDropdownMenuBox
         }
     }
 }

@@ -49,6 +49,8 @@ class PokemonSpeedScaleViewModel(
         private set
     var speedNature by mutableStateOf(false)
         private set
+    var scarfBoost by mutableStateOf(false)
+        private set
 
     private val scope = CoroutineScope(Dispatchers.Main)
     private var pokemons by mutableStateOf(emptyMap<PokemonName, PokeStats>())
@@ -103,12 +105,15 @@ class PokemonSpeedScaleViewModel(
         val pokemonSpeeds = buildList {
             add(interestPokemon)
             pokemons.forEach { (pokeName, baseStats) ->
-                val speed = PokeStats.compute(
+                var speed = PokeStats.compute(
                     baseStats,
                     evs = PokeStats.default(if (maxEvs) 252 else 0),
                     nature = if (speedNature) Nature.JOLLY else Nature.QUIRKY,
                     level = pokemon.level
                 ).speed
+                if (scarfBoost) {
+                    speed = (speed * 1.5f).toInt()
+                }
                 add(PokemonSpeed(pokeName, speed, speedNature, 0))
             }
         }
@@ -133,6 +138,11 @@ class PokemonSpeedScaleViewModel(
     fun flipSpeedNature() {
         if (isTabLoading) return
         this.speedNature = !speedNature
+        loadSpeedScale()
+    }
+    fun flipScarfBoostNature() {
+        if (isTabLoading) return
+        this.scarfBoost = !scarfBoost
         loadSpeedScale()
     }
 }
