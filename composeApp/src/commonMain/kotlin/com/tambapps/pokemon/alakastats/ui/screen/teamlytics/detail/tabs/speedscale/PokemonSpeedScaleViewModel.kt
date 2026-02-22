@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import arrow.core.Either
 import arrow.core.flatMap
+import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
@@ -51,6 +52,8 @@ class PokemonSpeedScaleViewModel(
         private set
     var scarfBoost by mutableStateOf(false)
         private set
+    var ownScarfBoost by mutableStateOf(pokemon.isScarfOrBooster(pokemonData))
+        private set
 
     private val scope = CoroutineScope(Dispatchers.Main)
     private var pokemons by mutableStateOf(emptyMap<PokemonName, PokeStats>())
@@ -89,14 +92,15 @@ class PokemonSpeedScaleViewModel(
 
     private fun computeScale(pokemons: Map<PokemonName, PokeStats>): SpeedScale {
         val pokemonBaseStats = pokemons[pokemon.name.normalized] ?: PokeStats.default(0)
+        val pokemonSpeed = PokeStats.compute(
+            baseStats = pokemonBaseStats,
+            evs = pokemon.evs,
+            nature = pokemon.nature ?: Nature.QUIRKY,
+            level = 50
+        ).speed.let { if (ownScarfBoost) (it * 1.5f).toInt() else it }
         val interestPokemon = PokemonSpeed(
             pokemonName = pokemon.name,
-            value = PokeStats.compute(
-                baseStats = pokemonBaseStats,
-                evs = pokemon.evs,
-                nature = pokemon.nature ?: Nature.QUIRKY,
-                level = 50
-            ).speed,
+            value = pokemonSpeed,
             boostNature = pokemon.nature?.bonusStat == Stat.SPEED,
             ev = pokemon.evs.speed,
             isPokemonOfInterest = true
@@ -105,15 +109,12 @@ class PokemonSpeedScaleViewModel(
         val pokemonSpeeds = buildList {
             add(interestPokemon)
             pokemons.forEach { (pokeName, baseStats) ->
-                var speed = PokeStats.compute(
+                val speed = PokeStats.compute(
                     baseStats,
                     evs = PokeStats.default(if (maxEvs) 252 else 0),
                     nature = if (speedNature) Nature.JOLLY else Nature.QUIRKY,
                     level = pokemon.level
-                ).speed
-                if (scarfBoost) {
-                    speed = (speed * 1.5f).toInt()
-                }
+                ).speed.let { if (scarfBoost) (it * 1.5f).toInt()  else it }
                 add(PokemonSpeed(pokeName, speed, speedNature, 0))
             }
         }
@@ -145,4 +146,18 @@ class PokemonSpeedScaleViewModel(
         this.scarfBoost = !scarfBoost
         loadSpeedScale()
     }
+
+    fun flipOwnScarfBoostNature() {
+        if (isTabLoading) return
+        this.ownScarfBoost = !ownScarfBoost
+        loadSpeedScale()
+    }
 }
+
+private fun Pokemon.isScarfOrBooster(pokemonData: PokemonData?): Boolean {
+    val item = item ?: return false
+    return item.normalized.value.let {
+        it == "choice-scarf" || it == "booster-energy" && pokemonData != null && pokemonData.stats.isSpeedHighestStat() }
+}
+
+private fun PokeStats.isSpeedHighestStat(): Boolean = Stat.entries.maxOfOrNull { this[it] } == speed

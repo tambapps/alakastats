@@ -1,6 +1,5 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -19,7 +17,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -133,11 +130,11 @@ private fun SettingsBarContent(viewModel: PokemonSpeedScaleViewModel) {
         Text("Opposing Investments", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(8.dp))
         val isCompact = LocalIsCompact.current
+        val flowRowPadding = if (isCompact) 8.dp else 16.dp
+        val separator = if (isCompact) "\n" else " "
         FlowRow {
-            val padding = if (isCompact) 8.dp else 16.dp
-            val separator = if (isCompact) "\n" else " "
             FilterChip(
-                modifier = Modifier.padding(horizontal = padding),
+                modifier = Modifier.padding(horizontal = flowRowPadding),
                 onClick = { viewModel.flipMaxEvs() },
                 label = {
                     Text("252${separator}EVs", textAlign = TextAlign.Center)
@@ -146,7 +143,7 @@ private fun SettingsBarContent(viewModel: PokemonSpeedScaleViewModel) {
             )
 
             FilterChip(
-                modifier = Modifier.padding(horizontal = padding),
+                modifier = Modifier.padding(horizontal = flowRowPadding),
                 onClick = { viewModel.flipSpeedNature() },
                 label = {
                     Text("+Spe${separator}Nature", textAlign = TextAlign.Center)
@@ -155,7 +152,7 @@ private fun SettingsBarContent(viewModel: PokemonSpeedScaleViewModel) {
             )
 
             FilterChip(
-                modifier = Modifier.padding(horizontal = padding),
+                modifier = Modifier.padding(horizontal = flowRowPadding),
                 onClick = { viewModel.flipScarfBoostNature() },
                 label = {
                     Text("Scarf/${separator}Booster Spe", textAlign = TextAlign.Center)
@@ -167,8 +164,19 @@ private fun SettingsBarContent(viewModel: PokemonSpeedScaleViewModel) {
 
         Spacer(Modifier.height(16.dp))
         Text("${viewModel.pokemon.name.value}'s Boosts", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(8.dp))
+        FlowRow {
+            FilterChip(
+                modifier = Modifier.padding(horizontal = flowRowPadding),
+                onClick = { viewModel.flipOwnScarfBoostNature() },
+                label = {
+                    Text("Scarf/${separator}Booster Spe", textAlign = TextAlign.Center)
+                },
+                selected = viewModel.ownScarfBoost
+            )
+        }
+
         // TODO add
-        //   - scarf enabled by default is pokemon's item is scarf or speed booster
         //   - speed stage ExposedDropdownMenuBox
     }
 }
