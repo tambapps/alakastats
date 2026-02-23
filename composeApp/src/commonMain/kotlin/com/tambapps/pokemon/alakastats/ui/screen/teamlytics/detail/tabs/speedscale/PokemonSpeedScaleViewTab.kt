@@ -1,9 +1,12 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,8 +24,10 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -66,15 +71,16 @@ fun PokemonSpeedScaleViewTab(
         return
     }
     val scrollState = rememberLazyListState()
-    Column(Modifier.fillMaxSize()) {
-        SettingsBar(viewModel)
-        SpeedScale(viewModel, scrollState, Modifier.weight(1f))
+    if (LocalIsCompact.current) {
+        PokemonSpeedScaleViewTabMobile(viewModel, scrollState)
+    } else {
+        PokemonSpeedScaleViewTabDesktop(viewModel, scrollState)
     }
     ScrollToTopIfNeeded(viewModel, scrollState)
 }
 
 @Composable
-private fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyListState, modifier: Modifier) {
+internal fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyListState, modifier: Modifier) {
     val speedScale = viewModel.speedScale ?: return
     val isCompact = LocalIsCompact.current
     LazyColumnWithScrollbar(modifier = modifier.fillMaxWidth(), state = scrollState) {
@@ -117,92 +123,74 @@ private fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyL
     }
 }
 
+val flowRowPadding @Composable get() = if (LocalIsCompact.current) 8.dp else 16.dp
+val separator @Composable get() = if (LocalIsCompact.current) "\n" else " "
+
 @Composable
-private fun SettingsBar(viewModel: PokemonSpeedScaleViewModel, modifier: Modifier = Modifier) {
-    if (LocalIsCompact.current) {
-        ExpansionTile(
-            modifier = Modifier.fillMaxWidth().padding(8.dp),
-            title = {
-                Text("Speed Settings", style = MaterialTheme.typography.titleLarge)
-            }
-        ) {
-            SettingsBarContent(viewModel)
-        }
-    } else {
-        ElevatedCard(modifier = modifier.fillMaxWidth().padding(8.dp)) {
-            SettingsBarContent(viewModel)
-        }
+fun OpposingInvestmentsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
+    FlowRow(
+        verticalArrangement = Arrangement.Center
+    ) {
+        FilterChip(
+            modifier = Modifier.padding(horizontal = flowRowPadding),
+            onClick = { viewModel.flipMaxEvs() },
+            label = {
+                Text("252${separator}EVs", textAlign = TextAlign.Center)
+            },
+            selected = viewModel.maxEvs
+        )
+
+        FilterChip(
+            modifier = Modifier.padding(horizontal = flowRowPadding),
+            onClick = { viewModel.flipSpeedNature() },
+            label = {
+                Text("+Spe${separator}Nature", textAlign = TextAlign.Center)
+            },
+            selected = viewModel.speedNature
+        )
+
+        FilterChip(
+            modifier = Modifier.padding(horizontal = flowRowPadding),
+            onClick = { viewModel.flipScarfBoostNature() },
+            label = {
+                Text("Scarf/${separator}Booster Spe", textAlign = TextAlign.Center)
+            },
+            selected = viewModel.scarfBoost
+        )
+
+        SpeedStageDropDown(
+            modifier = Modifier.padding(flowRowPadding),
+            value = viewModel.stage,
+            onValueChange = { viewModel.updateStage(it) }
+        )
     }
 }
 
 @Composable
-private fun SettingsBarContent(viewModel: PokemonSpeedScaleViewModel) {
-    Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-        Text("Opposing Investments", style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.height(8.dp))
-        val isCompact = LocalIsCompact.current
-        val flowRowPadding = if (isCompact) 8.dp else 16.dp
-        val separator = if (isCompact) "\n" else " "
-        FlowRow {
-            FilterChip(
-                modifier = Modifier.padding(horizontal = flowRowPadding),
-                onClick = { viewModel.flipMaxEvs() },
-                label = {
-                    Text("252${separator}EVs", textAlign = TextAlign.Center)
-                },
-                selected = viewModel.maxEvs
-            )
+fun PokemonBoostsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
+    FlowRow(
+        verticalArrangement = Arrangement.Center
+    ) {
+        FilterChip(
+            modifier = Modifier.padding(horizontal = flowRowPadding),
+            onClick = { viewModel.flipOwnScarfBoostNature() },
+            label = {
+                Text("Scarf/${separator}Booster Spe", textAlign = TextAlign.Center)
+            },
+            selected = viewModel.ownScarfBoost
+        )
 
-            FilterChip(
-                modifier = Modifier.padding(horizontal = flowRowPadding),
-                onClick = { viewModel.flipSpeedNature() },
-                label = {
-                    Text("+Spe${separator}Nature", textAlign = TextAlign.Center)
-                },
-                selected = viewModel.speedNature
-            )
-
-            FilterChip(
-                modifier = Modifier.padding(horizontal = flowRowPadding),
-                onClick = { viewModel.flipScarfBoostNature() },
-                label = {
-                    Text("Scarf/${separator}Booster Spe", textAlign = TextAlign.Center)
-                },
-                selected = viewModel.scarfBoost
-            )
-
-            SpeedStageDropDown(
-                modifier = Modifier.padding(flowRowPadding),
-                value = viewModel.stage,
-                onValueChange = { viewModel.updateStage(it) }
-            )
-        }
-
-        Spacer(Modifier.height(16.dp))
-        Text("${viewModel.pokemon.name.value}'s Boosts", style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.height(8.dp))
-        FlowRow {
-            FilterChip(
-                modifier = Modifier.padding(horizontal = flowRowPadding),
-                onClick = { viewModel.flipOwnScarfBoostNature() },
-                label = {
-                    Text("Scarf/${separator}Booster Spe", textAlign = TextAlign.Center)
-                },
-                selected = viewModel.ownScarfBoost
-            )
-
-            SpeedStageDropDown(
-                modifier = Modifier.padding(flowRowPadding),
-                value = viewModel.ownStage,
-                onValueChange = { viewModel.updateOwnStage(it) }
-            )
-        }
+        SpeedStageDropDown(
+            modifier = Modifier.padding(flowRowPadding),
+            value = viewModel.ownStage,
+            onValueChange = { viewModel.updateOwnStage(it) }
+        )
     }
 }
 
 data class StatBoostStage(val level: Int, val multiplier: Float) {
     val displayedText get() = buildString {
-        if (level == 0) append("Neutral (+0)")
+        if (level == 0) append("+0 (x1)")
         else {
             if (level > 0) append("+")
             append(level)
@@ -235,17 +223,19 @@ private fun SpeedStageDropDown(value: Int, onValueChange: (Int) -> Unit, modifie
     }
 
     ExposedDropdownMenuBox(
-        modifier = modifier.width(220.dp),
+        modifier = Modifier.padding(horizontal = flowRowPadding),
         expanded = expanded,
         onExpandedChange = { expanded = it }
     ) {
-        OutlinedTextField(
-            value = "Stage: " + (values.find { it.level == value } ?: values[6]).displayedText,
-            onValueChange = {},
-            readOnly = true,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-        )
+        OutlinedButton(
+            shape = FilterChipDefaults.shape,
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+             onClick = {}
+        ) {
+            Text((values.find { it.level == value } ?: values[6]).displayedText)
+            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+        }
 
         ExposedDropdownMenu(
             expanded = expanded,
