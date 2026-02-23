@@ -40,7 +40,7 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun ExpansionTile(
     title: @Composable RowScope.(Boolean) -> Unit,
-    subtitle: @Composable () -> Unit = {},
+    subtitle: @Composable (Boolean) -> Unit = {},
     disableWhenOpened: Boolean = false,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -63,7 +63,7 @@ fun ExpansionTile(
 fun ExpansionTile(
     title: @Composable RowScope.(Boolean) -> Unit,
     menu: @Composable ((MutableState<Boolean>) -> Unit)?,
-    subtitle: @Composable () -> Unit = {},
+    subtitle: @Composable (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
     gradientBackgroundColors: List<Color>? = null,
     onClick: (() -> Unit)? = null,
@@ -108,7 +108,7 @@ fun ExpansionTile(
 private fun AbstractExpansionTile(
     modifier: Modifier,
     title: @Composable RowScope.(Boolean) -> Unit,
-    subtitle: @Composable () -> Unit = {},
+    subtitle: @Composable (Boolean) -> Unit = {},
     expandButton: @Composable (MutableState<Boolean>) -> Unit,
     gradientBackgroundColors: List<Color>? = null,
     content: @Composable () -> Unit,
@@ -147,7 +147,7 @@ private fun AbstractExpansionTile(
                     expandButton(isCardExpandedState)
                 }
             }
-            subtitle()
+            subtitle(isCardExpandedState.value)
             AnimatedVisibility(
                 visible = isCardExpandedState.value,
                 enter = expandVertically(),

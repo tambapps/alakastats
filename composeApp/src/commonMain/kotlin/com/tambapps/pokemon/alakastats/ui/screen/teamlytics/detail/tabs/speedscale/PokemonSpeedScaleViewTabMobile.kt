@@ -33,6 +33,26 @@ private fun SettingsBar(viewModel: PokemonSpeedScaleViewModel) {
         modifier = Modifier.fillMaxWidth().padding(8.dp),
         title = {
             Text("Speed Settings", style = MaterialTheme.typography.titleLarge)
+        },
+        subtitle = { isExpanded ->
+            if (isExpanded) {
+                return@ExpansionTile
+            }
+            val opposingString = buildString {
+                if (viewModel.stage != 0) append(if (viewModel.stage > 0) "+${viewModel.stage}" else viewModel.stage).append(" ")
+                when {
+                    viewModel.maxEvs && viewModel.speedNature -> append("252+ ")
+                    viewModel.maxEvs -> append("252 ")
+                    viewModel.speedNature -> append("+Spe Nature ")
+                }
+                if (viewModel.scarfBoost) append("Scarf")
+            }
+            opposingString.takeIf { !it.isBlank() }?.let { Text("Opposing Investments: $it") }
+            val pokemonString = buildString {
+                if (viewModel.ownStage != 0) append(if (viewModel.ownStage > 0) "+${viewModel.ownStage}" else viewModel.ownStage).append(" ")
+                if (viewModel.ownScarfBoost) append("Scarf")
+            }
+            pokemonString.takeIf { !it.isBlank() }?.let { Text("${viewModel.pokemon.name.pretty}: $it") }
         }
     ) {
         Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
