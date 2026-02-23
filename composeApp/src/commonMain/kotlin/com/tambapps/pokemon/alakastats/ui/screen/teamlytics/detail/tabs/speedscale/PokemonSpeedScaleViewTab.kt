@@ -159,7 +159,6 @@ fun OpposingInvestmentsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
         )
 
         SpeedStageDropDown(
-            modifier = Modifier.padding(flowRowPadding),
             value = viewModel.stage,
             onValueChange = { viewModel.updateStage(it) }
         )
@@ -167,7 +166,7 @@ fun OpposingInvestmentsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
 }
 
 @Composable
-fun PokemonBoostsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
+internal fun PokemonBoostsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
     FlowRow(
         verticalArrangement = Arrangement.Center
     ) {
@@ -181,7 +180,6 @@ fun PokemonBoostsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
         )
 
         SpeedStageDropDown(
-            modifier = Modifier.padding(flowRowPadding),
             value = viewModel.ownStage,
             onValueChange = { viewModel.updateOwnStage(it) }
         )
@@ -202,7 +200,7 @@ data class StatBoostStage(val level: Int, val multiplier: Float) {
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SpeedStageDropDown(value: Int, onValueChange: (Int) -> Unit, modifier: Modifier = Modifier) {
+private fun SpeedStageDropDown(value: Int, onValueChange: (Int) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val values = remember {
         listOf(
@@ -229,7 +227,7 @@ private fun SpeedStageDropDown(value: Int, onValueChange: (Int) -> Unit, modifie
     ) {
         OutlinedButton(
             shape = FilterChipDefaults.shape,
-            contentPadding = PaddingValues(horizontal = 8.dp),
+            contentPadding = PaddingValues(horizontal = 10.dp),
             modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
              onClick = {}
         ) {

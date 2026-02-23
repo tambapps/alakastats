@@ -13,6 +13,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -39,7 +40,10 @@ private fun SettingsBar(viewModel: PokemonSpeedScaleViewModel, modifier: Modifie
                 OpposingInvestmentsFlowRow(viewModel)
             }
             Spacer(Modifier.width(16.dp))
-            Column(Modifier.weight(1f)) {
+            Column(
+                Modifier.weight(1f),
+                horizontalAlignment = Alignment.End
+            ) {
                 Text("${viewModel.pokemon.name.value}'s Boosts", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(8.dp))
                 PokemonBoostsFlowRow(viewModel)
