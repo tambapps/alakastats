@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
@@ -49,7 +49,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.edit.MatchupNotesEdit
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit.MatchupNotesEdit
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ExpandableDesktopReplay
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ReplayCompact
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection

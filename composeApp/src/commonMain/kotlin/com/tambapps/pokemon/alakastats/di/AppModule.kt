@@ -30,8 +30,8 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.TeamPokemonSt
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailOverviewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale.PokemonSpeedScaleViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.MatchupNotesViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.edit.MatchupNotesEditViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupNotesViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit.MatchupNotesEditViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.TeamReplayViewModel

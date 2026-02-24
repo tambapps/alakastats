@@ -41,8 +41,8 @@ import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.MatchupNotesTab
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.MatchupNotesViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupNotesTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.UsagesTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.overview.OverviewTab
@@ -56,7 +56,7 @@ import kotlin.uuid.Uuid
 
 data class TeamlyticsScreen(val teamId: Uuid) : Screen {
     private companion object {
-        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Matchup Notes")
+        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Game Plans")
     }
 
     @OptIn(ExperimentalMaterial3Api::class)

@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.edit
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -9,7 +9,6 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
 import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
-import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser

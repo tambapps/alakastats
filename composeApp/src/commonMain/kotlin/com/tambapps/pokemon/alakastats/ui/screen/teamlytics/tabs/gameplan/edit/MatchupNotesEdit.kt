@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.edit
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
