@@ -187,9 +187,11 @@ data class Player(
     // sorted to always have the same order
     val lead get() = selection.take(2).sortedBy { it.value }
 
-    fun hasSelected(pokemonName: PokemonName) = selection.any { pokemonName.matches(it) }
+    val teamPokemonNames get() = ots?.pokemons?.map { it.name } ?: teamPreview.pokemons.map { it.name }
 
-    fun hasTerastallized(pokemonName: PokemonName) = terastallization?.pokemon?.matches(pokemonName) == true
+    fun hasSelected(pokemonName: PokemonName) = selection.any { pokemonName.baseMatches(it) }
 
-    fun isLead(pokemonName: PokemonName) = lead.any { pokemonName.matches(it) }
+    fun hasTerastallized(pokemonName: PokemonName) = terastallization?.pokemon?.baseMatches(pokemonName) == true
+
+    fun isLead(pokemonName: PokemonName) = lead.any { pokemonName.baseMatches(it) }
 }
