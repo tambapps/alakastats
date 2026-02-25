@@ -6,37 +6,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.ui.composables.PokemonCard
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatCard
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollableRow
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.NoReplay
-import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
-import kotlin.math.pow
 
 @Composable
 fun LeadStatsTab(viewModel: LeadStatsViewModel) {
@@ -134,99 +120,29 @@ private fun LeadRow(
     }
 }
 
-/**
- * Function given by ChatGPT: Power-law (gamma) mapping — easiest to tune
- * I wanted a function to offset a little Pokemons with a small width, and a lot Pokemon with large with,
- * here it is
- */
-private fun leadOffsetDp(
-    widthDp: Dp,
-    minOffsetDp: Dp,     // thin sprites
-    maxOffsetDp: Dp,     // very wide sprites
-    wMinDp: Dp = 56.dp,          // tune to your art
-    wMaxDp: Dp = 160.dp,         // tune to your art
-    gamma: Double = 1.8
-): Dp {
-    val w = widthDp.value
-    val wMin = wMinDp.value
-    val wMax = wMaxDp.value
-    val t = ((w - wMin) / (wMax - wMin)).coerceIn(0f, 1f)
-    val eased = t.toDouble().pow(gamma).toFloat()
-    val off = minOffsetDp.value + (maxOffsetDp.value - minOffsetDp.value) * eased
-    return off.dp
-}
-
-
 @Composable
 private fun LeadCard(
     viewModel: LeadStatsViewModel,
     pokemonName: PokemonName,
     pokemonName2: PokemonName? = null,
     stat: WinStats,
-    modifier: Modifier) {
-    val density = LocalDensity.current
-    val (minOffsetDp, maxOffsetDp) = if (pokemonName2 == null) 12.dp  to 80.dp else 24.dp to 100.dp
-    PokemonCard(
-        modifier = modifier,
-        pokemonArtwork = { contentWidth, contentHeight ->
-            var spriteWidth by remember { mutableStateOf(0.dp) }
-            viewModel.pokemonImageService.PokemonArtwork(
-                name = pokemonName,
-                modifier = Modifier.align(Alignment.BottomEnd)
-                    .height(if (LocalIsCompact.current) 175.dp else 200.dp)
-                    // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
-                    .widthIn(max = remember(contentWidth) { contentWidth * 0.7f })
-                    .onSizeChanged { size ->
-                        with(density) { spriteWidth = size.width.toDp() }
-                    }
-                    .offset(y = 16.dp, x = leadOffsetDp(
-                        spriteWidth,
-                        minOffsetDp = minOffsetDp,
-                        maxOffsetDp = maxOffsetDp
-                    ))
-            )
-            pokemonName2?.let {
-                var spriteWidth by remember { mutableStateOf(0.dp) }
-
-                viewModel.pokemonImageService.PokemonArtwork(
-                    name = it,
-                    facingDirection = FacingDirection.RIGHT,
-                    modifier = Modifier.align(Alignment.BottomStart)
-                        .height(if (LocalIsCompact.current) 175.dp else 200.dp)
-                        // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
-                        .widthIn(max = remember(contentWidth) { contentWidth * 0.7f })
-                        .onSizeChanged { size ->
-                            with(density) { spriteWidth = size.width.toDp() }
-                        }
-                        .offset(y = 16.dp, x = - leadOffsetDp(
-                            spriteWidth,
-                            minOffsetDp = minOffsetDp,
-                            maxOffsetDp = maxOffsetDp
-                        ))
-                )
-            }
-        }
-    ) {
-        Text(
-            "${stat.winRate.times(100).toInt()}%",
-            modifier = Modifier.align(Alignment.TopCenter),
-            style = MaterialTheme.typography.displayLarge,
-            textAlign = TextAlign.Center,
-        )
-
-        val winCount = stat.winCount
-        val total = stat.total
-        Text(
-            when {
-                total == 0 -> "Did not participate\nto any game"
-                winCount == 0 -> "Lost all $total games"
-                winCount == total && total == 1 -> "Won\n1 out of 1\ngame"
-                winCount == total -> "Won all\n$total games"
-                else -> "Won ${winCount}\nout of ${stat.total}\ngames"
-            },
-            textAlign = if (pokemonName2 != null) TextAlign.Center else TextAlign.Start,
-            modifier = Modifier.align(if (pokemonName2 != null) Alignment.BottomCenter else Alignment.BottomStart).padding(bottom = 8.dp),
-            style = MaterialTheme.typography.headlineMedium
-        )
+    modifier: Modifier
+) {
+    val winCount = stat.winCount
+    val total = stat.total
+    val text = when {
+        total == 0 -> "Did not participate\nto any game"
+        winCount == 0 -> "Lost all $total games"
+        winCount == total && total == 1 -> "Won\n1 out of 1\ngame"
+        winCount == total -> "Won all\n$total games"
+        else -> "Won ${winCount}\nout of ${stat.total}\ngames"
     }
+    PokemonStatCard(
+        pokemonImageService = viewModel.pokemonImageService,
+        title = "${stat.winRate.times(100).toInt()}%",
+        text = text,
+        pokemonName = pokemonName,
+        pokemonName2 = pokemonName2,
+        modifier = modifier
+    )
 }
