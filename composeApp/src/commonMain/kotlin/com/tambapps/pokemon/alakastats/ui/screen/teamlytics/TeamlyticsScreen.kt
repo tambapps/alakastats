@@ -32,6 +32,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
@@ -43,6 +44,8 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsT
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupNotesTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupNotesViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.MatchupsTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.MatchupsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.UsagesTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.overview.OverviewTab
@@ -56,7 +59,7 @@ import kotlin.uuid.Uuid
 
 data class TeamlyticsScreen(val teamId: Uuid) : Screen {
     private companion object {
-        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Game Plans")
+        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Matchup Stats", "Game Plans")
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -133,7 +136,10 @@ internal fun Pager(
             3 -> PagerTab<ConsultTeamlyticsUseCase, LeadStatsViewModel>(viewModel, page) {
                 LeadStatsTab(it)
             }
-            4 -> PagerTab<ManageMatchupNotesUseCase, MatchupNotesViewModel>(viewModel, page) {
+            4 -> PagerTab<ManageReplayFiltersUseCase, MatchupsViewModel>(viewModel, page) {
+                MatchupsTab(it)
+            }
+            5 -> PagerTab<ManageMatchupNotesUseCase, MatchupNotesViewModel>(viewModel, page) {
                 MatchupNotesTab(it)
             }
         }

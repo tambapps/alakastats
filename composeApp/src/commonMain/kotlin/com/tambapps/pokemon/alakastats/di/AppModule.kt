@@ -14,6 +14,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalFormatDataRepository
@@ -32,6 +33,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedsca
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupNotesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit.MatchupNotesEditViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.MatchupsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.overview.OverviewViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.TeamReplayViewModel
@@ -101,11 +103,14 @@ val appModules = listOf(module {
     factory { (useCase: ManageTeamReplaysUseCase) ->
         TeamReplayViewModel(useCase, get(), get())
     }
-    factory { (useCase: ManageTeamReplaysUseCase) ->
+    factory { (useCase: ManageReplayFiltersUseCase) ->
         LeadStatsViewModel(useCase, get())
     }
     factory { (useCase: ManageTeamReplaysUseCase) ->
         UsagesViewModel(useCase, get())
+    }
+    factory { (useCase: ManageReplayFiltersUseCase) ->
+        MatchupsViewModel(useCase, get())
     }
     factory { (useCase: ManageMatchupNotesUseCase) ->
         MatchupNotesViewModel(useCase, get())
