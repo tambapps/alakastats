@@ -54,7 +54,9 @@ fun MatchupsTab(viewModel: MatchupsViewModel) {
         Spacer(Modifier.height(space))
         LowestAttendancesRow(viewModel)
         Spacer(Modifier.height(space))
-        CommonLeadsStats(viewModel)
+        CommonLeadsStatsRow(viewModel)
+        Spacer(Modifier.height(space))
+        WorstLeadsStatsRow(viewModel)
         Spacer(Modifier.height(space))
     }
 }
@@ -65,18 +67,10 @@ fun BestMatchupsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
     title = "Best Matchups",
     stats = viewModel.bestMatchups,
     isDuo = false) { matchupStats ->
-    val winCount = matchupStats.winCount
-    val total = matchupStats.attendanceCount
-    val text = when {
-        winCount == 0 -> "Lost to all $total games"
-        winCount == total && total == 1 -> "Beat\n1 out of 1\ngame"
-        winCount == total -> "Beat all\n$total games"
-        else -> "Beat ${winCount}\nout of ${total}\ngames"
-    }
     PokemonStatCard(
         pokemonImageService = viewModel.pokemonImageService,
         title = "${matchupStats.rate.times(100).toInt()}%",
-        text = text,
+        text = winRatioText(winCount = matchupStats.winCount, total = matchupStats.attendanceCount),
         pokemonName = matchupStats.pokemonName,
         modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
     )
@@ -88,18 +82,10 @@ fun WorstMatchupsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
     title = "Worst Matchups",
     stats = viewModel.worstMatchups,
     isDuo = false) { matchupStats ->
-    val looseCount = matchupStats.attendanceCount - matchupStats.winCount
-    val total = matchupStats.attendanceCount
-    val text = when {
-        looseCount == 0 -> "Beat all $total games"
-        looseCount == total && total == 1 -> "Lost to\n1 out of 1\ngame"
-        looseCount == total -> "Lost to all\n$total games"
-        else -> "Lost to ${looseCount}\nout of ${total}\ngames"
-    }
     PokemonStatCard(
         pokemonImageService = viewModel.pokemonImageService,
         title = "${matchupStats.rate.times(100).toInt()}%",
-        text = text,
+        text = winRatioText(winCount = matchupStats.winCount, total = matchupStats.attendanceCount),
         pokemonName = matchupStats.pokemonName,
         modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
     )
@@ -114,7 +100,7 @@ fun HighestAttendancesRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
     val attendanceCount = attendanceStats.attendanceCount
     val total = attendanceStats.totalGamesCount
     val text = when {
-        attendanceCount == 0 -> "Not seen all $total games"
+        attendanceCount == 0 && total > 1 -> "Not seen all $total games"
         attendanceCount == total && total == 1 -> "Seen\n1 out of 1\ngame"
         attendanceCount == total -> "Seen all\n$total games"
         else -> "Seen ${attendanceCount}\nout of ${total}\ngames"
@@ -152,7 +138,7 @@ fun LowestAttendancesRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
 }
 
 @Composable
-private fun CommonLeadsStats(viewModel: MatchupsViewModel) = PokemonStatsRow(
+private fun CommonLeadsStatsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
     viewModel = viewModel,
     title = if (LocalIsCompact.current) "Common Opp. Leads" else "Common Opposing Leads",
     stats = viewModel.commonLeads,
@@ -169,11 +155,37 @@ private fun CommonLeadsStats(viewModel: MatchupsViewModel) = PokemonStatsRow(
     }
     PokemonStatCard(
         pokemonImageService = viewModel.pokemonImageService,
-        title = "${leadStats.rate.times(100).toInt()}%",
+        title = "${leadStats.attendanceRate.times(100).toInt()}%",
         text = text,
         pokemonName = leadStats.lead.first(),
         pokemonName2 = leadStats.lead.getOrNull(1),
         modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
     )
 
+}
+
+@Composable
+private fun WorstLeadsStatsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
+    viewModel = viewModel,
+    title = if (LocalIsCompact.current) "Worst Opp. Leads" else "Worst Opposing Leads",
+    stats = viewModel.worstLeads,
+    isDuo = viewModel.worstLeads.firstOrNull()?.lead?.let { it.size >= 2 } == true,
+    emptyMessage = if (!viewModel.filters.hasAny()) "Apply filters to see worst opposing leads in a matchup" else "No data to display"
+) { leadStats ->
+    PokemonStatCard(
+        pokemonImageService = viewModel.pokemonImageService,
+        title = "${leadStats.winRate.times(100).toInt()}%",
+        text = winRatioText(winCount = leadStats.winCount, total = leadStats.attendanceCount, isDuo = true),
+        pokemonName = leadStats.lead.first(),
+        pokemonName2 = leadStats.lead.getOrNull(1),
+        modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
+    )
+
+}
+
+private fun winRatioText(winCount: Int, total: Int, isDuo: Boolean = false) =  when {
+    winCount == 0 && total > 1 -> if (isDuo) "Lost all\n$total games" else "Lost all $total games"
+    winCount == total && total == 1 -> "Beat\n1 out of 1\ngame"
+    winCount == total -> "Beat all\n$total games"
+    else -> "Beat ${winCount}\nout of $total\ngames"
 }

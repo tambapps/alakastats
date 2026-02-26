@@ -38,6 +38,8 @@ class MatchupsViewModel(
         private set
     var commonLeads by mutableStateOf(emptyList<LeadStats>())
         private set
+    var worstLeads by mutableStateOf(emptyList<LeadStats>())
+        private set
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
@@ -55,27 +57,28 @@ class MatchupsViewModel(
                 worstMatchups = matchupStatsResult.second
                 highestAttendances = attendanceStatsResult.first
                 lowestAttendances = attendanceStatsResult.second
-                commonLeads = commonLeadsResult
+                commonLeads = commonLeadsResult.first
+                worstLeads = commonLeadsResult.second
                 isTabLoading = false
             }
         }
     }
 
-    private fun computeCommonLeadStats(): List<LeadStats> = useCase.filteredTeam.withContext {
-        if (!filters.hasAny()) return@withContext emptyList()
+    private fun computeCommonLeadStats(): Pair<List<LeadStats>, List<LeadStats>> = useCase.filteredTeam.withContext {
+        if (!filters.hasAny()) return@withContext emptyList<LeadStats>() to emptyList()
         val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
 
-        val sortedStats = buildMap {
+        val leadsStats = buildMap {
             for (replay in replays) {
                 val opponentPlayer = replay.opponentPlayer
                 val lead = opponentPlayer.lead
                 val currentStats = getOrPut(lead) { LeadStats(lead, replays.size) }
-                this[lead] = currentStats.copy(attendanceCount = currentStats.attendanceCount + 1)
-
+                this[lead] = currentStats.incr(hasWon = replay.gameOutput == GameOutput.WIN)
             }
-        }.values.sortedBy { - it.attendanceCount }
+        }.values
+        leadsStats.sortedBy { - it.attendanceCount }.take(MATCHUP_LIST_MAX_LENGTH) to
+                leadsStats.sortedWith(compareBy({ it.winRate }, { - it.attendanceCount })).take(MATCHUP_LIST_MAX_LENGTH)
 
-        sortedStats.take(MATCHUP_LIST_MAX_LENGTH)
     }
 
     private fun computeMatchupStats(): Pair<List<MatchupStats>, List<MatchupStats>> = computeStats(
@@ -139,8 +142,10 @@ data class LeadStats(
     val lead: List<PokemonName>,
     val totalGamesCount: Int,
     val attendanceCount: Int = 0,
+    val winCount: Int = 0,
     ) {
-    val rate = attendanceCount.toFloat() / totalGamesCount
+    val attendanceRate = attendanceCount.toFloat() / totalGamesCount
+    val winRate = winCount.toFloat() / attendanceCount
 }
 
 private fun MatchupStats.incr(hasWon: Boolean) = copy(
@@ -151,4 +156,9 @@ private fun MatchupStats.incr(hasWon: Boolean) = copy(
 private fun AttendanceStats.incr(hasAttended: Boolean) = copy(
     attendanceCount = if (hasAttended) attendanceCount + 1 else attendanceCount,
     totalGamesCount = totalGamesCount + 1
+)
+
+private fun LeadStats.incr(hasWon: Boolean) = copy(
+    attendanceCount = attendanceCount + 1,
+    winCount = if (hasWon) winCount + 1 else winCount,
 )
