@@ -26,7 +26,7 @@ class MatchupsViewModel(
     override var isTabLoading by mutableStateOf(false)
         private set
 
-    val hasNoData get() = bestMatchups.isEmpty() && worstMatchups.isEmpty()
+    val hasNoData get() = useCase.filteredTeam.replays.isEmpty()
 
     var bestMatchups by mutableStateOf(emptyList<MatchupStats>())
         private set

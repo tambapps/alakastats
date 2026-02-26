@@ -59,7 +59,7 @@ fun OpponentTrendsTab(viewModel: MatchupsViewModel) {
             if (showDialog) {
                 WheelPickerDialog(
                     title = "Minimum Attendance",
-                    items = (1..10).toList(),
+                    items = (1..100).toList(),
                     initialIndex = viewModel.minimumAttendance - 1,
                     onPicked = { viewModel.updateMinimumAttendance(it) },
                     onDismissRequest = { showDialog = false }
