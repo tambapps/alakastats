@@ -1,7 +1,37 @@
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+
+abstract class GenerateBuildConfigTask : DefaultTask() {
+    @get:Input
+    abstract val versionName: Property<String>
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val file = outputDir.get().asFile
+            .resolve("com/tambapps/pokemon/alakastats/AppBuildConfig.kt")
+        file.parentFile.mkdirs()
+        file.writeText(
+            """
+            package com.tambapps.pokemon.alakastats
+
+            object AppBuildConfig {
+                const val VERSION_NAME = "${versionName.get()}"
+            }
+            """.trimIndent()
+        )
+    }
+}
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -9,6 +39,14 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlin.serialization)
+}
+
+val appVersionName = "1.0"
+val appVersionCode = 1
+
+val generateBuildConfig by tasks.registering(GenerateBuildConfigTask::class) {
+    versionName.set(appVersionName)
+    outputDir.set(layout.buildDirectory.dir("generated/buildconfig/commonMain/kotlin"))
 }
 
 kotlin {
@@ -58,6 +96,9 @@ kotlin {
     }
     
     sourceSets {
+        commonMain {
+            kotlin.srcDir(generateBuildConfig)
+        }
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -120,8 +161,8 @@ android {
         applicationId = "com.tambapps.pokemon.alakastats"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
     }
     packaging {
         resources {

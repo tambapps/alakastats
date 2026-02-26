@@ -31,10 +31,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.AppBuildConfig
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.jetbrains.compose.resources.painterResource
 
@@ -64,37 +66,44 @@ internal fun HomeScreenDesktop(viewModel: HomeViewModel) {
 }
 
 @Composable
-fun AlakastatsLabel(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Image(
-            painter = painterResource(if (isDarkThemeEnabled()) Res.drawable.alakastats_dark else Res.drawable.alakastats),
-            contentDescription = "Alakastats logo",
-            modifier = Modifier.size(80.dp),
-            contentScale = ContentScale.Fit
-        )
-        var fontSize by remember { mutableStateOf(TextUnit.Unspecified) }
-        Text(
-            "Alakastats",
-            style = MaterialTheme.typography.displayLarge,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            fontSize = fontSize,
-            overflow = TextOverflow.Clip,
-            onTextLayout = { result ->
-                // useful for the use in AboutScreen for mobile
-                if (result.hasVisualOverflow) {
-                    val currentSize = if (fontSize == TextUnit.Unspecified)
-                        result.layoutInput.style.fontSize
-                    else fontSize
-                    fontSize = (currentSize.value * 0.9f).sp
+fun AlakastatsLabel(modifier: Modifier = Modifier, withVersion: Boolean = false) {
+    Column(modifier = modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                painter = painterResource(if (isDarkThemeEnabled()) Res.drawable.alakastats_dark else Res.drawable.alakastats),
+                contentDescription = "Alakastats logo",
+                modifier = Modifier.size(80.dp),
+                contentScale = ContentScale.Fit
+            )
+            var fontSize by remember { mutableStateOf(TextUnit.Unspecified) }
+            Text(
+                "Alakastats",
+                style = MaterialTheme.typography.displayLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                fontSize = fontSize,
+                overflow = TextOverflow.Clip,
+                onTextLayout = { result ->
+                    // useful for the use in AboutScreen for mobile
+                    if (result.hasVisualOverflow) {
+                        val currentSize = if (fontSize == TextUnit.Unspecified)
+                            result.layoutInput.style.fontSize
+                        else fontSize
+                        fontSize = (currentSize.value * 0.9f).sp
+                    }
                 }
-            }
-        )
-
+            )
+        }
+        if (withVersion) {
+            Text(
+                "Version ${AppBuildConfig.VERSION_NAME}",
+                modifier.alpha(0.8f),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
     }
 }
 

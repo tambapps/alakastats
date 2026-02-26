@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.AppBuildConfig
 import com.tambapps.pokemon.alakastats.ui.screen.home.AlakastatsLabel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
@@ -47,7 +49,7 @@ object AboutScreen : Screen {
                 )
                 .verticalScroll(rememberScrollState()),
         ) {
-            AlakastatsLabel(Modifier.align(Alignment.CenterHorizontally))
+            AlakastatsLabel(Modifier.align(Alignment.CenterHorizontally), withVersion = true)
             VerticalSpacer(8.dp)
             AboutAlakastats()
             VerticalSpacer()
