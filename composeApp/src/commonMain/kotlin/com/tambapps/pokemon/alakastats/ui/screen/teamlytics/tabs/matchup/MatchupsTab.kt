@@ -49,6 +49,11 @@ fun MatchupsTab(viewModel: MatchupsViewModel) {
         BestMatchupsRow(viewModel)
         Spacer(Modifier.height(space))
         WorstMatchupsRow(viewModel)
+        Spacer(Modifier.height(space))
+        HighestAttendancesRow(viewModel)
+        Spacer(Modifier.height(space))
+        LowestAttendancesRow(viewModel)
+        Spacer(Modifier.height(space))
     }
 }
 
@@ -98,3 +103,48 @@ fun WorstMatchupsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
     )
 }
 
+@Composable
+fun HighestAttendancesRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
+    viewModel = viewModel,
+    title = "Highest Attendance",
+    stats = viewModel.highestAttendances,
+    isDuo = false) { attendanceStats ->
+    val attendanceCount = attendanceStats.attendanceCount
+    val total = attendanceStats.totalGamesCount
+    val text = when {
+        attendanceCount == 0 -> "Not seen all $total games"
+        attendanceCount == total && total == 1 -> "Seen\n1 out of 1\ngame"
+        attendanceCount == total -> "Seen all\n$total games"
+        else -> "Seen ${attendanceCount}\nout of ${total}\ngames"
+    }
+    PokemonStatCard(
+        pokemonImageService = viewModel.pokemonImageService,
+        title = "${attendanceStats.rate.times(100).toInt()}%",
+        text = text,
+        pokemonName = attendanceStats.pokemonName,
+        modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
+    )
+}
+
+@Composable
+fun LowestAttendancesRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
+    viewModel = viewModel,
+    title = "Lowest Attendance",
+    stats = viewModel.lowestAttendances,
+    isDuo = false) { attendanceStats ->
+    val attendanceCount = attendanceStats.attendanceCount
+    val total = attendanceStats.totalGamesCount
+    val text = when {
+        attendanceCount == 0 -> "Not seen all $total games"
+        attendanceCount == total && total == 1 -> "Seen\n1 out of 1\ngame"
+        attendanceCount == total -> "Seen all\n$total games"
+        else -> "Seen ${attendanceCount}\nout of ${total}\ngames"
+    }
+    PokemonStatCard(
+        pokemonImageService = viewModel.pokemonImageService,
+        title = "${attendanceStats.rate.times(100).toInt()}%",
+        text = text,
+        pokemonName = attendanceStats.pokemonName,
+        modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
+    )
+}

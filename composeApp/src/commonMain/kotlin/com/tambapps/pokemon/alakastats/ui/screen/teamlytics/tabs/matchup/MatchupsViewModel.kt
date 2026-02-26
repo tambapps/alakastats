@@ -32,6 +32,11 @@ class MatchupsViewModel(
     var worstMatchups by mutableStateOf(emptyList<MatchupStats>())
         private set
 
+    var highestAttendances by mutableStateOf(emptyList<AttendanceStats>())
+        private set
+    var lowestAttendances by mutableStateOf(emptyList<AttendanceStats>())
+        private set
+
     private val scope = CoroutineScope(Dispatchers.Default)
 
 
@@ -41,10 +46,13 @@ class MatchupsViewModel(
         }
         isTabLoading = true
         scope.launch {
-            val result = computeMatchupStats()
+            val matchupStatsResult = computeMatchupStats()
+            val attendanceStatsResult = computeAttendanceStats()
             kotlinx.coroutines.withContext(Dispatchers.Main) {
-                bestMatchups = result.first
-                worstMatchups = result.second
+                bestMatchups = matchupStatsResult.first
+                worstMatchups = matchupStatsResult.second
+                highestAttendances = attendanceStatsResult.first
+                lowestAttendances = attendanceStatsResult.second
                 isTabLoading = false
             }
         }
@@ -52,12 +60,21 @@ class MatchupsViewModel(
 
     private fun computeMatchupStats(): Pair<List<MatchupStats>, List<MatchupStats>> = computeStats(
         statGenerator = ::MatchupStats,
+        replayPokemonsSupplier = { it.opponentPlayer.selection },
         statUpdater = { replay, stats -> stats.incr(replay.gameOutput == GameOutput.WIN) },
         comparator = compareBy({ - it.rate }, { - it.attendanceCount })
     )
 
+    private fun computeAttendanceStats(): Pair<List<AttendanceStats>, List<AttendanceStats>> = computeStats(
+        statGenerator = ::AttendanceStats,
+        replayPokemonsSupplier = { it.opponentPlayer.teamPokemonNames },
+        statUpdater = { replay, stats -> stats.incr(replay.opponentPlayer.hasSelected(stats.pokemonName)) },
+        comparator = compareBy({ - it.rate }, { - it.totalGamesCount })
+    )
+
     private inline fun <T: Ratable> computeStats(
         statGenerator: (PokemonName) -> T,
+        replayPokemonsSupplier: TeamlyticsContext.(ReplayAnalytics) -> List<PokemonName>,
         statUpdater: TeamlyticsContext.(ReplayAnalytics, T) -> T,
         comparator: Comparator<in T>
     ): Pair<List<T>, List<T>> = useCase.filteredTeam.withContext {
@@ -65,7 +82,7 @@ class MatchupsViewModel(
 
         val sortedMatchups = buildMap {
             for (replay in replays) {
-                for (pokemonName in replay.opponentPlayer.selection) {
+                for (pokemonName in replayPokemonsSupplier.invoke(this@withContext, replay)) {
                     val currentStats = getOrPut(pokemonName.baseNormalized) { statGenerator.invoke(pokemonName) }
                     this[pokemonName.baseNormalized] = statUpdater.invoke(this@withContext, replay, currentStats)
                 }
@@ -90,11 +107,10 @@ data class MatchupStats(
     override val rate = winCount.toFloat() / attendanceCount
 }
 
-// TODO use me
 data class AttendanceStats(
     val pokemonName: PokemonName,
-    val attendanceCount: Int,
-    val totalGamesCount: Int,
+    val attendanceCount: Int = 0,
+    val totalGamesCount: Int = 0,
 ): Ratable {
     override val rate = attendanceCount.toFloat() / totalGamesCount
 }
@@ -102,4 +118,9 @@ data class AttendanceStats(
 private fun MatchupStats.incr(hasWon: Boolean) = copy(
     winCount = if (hasWon) winCount + 1 else winCount,
     attendanceCount = attendanceCount + 1
+)
+
+private fun AttendanceStats.incr(hasAttended: Boolean) = copy(
+    attendanceCount = if (hasAttended) attendanceCount + 1 else attendanceCount,
+    totalGamesCount = totalGamesCount + 1
 )
