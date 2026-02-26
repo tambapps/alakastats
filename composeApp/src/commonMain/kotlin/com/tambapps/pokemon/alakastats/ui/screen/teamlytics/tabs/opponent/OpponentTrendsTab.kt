@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.opponent
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,7 +23,7 @@ import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
 
 
 @Composable
-fun MatchupsTab(viewModel: MatchupsViewModel) {
+fun OpponentTrendsTab(viewModel: MatchupsViewModel) {
     LaunchedEffect(viewModel.useCase.filters) {
         viewModel.loadStats()
     }

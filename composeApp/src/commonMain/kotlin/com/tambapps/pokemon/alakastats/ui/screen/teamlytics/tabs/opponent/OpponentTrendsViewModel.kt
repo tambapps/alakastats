@@ -1,4 +1,4 @@
-package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup
+package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.opponent
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,7 +51,7 @@ class MatchupsViewModel(
         scope.launch {
             val matchupStatsResult = computeMatchupStats()
             val attendanceStatsResult = computeAttendanceStats()
-            val commonLeadsResult = computeCommonLeadStats()
+            val commonLeadsResult = computeLeadsStats()
             kotlinx.coroutines.withContext(Dispatchers.Main) {
                 bestMatchups = matchupStatsResult.first
                 worstMatchups = matchupStatsResult.second
@@ -64,7 +64,8 @@ class MatchupsViewModel(
         }
     }
 
-    private fun computeCommonLeadStats(): Pair<List<LeadStats>, List<LeadStats>> = useCase.filteredTeam.withContext {
+    private fun computeLeadsStats(): Pair<List<LeadStats>, List<LeadStats>> = useCase.filteredTeam.withContext {
+        // don't want to compute lead stats if no filters is applied because they are intended to be used when filtering on specific matchup
         if (!filters.hasAny()) return@withContext emptyList<LeadStats>() to emptyList()
         val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
 

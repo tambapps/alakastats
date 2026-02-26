@@ -44,8 +44,8 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsT
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupNotesTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupNotesViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.MatchupsTab
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup.MatchupsViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.opponent.OpponentTrendsTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.opponent.MatchupsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.UsagesTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.overview.OverviewTab
@@ -59,7 +59,7 @@ import kotlin.uuid.Uuid
 
 data class TeamlyticsScreen(val teamId: Uuid) : Screen {
     private companion object {
-        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Matchup Stats", "Game Plans")
+        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Opponent Trends", "Game Plans")
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -137,7 +137,7 @@ internal fun Pager(
                 LeadStatsTab(it)
             }
             4 -> PagerTab<ManageReplayFiltersUseCase, MatchupsViewModel>(viewModel, page) {
-                MatchupsTab(it)
+                OpponentTrendsTab(it)
             }
             5 -> PagerTab<ManageMatchupNotesUseCase, MatchupNotesViewModel>(viewModel, page) {
                 MatchupNotesTab(it)
