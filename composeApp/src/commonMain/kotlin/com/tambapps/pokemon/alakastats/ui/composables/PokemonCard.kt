@@ -67,7 +67,15 @@ inline fun <T> PokemonStatsRow(
             }
         }
 
-        // TODO display something if list is empty. Szme for LeadStats
+        if (stats.isEmpty()) {
+            Text(
+                "No data to display",
+                modifier = Modifier.padding(vertical = 64.dp, horizontal = 64.dp),
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+            )
+            return
+        }
         ScrollableRow(
             modifier = Modifier.fillMaxWidth(),
             scrollState = scrollState,
