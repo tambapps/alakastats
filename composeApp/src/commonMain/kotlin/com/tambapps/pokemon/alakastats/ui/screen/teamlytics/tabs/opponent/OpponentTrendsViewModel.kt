@@ -86,35 +86,38 @@ class MatchupsViewModel(
         statGenerator = ::MatchupStats,
         replayPokemonsSupplier = { it.opponentPlayer.selection },
         statUpdater = { replay, stats -> stats.incr(replay.gameOutput == GameOutput.WIN) },
-        comparator = compareBy({ - it.rate }, { - it.attendanceCount })
+        bestComparator = compareBy({ - it.rate }, { - it.attendanceCount }),
+        worstComparator = compareBy({ it.rate }, { - it.attendanceCount }),
     )
 
     private fun computeAttendanceStats(): Pair<List<AttendanceStats>, List<AttendanceStats>> = computeStats(
         statGenerator = ::AttendanceStats,
         replayPokemonsSupplier = { it.opponentPlayer.teamPokemonNames },
         statUpdater = { replay, stats -> stats.incr(replay.opponentPlayer.hasSelected(stats.pokemonName)) },
-        comparator = compareBy({ - it.rate }, { - it.totalGamesCount })
+        bestComparator = compareBy({ - it.rate }, { - it.attendanceCount }),
+        worstComparator = compareBy({ it.rate }, { - it.attendanceCount })
     )
 
     private inline fun <T: Ratable> computeStats(
         statGenerator: (PokemonName) -> T,
         replayPokemonsSupplier: TeamlyticsContext.(ReplayAnalytics) -> List<PokemonName>,
         statUpdater: TeamlyticsContext.(ReplayAnalytics, T) -> T,
-        comparator: Comparator<in T>
+        bestComparator: Comparator<in T>,
+        worstComparator: Comparator<in T>
     ): Pair<List<T>, List<T>> = useCase.filteredTeam.withContext {
         val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
 
-        val sortedStats = buildMap {
+        val stats = buildMap {
             for (replay in replays) {
                 for (pokemonName in replayPokemonsSupplier.invoke(this@withContext, replay)) {
                     val currentStats = getOrPut(pokemonName.baseNormalized) { statGenerator.invoke(pokemonName) }
                     this[pokemonName.baseNormalized] = statUpdater.invoke(this@withContext, replay, currentStats)
                 }
             }
-        }.values.sortedWith(comparator)
+        }.values
 
-        sortedStats.take(MATCHUP_LIST_MAX_LENGTH).filter { it.rate >= 0.5f } to
-                sortedStats.takeLast(MATCHUP_LIST_MAX_LENGTH).reversed().filter { it.rate < 0.5f }
+        stats.sortedWith(bestComparator).take(MATCHUP_LIST_MAX_LENGTH).filter { it.rate >= 0.5f } to
+                stats.sortedWith(worstComparator).take(MATCHUP_LIST_MAX_LENGTH).filter { it.rate < 0.5f }
     }
 
 }
