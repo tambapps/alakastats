@@ -44,6 +44,7 @@ inline fun <T> PokemonStatsRow(
     title: String,
     stats: List<T>,
     isDuo: Boolean,
+    emptyMessage: String = "No data to display",
     crossinline statCardGenerator: @Composable (T) -> Unit
 ) {
     Column {
@@ -69,7 +70,7 @@ inline fun <T> PokemonStatsRow(
 
         if (stats.isEmpty()) {
             Text(
-                "No data to display",
+                emptyMessage,
                 modifier = Modifier.padding(vertical = 64.dp, horizontal = 64.dp),
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,

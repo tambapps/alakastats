@@ -36,9 +36,10 @@ class MatchupsViewModel(
         private set
     var lowestAttendances by mutableStateOf(emptyList<AttendanceStats>())
         private set
+    var commonLeads by mutableStateOf(emptyList<LeadStats>())
+        private set
 
     private val scope = CoroutineScope(Dispatchers.Default)
-
 
     fun loadStats() {
         if (isTabLoading) {
@@ -48,14 +49,33 @@ class MatchupsViewModel(
         scope.launch {
             val matchupStatsResult = computeMatchupStats()
             val attendanceStatsResult = computeAttendanceStats()
+            val commonLeadsResult = computeCommonLeadStats()
             kotlinx.coroutines.withContext(Dispatchers.Main) {
                 bestMatchups = matchupStatsResult.first
                 worstMatchups = matchupStatsResult.second
                 highestAttendances = attendanceStatsResult.first
                 lowestAttendances = attendanceStatsResult.second
+                commonLeads = commonLeadsResult
                 isTabLoading = false
             }
         }
+    }
+
+    private fun computeCommonLeadStats(): List<LeadStats> = useCase.filteredTeam.withContext {
+        if (!filters.hasAny()) return@withContext emptyList()
+        val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
+
+        val sortedStats = buildMap {
+            for (replay in replays) {
+                val opponentPlayer = replay.opponentPlayer
+                val lead = opponentPlayer.lead
+                val currentStats = getOrPut(lead) { LeadStats(lead, replays.size) }
+                this[lead] = currentStats.copy(attendanceCount = currentStats.attendanceCount + 1)
+
+            }
+        }.values.sortedBy { - it.attendanceCount }
+
+        sortedStats.take(MATCHUP_LIST_MAX_LENGTH)
     }
 
     private fun computeMatchupStats(): Pair<List<MatchupStats>, List<MatchupStats>> = computeStats(
@@ -80,7 +100,7 @@ class MatchupsViewModel(
     ): Pair<List<T>, List<T>> = useCase.filteredTeam.withContext {
         val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
 
-        val sortedMatchups = buildMap {
+        val sortedStats = buildMap {
             for (replay in replays) {
                 for (pokemonName in replayPokemonsSupplier.invoke(this@withContext, replay)) {
                     val currentStats = getOrPut(pokemonName.baseNormalized) { statGenerator.invoke(pokemonName) }
@@ -89,8 +109,8 @@ class MatchupsViewModel(
             }
         }.values.sortedWith(comparator)
 
-        sortedMatchups.take(MATCHUP_LIST_MAX_LENGTH).filter { it.rate >= 0.5f } to
-                sortedMatchups.takeLast(MATCHUP_LIST_MAX_LENGTH).reversed().filter { it.rate < 0.5f }
+        sortedStats.take(MATCHUP_LIST_MAX_LENGTH).filter { it.rate >= 0.5f } to
+                sortedStats.takeLast(MATCHUP_LIST_MAX_LENGTH).reversed().filter { it.rate < 0.5f }
     }
 
 }
@@ -113,6 +133,14 @@ data class AttendanceStats(
     val totalGamesCount: Int = 0,
 ): Ratable {
     override val rate = attendanceCount.toFloat() / totalGamesCount
+}
+
+data class LeadStats(
+    val lead: List<PokemonName>,
+    val totalGamesCount: Int,
+    val attendanceCount: Int = 0,
+    ) {
+    val rate = attendanceCount.toFloat() / totalGamesCount
 }
 
 private fun MatchupStats.incr(hasWon: Boolean) = copy(

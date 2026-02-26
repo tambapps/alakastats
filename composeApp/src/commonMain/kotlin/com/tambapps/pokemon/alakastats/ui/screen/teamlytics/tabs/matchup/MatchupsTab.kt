@@ -54,6 +54,8 @@ fun MatchupsTab(viewModel: MatchupsViewModel) {
         Spacer(Modifier.height(space))
         LowestAttendancesRow(viewModel)
         Spacer(Modifier.height(space))
+        CommonLeadsStats(viewModel)
+        Spacer(Modifier.height(space))
     }
 }
 
@@ -147,4 +149,31 @@ fun LowestAttendancesRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
         pokemonName = attendanceStats.pokemonName,
         modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
     )
+}
+
+@Composable
+private fun CommonLeadsStats(viewModel: MatchupsViewModel) = PokemonStatsRow(
+    viewModel = viewModel,
+    title = if (LocalIsCompact.current) "Common Opp. Leads" else "Common Opposing Leads",
+    stats = viewModel.commonLeads,
+    isDuo = viewModel.commonLeads.firstOrNull()?.lead?.let { it.size >= 2 } == true,
+    emptyMessage = if (!viewModel.filters.hasAny()) "Apply filters to see common opposing leads in a matchup" else "No data to display"
+) { leadStats ->
+
+    val attendanceCount = leadStats.attendanceCount
+    val total = leadStats.totalGamesCount
+    val text = when {
+        attendanceCount == total && total == 1 -> "Won\n1 out of 1\ngame"
+        attendanceCount == total -> "Lead all\n$total games"
+        else -> "Led ${attendanceCount}\nout of $total\ngames"
+    }
+    PokemonStatCard(
+        pokemonImageService = viewModel.pokemonImageService,
+        title = "${leadStats.rate.times(100).toInt()}%",
+        text = text,
+        pokemonName = leadStats.lead.first(),
+        pokemonName2 = leadStats.lead.getOrNull(1),
+        modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
+    )
+
 }
