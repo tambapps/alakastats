@@ -67,7 +67,7 @@ internal fun HomeScreenDesktop(viewModel: HomeViewModel) {
 
 @Composable
 fun AlakastatsLabel(modifier: Modifier = Modifier, withVersion: Boolean = false) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
