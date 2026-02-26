@@ -1,26 +1,20 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.matchup
 
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatCard
-import com.tambapps.pokemon.alakastats.ui.composables.ScrollableRow
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatsRow
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.Header
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.NoReplay
@@ -59,81 +53,48 @@ fun MatchupsTab(viewModel: MatchupsViewModel) {
 }
 
 @Composable
-fun BestMatchupsRow(viewModel: MatchupsViewModel) = MatchupRow(
-    viewModel,
-    "Best Matchups",
-    viewModel.bestMatchups) {
-    val winCount = it.winCount
-    val total = it.attendanceCount
-    when {
+fun BestMatchupsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
+    viewModel = viewModel,
+    title = "Best Matchups",
+    stats = viewModel.bestMatchups,
+    isDuo = false) { matchupStats ->
+    val winCount = matchupStats.winCount
+    val total = matchupStats.attendanceCount
+    val text = when {
         winCount == 0 -> "Lost to all $total games"
         winCount == total && total == 1 -> "Beat\n1 out of 1\ngame"
         winCount == total -> "Beat all\n$total games"
         else -> "Beat ${winCount}\nout of ${total}\ngames"
     }
+    PokemonStatCard(
+        pokemonImageService = viewModel.pokemonImageService,
+        title = "${matchupStats.winRate.times(100).toInt()}%",
+        text = text,
+        pokemonName = matchupStats.pokemonName,
+        modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
+    )
 }
 
 @Composable
-fun WorstMatchupsRow(viewModel: MatchupsViewModel) = MatchupRow(
-    viewModel,
-    "Worst Matchups",
-    viewModel.worstMatchups) {
-    val looseCount = it.attendanceCount - it.winCount
-    val total = it.attendanceCount
-    when {
+fun WorstMatchupsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
+    viewModel = viewModel,
+    title = "Worst Matchups",
+    stats = viewModel.worstMatchups,
+    isDuo = false) { matchupStats ->
+    val looseCount = matchupStats.attendanceCount - matchupStats.winCount
+    val total = matchupStats.attendanceCount
+    val text = when {
         looseCount == 0 -> "Beat all $total games"
         looseCount == total && total == 1 -> "Lost to\n1 out of 1\ngame"
         looseCount == total -> "Lost to all\n$total games"
         else -> "Lost to ${looseCount}\nout of ${total}\ngames"
     }
-}
-
-@Composable
-private inline fun MatchupRow(
-    viewModel: MatchupsViewModel,
-    title: String,
-    matchupStats: List<MatchupStats>,
-    crossinline textGenerator: (MatchupStats) -> String
-) {
-    Column {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.displaySmall,
-            fontWeight = FontWeight.Bold
-        )
-        val spaceWidth = 64.dp
-
-        val scrollState = rememberScrollState()
-        // Auto-scroll animation to show the row is scrollable
-        LaunchedEffect(scrollState.maxValue, viewModel.useCase.filters) {
-            if (scrollState.maxValue > 0) {
-                scrollState.scrollTo(scrollState.maxValue)
-                kotlinx.coroutines.delay(250)
-                scrollState.animateScrollTo(
-                    value = 0,
-                    animationSpec = tween(durationMillis = 1250)
-                )
-            }
-        }
-
-        // TODO display something if list is empty. Szme for LeadStats
-        ScrollableRow(
-            modifier = Modifier.fillMaxWidth(),
-            scrollState = scrollState,
-            scrollbarThickness = 16.dp
-        ) {
-            matchupStats.forEach { matchupStats ->
-                PokemonStatCard(
-                    pokemonImageService = viewModel.pokemonImageService,
-                    title = "${matchupStats.winRate.times(100).toInt()}%",
-                    text = textGenerator(matchupStats),
-                    pokemonName = matchupStats.pokemonName,
-                    modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
-                )
-
-                Spacer(Modifier.width(spaceWidth))
-            }
-        }
-    }
+    PokemonStatCard(
+        pokemonImageService = viewModel.pokemonImageService,
+        title = "${matchupStats.winRate.times(100).toInt()}%",
+        text = text,
+        pokemonName = matchupStats.pokemonName,
+        modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
+    )
 }
 

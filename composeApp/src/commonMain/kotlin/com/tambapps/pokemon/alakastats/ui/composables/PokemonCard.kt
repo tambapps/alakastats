@@ -1,18 +1,24 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,14 +27,63 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlin.math.pow
+
+@Composable
+inline fun <T> PokemonStatsRow(
+    viewModel: TeamlyticsFiltersTabViewModel,
+    title: String,
+    stats: List<T>,
+    isDuo: Boolean,
+    crossinline statCardGenerator: @Composable (T) -> Unit
+) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold
+        )
+        val spaceWidth = if (isDuo) 200.dp else 64.dp
+
+        val scrollState = rememberScrollState()
+        // Auto-scroll animation to show the row is scrollable
+        LaunchedEffect(scrollState.maxValue, viewModel.useCase.filters) {
+            if (scrollState.maxValue > 0) {
+                scrollState.scrollTo(scrollState.maxValue)
+                kotlinx.coroutines.delay(250)
+                scrollState.animateScrollTo(
+                    value = 0,
+                    animationSpec = tween(durationMillis = 1250)
+                )
+            }
+        }
+
+        // TODO display something if list is empty. Szme for LeadStats
+        ScrollableRow(
+            modifier = Modifier.fillMaxWidth(),
+            scrollState = scrollState,
+            scrollbarThickness = 16.dp
+        ) {
+            if (isDuo) {
+                Spacer(Modifier.width(spaceWidth * 0.5f))
+            }
+            stats.forEach { matchupStats ->
+                statCardGenerator.invoke(matchupStats)
+                Spacer(Modifier.width(spaceWidth))
+            }
+        }
+    }
+}
+
 
 @Composable
 fun PokemonStatCard(
