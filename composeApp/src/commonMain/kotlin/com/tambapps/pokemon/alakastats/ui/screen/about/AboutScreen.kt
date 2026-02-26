@@ -106,9 +106,13 @@ private fun AboutAlakastats() = Section(
         }
         append(".\nEverything is stored locally on your device (in your browser or on your smartphone).\n\n")
 
-        append("You can consult the full source code ")
+        append("You can follow me on ")
+        withLink(LinkAnnotation.Url("https://x.com/alakastats")) {
+            withStyle(linkStyle) { append("X (Twitter)") }
+        }
+        append("\nOr consult the source code of this app on ")
         withLink(LinkAnnotation.Url("https://github.com/tambapps/alakastats")) {
-            withStyle(linkStyle) { append("here") }
+            withStyle(linkStyle) { append("Github") }
         }
         append(".")
     }
