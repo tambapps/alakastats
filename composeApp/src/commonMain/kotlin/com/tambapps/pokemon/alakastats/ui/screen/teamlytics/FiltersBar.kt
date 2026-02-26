@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -88,7 +89,6 @@ fun FiltersBar(
     val opponentSelectionFilter = remember(filters) { PokemonsFilter("Opp. Selection", "Opponent's Selection", filters.opponentSelection, allowLead = true, max = 4) }
     val yourSelectionFilter = remember(filters) { PokemonsFilter("Your Selection", "Your Selection", filters.yourSelection, allowLead = true, max = 4) }
     val showPokemonDialogFilterState = remember { mutableStateOf<PokemonsFilter?>(null) }
-    val isCompact = LocalIsCompact.current
 
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
@@ -117,15 +117,9 @@ fun FiltersBar(
                     dialogState = showPokemonDialogFilterState,
                     onClear = { viewModel.applyFilters(filters.copy(yourSelection = emptyList())) }
                 )
-                if (!isCompact && additionalFilters != null) {
-                    additionalFilters.invoke()
-                }
+                additionalFilters?.invoke()
             }
             Spacer(Modifier.height(16.dp))
-            if (isCompact && additionalFilters != null) {
-                additionalFilters.invoke()
-                Spacer(Modifier.height(16.dp))
-            }
         }
     }
 
@@ -246,6 +240,22 @@ private fun SetPokemonFilterDialog(
 }
 
 @Composable
+fun FilterBarButton(
+    onClick: () -> Unit,
+    isCompact: Boolean = LocalIsCompact.current,
+    contentPadding: PaddingValues = if (!isCompact) ButtonDefaults.ContentPadding else PaddingValues(horizontal = 10.dp, vertical = 8.dp),
+    modifier: Modifier = Modifier.padding(horizontal = if (isCompact) 4.dp else 16.dp),
+    content: @Composable RowScope.() -> Unit
+) {
+    OutlinedButton(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        contentPadding = contentPadding,
+        modifier = modifier.padding(horizontal = if (isCompact) 4.dp else 16.dp),
+        content=content)
+}
+
+@Composable
 private fun PokemonFilterButton(
     pokemonImageService: PokemonImageService,
     onClear: () -> Unit,
@@ -254,11 +264,9 @@ private fun PokemonFilterButton(
 ) {
     val pokemons = filter.pokemons
     val isCompact = LocalIsCompact.current
-    OutlinedButton(
+    FilterBarButton(
         onClick = { dialogState.value = filter },
-        shape = RoundedCornerShape(8.dp),
-        contentPadding = if (!isCompact || pokemons.isEmpty()) ButtonDefaults.ContentPadding else PaddingValues(horizontal = 10.dp, vertical = 8.dp),
-        modifier = Modifier.padding(horizontal = if (isCompact) 4.dp else 16.dp)) {
+        contentPadding = if (!isCompact || pokemons.isEmpty()) ButtonDefaults.ContentPadding else PaddingValues(horizontal = 10.dp, vertical = 8.dp)) {
         Text(filter.shortTitle)
 
         if (pokemons.isNotEmpty()) {
@@ -298,8 +306,7 @@ private fun OppUsernameButton(viewModel: FiltersViewModel) {
     val text = "Opp. Username"
     val isCompact = LocalIsCompact.current
     var showDialog by remember { mutableStateOf(false) }
-    OutlinedButton(onClick = { showDialog = true }, shape = RoundedCornerShape(8.dp),
-        modifier = Modifier.padding(horizontal = if (isCompact) 4.dp else 16.dp)) {
+    FilterBarButton(onClick = { showDialog = true }) {
         val text = when {
             viewModel.filters.opponentUsernames.isNotEmpty() -> "$text: " + viewModel.filters.opponentUsernames.joinToString(separator = ", ", transform = { it.value })
             else -> text
