@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GameOutput
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
@@ -48,30 +50,53 @@ class MatchupsViewModel(
         }
     }
 
-    private fun computeMatchupStats(): Pair<List<MatchupStats>, List<MatchupStats>> = useCase.filteredTeam.withContext {
+    private fun computeMatchupStats(): Pair<List<MatchupStats>, List<MatchupStats>> = computeStats(
+        statGenerator = ::MatchupStats,
+        statUpdater = { replay, stats -> stats.incr(replay.gameOutput == GameOutput.WIN) },
+        comparator = compareBy({ - it.rate }, { - it.attendanceCount })
+    )
+
+    private inline fun <T: Ratable> computeStats(
+        statGenerator: (PokemonName) -> T,
+        statUpdater: TeamlyticsContext.(ReplayAnalytics, T) -> T,
+        comparator: Comparator<in T>
+    ): Pair<List<T>, List<T>> = useCase.filteredTeam.withContext {
         val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
 
         val sortedMatchups = buildMap {
             for (replay in replays) {
-                val won = replay.gameOutput == GameOutput.WIN
                 for (pokemonName in replay.opponentPlayer.selection) {
-                    val currentStats = getOrPut(pokemonName.baseNormalized) { MatchupStats(pokemonName, 0, 0) }
-                    this[pokemonName.baseNormalized] = currentStats.incr(won)
+                    val currentStats = getOrPut(pokemonName.baseNormalized) { statGenerator.invoke(pokemonName) }
+                    this[pokemonName.baseNormalized] = statUpdater.invoke(this@withContext, replay, currentStats)
                 }
             }
-        }.values.sortedWith(compareBy({ - it.winRate }, { - it.attendanceCount }))
+        }.values.sortedWith(comparator)
 
-        sortedMatchups.take(MATCHUP_LIST_MAX_LENGTH).filter { it.winRate >= 0.5f } to
-                sortedMatchups.takeLast(MATCHUP_LIST_MAX_LENGTH).reversed().filter { it.winRate < 0.5f }
+        sortedMatchups.take(MATCHUP_LIST_MAX_LENGTH).filter { it.rate >= 0.5f } to
+                sortedMatchups.takeLast(MATCHUP_LIST_MAX_LENGTH).reversed().filter { it.rate < 0.5f }
     }
+
+}
+
+interface Ratable {
+    val rate: Float
 }
 
 data class MatchupStats(
     val pokemonName: PokemonName,
-    val winCount: Int,
+    val winCount: Int = 0,
+    val attendanceCount: Int = 0,
+): Ratable {
+    override val rate = winCount.toFloat() / attendanceCount
+}
+
+// TODO use me
+data class AttendanceStats(
+    val pokemonName: PokemonName,
     val attendanceCount: Int,
-) {
-    val winRate = winCount.toFloat() / attendanceCount
+    val totalGamesCount: Int,
+): Ratable {
+    override val rate = attendanceCount.toFloat() / totalGamesCount
 }
 
 private fun MatchupStats.incr(hasWon: Boolean) = copy(

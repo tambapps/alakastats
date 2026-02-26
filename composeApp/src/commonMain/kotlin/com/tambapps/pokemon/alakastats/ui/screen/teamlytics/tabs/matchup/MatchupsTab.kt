@@ -68,7 +68,7 @@ fun BestMatchupsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
     }
     PokemonStatCard(
         pokemonImageService = viewModel.pokemonImageService,
-        title = "${matchupStats.winRate.times(100).toInt()}%",
+        title = "${matchupStats.rate.times(100).toInt()}%",
         text = text,
         pokemonName = matchupStats.pokemonName,
         modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
@@ -91,7 +91,7 @@ fun WorstMatchupsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
     }
     PokemonStatCard(
         pokemonImageService = viewModel.pokemonImageService,
-        title = "${matchupStats.winRate.times(100).toInt()}%",
+        title = "${matchupStats.rate.times(100).toInt()}%",
         text = text,
         pokemonName = matchupStats.pokemonName,
         modifier = Modifier.size(256.dp).padding(bottom = 32.dp)
