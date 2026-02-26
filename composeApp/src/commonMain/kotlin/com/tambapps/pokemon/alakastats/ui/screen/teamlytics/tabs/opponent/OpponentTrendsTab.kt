@@ -9,12 +9,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatsRow
+import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FilterBarButton
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.Header
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.NoReplay
@@ -43,7 +50,22 @@ fun OpponentTrendsTab(viewModel: MatchupsViewModel) {
         if (isCompact) {
             Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
         }
-        FiltersBar(viewModel)
+        FiltersBar(viewModel) {
+            var showDialog by remember { mutableStateOf(false) }
+            FilterBarButton(onClick = { showDialog = true }) {
+                Text((if (isCompact) "Min. Attendance" else "Minimum Attendance") +
+                        (if (viewModel.minimumAttendance > 1) ": ${viewModel.minimumAttendance}" else ""))
+            }
+            if (showDialog) {
+                WheelPickerDialog(
+                    title = "Minimum Attendance",
+                    items = (1..10).toList(),
+                    initialIndex = viewModel.minimumAttendance - 1,
+                    onPicked = { viewModel.updateMinimumAttendance(it) },
+                    onDismissRequest = { showDialog = false }
+                )
+            }
+       }
         Spacer(Modifier.height(16.dp))
         Header(viewModel.useCase)
         BestMatchupsRow(viewModel)

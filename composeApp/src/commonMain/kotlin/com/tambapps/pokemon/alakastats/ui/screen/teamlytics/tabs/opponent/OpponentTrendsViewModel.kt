@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.opponent
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.PokemonName
@@ -40,8 +41,18 @@ class MatchupsViewModel(
         private set
     var worstLeads by mutableStateOf(emptyList<LeadStats>())
         private set
+    var minimumAttendance by mutableIntStateOf(1)
+        private set
 
     private val scope = CoroutineScope(Dispatchers.Default)
+
+    fun updateMinimumAttendance(value: Int) {
+        if (isTabLoading) {
+            return
+        }
+        minimumAttendance = value
+        loadStats()
+    }
 
     fun loadStats() {
         if (isTabLoading) {
@@ -77,6 +88,7 @@ class MatchupsViewModel(
                 this[lead] = currentStats.incr(hasWon = replay.gameOutput == GameOutput.WIN)
             }
         }.values
+            .filter { it.attendanceCount >= minimumAttendance }
         leadsStats.sortedBy { - it.attendanceCount }.take(MATCHUP_LIST_MAX_LENGTH) to
                 leadsStats.sortedWith(compareBy({ it.winRate }, { - it.attendanceCount })).take(MATCHUP_LIST_MAX_LENGTH)
 
@@ -98,7 +110,7 @@ class MatchupsViewModel(
         worstComparator = compareBy({ it.rate }, { - it.attendanceCount })
     )
 
-    private inline fun <T: Ratable> computeStats(
+    private inline fun <T: OppTrendStat> computeStats(
         statGenerator: (PokemonName) -> T,
         replayPokemonsSupplier: TeamlyticsContext.(ReplayAnalytics) -> List<PokemonName>,
         statUpdater: TeamlyticsContext.(ReplayAnalytics, T) -> T,
@@ -115,6 +127,7 @@ class MatchupsViewModel(
                 }
             }
         }.values
+            .filter { it.attendanceCount >= minimumAttendance }
 
         stats.sortedWith(bestComparator).take(MATCHUP_LIST_MAX_LENGTH).filter { it.rate >= 0.5f } to
                 stats.sortedWith(worstComparator).take(MATCHUP_LIST_MAX_LENGTH).filter { it.rate < 0.5f }
@@ -122,23 +135,24 @@ class MatchupsViewModel(
 
 }
 
-interface Ratable {
+interface OppTrendStat {
     val rate: Float
+    val attendanceCount: Int
 }
 
 data class MatchupStats(
     val pokemonName: PokemonName,
     val winCount: Int = 0,
-    val attendanceCount: Int = 0,
-): Ratable {
+    override val attendanceCount: Int = 0,
+): OppTrendStat {
     override val rate = winCount.toFloat() / attendanceCount
 }
 
 data class AttendanceStats(
     val pokemonName: PokemonName,
-    val attendanceCount: Int = 0,
+    override val attendanceCount: Int = 0,
     val totalGamesCount: Int = 0,
-): Ratable {
+): OppTrendStat {
     override val rate = attendanceCount.toFloat() / totalGamesCount
 }
 
