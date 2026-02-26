@@ -23,8 +23,12 @@ class MatchupsViewModel(
     override var isTabLoading by mutableStateOf(false)
         private set
 
-    private var bestMatchups by mutableStateOf(emptyList<MatchupStats>())
-    private var worstMatchups by mutableStateOf(emptyList<MatchupStats>())
+    val hasNoData get() = bestMatchups.isEmpty() && worstMatchups.isEmpty()
+
+    var bestMatchups by mutableStateOf(emptyList<MatchupStats>())
+        private set
+    var worstMatchups by mutableStateOf(emptyList<MatchupStats>())
+        private set
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
@@ -39,6 +43,7 @@ class MatchupsViewModel(
             kotlinx.coroutines.withContext(Dispatchers.Main) {
                 bestMatchups = result.first
                 worstMatchups = result.second
+                isTabLoading = false
             }
         }
     }
@@ -50,15 +55,14 @@ class MatchupsViewModel(
             for (replay in replays) {
                 val won = replay.gameOutput == GameOutput.WIN
                 for (pokemonName in replay.opponentPlayer.selection) {
-                    val currentStats = getOrPut(pokemonName.normalized) { MatchupStats(
-                        pokemonName, winCount = if (won) 1 else 0, attendanceCount = 1
-                    ) }
-                    this[pokemonName.normalized] = currentStats.incr(won)
+                    val currentStats = getOrPut(pokemonName.baseNormalized) { MatchupStats(pokemonName, 0, 0) }
+                    this[pokemonName.baseNormalized] = currentStats.incr(won)
                 }
             }
-        }.values.sortedBy { it.winCount.toFloat() / it.attendanceCount }
+        }.values.sortedWith(compareBy({ - it.winRate }, { - it.attendanceCount }))
 
-        sortedMatchups.takeLast(MATCHUP_LIST_MAX_LENGTH) to sortedMatchups.take(MATCHUP_LIST_MAX_LENGTH)
+        sortedMatchups.take(MATCHUP_LIST_MAX_LENGTH).filter { it.winRate >= 0.5f } to
+                sortedMatchups.takeLast(MATCHUP_LIST_MAX_LENGTH).reversed().filter { it.winRate < 0.5f }
     }
 }
 

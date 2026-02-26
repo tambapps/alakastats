@@ -135,7 +135,7 @@ private fun LeadCard(
         winCount == 0 -> "Lost all $total games"
         winCount == total && total == 1 -> "Won\n1 out of 1\ngame"
         winCount == total -> "Won all\n$total games"
-        else -> "Won ${winCount}\nout of ${stat.total}\ngames"
+        else -> "Won ${winCount}\nout of $total\ngames"
     }
     PokemonStatCard(
         pokemonImageService = viewModel.pokemonImageService,
