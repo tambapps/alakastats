@@ -28,14 +28,14 @@ data class Teamlytics(
     val lastUpdatedAt: Instant,
     val data: TeamlyticsData,
     val notes: TeamlyticsNotes?,
-    val matchupNotes: List<MatchupNotes>,
+    val matchupPlans: List<MatchupPlan>,
     val format: Format
 ) {
     val winRate get() = computeWinRatePercentage(sdNames, replays)
 
 }
 
-data class MatchupNotes(
+data class MatchupPlan(
     val id: Uuid,
     val name: String,
     val pokePaste: PokePaste?,

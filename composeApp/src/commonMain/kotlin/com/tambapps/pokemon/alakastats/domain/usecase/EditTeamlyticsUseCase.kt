@@ -44,7 +44,7 @@ class EditTeamlyticsUseCase(
             sdNames = sdNames,
             lastUpdatedAt = Clock.System.now(),
             notes = null,
-            matchupNotes = emptyList(),
+            matchupPlans = emptyList(),
             data = TeamlyticsData(emptyMap()),
             format = format
         )

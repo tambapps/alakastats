@@ -31,7 +31,7 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupPlansUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
@@ -42,8 +42,8 @@ import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupNotesTab
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupNotesViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupPlansTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupPlansViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.opponent.OpponentTrendsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.opponent.MatchupsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.UsagesTab
@@ -139,8 +139,8 @@ internal fun Pager(
             4 -> PagerTab<ManageReplayFiltersUseCase, MatchupsViewModel>(viewModel, page) {
                 OpponentTrendsTab(it)
             }
-            5 -> PagerTab<ManageMatchupNotesUseCase, MatchupNotesViewModel>(viewModel, page) {
-                MatchupNotesTab(it)
+            5 -> PagerTab<ManageMatchupPlansUseCase, MatchupPlansViewModel>(viewModel, page) {
+                MatchupPlansTab(it)
             }
         }
     }

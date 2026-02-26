@@ -7,7 +7,7 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
-import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
@@ -15,7 +15,7 @@ import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import io.ktor.client.HttpClient
 import kotlin.uuid.Uuid
 
-class MatchupNotesEditViewModel(
+class MatchupPlanEditViewModel(
     pokepasteParser: PokepasteParser,
     httpClient: HttpClient,
     val pokemonImageService: PokemonImageService,
@@ -30,19 +30,19 @@ class MatchupNotesEditViewModel(
     var compositionDialogFor by mutableStateOf<GamePlanState?>(null)
     var addReplayDialogFor by mutableStateOf<GamePlanState?>(null)
 
-    fun generateMatchupNotes(matchupNotes: MatchupNotes?) = MatchupNotes(
-        id = matchupNotes?.id ?: Uuid.random(),
+    fun generateMatchupPlan(matchupPlan: MatchupPlan?) = MatchupPlan(
+        id = matchupPlan?.id ?: Uuid.random(),
         name = name,
         pokePaste = pokepasteParser.tryParse(pokepaste),
         gamePlans = gamePlanStates.map { it.toGamePlan() }
     )
 
-    fun prepareEdition(matchupNotes: MatchupNotes) {
-        name = matchupNotes.name
-        pokepaste = matchupNotes.pokePaste?.toPokePasteString() ?: ""
+    fun prepareEdition(matchupPlan: MatchupPlan) {
+        name = matchupPlan.name
+        pokepaste = matchupPlan.pokePaste?.toPokePasteString() ?: ""
         validPokepaste()
         gamePlanStates.clear()
-        gamePlanStates.addAll(matchupNotes.gamePlans.map { GamePlanState.from(it) })
+        gamePlanStates.addAll(matchupPlan.gamePlans.map { GamePlanState.from(it) })
     }
 
     fun updateName(name: String) {

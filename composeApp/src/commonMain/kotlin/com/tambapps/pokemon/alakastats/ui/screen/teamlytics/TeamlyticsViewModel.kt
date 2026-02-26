@@ -7,7 +7,7 @@ import arrow.core.Either
 import arrow.core.raise.either
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
-import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsData
@@ -15,7 +15,7 @@ import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupPlansUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
@@ -39,7 +39,7 @@ class TeamlyticsViewModel(
     private val useCase: ManageTeamlyticsUseCase,
     val imageService: PokemonImageService,
 ) : ScreenModel, ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase,
-    ManageMatchupNotesUseCase, PagerViewModel {
+    ManageMatchupPlansUseCase, PagerViewModel {
 
     private val scope = CoroutineScope(Dispatchers.Default)
     var teamState by mutableStateOf<TeamState>(TeamState.Loading)
@@ -111,9 +111,9 @@ class TeamlyticsViewModel(
         return save(currentTeam.copy(replays = teamReplays.withComputedElo())).also { onReplaysModified() }
     }
 
-    override suspend fun setMatchupNotes(matchupNotes: List<MatchupNotes>): Either<DomainError, Unit> {
+    override suspend fun setMatchupPlans(matchupPlans: List<MatchupPlan>): Either<DomainError, Unit> {
         val currentTeam = originalTeam
-        return save(currentTeam.copy(matchupNotes = matchupNotes)).also { onReplaysModified() }
+        return save(currentTeam.copy(matchupPlans = matchupPlans)).also { onReplaysModified() }
     }
 
     override fun export(team: Teamlytics) = useCase.export(team)

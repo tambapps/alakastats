@@ -13,7 +13,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
-import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupNotesUseCase
+import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupPlansUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
@@ -31,8 +31,8 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.TeamPokemonSt
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailOverviewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale.PokemonSpeedScaleViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupNotesViewModel
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit.MatchupNotesEditViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupPlansViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit.MatchupPlanEditViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.opponent.MatchupsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.UsagesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.overview.OverviewViewModel
@@ -83,7 +83,7 @@ val appModules = listOf(module {
 
     factoryOf(::HomeViewModel)
     factoryOf(::EditTeamViewModel)
-    factoryOf(::MatchupNotesEditViewModel)
+    factoryOf(::MatchupPlanEditViewModel)
 
     factory { (teamId: Uuid) ->
         TeamlyticsViewModel(teamId, get(), get())
@@ -112,7 +112,7 @@ val appModules = listOf(module {
     factory { (useCase: ManageReplayFiltersUseCase) ->
         MatchupsViewModel(useCase, get())
     }
-    factory { (useCase: ManageMatchupNotesUseCase) ->
-        MatchupNotesViewModel(useCase, get())
+    factory { (useCase: ManageMatchupPlansUseCase) ->
+        MatchupPlansViewModel(useCase, get())
     }
 })

@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
@@ -64,16 +64,16 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
 @Composable
-fun MatchupNotesEdit(
+fun MatchupPlansEdit(
     team: Teamlytics,
-    matchupNotes: MatchupNotes? = null,
+    matchupPlan: MatchupPlan? = null,
     onCancel: () -> Unit,
-    onEdited: (MatchupNotes) -> Unit
+    onEdited: (MatchupPlan) -> Unit
 ) {
-    val viewModel = koinInject<MatchupNotesEditViewModel>()
+    val viewModel = koinInject<MatchupPlanEditViewModel>()
     LaunchedEffect(Unit) {
-        if (matchupNotes != null) {
-            viewModel.prepareEdition(matchupNotes)
+        if (matchupPlan != null) {
+            viewModel.prepareEdition(matchupPlan)
         }
     }
     val isCompact = LocalIsCompact.current
@@ -88,7 +88,7 @@ fun MatchupNotesEdit(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (matchupNotes != null) "Edit Matchup" else "Create Matchup") },
+                title = { Text(if (matchupPlan != null) "Edit Matchup" else "Create Matchup") },
                 navigationIcon = {
                     BackIconButton(onClick = onCancel)
                 }
@@ -158,7 +158,7 @@ fun MatchupNotesEdit(
                     VerticalSpacer(32.dp)
                 }
             }
-            ButtonsBar(viewModel, matchupNotes, onCancel, onEdited)
+            ButtonsBar(viewModel, matchupPlan, onCancel, onEdited)
         }
     }
     viewModel.compositionDialogFor?.let { AddToCompositionDialog(viewModel, team, it) }
@@ -167,10 +167,10 @@ fun MatchupNotesEdit(
 
 @Composable
 private fun ButtonsBar(
-    viewModel: MatchupNotesEditViewModel,
-    matchupNotes: MatchupNotes?,
+    viewModel: MatchupPlanEditViewModel,
+    matchupPlan: MatchupPlan?,
     onCancel: () -> Unit,
-    onEdited: (MatchupNotes) -> Unit
+    onEdited: (MatchupPlan) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
@@ -184,12 +184,12 @@ private fun ButtonsBar(
         }
 
         Button(
-            onClick = { onEdited(viewModel.generateMatchupNotes(matchupNotes)) },
+            onClick = { onEdited(viewModel.generateMatchupPlan(matchupPlan)) },
             modifier = Modifier.weight(1f),
             enabled = viewModel.isFormValid,
         ) {
             Text(
-                if (matchupNotes != null) "Update Matchup" else "Create Matchup",
+                if (matchupPlan != null) "Update Matchup" else "Create Matchup",
                 // important
                 color = LocalContentColor.current
             )
@@ -199,7 +199,7 @@ private fun ButtonsBar(
 
 @Composable
 private fun SelectReplayExampleDialog(
-    viewModel: MatchupNotesEditViewModel,
+    viewModel: MatchupPlanEditViewModel,
     team: Teamlytics,
     gamePlanState: GamePlanState
 ) {
@@ -295,7 +295,7 @@ private fun SelectReplayExampleDialog(
 
 @Composable
 private fun AddToCompositionDialog(
-    viewModel: MatchupNotesEditViewModel,
+    viewModel: MatchupPlanEditViewModel,
     team: Teamlytics,
     gamePlanState: GamePlanState
 ) {
@@ -380,7 +380,7 @@ private fun SectionSubTitle(text: String) = Text(
 
 
 @Composable
-private fun NameInput(viewModel: MatchupNotesEditViewModel) {
+private fun NameInput(viewModel: MatchupPlanEditViewModel) {
     OutlinedTextField(
         value = viewModel.name,
         onValueChange = viewModel::updateName,
@@ -392,7 +392,7 @@ private fun NameInput(viewModel: MatchupNotesEditViewModel) {
 
 @Composable
 private fun GamePlanComposition(
-    viewModel: MatchupNotesEditViewModel,
+    viewModel: MatchupPlanEditViewModel,
     gamePlanState: GamePlanState
 ) {
     val composition = gamePlanState.composition
@@ -434,7 +434,7 @@ private fun GamePlanComposition(
 
 @Composable
 private fun ReplayExamples(
-    viewModel: MatchupNotesEditViewModel,
+    viewModel: MatchupPlanEditViewModel,
     team: Teamlytics,
     gamePlanState: GamePlanState
 ) {

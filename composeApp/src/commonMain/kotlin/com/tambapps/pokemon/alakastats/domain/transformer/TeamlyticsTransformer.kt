@@ -7,7 +7,7 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.DamageClass
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
-import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.PokemonMove
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
@@ -36,7 +36,7 @@ fun Teamlytics.toEntity() = TeamlyticsEntity(
     sdNames = sdNames.map { it.value },
     lastUpdatedAt = lastUpdatedAt,
     notes = notes?.toEntity(),
-    matchupNotes = matchupNotes.map { it.toEntity() },
+    matchupNotes = matchupPlans.map { it.toEntity() },
     data = data.toEntity(),
     format = format.name
 )
@@ -52,7 +52,7 @@ fun TeamlyticsEntity.toDomain(pokepasteParser: PokepasteParser): Teamlytics {
         sdNames = sdNames.map(::UserName),
         lastUpdatedAt = lastUpdatedAt ?: Clock.System.now(),
         notes = notes?.toDomain(pokepaste),
-        matchupNotes = matchupNotes?.map { it.toDomain(replays, pokepasteParser) } ?: emptyList(),
+        matchupPlans = matchupNotes?.map { it.toDomain(replays, pokepasteParser) } ?: emptyList(),
         data = data?.toDomain() ?: TeamlyticsData(emptyMap()),
         format = format?.let {
             try {
@@ -112,14 +112,14 @@ fun TeamlyticsNotesEntity.toDomain(pokePaste: PokePaste): TeamlyticsNotes {
     return TeamlyticsNotes(teamNotes = teamNotes, pokemonNotes = map)
 }
 
-fun MatchupNotes.toEntity() = MatchupNotesEntity(
+fun MatchupPlan.toEntity() = MatchupNotesEntity(
     id = id,
     name = name,
     pokePaste = pokePaste?.toPokePasteString(),
     gamePlans = gamePlans.map { it.toEntity() }
 )
 
-fun MatchupNotesEntity.toDomain(replays: List<ReplayAnalytics>, pokepasteParser: PokepasteParser) = MatchupNotes(
+fun MatchupNotesEntity.toDomain(replays: List<ReplayAnalytics>, pokepasteParser: PokepasteParser) = MatchupPlan(
     id = id,
     name = name,
     pokePaste = pokePaste?.let(pokepasteParser::tryParse),

@@ -20,18 +20,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
 
 @Composable
-fun MatchupNotesTabDesktop(viewModel: MatchupNotesViewModel, scrollState: LazyListState) {
-    val matchupNotes = viewModel.matchupNotes
+fun MatchupPlansTabDesktop(viewModel: MatchupPlansViewModel, scrollState: LazyListState) {
+    val matchupPlans = viewModel.matchupPlans
 
     LazyColumn(Modifier.padding(horizontal = 16.dp), state = scrollState) {
         item { Spacer(Modifier.height(32.dp)) }
-        items(matchupNotes) {
+        items(matchupPlans) {
             MatchNotesDesktop(viewModel, it, modifier = Modifier.fillMaxWidth())
             Spacer(Modifier.height(32.dp))
         }
@@ -42,16 +42,16 @@ fun MatchupNotesTabDesktop(viewModel: MatchupNotesViewModel, scrollState: LazyLi
 
 @Composable
 private fun MatchNotesDesktop(
-    viewModel: MatchupNotesViewModel,
-    matchupNotes: MatchupNotes,
+    viewModel: MatchupPlansViewModel,
+    matchupPlan: MatchupPlan,
     modifier: Modifier
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    MatchNotes(viewModel = viewModel, matchupNotes = matchupNotes, modifier = modifier) {
+    MatchNotes(viewModel = viewModel, matchupPlan = matchupPlan, modifier = modifier) {
         Column(Modifier.padding(all = 8.dp).fillMaxWidth()) {
             Spacer(Modifier.height(16.dp))
-            matchupNotes.gamePlans.forEachIndexed { index, gamePlan ->
+            matchupPlan.gamePlans.forEachIndexed { index, gamePlan ->
                 Text(
                     text = "Game Plan ${index + 1}",
                     style = MaterialTheme.typography.headlineSmall,
@@ -84,6 +84,6 @@ private fun MatchNotesDesktop(
         }
     }
     if (showDeleteDialog) {
-        DeleteMatchupDialog(viewModel, matchupNotes, onDismiss = { showDeleteDialog = false })
+        DeleteMatchupDialog(viewModel, matchupPlan, onDismiss = { showDeleteDialog = false })
     }
 }

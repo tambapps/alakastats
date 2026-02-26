@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
-import com.tambapps.pokemon.alakastats.domain.model.MatchupNotes
+import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
@@ -49,7 +49,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit.MatchupNotesEdit
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit.MatchupPlansEdit
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ExpandableDesktopReplay
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ReplayCompact
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
@@ -59,13 +59,13 @@ import org.jetbrains.compose.resources.painterResource
 
 
 @Composable
-fun MatchupNotesTab(viewModel: MatchupNotesViewModel) {
+fun MatchupPlansTab(viewModel: MatchupPlansViewModel) {
     val snackBar = LocalSnackBar.current
     when (val mode = viewModel.editMatchupMode) {
         NoEdit -> {
             FabLayout(
                 fab = {
-                    if (viewModel.hasMatchupNotes) {
+                    if (viewModel.hasMatchupPlans) {
                         FloatingActionButton(onClick = { viewModel.editMatchupMode = CreateMatchup },) {
                             Icon(
                                 painter = painterResource(Res.drawable.add),
@@ -76,19 +76,19 @@ fun MatchupNotesTab(viewModel: MatchupNotesViewModel) {
                 }
             ) {
                 val scrollState = rememberLazyListState()
-                if (!viewModel.hasMatchupNotes) {
+                if (!viewModel.hasMatchupPlans) {
                     NoNotes(viewModel)
                 } else if (LocalIsCompact.current)  {
-                    MatchupNotesTabMobile(viewModel, scrollState)
+                    MatchupPlansTabMobile(viewModel, scrollState)
                 } else {
-                    MatchupNotesTabDesktop(viewModel, scrollState)
+                    MatchupPlansTabDesktop(viewModel, scrollState)
                 }
                 ScrollToTopIfNeeded(viewModel, scrollState)
             }
         }
-        CreateMatchup, is EditMatchup -> MatchupNotesEdit(
+        CreateMatchup, is EditMatchup -> MatchupPlansEdit(
             team = viewModel.team,
-            matchupNotes = (mode as? EditMatchup)?.matchupNotes,
+            matchupPlan = (mode as? EditMatchup)?.matchupPlan,
             onCancel = { viewModel.editMatchupMode = NoEdit },
             onEdited = { editedMatchup ->
                 val verb = if (mode == CreateMatchup) "created" else "edited"
@@ -103,7 +103,7 @@ fun MatchupNotesTab(viewModel: MatchupNotesViewModel) {
 }
 
 @Composable
-fun NoNotes(viewModel: MatchupNotesViewModel) {
+fun NoNotes(viewModel: MatchupPlansViewModel) {
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.align(Alignment.Center).padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Add your game plans for each matchup to remember how to play against the meta",
@@ -127,8 +127,8 @@ fun NoNotes(viewModel: MatchupNotesViewModel) {
 
 @Composable
 internal fun MatchNotes(
-    viewModel: MatchupNotesViewModel,
-    matchupNotes: MatchupNotes,
+    viewModel: MatchupPlansViewModel,
+    matchupPlan: MatchupPlan,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -139,13 +139,13 @@ internal fun MatchNotes(
         gradientBackgroundColors = cardGradientColors,
         title = {
             Text(
-                text = matchupNotes.name,
+                text = matchupPlan.name,
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
             )
         },
         subtitle = {
-            matchupNotes.pokePaste?.let { pokePaste ->
+            matchupPlan.pokePaste?.let { pokePaste ->
                 PokemonTeamPreview(
                     viewModel.pokemonImageService,
                     pokePaste.pokemons.map { it.name },
@@ -161,7 +161,7 @@ internal fun MatchNotes(
             ) {
                 DropdownMenuItem(
                     text = { Text("Edit") },
-                    onClick = { viewModel.editMatchupMode = EditMatchup(matchupNotes) }
+                    onClick = { viewModel.editMatchupMode = EditMatchup(matchupPlan) }
                 )
                 DropdownMenuItem(
                     text = { Text("Delete") },
@@ -173,7 +173,7 @@ internal fun MatchNotes(
         content = content
     )
     if (showDeleteDialog) {
-        DeleteMatchupDialog(viewModel, matchupNotes, onDismiss = { showDeleteDialog = false })
+        DeleteMatchupDialog(viewModel, matchupPlan, onDismiss = { showDeleteDialog = false })
     }
 }
 
@@ -221,7 +221,7 @@ internal fun Composition(composition: List<PokemonName>,
 }
 
 @Composable
-internal fun ExampleReplays(viewModel: MatchupNotesViewModel, gamePlan: GamePlan) {
+internal fun ExampleReplays(viewModel: MatchupPlansViewModel, gamePlan: GamePlan) {
     Text(
         text = "Example Replays",
         style = MaterialTheme.typography.headlineSmall,
@@ -240,10 +240,10 @@ internal fun ExampleReplays(viewModel: MatchupNotesViewModel, gamePlan: GamePlan
 }
 
 @Composable
-internal fun DeleteMatchupDialog(viewModel: MatchupNotesViewModel, matchupNotes: MatchupNotes, onDismiss: () -> Unit) {
+internal fun DeleteMatchupDialog(viewModel: MatchupPlansViewModel, matchupPlan: MatchupPlan, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Delete Matchup ${matchupNotes.name}") },
+        title = { Text("Delete Matchup ${matchupPlan.name}") },
         text = {
             Column {
                 Text(
@@ -257,7 +257,7 @@ internal fun DeleteMatchupDialog(viewModel: MatchupNotesViewModel, matchupNotes:
             val snackBar = LocalSnackBar.current
             TextButton(
                 onClick = {
-                    viewModel.deleteMatchup(matchupNotes,
+                    viewModel.deleteMatchup(matchupPlan,
                         onSuccess = { snackBar.show("Successfully deleted matchup", SnackBar.Severity.SUCCESS) },
                         onError = { snackBar.show("Error: ${it.message}", SnackBar.Severity.ERROR) })
                     onDismiss.invoke()
