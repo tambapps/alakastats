@@ -1,8 +1,21 @@
 package com.tambapps.pokemon.alakastats
 
-class WasmPlatform: Platform {
+import kotlinx.browser.window
+
+object WasmPlatform: Platform {
     override val name: String = "Web with Kotlin/Wasm"
     override val type: PlatformType = PlatformType.Web
+    override val deviceType: DeviceType = detectDeviceCategory()
 }
 
-actual fun getPlatform(): Platform = WasmPlatform()
+private fun detectDeviceCategory(): DeviceType {
+    val userAgent = window.navigator.userAgent
+    return when {
+        userAgent.contains("Android", ignoreCase = true) -> DeviceType.Android
+        userAgent.contains("iPhone", ignoreCase = true) ||
+        userAgent.contains("iPad", ignoreCase = true) -> DeviceType.Ios
+        else -> DeviceType.Desktop
+    }
+}
+
+actual fun getPlatform(): Platform = WasmPlatform
