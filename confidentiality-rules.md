@@ -1,4 +1,4 @@
-# Privacy Policy – Alakastats (Android)
+# Privacy Policy – Alakastats (Android/iOs)
 
 **Last updated: February 18, 2026**
 
@@ -42,7 +42,7 @@ All data you enter into the application (teams, statistics, notes, analyses, etc
 You may delete this data at any time by:
 
 - Uninstalling the application
-- Clearing the application's data through Android system settings
+- Clearing the application's data through system settings
 
 ---
 
@@ -66,17 +66,17 @@ The application:
 
 ---
 
-## 6. Android Permissions
+## 6. Permissions
 
 Alakastats does not request any sensitive permissions.  
-If standard system permissions are required by Android for basic functionality, they are never used to collect or transmit personal data.
+If standard system permissions are required by your device for basic functionality, they are never used to collect or transmit personal data.
 
 ---
 
 ## 7. Security
 
 Since no data is collected or transmitted, no external processing occurs.  
-The security of locally stored data depends on your Android device’s protection mechanisms (screen lock, encryption, etc.).
+The security of locally stored data depends on your device’s protection mechanisms (screen lock, encryption, etc.).
 
 ---
 
