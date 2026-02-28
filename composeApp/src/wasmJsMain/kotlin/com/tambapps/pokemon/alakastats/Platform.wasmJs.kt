@@ -18,4 +18,4 @@ private fun detectDeviceCategory(): DeviceType {
     }
 }
 
-actual fun getPlatform(): Platform = WasmPlatform
+actual val platform: Platform = WasmPlatform

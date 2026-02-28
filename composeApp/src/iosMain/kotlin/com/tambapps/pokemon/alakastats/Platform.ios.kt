@@ -8,4 +8,4 @@ object IOSPlatform: Platform {
     override val deviceType: DeviceType = DeviceType.Ios
 }
 
-actual fun getPlatform(): Platform = IOSPlatform
+actual val platform: Platform = IOSPlatform

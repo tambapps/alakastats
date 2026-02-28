@@ -6,7 +6,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.PlatformType
-import com.tambapps.pokemon.alakastats.getPlatform
+import com.tambapps.pokemon.alakastats.platform
 
 val LocalIsCompact = compositionLocalOf { false }
 
@@ -22,7 +22,7 @@ fun ProvideIsCompact(
     content: @Composable () -> Unit
 ) {
     BoxWithConstraints {
-        val isCompact = maxWidth / maxHeight < 1.5f || getPlatform().type != PlatformType.Web
+        val isCompact = maxWidth / maxHeight < 1.5f || platform.type != PlatformType.Web
         CompositionLocalProvider(LocalIsCompact provides isCompact) {
             content()
         }

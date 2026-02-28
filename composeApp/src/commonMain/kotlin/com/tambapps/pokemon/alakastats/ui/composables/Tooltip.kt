@@ -19,7 +19,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import com.tambapps.pokemon.alakastats.PlatformType
-import com.tambapps.pokemon.alakastats.getPlatform
+import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import kotlin.time.Duration.Companion.seconds
 
@@ -48,7 +48,7 @@ fun Tooltip(tooltip: String, modifier: Modifier = Modifier, content: @Composable
     }
 
     Box(modifier) {
-        val modifier = if (getPlatform().type == PlatformType.Web) Modifier.pointerInput(Unit) {
+        val modifier = if (platform.type == PlatformType.Web) Modifier.pointerInput(Unit) {
             detectTapGestures(
                 onTap = { show = true },
             )

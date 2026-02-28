@@ -33,7 +33,7 @@ import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
-import com.tambapps.pokemon.alakastats.getPlatform
+import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
@@ -269,7 +269,7 @@ fun PokepastePokemonItemAndAbility(pokemon: Pokemon, pokemonImageService: Pokemo
 @Composable
 fun PokePasteInput(viewModel: PokepasteEditingViewModel) {
     Column {
-        if (getPlatform().type == PlatformType.Web) {
+        if (platform.type == PlatformType.Web) {
             Text(
                 text = "Pokepaste",
                 style = MaterialTheme.typography.titleLarge,

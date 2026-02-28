@@ -16,4 +16,4 @@ interface Platform {
     val deviceType: DeviceType
 }
 
-expect fun getPlatform(): Platform
+expect val platform: Platform

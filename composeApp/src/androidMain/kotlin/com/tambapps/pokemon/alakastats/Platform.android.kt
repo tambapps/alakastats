@@ -8,4 +8,4 @@ object AndroidPlatform : Platform {
     override val deviceType: DeviceType = DeviceType.Android
 }
 
-actual fun getPlatform(): Platform = AndroidPlatform
+actual val platform: Platform = AndroidPlatform
