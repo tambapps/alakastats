@@ -51,7 +51,10 @@ import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
-
+/*
+ Apparently the call to graphql.pokeapi doesn't work on ios SIMULATOR ONLY. to test it I have to declare http client,
+  see IosModule.kt
+ */
 @Composable
 fun PokemonSpeedScaleViewTab(
     viewModel: PokemonSpeedScaleViewModel
