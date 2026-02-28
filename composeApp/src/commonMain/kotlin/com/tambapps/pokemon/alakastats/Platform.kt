@@ -2,7 +2,7 @@ package com.tambapps.pokemon.alakastats
 
 enum class PlatformType {
     Ios,
-    Jvm,
+    Android,
     Web
 }
 interface Platform {
