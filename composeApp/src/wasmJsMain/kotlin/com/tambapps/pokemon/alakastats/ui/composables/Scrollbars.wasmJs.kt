@@ -24,6 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import com.tambapps.pokemon.alakastats.DeviceType
+import com.tambapps.pokemon.alakastats.PlatformType
+import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 
@@ -34,7 +37,7 @@ actual fun ScrollableRow(
     scrollbarThickness: Dp,
     content: @Composable RowScope.() -> Unit
 ) {
-    if (LocalIsCompact.current) {
+    if (platform.type != PlatformType.Web || platform.deviceType != DeviceType.Desktop) {
         Row(modifier.horizontalScroll(scrollState), content = content)
     } else {
         // defined scrollbar for desktop Web
