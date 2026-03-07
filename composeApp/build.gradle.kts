@@ -9,30 +9,6 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
-abstract class GenerateBuildConfigTask : DefaultTask() {
-    @get:Input
-    abstract val versionName: Property<String>
-
-    @get:OutputDirectory
-    abstract val outputDir: DirectoryProperty
-
-    @TaskAction
-    fun generate() {
-        val file = outputDir.get().asFile
-            .resolve("com/tambapps/pokemon/alakastats/AppBuildConfig.kt")
-        file.parentFile.mkdirs()
-        file.writeText(
-            """
-            package com.tambapps.pokemon.alakastats
-
-            object AppBuildConfig {
-                const val VERSION_NAME = "${versionName.get()}"
-            }
-            """.trimIndent()
-        )
-    }
-}
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
@@ -41,8 +17,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-val appVersionName = "1.1"
-val appVersionCode = 2
+val appVersionName = "1.2"
+val appVersionCode = 3
 
 val generateBuildConfig by tasks.registering(GenerateBuildConfigTask::class) {
     versionName.set(appVersionName)
@@ -187,5 +163,29 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+}
+
+abstract class GenerateBuildConfigTask : DefaultTask() {
+    @get:Input
+    abstract val versionName: Property<String>
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val file = outputDir.get().asFile
+            .resolve("com/tambapps/pokemon/alakastats/AppBuildConfig.kt")
+        file.parentFile.mkdirs()
+        file.writeText(
+            """
+            package com.tambapps.pokemon.alakastats
+
+            object AppBuildConfig {
+                const val VERSION_NAME = "${versionName.get()}"
+            }
+            """.trimIndent()
+        )
+    }
 }
 
