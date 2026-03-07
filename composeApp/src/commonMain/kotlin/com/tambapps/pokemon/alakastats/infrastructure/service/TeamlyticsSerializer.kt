@@ -25,6 +25,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PssStats
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.PssTeamlytics
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsDataEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsNotesEntity
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
@@ -75,9 +76,20 @@ class TeamlyticsSerializer(
             .bind()
         val sdNames = jsonAccess { jsonObject[TeamlyticsEntity::sdNames.name]?.jsonArray?.map { it.jsonPrimitive.content } }.bind()
             ?: listOf()
-        val notes = jsonAccess { jsonObject[TeamlyticsEntity::notes.name]?.let { json.decodeFromJsonElement<TeamlyticsNotesEntity>(it) } }.bind()
+        val data = jsonAccess {
+            jsonObject[TeamlyticsEntity::data.name]
+                ?.let { json.decodeFromJsonElement<TeamlyticsDataEntity>(it) }
+        }.bind()
 
-        val matchupNotes = jsonAccess { jsonObject[TeamlyticsEntity::matchupNotes.name]?.let { json.decodeFromJsonElement<List<MatchupNotesEntity>>(it) } }.bind()
+        val notes = jsonAccess {
+            jsonObject[TeamlyticsEntity::notes.name]
+                ?.let { json.decodeFromJsonElement<TeamlyticsNotesEntity>(it) }
+        }.bind()
+        val matchupNotes = jsonAccess {
+            jsonObject[TeamlyticsEntity::matchupNotes.name]
+                ?.let { json.decodeFromJsonElement<List<MatchupNotesEntity>>(it) }
+        }.bind()
+        val format = jsonAccess { jsonObject[TeamlyticsEntity::format.name]?.jsonPrimitive?.contentOrNull }.bind()
 
         TeamlyticsEntity(
             id = Uuid.random(),
@@ -85,9 +97,11 @@ class TeamlyticsSerializer(
             pokePaste = pokepaste,
             replays = replays,
             sdNames = sdNames,
+            data = data,
             notes = notes,
             lastUpdatedAt = Clock.System.now(),
-            matchupNotes = matchupNotes
+            matchupNotes = matchupNotes,
+            format = format
         )
     }
 
