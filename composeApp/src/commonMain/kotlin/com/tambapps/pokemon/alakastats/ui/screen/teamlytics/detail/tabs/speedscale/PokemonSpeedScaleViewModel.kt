@@ -110,7 +110,6 @@ class PokemonSpeedScaleViewModel(
         )
 
         val pokemonSpeeds = buildList {
-            add(interestPokemon)
             pokemons.forEach { (pokeName, baseStats) ->
                 val speed = PokeStats.compute(
                     baseStats,
@@ -120,6 +119,8 @@ class PokemonSpeedScaleViewModel(
                 ).speed.let { if (scarfBoost) (it * 1.5f).toInt()  else it }.toStage(stage)
                 add(PokemonSpeed(pokeName, speed, speedNature, 0))
             }
+            // adding last in purpose, because the interestPokemon will be looking left
+            add(interestPokemon)
         }
         val speedGroups = pokemonSpeeds.groupBy { it.value }
             .asSequence()

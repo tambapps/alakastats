@@ -82,6 +82,9 @@ fun PokemonSpeedScaleViewTab(
     ScrollToTopIfNeeded(viewModel, scrollState)
 }
 
+
+private val ABOVE_BACKGROUND_COLOR = Color(0x11FF0000)
+private val BELOW_BACKGROUND_COLOR = Color(0x1100FF00)
 @Composable
 internal fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyListState, modifier: Modifier) {
     val speedScale = viewModel.speedScale ?: return
@@ -90,14 +93,18 @@ internal fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: Lazy
         items(speedScale.speedGroups) { pokemonSpeeds ->
             val speedValue = pokemonSpeeds.first().value
             val backgroundColor = when {
-                speedValue > speedScale.interestPokemon.value -> Color(0x11FF0000)
-                speedValue < speedScale.interestPokemon.value -> Color(0x1100FF00)
+                speedValue > speedScale.interestPokemon.value -> ABOVE_BACKGROUND_COLOR
+                speedValue < speedScale.interestPokemon.value -> BELOW_BACKGROUND_COLOR
                 else -> Color.Transparent
             }
             Column(Modifier.fillMaxSize().background(backgroundColor)) {
                 FlowRow(Modifier.padding(horizontal = if (isCompact) 8.dp else 32.dp)) {
 
                     pokemonSpeeds.forEach { pSpeed ->
+                        if (pSpeed.isPokemonOfInterest) {
+                            // just to add more padding
+                            Box(Modifier.width(if (isCompact) 16.dp else 32.dp))
+                        }
                         viewModel.pokemonImageService.PokemonSprite(
                             pSpeed.pokemonName,
                             modifier = if (isCompact) Modifier.size(75.dp).scale(1.5f).padding(8.dp)
