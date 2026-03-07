@@ -35,6 +35,12 @@ class ManageTeamlyticsListUseCase(
 
     fun listSamplePreviews(): List<TeamlyticsPreview> = listOf(
         samplePreview(
+            name = "CataPult",
+            pokemons = listOf("Dragapult", "Chien-Pao", "Entei", "Ogerpon-Wellspring", "Ursaluna-Bloodmoon", "Sinistcha").map(::PokemonName),
+            nbReplays = 38,
+            winrate = 63,
+        ),
+        samplePreview(
             name = "Electrizer",
             pokemons = listOf("Miraidon", "Iron-Bundle", "Landorus", "Farigiraf", "Incineroar", "Ogerpon-Cornerstone").map(::PokemonName),
             nbReplays = 10,
