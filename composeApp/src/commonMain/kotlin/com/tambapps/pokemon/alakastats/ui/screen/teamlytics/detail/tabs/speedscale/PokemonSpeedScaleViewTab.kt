@@ -1,12 +1,13 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.warning
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -26,9 +26,10 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,11 +46,12 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
-import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import org.jetbrains.compose.resources.painterResource
 
 /*
  Apparently the call to graphql.pokeapi doesn't work on ios SIMULATOR ONLY. to test it I have to declare http client,
@@ -61,15 +63,22 @@ fun PokemonSpeedScaleViewTab(
 ) {
     val snackBar = LocalSnackBar.current
     LaunchedEffect(Unit) {
-        viewModel.loadSpeedScale { snackBar.show("Error while loading speed scale: ${it.message}", SnackBar.Severity.ERROR) }
+        viewModel.loadSpeedScale {
+            snackBar.show(
+                "Error while loading speed scale: ${it.message}",
+                SnackBar.Severity.ERROR
+            )
+        }
     }
 
     if (viewModel.team.format == Format.NONE) {
         Box(Modifier.fillMaxSize()) {
-            Text("Your team has no format.\nPlease edit your team to specify the format",
+            Text(
+                "Your team has no format.\nPlease edit your team to specify the format",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.align(Alignment.Center))
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
         return
     }
@@ -85,8 +94,13 @@ fun PokemonSpeedScaleViewTab(
 
 private val ABOVE_BACKGROUND_COLOR = Color(0x11FF0000)
 private val BELOW_BACKGROUND_COLOR = Color(0x1100FF00)
+
 @Composable
-internal fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: LazyListState, modifier: Modifier) {
+internal fun SpeedScale(
+    viewModel: PokemonSpeedScaleViewModel,
+    scrollState: LazyListState,
+    modifier: Modifier
+) {
     val speedScale = viewModel.speedScale ?: return
     val isCompact = LocalIsCompact.current
     LazyColumnWithScrollbar(modifier = modifier.fillMaxWidth(), state = scrollState) {
@@ -105,22 +119,18 @@ internal fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: Lazy
                             // just to add more padding
                             Box(Modifier.width(if (isCompact) 16.dp else 32.dp))
                         }
-                        viewModel.pokemonImageService.PokemonSprite(
-                            pSpeed.pokemonName,
-                            modifier = if (isCompact) Modifier.size(75.dp).scale(1.5f).padding(8.dp)
-                            else Modifier.size(128.dp).scale(1.5f).padding(16.dp),
-                            facingDirection = if (pSpeed.isPokemonOfInterest) FacingDirection.LEFT else FacingDirection.RIGHT,
-                            disableTooltip = false
-                        )
+                        PokemonSpeedItem(viewModel, pSpeed)
                     }
                 }
 
-                Text(speedValue.toString(),
+                Text(
+                    speedValue.toString(),
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(horizontal = 8.dp)
-                    )
+                )
 
-                HorizontalDivider(Modifier.fillMaxWidth(),
+                HorizontalDivider(
+                    Modifier.fillMaxWidth(),
                     thickness = 4.dp,
                     color = MaterialTheme.colorScheme.surfaceContainerLow
                 )
@@ -131,6 +141,42 @@ internal fun SpeedScale(viewModel: PokemonSpeedScaleViewModel, scrollState: Lazy
             Spacer(Modifier.height(256.dp))
         }
     }
+}
+
+@Composable
+private fun PokemonSpeedItem(viewModel: PokemonSpeedScaleViewModel, pSpeed: PokemonSpeed) {
+    if (pSpeed.statsNotFound) {
+        Box {
+            PokemonSpeedSprite(viewModel, pSpeed)
+            val snackbar = LocalSnackBar.current
+            IconButton(onClick = {
+                snackbar.show(
+                    "${pSpeed.pokemonName.pretty}'s base stats were not found. Please contact JarmanVGC to fix this issue",
+                    SnackBar.Severity.WARNING
+                )
+            }) {
+                Icon(
+                    modifier = Modifier.size(if (LocalIsCompact.current) 32.dp else 64.dp),
+                    painter = painterResource(Res.drawable.warning),
+                    contentDescription = "Warning",
+                    tint = MaterialTheme.colorScheme.defaultIconColor
+                )
+            }
+        }
+    } else {
+        PokemonSpeedSprite(viewModel, pSpeed)
+    }
+}
+
+@Composable
+private fun PokemonSpeedSprite(viewModel: PokemonSpeedScaleViewModel, pSpeed: PokemonSpeed) {
+    viewModel.pokemonImageService.PokemonSprite(
+        pSpeed.pokemonName,
+        modifier = if (LocalIsCompact.current) Modifier.size(75.dp).scale(1.5f).padding(8.dp)
+        else Modifier.size(128.dp).scale(1.5f).padding(16.dp),
+        facingDirection = if (pSpeed.isPokemonOfInterest) FacingDirection.LEFT else FacingDirection.RIGHT,
+        disableTooltip = false
+    )
 }
 
 val flowRowPadding @Composable get() = if (LocalIsCompact.current) 8.dp else 16.dp
@@ -197,17 +243,19 @@ internal fun PokemonBoostsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
 }
 
 data class StatBoostStage(val level: Int, val multiplier: Float) {
-    val displayedText get() = buildString {
-        if (level == 0) append("+0 (x1)")
-        else {
-            if (level > 0) append("+")
-            append(level)
-            append(" (x")
-            append(multiplier)
-            append(")")
+    val displayedText
+        get() = buildString {
+            if (level == 0) append("+0 (x1)")
+            else {
+                if (level > 0) append("+")
+                append(level)
+                append(" (x")
+                append(multiplier)
+                append(")")
+            }
         }
-    }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SpeedStageDropDown(value: Int, onValueChange: (Int) -> Unit) {
@@ -239,7 +287,7 @@ private fun SpeedStageDropDown(value: Int, onValueChange: (Int) -> Unit) {
             shape = FilterChipDefaults.shape,
             contentPadding = PaddingValues(horizontal = 10.dp),
             modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-             onClick = {}
+            onClick = {}
         ) {
             Text((values.find { it.level == value } ?: values[6]).displayedText)
             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)

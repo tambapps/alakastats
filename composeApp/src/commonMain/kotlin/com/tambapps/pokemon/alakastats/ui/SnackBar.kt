@@ -30,6 +30,8 @@ val LocalSnackBar = compositionLocalOf<SnackBar> {
 
 private val darkErrorColor = Color(0xFFA80000)
 private val darkSuccessColor = Color(0xFF059600)
+private val darkWarningColor = Color(0xFFB86000)
+private val lightWarningColor = Color(0xFFFF9800)
 
 class SnackBar(
     private val state: SnackbarHostState,
@@ -38,6 +40,7 @@ class SnackBar(
 ) {
     enum class Severity {
         INFO,
+        WARNING,
         ERROR,
         SUCCESS
     }
@@ -60,11 +63,13 @@ class SnackBar(
     private fun backgroundColor(type: Severity) = if(isDarkTheme)
         when(type) {
             Severity.INFO -> surfaceVariantDark
+            Severity.WARNING -> darkWarningColor
             Severity.ERROR -> darkErrorColor
             Severity.SUCCESS -> darkSuccessColor
         }
     else when(type) {
         Severity.INFO -> surfaceVariantLight
+        Severity.WARNING -> lightWarningColor
         Severity.ERROR -> Color.Red
         Severity.SUCCESS -> Color.Green
     }

@@ -28,7 +28,8 @@ data class PokemonSpeed(
     val value: Int,
     val boostNature: Boolean,
     val ev: Int,
-    val isPokemonOfInterest: Boolean = false
+    val isPokemonOfInterest: Boolean = false,
+    val statsNotFound: Boolean = false
 )
 
 data class SpeedScale(
@@ -117,7 +118,8 @@ class PokemonSpeedScaleViewModel(
                     nature = if (speedNature) Nature.JOLLY else Nature.QUIRKY,
                     level = pokemon.level
                 ).speed.let { if (scarfBoost) (it * 1.5f).toInt()  else it }.toStage(stage)
-                add(PokemonSpeed(pokeName, speed, speedNature, 0))
+                val statsNotFound = baseStats.speed == 0
+                add(PokemonSpeed(pokeName, speed, speedNature, 0, statsNotFound = statsNotFound))
             }
             // adding last in purpose, because the interestPokemon will be looking left
             add(interestPokemon)

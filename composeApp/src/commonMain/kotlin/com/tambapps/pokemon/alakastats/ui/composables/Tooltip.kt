@@ -63,21 +63,26 @@ fun Tooltip(tooltip: String, modifier: Modifier = Modifier, content: @Composable
             content()
         }
         if (show) {
-            Popup(alignment = Alignment.BottomCenter) {
-                val (background, text) =
-                    if (isDarkThemeEnabled()) Pair(Color.Black, Color.White)
-                    else Pair(Color.White, Color.Black)
-                Box(
-                    modifier = Modifier
-                        .background(
-                            color = background.copy(alpha = 0.8f),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(tooltip, color = text)
-                }
-            }
+            PopUp(tooltip, alignment = Alignment.BottomCenter)
+        }
+    }
+}
+
+@Composable
+fun PopUp(text: String, alignment: Alignment = Alignment.TopStart) {
+    Popup(alignment = alignment) {
+        val (background, color) =
+            if (isDarkThemeEnabled()) Pair(Color.Black, Color.White)
+            else Pair(Color.White, Color.Black)
+        Box(
+            modifier = Modifier
+                .background(
+                    color = background.copy(alpha = 0.8f),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(horizontal = 12.dp, vertical = 6.dp)
+        ) {
+            Text(text, color = color)
         }
     }
 }
