@@ -3,8 +3,11 @@ package com.tambapps.pokemon.alakastats.ui.screen.home
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.alakastats
 import alakastats.composeapp.generated.resources.alakastats_dark
+import alakastats.composeapp.generated.resources.download_on_android
+import alakastats.composeapp.generated.resources.download_on_ios
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,12 +24,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.DeviceType
+import com.tambapps.pokemon.alakastats.PlatformType
+import com.tambapps.pokemon.alakastats.platform
+import com.tambapps.pokemon.alakastats.ui.screen.about.GetAppButton
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.jetbrains.compose.resources.painterResource
 
@@ -55,6 +63,10 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
             Text("Alakastats", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             CatchPhrase(skipLine = true, textAlign = TextAlign.Center)
 
+            if (platform.type == PlatformType.Web && platform.deviceType.let { it == DeviceType.Android || it == DeviceType.Ios }) {
+                Spacer(Modifier.height(16.dp))
+                GetAppButton(platform.deviceType)
+            }
             Spacer(Modifier.height(16.dp))
 
             NewTeamButton(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))

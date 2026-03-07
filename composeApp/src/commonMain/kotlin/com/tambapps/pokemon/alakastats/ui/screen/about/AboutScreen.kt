@@ -1,14 +1,21 @@
 package com.tambapps.pokemon.alakastats.ui.screen.about
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.download_on_android
+import alakastats.composeapp.generated.resources.download_on_ios
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -32,10 +40,13 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.DeviceType
+import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.screen.home.AlakastatsLabel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
+import org.jetbrains.compose.resources.painterResource
 
 
 object AboutScreen : Screen {
@@ -124,8 +135,26 @@ private fun AboutAlakastats() = Section(
             withStyle(linkStyle) { append("Github") }
         }
         append(".")
+    },
+    additional = {
+        if (LocalIsCompact.current) {
+            Column(Modifier.padding(top = 8.dp)) {
+                GetAppButtons()
+            }
+        } else {
+            Row(Modifier.padding(top = 8.dp)) {
+                GetAppButtons()
+            }
+        }
     }
 )
+
+@Composable
+private fun GetAppButtons() {
+    val modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+    GetAppButton(DeviceType.Android, modifier = modifier)
+    GetAppButton(DeviceType.Ios, modifier = modifier)
+}
 
 @Composable
 private fun Credits() = Section(
@@ -150,15 +179,34 @@ private fun Credits() = Section(
 )
 
 @Composable
-private fun Section(title: String, text: AnnotatedString) {
+private fun Section(title: String, text: AnnotatedString, additional: (@Composable () -> Unit)? = null) {
     Column(Modifier.padding(horizontal = 8.dp)) {
         Text(title, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.align(Alignment.Start))
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
         )
+        additional?.invoke()
     }
 }
 
 @Composable
 private fun VerticalSpacer(height: Dp = 20.dp) = Spacer(Modifier.height(height))
+
+@Composable
+fun GetAppButton(deviceType: DeviceType, modifier: Modifier = Modifier) {
+    val uriHandler = LocalUriHandler.current
+    val url = if (deviceType == DeviceType.Android)
+        "https://play.google.com/store/apps/details?id=com.tambapps.pokemon.alakastats"
+    else
+        "https://apps.apple.com/app/alakastats/id6759507260"
+    Image(
+        modifier = modifier.clickable(onClick = { uriHandler.openUri(url) })
+            .size(width = 180.dp, height = 54.dp),
+        painter = painterResource(
+            if (deviceType == DeviceType.Android) Res.drawable.download_on_android
+            else Res.drawable.download_on_ios
+        ),
+        contentDescription = "Download on $deviceType"
+    )
+}
