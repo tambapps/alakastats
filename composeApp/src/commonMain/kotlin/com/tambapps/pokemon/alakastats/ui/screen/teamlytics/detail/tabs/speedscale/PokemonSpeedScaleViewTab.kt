@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,18 +17,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,6 +42,7 @@ import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
+import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
@@ -215,7 +210,7 @@ fun OpposingInvestmentsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
         )
 
         SpeedStageDropDown(
-            value = viewModel.stage,
+            speedStage = viewModel.stage,
             onValueChange = { viewModel.updateStage(it) }
         )
     }
@@ -236,76 +231,66 @@ internal fun PokemonBoostsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
         )
 
         SpeedStageDropDown(
-            value = viewModel.ownStage,
+            speedStage = viewModel.ownStage,
             onValueChange = { viewModel.updateOwnStage(it) }
         )
     }
 }
 
 data class StatBoostStage(val level: Int, val multiplier: Float) {
-    val displayedText
-        get() = buildString {
-            if (level == 0) append("+0 (x1)")
-            else {
-                if (level > 0) append("+")
-                append(level)
-                append(" (x")
-                append(multiplier)
-                append(")")
-            }
-        }
+
+    override fun toString() = buildString {
+        if (level >= 0) append("+")
+        append(level)
+        append(" (x")
+        append(if (multiplier % 1.0 == 0.0) multiplier.toInt() else multiplier)
+        append(")")
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SpeedStageDropDown(value: Int, onValueChange: (Int) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    val values = remember {
-        listOf(
-            StatBoostStage(6, 4.0f),
-            StatBoostStage(5, 3.5f),
-            StatBoostStage(4, 3.0f),
-            StatBoostStage(3, 2.5f),
-            StatBoostStage(2, 2.0f),
-            StatBoostStage(1, 1.5f),
-            StatBoostStage(0, 1.0f),
-            StatBoostStage(-1, 0.67f),
-            StatBoostStage(-2, 0.5f),
-            StatBoostStage(-3, 0.4f),
-            StatBoostStage(-4, 0.33f),
-            StatBoostStage(-5, 0.29f),
-            StatBoostStage(-6, 0.25f)
+private fun SpeedStageDropDown(speedStage: Int, onValueChange: (Int) -> Unit) {
+    var show by remember { mutableStateOf(false) }
+    val values = remember { getSpeedStages() }
+    val speedStageIndex = remember(speedStage) {
+        values.indexOfFirst { it.level == speedStage }.let { if (it != -1) it else NEUTRAL_SPEED_STAGE_INDEX }
+    }
+
+    FilterChip(
+        modifier = Modifier.padding(horizontal = flowRowPadding),
+        onClick = { show = true },
+        label = {
+            Text(values[speedStageIndex].toString(), textAlign = TextAlign.Center)
+            ExposedDropdownMenuDefaults.TrailingIcon(expanded = show)
+        },
+        selected = speedStage != 0
+    )
+
+    if (show) {
+        WheelPickerDialog(
+            title = "Speed Stage",
+            items = values,
+            initialIndex = speedStageIndex,
+            onPicked = { onValueChange.invoke(it.level) },
+            onDismissRequest = { show = false },
         )
     }
-
-    ExposedDropdownMenuBox(
-        modifier = Modifier.padding(horizontal = flowRowPadding),
-        expanded = expanded,
-        onExpandedChange = { expanded = it }
-    ) {
-        OutlinedButton(
-            shape = FilterChipDefaults.shape,
-            contentPadding = PaddingValues(horizontal = 10.dp),
-            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-            onClick = {}
-        ) {
-            Text((values.find { it.level == value } ?: values[6]).displayedText)
-            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-        }
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            values.forEach { stage ->
-                DropdownMenuItem(
-                    text = { Text(stage.displayedText) },
-                    onClick = {
-                        onValueChange.invoke(stage.level)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
 }
+
+private const val NEUTRAL_SPEED_STAGE_INDEX = 6
+private fun getSpeedStages() = listOf(
+    StatBoostStage(6, 4.0f),
+    StatBoostStage(5, 3.5f),
+    StatBoostStage(4, 3.0f),
+    StatBoostStage(3, 2.5f),
+    StatBoostStage(2, 2.0f),
+    StatBoostStage(1, 1.5f),
+    StatBoostStage(0, 1.0f),
+    StatBoostStage(-1, 0.67f),
+    StatBoostStage(-2, 0.5f),
+    StatBoostStage(-3, 0.4f),
+    StatBoostStage(-4, 0.33f),
+    StatBoostStage(-5, 0.29f),
+    StatBoostStage(-6, 0.25f)
+)

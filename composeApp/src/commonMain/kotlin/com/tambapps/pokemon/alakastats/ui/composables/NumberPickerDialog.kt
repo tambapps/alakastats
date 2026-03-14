@@ -52,7 +52,7 @@ fun <T> WheelPickerDialog(
                 ) { index ->
                     Text(
                         text = itemToText.invoke(items[index]),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.headlineMedium,
                         modifier =
                             Modifier.padding(32.dp, 8.dp).graphicsLayer {
                                 alpha = (BUFFER_SIZE - abs(state.value - index)).coerceIn(0f, 1f)
