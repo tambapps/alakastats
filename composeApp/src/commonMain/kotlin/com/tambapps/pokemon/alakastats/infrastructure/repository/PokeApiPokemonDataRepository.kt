@@ -112,6 +112,7 @@ private val PokemonName.pokeApiNormalized: PokemonName get() {
         name == "maushold" -> PokemonName("maushold-family-of-four")
         name == "dudunsparce" -> PokemonName("dudunsparce-two-segment")
         name == "tatsugiri" -> PokemonName("tatsugiri-droopy")
+        name == "giratina" -> PokemonName("giratina-altered")
         else -> n
     }
 }

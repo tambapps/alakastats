@@ -10,8 +10,10 @@ import kotlin.uuid.Uuid
 enum class Format(
     val displayedName: String
 ) {
-    NONE("<none>"), REGULATION_H("Regulation H"), REGULATION_F("Regulation F");
-
+    NONE("<none>"),
+    REGULATION_H("Regulation H"),
+    REGULATION_F("Regulation F"),
+    REGULATION_I("Regulation I");
 
 }
 
