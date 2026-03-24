@@ -64,7 +64,7 @@ class GamePlanState() {
     var exampleReplays by mutableStateOf(emptyList<ReplayAnalytics>())
         private set
 
-    val isValid get() = description.isNotBlank() && composition.isNotEmpty()
+    val isValid get() = description.isNotBlank() || composition.isNotEmpty()
 
     fun updateDescription(description: String) {
         this.description = description
