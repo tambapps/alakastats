@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.Pokemon
+import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
@@ -58,6 +59,16 @@ fun OverviewTab(viewModel: OverviewViewModel) {
         OverviewTabDesktop(viewModel, scrollState)
     }
     ScrollToTopIfNeeded(viewModel, scrollState)
+}
+
+@Composable
+internal fun FormatText(format: Format, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier,
+        text = format.displayedName,
+        style = MaterialTheme.typography.headlineMedium,
+        fontWeight = FontWeight.Bold
+    )
 }
 
 @Composable

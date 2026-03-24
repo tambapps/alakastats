@@ -57,7 +57,7 @@ class PokemonDetailViewModel(
                 state = teamlyticsResult.fold(
                     ifLeft = { TeamPokemonStateState.Error(it) },
                     ifRight = { team ->
-                        val pokemon = team.pokePaste.pokemons.find { it.name.matches(pokemonName) }
+                        val pokemon = team.pokePaste.pokemons.find { it.name.matches(pokemonName) }?.let { it.copy(level = team.format.pokemonLevel ?: it.level) }
                         val data = team.data.pokemonData[pokemonName]
                         val notes = team.notes?.pokemonNotes?.get(pokemon?.name)
                         val usages = computeUsages(team)

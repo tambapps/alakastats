@@ -34,7 +34,7 @@ data class TeamlyticsDataEntity(
 data class PokemonDataEntity(
     val name: String,
     val moves: Map<String, PokemonMoveEntity>,
-    val stats: List<Int>
+    val baseStats: List<Int>? = null
 )
 
 @Serializable

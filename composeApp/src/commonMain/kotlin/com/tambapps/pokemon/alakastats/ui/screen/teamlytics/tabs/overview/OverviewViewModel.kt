@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.Pokemon
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsData
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
@@ -28,7 +29,10 @@ class OverviewViewModel(
     var isEditingNotes by mutableStateOf(false)
     var teamNotes by mutableStateOf("")
     val pokemonNotes = mutableStateMapOf<Pokemon, String>()
-
+    val leveledPokemons = when(val formatPokemonLevel = team.format.pokemonLevel) {
+        null -> team.pokePaste.pokemons
+        else -> team.pokePaste.pokemons.map { it.copy(level = formatPokemonLevel) }
+    }
     override var isTabLoading by mutableStateOf(false)
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -119,8 +123,7 @@ class OverviewViewModel(
 
 
     private fun loadPokemonData() {
-        val data = team.data
-        if (team.pokePaste.pokemons.all { data.pokemonData.containsKey(it.name.normalized) }) {
+        if (!team.shouldLoadPokemonData()) {
             return
         }
         isTabLoading = true
@@ -140,7 +143,9 @@ class OverviewViewModel(
                 isTabLoading = false
             }
         }
-
     }
 }
+
+private fun Teamlytics.shouldLoadPokemonData() = pokePaste.pokemons.any { !data.pokemonData.containsKey(it.name.normalized) }
+        || data.pokemonData.values.any { it.baseStats == null }
 

@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonNormalizer
@@ -109,7 +110,7 @@ fun PokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, modifier: Modif
     Row(modifier) {
         for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
             val modifier = if (LocalIsCompact.current) Modifier.weight(1f) else Modifier.padding(horizontal = 4.dp)
-            PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, pokemonData?.stats, modifier)
+            PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, pokemonData?.baseStats, modifier)
         }
     }
 }
@@ -139,7 +140,7 @@ private fun PokemonStatColumn(
     stat: Stat,
     ivs: PokeStats,
     evs: PokeStats,
-    stats: PokeStats?, // computed stats
+    baseStats: PokeStats?,
     modifier: Modifier = Modifier) {
     Column(
         modifier,
@@ -159,7 +160,16 @@ private fun PokemonStatColumn(
             else -> Color.Unspecified
         }
         Text(txt, color = textColor, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
-        if (stats != null) {
+        if (baseStats != null) {
+            val stats = remember(baseStats) {
+                PokeStats.compute(
+                    baseStats = baseStats,
+                    evs = pokemon.evs,
+                    ivs = pokemon.ivs,
+                    nature = pokemon.nature ?: Nature.QUIRKY,
+                    level = pokemon.level
+                )
+            }
             StatText(stats[stat], textColor)
         } else {
             StatText(evs[stat], textColor)

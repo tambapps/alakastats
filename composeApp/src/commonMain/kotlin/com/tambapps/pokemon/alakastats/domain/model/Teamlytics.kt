@@ -8,12 +8,13 @@ import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 enum class Format(
-    val displayedName: String
+    val displayedName: String,
+    val pokemonLevel: Int? = null
 ) {
     NONE("<none>"),
-    REGULATION_H("Regulation H"),
-    REGULATION_F("Regulation F"),
-    REGULATION_I("Regulation I");
+    REGULATION_H("Regulation H", pokemonLevel = 50),
+    REGULATION_F("Regulation F", pokemonLevel = 50),
+    REGULATION_I("Regulation I", pokemonLevel = 50);
 
 }
 
@@ -62,7 +63,7 @@ data class TeamlyticsData(
 data class PokemonData(
     val name: PokemonName,
     val moves: Map<MoveName, PokemonMove>,
-    val stats: PokeStats
+    val baseStats: PokeStats?
 )
 
 

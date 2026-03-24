@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.Pokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.verticalPokemonSpace
@@ -43,6 +44,10 @@ internal fun OverviewTabMobile(viewModel: OverviewViewModel, scrollState: Scroll
             }
             Spacer(Modifier.width(4.dp))
         }
+        team.format.takeIf { it != Format.NONE }?.let {
+            Spacer(Modifier.height(4.dp))
+            FormatText(it)
+        }
         Spacer(Modifier.height(4.dp))
         NoteTextOrTextField(viewModel, viewModel.teamNotes, "Team notes") {
             viewModel.teamNotes = it
@@ -59,7 +64,7 @@ internal fun OverviewTabMobile(viewModel: OverviewViewModel, scrollState: Scroll
 
 @Composable
 private fun NotedPokePaste(viewModel: OverviewViewModel) {
-    val pokemons = viewModel.team.pokePaste.pokemons
+    val pokemons = viewModel.leveledPokemons
     pokemons.forEach { pokemon ->
         NotedPokepastePokemon(viewModel, pokemon, Modifier.fillMaxWidth())
         Spacer(Modifier.height(verticalPokemonSpace))

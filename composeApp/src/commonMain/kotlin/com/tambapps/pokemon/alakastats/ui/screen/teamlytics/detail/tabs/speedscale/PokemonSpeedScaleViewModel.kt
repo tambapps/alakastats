@@ -61,6 +61,7 @@ class PokemonSpeedScaleViewModel(
 
     private val scope = CoroutineScope(Dispatchers.Main)
     private var pokemons by mutableStateOf(emptyMap<PokemonName, PokeStats>())
+    private val pokemonLevel = pokemon.level
 
     // grouped by speed value
     var speedScale by mutableStateOf<SpeedScale?>(null)
@@ -100,7 +101,7 @@ class PokemonSpeedScaleViewModel(
             baseStats = pokemonBaseStats,
             evs = pokemon.evs,
             nature = pokemon.nature ?: Nature.QUIRKY,
-            level = 50
+            level = pokemonLevel
         ).speed.let { if (ownScarfBoost) (it * 1.5f).toInt() else it }.toStage(ownStage)
         val interestPokemon = PokemonSpeed(
             pokemonName = pokemon.name,
@@ -116,7 +117,7 @@ class PokemonSpeedScaleViewModel(
                     baseStats,
                     evs = PokeStats.default(if (maxEvs) 252 else 0),
                     nature = if (speedNature) Nature.JOLLY else Nature.QUIRKY,
-                    level = pokemon.level
+                    level = pokemonLevel
                 ).speed.let { if (scarfBoost) (it * 1.5f).toInt()  else it }.toStage(stage)
                 val statsNotFound = baseStats.speed == 0
                 add(PokemonSpeed(pokeName, speed, speedNature, 0, statsNotFound = statsNotFound))
@@ -183,7 +184,8 @@ fun Int.toStage(level: Int): Int {
 private fun Pokemon.isScarfOrBooster(pokemonData: PokemonData?): Boolean {
     val item = item ?: return false
     return item.normalized.value.let {
-        it == "choice-scarf" || it == "booster-energy" && pokemonData != null && pokemonData.stats.isSpeedHighestStat() }
+        it == "choice-scarf"
+                || it == "booster-energy" && pokemonData?.baseStats != null && PokeStats.compute(this, pokemonData.baseStats).isSpeedHighestStat() }
 }
 
-private fun PokeStats.isSpeedHighestStat(): Boolean = Stat.entries.maxOfOrNull { this[it] } == speed
+private fun PokeStats.isSpeedHighestStat(): Boolean = (Stat.entries - Stat.HP).maxOfOrNull { this[it] } == speed
