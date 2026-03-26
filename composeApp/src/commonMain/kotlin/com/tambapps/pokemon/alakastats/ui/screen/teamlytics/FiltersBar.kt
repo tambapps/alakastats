@@ -41,7 +41,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.domain.model.GameOutput
+import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
@@ -318,7 +318,7 @@ private fun GameOutcomeButton(viewModel: FiltersViewModel) {
     if (showDialog) {
         WheelPickerDialog(
             title = "Game Outcome",
-            items = GameOutput.entries,
+            items = GameOutcome.entries,
             onPicked = { viewModel.applyFilters(viewModel.filters.copy(gameOutcome = it)) },
             onDismissRequest = { showDialog = false }
         )

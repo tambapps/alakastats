@@ -4,7 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.domain.model.GameOutput
+import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
@@ -51,7 +51,7 @@ class LeadStatsViewModel(
     }
 
     private fun computeStats(): Triple<List<LeadStats>, List<LeadStats>, List<LeadStats>> = useCase.filteredTeam.withContext {
-        val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
+        val replays = team.replays.filter { it.gameOutcome != GameOutcome.UNKNOWN }
         val leadsStats = computeLeadsStats(replays)
         val pokemonLeadAndWins = computeIndividualStats(replays)
         val leadAndWinStats = pokemonLeadAndWins
@@ -81,7 +81,7 @@ class LeadStatsViewModel(
 }
 
 fun TeamlyticsContext.winStats(replays: List<ReplayAnalytics>): WinStats {
-    val winCount = replays.count { it.gameOutput == GameOutput.WIN }
+    val winCount = replays.count { it.gameOutcome == GameOutcome.WIN }
     val total = replays.size
     return WinStats(
         winCount = winCount,

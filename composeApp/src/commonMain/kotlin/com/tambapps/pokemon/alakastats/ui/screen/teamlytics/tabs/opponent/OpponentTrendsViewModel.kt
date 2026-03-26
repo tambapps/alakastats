@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.domain.model.GameOutput
+import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
@@ -78,14 +78,14 @@ class MatchupsViewModel(
     private fun computeLeadsStats(): Pair<List<LeadStats>, List<LeadStats>> = useCase.filteredTeam.withContext {
         // don't want to compute lead stats if no filters is applied because they are intended to be used when filtering on specific matchup
         if (!filters.hasAny()) return@withContext emptyList<LeadStats>() to emptyList()
-        val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
+        val replays = team.replays.filter { it.gameOutcome != GameOutcome.UNKNOWN }
 
         val leadsStats = buildMap {
             for (replay in replays) {
                 val opponentPlayer = replay.opponentPlayer
                 val lead = opponentPlayer.lead
                 val currentStats = getOrPut(lead) { LeadStats(lead, replays.size) }
-                this[lead] = currentStats.incr(hasWon = replay.gameOutput == GameOutput.WIN)
+                this[lead] = currentStats.incr(hasWon = replay.gameOutcome == GameOutcome.WIN)
             }
         }.values
             .filter { it.attendanceCount >= minimumAttendance }
@@ -97,7 +97,7 @@ class MatchupsViewModel(
     private fun computeMatchupStats(): Pair<List<MatchupStats>, List<MatchupStats>> = computeStats(
         statGenerator = ::MatchupStats,
         replayPokemonsSupplier = { it.opponentPlayer.selection },
-        statUpdater = { replay, stats -> stats.incr(replay.gameOutput == GameOutput.WIN) },
+        statUpdater = { replay, stats -> stats.incr(replay.gameOutcome == GameOutcome.WIN) },
         bestComparator = compareBy({ - it.rate }, { - it.attendanceCount }),
         worstComparator = compareBy({ it.rate }, { - it.attendanceCount }),
     )
@@ -117,7 +117,7 @@ class MatchupsViewModel(
         bestComparator: Comparator<in T>,
         worstComparator: Comparator<in T>
     ): Pair<List<T>, List<T>> = useCase.filteredTeam.withContext {
-        val replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
+        val replays = team.replays.filter { it.gameOutcome != GameOutcome.UNKNOWN }
 
         val stats = buildMap {
             for (replay in replays) {

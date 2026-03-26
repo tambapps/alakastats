@@ -21,15 +21,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.tambapps.pokemon.alakastats.domain.model.GameOutput
+import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.domain.model.getGameOutput
+import com.tambapps.pokemon.alakastats.domain.model.getGameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
-import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
-import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
+import com.tambapps.pokemon.alakastats.ui.composables.GameOutcomeCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.Header
@@ -105,14 +104,14 @@ fun ReplayCompact(
     borderColor: Color? = null
     ) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
-    val gameOutput = team.getGameOutput(replay)
+    val gameOutput = team.getGameOutcome(replay)
     ExpansionTile(
         title = { isExpanded ->
-            GameOutputCard(gameOutput)
+            GameOutcomeCard(gameOutput)
             VsText(currentPlayer, opponentPlayer, gameOutput)
         },
         subtitle = {
-            if (gameOutput != GameOutput.UNKNOWN) {
+            if (gameOutput != GameOutcome.UNKNOWN) {
                 PokemonTeamPreview(pokemonImageService, opponentPlayer, fillWidth = true)
             }
         },
@@ -125,7 +124,7 @@ fun ReplayCompact(
     ) {
         Column {
             Spacer(Modifier.height(8.dp))
-            if (gameOutput != GameOutput.UNKNOWN && opponentPlayer.ots != null && replay.url != null) {
+            if (gameOutput != GameOutcome.UNKNOWN && opponentPlayer.ots != null && replay.url != null) {
                 Row(Modifier.fillMaxWidth()
                     .padding(horizontal = 8.dp)) {
                     Spacer(Modifier.weight(1f))
@@ -134,14 +133,14 @@ fun ReplayCompact(
                     ViewReplayButton(team, replay, replay.url)
                     Spacer(Modifier.weight(1f))
                 }
-            } else if (gameOutput != GameOutput.UNKNOWN && opponentPlayer.ots != null) {
+            } else if (gameOutput != GameOutcome.UNKNOWN && opponentPlayer.ots != null) {
                 OtsButton(opponentPlayer, opponentPlayer.ots, pokemonImageService, modifier = Modifier.align(Alignment.CenterHorizontally))
             } else if (replay.url != null) {
                 ViewReplayButton(team, replay, replay.url, modifier = Modifier.align(Alignment.CenterHorizontally))
             }
             Spacer(Modifier.height(8.dp))
 
-            if (viewModel != null && gameOutput == GameOutput.UNKNOWN) {
+            if (viewModel != null && gameOutput == GameOutcome.UNKNOWN) {
                 MobileSdNamesWarning(viewModel)
             } else {
                 Spacer(Modifier.height(8.dp))
@@ -198,15 +197,15 @@ private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String,
 
 
 @Composable
-private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutput: GameOutput, modifier: Modifier = Modifier) {
+private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutcome: GameOutcome, modifier: Modifier = Modifier) {
     val text =
-        if (gameOutput != GameOutput.UNKNOWN) "VS ${opponentPlayer.name.value}"
+        if (gameOutcome != GameOutcome.UNKNOWN) "VS ${opponentPlayer.name.value}"
         else "${currentPlayer.name.value}\nVS\n${opponentPlayer.name.value}"
     Text(
         text = text,
         style = MaterialTheme.typography.titleLarge,
         modifier = modifier.padding(start = 8.dp),
-        textAlign = if (gameOutput != GameOutput.UNKNOWN) null else TextAlign.Center,
+        textAlign = if (gameOutcome != GameOutcome.UNKNOWN) null else TextAlign.Center,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1
     )

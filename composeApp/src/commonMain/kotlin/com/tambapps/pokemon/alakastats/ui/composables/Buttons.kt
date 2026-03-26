@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.Navigator
-import com.tambapps.pokemon.alakastats.domain.model.GameOutput
+import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
@@ -44,11 +44,11 @@ val WIN_COLOR = Color(0xFF4CAF50)
 val LOOSE_COLOR = Color(0xFFF44336)
 
 @Composable
-fun GameOutputCard(output: GameOutput) {
+fun GameOutcomeCard(output: GameOutcome) {
     val color = when (output) {
-        GameOutput.WIN -> WIN_COLOR
-        GameOutput.LOOSE -> LOOSE_COLOR
-        GameOutput.UNKNOWN -> if (isDarkThemeEnabled()) Color.LightGray else Color.DarkGray
+        GameOutcome.WIN -> WIN_COLOR
+        GameOutcome.LOOSE -> LOOSE_COLOR
+        GameOutcome.UNKNOWN -> if (isDarkThemeEnabled()) Color.LightGray else Color.DarkGray
     }
     val isCompact = LocalIsCompact.current
 

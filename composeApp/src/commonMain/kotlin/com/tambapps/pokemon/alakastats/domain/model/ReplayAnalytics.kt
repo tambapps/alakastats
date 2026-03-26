@@ -23,15 +23,15 @@ fun Teamlytics.getPlayers(replay: ReplayAnalytics): Pair<Player, Player> =
     if (sdNames.contains(replay.player1.name)) replay.player1 to replay.player2
     else replay.player2 to replay.player1
 
-fun Teamlytics.getGameOutput(replay: ReplayAnalytics) = when {
-    sdNames.contains(replay.winner) -> GameOutput.WIN
-    sdNames.contains(replay.looser) -> GameOutput.LOOSE
-    else -> GameOutput.UNKNOWN
+fun Teamlytics.getGameOutcome(replay: ReplayAnalytics) = when {
+    sdNames.contains(replay.winner) -> GameOutcome.WIN
+    sdNames.contains(replay.looser) -> GameOutcome.LOOSE
+    else -> GameOutcome.UNKNOWN
 }
 
 class TeamlyticsContext(val team: Teamlytics) {
-    val ReplayAnalytics.gameOutput: GameOutput
-        get() = team.getGameOutput(this)
+    val ReplayAnalytics.gameOutcome: GameOutcome
+        get() = team.getGameOutcome(this)
 
     val ReplayAnalytics.youPlayer: Player
         get() = team.getYouPlayer(this)
@@ -43,7 +43,7 @@ class TeamlyticsContext(val team: Teamlytics) {
     fun ReplayFilters.matches(replay: ReplayAnalytics): Boolean = matches(
         opponentPlayer = replay.opponentPlayer,
         youPlayer = replay.youPlayer,
-        gameOutcome = replay.gameOutput
+        gameOutcome = replay.gameOutcome
     )
 }
 
@@ -51,7 +51,7 @@ inline fun <R> Teamlytics.withContext(block: TeamlyticsContext.() -> R): R {
     return TeamlyticsContext(this).block()
 }
 
-enum class GameOutput {
+enum class GameOutcome {
     WIN, LOOSE, UNKNOWN
 }
 data class ReplayAnalytics(

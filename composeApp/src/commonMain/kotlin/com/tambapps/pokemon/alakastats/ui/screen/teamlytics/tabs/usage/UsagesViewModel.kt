@@ -6,9 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.domain.model.GameOutput
+import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.Player
-import com.tambapps.pokemon.alakastats.domain.model.PokemonMove
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
@@ -52,7 +51,7 @@ class UsagesViewModel(
         pokemonPokemonUsages.clear()
         scope.launch {
             val result = useCase.filteredTeam.withContext {
-                var replays = team.replays.filter { it.gameOutput != GameOutput.UNKNOWN }
+                var replays = team.replays.filter { it.gameOutcome != GameOutcome.UNKNOWN }
                 if (onlyPokePasteMoves) {
                     replays = replays.map { it.onlyWithPokePasteMoves(it.youPlayer, team.pokePaste) }
                 }

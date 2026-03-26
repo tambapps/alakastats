@@ -29,14 +29,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.tambapps.pokemon.alakastats.domain.model.GameOutput
+import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.domain.model.getGameOutput
+import com.tambapps.pokemon.alakastats.domain.model.getGameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
-import com.tambapps.pokemon.alakastats.ui.composables.GameOutputCard
+import com.tambapps.pokemon.alakastats.ui.composables.GameOutcomeCard
 import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
@@ -86,7 +86,7 @@ fun ExpandableDesktopReplay(
     pokemonImageService: PokemonImageService
 ) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
-    val gameOutput = team.getGameOutput(replay)
+    val gameOutput = team.getGameOutcome(replay)
 
     ExpansionTile(
         title = {
@@ -116,7 +116,7 @@ fun ExpandableDesktopReplay(
 @Composable
 fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
-    val gameOutput = team.getGameOutput(replay)
+    val gameOutput = team.getGameOutcome(replay)
     MyCard(
         modifier = Modifier.fillMaxWidth(),
         gradientBackgroundColors = cardGradientColors
@@ -145,7 +145,7 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
 private fun HeadRow(
     team: Teamlytics,
     replay: ReplayAnalytics,
-    gameOutput: GameOutput,
+    gameOutcome: GameOutcome,
     currentPlayer: Player,
     opponentPlayer: Player,
     pokemonImageService: PokemonImageService,
@@ -155,10 +155,10 @@ private fun HeadRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
-        GameOutputCard(gameOutput)
-        VsText(currentPlayer, opponentPlayer, gameOutput)
+        GameOutcomeCard(gameOutcome)
+        VsText(currentPlayer, opponentPlayer, gameOutcome)
         Spacer(Modifier.width(16.dp))
-        if (gameOutput != GameOutput.UNKNOWN) {
+        if (gameOutcome != GameOutcome.UNKNOWN) {
             PokemonTeamPreview(
                 pokemonImageService, opponentPlayer,
                 childModifier = Modifier.size(100.dp).padding(bottom = 16.dp)
@@ -194,13 +194,13 @@ private fun HeadRow(
 @Composable
 private fun ReplayContent(
     replay: ReplayAnalytics,
-    gameOutput: GameOutput,
+    gameOutcome: GameOutcome,
     currentPlayer: Player,
     opponentPlayer: Player,
     pokemonImageService: PokemonImageService,
     viewModel: TeamReplayViewModel?,
 ) {
-    if (gameOutput == GameOutput.UNKNOWN) {
+    if (gameOutcome == GameOutcome.UNKNOWN) {
         DesktopSdNamesWarning(viewModel)
     } else {
         Row(
@@ -332,9 +332,9 @@ private fun DesktopSelection(
 }
 
 @Composable
-private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutput: GameOutput) {
+private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutcome: GameOutcome) {
     val text =
-        if (gameOutput != GameOutput.UNKNOWN) "VS ${opponentPlayer.name.value}"
+        if (gameOutcome != GameOutcome.UNKNOWN) "VS ${opponentPlayer.name.value}"
         else "${currentPlayer.name.value} VS ${opponentPlayer.name.value}"
     Text(
         text = text,
