@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -39,13 +40,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import com.swmansion.kmpwheelpicker.WheelPickerState
+import com.swmansion.kmpwheelpicker.rememberWheelPickerState
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
+import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
-import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonWheelPicker
 import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
@@ -357,39 +365,69 @@ private fun AddPokemonNameDialog(
     onAdd: (PokemonFilter) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    var pokemonName by remember { mutableStateOf(PokemonName("")) }
+    val allPokemons = remember { pokemonImageService.listAvailableNames() }
+    var text by remember { mutableStateOf("") }
+    val pokemons = remember(text) {
+        if (text.isBlank()) allPokemons
+        else allPokemons.filter { it.value.contains(text, ignoreCase = true) }
+    }
+    var error: String? by remember { mutableStateOf(null) }
+    val wheelState = rememberWheelPickerState(itemCount = pokemons.size, initialIndex = 0)
+    val limit = if (LocalIsCompact.current) 3 else 10
+    val showWheel = remember(pokemons) { pokemons.isNotEmpty() && pokemons.size <= limit }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-    val alreadyContains = remember(pokemonName) { containsValidator.invoke(pokemonName) }
-    val isValid = pokemonName.value.isNotBlank() && !alreadyContains
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text("Add Pokemon Filter") },
         text = {
-            Column {
-                PokemonNameTextField(
-                    value = pokemonName,
-                    placeholder = "Pokemon Name",
-                    isError = alreadyContains,
-                    supportingText = if (alreadyContains) ({
-                        Text("${pokemonName.pretty} was already added")
-                    }) else null,
-                    onValueChange = { pokemonName = it },
-                    pokemonImageService = pokemonImageService,
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                    value = text,
+                    onValueChange = {
+                        text = it
+                        if (showWheel) error = null
+                    },
+                    isError = error != null,
+                    singleLine = true,
+                    supportingText = error?.let { ({ Text(it) }) },
+                    label = { Text("Pokemon Name") },
                 )
+                if (showWheel) {
+                    val keyboardController = LocalSoftwareKeyboardController.current
+                    LaunchedEffect(text) {
+                        keyboardController?.hide()
+                        wheelState.scrollTo(0)
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    PokemonWheelPicker(
+                        modifier = Modifier.weight(1f),
+                        pokemonImageService = pokemonImageService,
+                        pokemons = pokemons,
+                        state = wheelState
+                    )
+                }
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
+                    val pokemonName = pokemons.getOrNull(wheelState.index)
+                    if (!showWheel || pokemonName == null) {
+                        error = "No Pokemon was selected"
+                        return@TextButton
+                    }
+                    if (containsValidator.invoke(pokemonName)) {
+                        error = "${pokemonName.pretty} was already selected"
+                        return@TextButton
+                    }
                     onAdd.invoke(PokemonFilter(pokemonName, asLead))
                     onDismissRequest.invoke()
                 },
-                enabled = isValid
             ) {
-                Text(
-                    "Add",
-                    color = if (isValid) Color.Unspecified else Color.LightGray
-                )
+                Text("Add")
             }
         },
         dismissButton = {

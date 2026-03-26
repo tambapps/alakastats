@@ -1,10 +1,12 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,11 +18,59 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import com.swmansion.kmpwheelpicker.WheelPicker
+import com.swmansion.kmpwheelpicker.WheelPickerState
 import com.swmansion.kmpwheelpicker.rememberWheelPickerState
+import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlin.math.abs
 
-
 private const val BUFFER_SIZE = 3
+
+@Composable
+fun PokemonWheelPicker(
+    pokemonImageService: PokemonImageService,
+    pokemons: List<PokemonName>,
+    modifier: Modifier = Modifier,
+    state: WheelPickerState = rememberWheelPickerState(itemCount = pokemons.size, initialIndex = 0),
+) {
+    Box(modifier.clipToBounds()) {
+        WheelPicker(
+            state = state,
+            bufferSize = BUFFER_SIZE,
+            window = {
+                Box(
+                    Modifier.background(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        MaterialTheme.shapes.small,
+                    )
+                )
+            }
+        ) { index ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                    Modifier.padding(32.dp, 8.dp).graphicsLayer {
+                        alpha = (BUFFER_SIZE - abs(state.value - index)).coerceIn(0f, 1f)
+                    },
+            ) {
+                val pokemonName = pokemons[index]
+                pokemonImageService.PokemonSprite(pokemonName, Modifier.size(if (LocalIsCompact.current) 64.dp else 128.dp), disableTooltip = true)
+                Text(
+                    text = pokemonName.pretty,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color =
+                        lerp(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.onSurfaceVariant,
+                            abs(state.value - index).coerceIn(0f, 1f),
+                        ),
+                )
+
+            }
+        }
+    }
+}
 
 @Composable
 fun <T> WheelPickerDialog(
