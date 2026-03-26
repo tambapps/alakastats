@@ -42,7 +42,8 @@ class TeamlyticsContext(val team: Teamlytics) {
 
     fun ReplayFilters.matches(replay: ReplayAnalytics): Boolean = matches(
         opponentPlayer = replay.opponentPlayer,
-        youPlayer = replay.youPlayer
+        youPlayer = replay.youPlayer,
+        gameOutcome = replay.gameOutput
     )
 }
 

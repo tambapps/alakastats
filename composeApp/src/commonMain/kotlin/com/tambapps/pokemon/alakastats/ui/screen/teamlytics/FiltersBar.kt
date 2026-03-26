@@ -5,7 +5,6 @@ import alakastats.composeapp.generated.resources.add
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -42,10 +41,12 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.GameOutput
 import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonNameTextField
+import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
@@ -117,6 +118,9 @@ fun FiltersBar(
                     dialogState = showPokemonDialogFilterState,
                     onClear = { viewModel.applyFilters(filters.copy(yourSelection = emptyList())) }
                 )
+
+                GameOutcomeButton(viewModel)
+
                 additionalFilters?.invoke()
             }
             Spacer(Modifier.height(16.dp))
@@ -290,21 +294,40 @@ private fun PokemonFilterButton(
             }
             Spacer(Modifier.width(18.dp))
 
-            Icon(
-                modifier = Modifier.size(if (isCompact) 25.dp else 25.dp).rotate(45f).clickable(onClick = { onClear.invoke() }),
-                painter = painterResource(Res.drawable.add),
-                contentDescription = "More",
-                tint = MaterialTheme.colorScheme.defaultIconColor
-            )
-
+            ClearIcon(onClear)
         }
+    }
+}
+
+@Composable
+private fun GameOutcomeButton(viewModel: FiltersViewModel) {
+    val text = "Game Outcome"
+    var showDialog by remember { mutableStateOf(false) }
+    FilterBarButton(onClick = { showDialog = true }) {
+        Text(
+            when(val outcome = viewModel.filters.gameOutcome) {
+                null -> text
+                else -> "$text: $outcome"
+            }
+        )
+        if (viewModel.filters.gameOutcome != null) {
+            Spacer(Modifier.width(18.dp))
+            ClearIcon(onClick = { viewModel.applyFilters(viewModel.filters.copy(gameOutcome = null)) })
+        }
+    }
+    if (showDialog) {
+        WheelPickerDialog(
+            title = "Game Outcome",
+            items = GameOutput.entries,
+            onPicked = { viewModel.applyFilters(viewModel.filters.copy(gameOutcome = it)) },
+            onDismissRequest = { showDialog = false }
+        )
     }
 }
 
 @Composable
 private fun OppUsernameButton(viewModel: FiltersViewModel) {
     val text = "Opp. Username"
-    val isCompact = LocalIsCompact.current
     var showDialog by remember { mutableStateOf(false) }
     FilterBarButton(onClick = { showDialog = true }) {
         val text = when {
@@ -314,13 +337,7 @@ private fun OppUsernameButton(viewModel: FiltersViewModel) {
         Text(text)
         if (viewModel.filters.opponentUsernames.isNotEmpty()) {
             Spacer(Modifier.width(18.dp))
-            Icon(
-                modifier = Modifier.size(if (isCompact) 25.dp else 25.dp).rotate(45f).clickable(onClick = { viewModel.applyFilters(viewModel.filters.copy(opponentUsernames = emptySet())) }),
-                painter = painterResource(Res.drawable.add),
-                contentDescription = "More",
-                tint = MaterialTheme.colorScheme.defaultIconColor
-            )
-
+            ClearIcon(onClick = { viewModel.applyFilters(viewModel.filters.copy(opponentUsernames = emptySet())) })
         }
     }
     if (showDialog) {
@@ -435,3 +452,16 @@ private fun ShowdownNameDialog(
         }
     )
 }
+
+@Composable
+private fun ClearIcon(onClick: (() -> Unit)? = null) {
+    Icon(
+        modifier = Modifier.size(if (LocalIsCompact.current) 25.dp else 25.dp)
+            .rotate(45f)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+        painter = painterResource(Res.drawable.add),
+        contentDescription = "Clear",
+        tint = MaterialTheme.colorScheme.defaultIconColor
+    )
+}
+
