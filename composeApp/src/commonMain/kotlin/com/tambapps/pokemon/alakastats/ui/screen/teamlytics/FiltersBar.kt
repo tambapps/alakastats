@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -16,8 +17,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
@@ -44,16 +47,18 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
-import com.swmansion.kmpwheelpicker.WheelPickerState
 import com.swmansion.kmpwheelpicker.rememberWheelPickerState
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.CommonFilters
 import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonWheelPicker
+import com.tambapps.pokemon.alakastats.ui.composables.ScrollableRow
 import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
@@ -129,6 +134,9 @@ fun FiltersBar(
 
                 GameOutcomeButton(viewModel)
 
+                parentViewModel.formatData?.commonFilters
+                    ?.takeIf { it.isNotEmpty }
+                    ?.let { CommonFiltersButton(viewModel, it) }
                 additionalFilters?.invoke()
             }
             Spacer(Modifier.height(16.dp))
@@ -349,6 +357,83 @@ private fun GameOutcomeButton(viewModel: FiltersViewModel) {
             onDismissRequest = { showDialog = false }
         )
     }
+}
+
+@Composable
+private fun CommonFiltersButton(
+    viewModel: FiltersViewModel,
+    commonFilters: CommonFilters,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    FilterBarButton(onClick = { showDialog = true }) {
+        Text("Common filters")
+    }
+
+    if (showDialog) {
+        CommonFiltersDialog(
+            commonFilters=commonFilters,
+            viewModel=viewModel,
+            onDismissRequest= { showDialog = false },
+        )
+    }
+}
+
+@Composable
+private fun CommonFiltersDialog(
+    commonFilters: CommonFilters,
+    viewModel: FiltersViewModel,
+    onDismissRequest: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Common Filters") },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                if (commonFilters.opponentTeamFilters.isNotEmpty()) {
+                    ExpansionTile(
+                        initiallyExpanded=true, // true for now because this is the only category we have
+                        modifier = Modifier.fillMaxWidth(),
+                        title = {
+                            Text("Opponent Team", style = MaterialTheme.typography.titleMedium)
+                        }
+                    ) {
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            commonFilters.opponentTeamFilters.forEach { pokemons ->
+                                val iconSize = if (LocalIsCompact.current) 56.dp else 64.dp
+                                val offset = iconSize * - 0.1f
+                                FilterBarButton(
+                                    onClick = {
+                                        viewModel.applyFilters(viewModel.filters.copy(opponentTeam = pokemons))
+                                        onDismissRequest.invoke()
+                                    },
+                                    modifier = Modifier.padding(all = 8.dp)
+                                ) {
+                                    pokemons.forEach {
+                                        viewModel.pokemonImageService.PokemonSprite(
+                                            it.name,
+                                            Modifier.size(iconSize)
+                                                .scale(1.5f)
+                                                .padding(all = 4.dp)
+                                                .offset(y = offset)
+                                            , disableTooltip = true)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable

@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.domain.model
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -19,8 +20,10 @@ enum class Format(
 }
 
 data class CommonFilters(
-    val opponentTeamFilters: List<List<PokemonName>>
-)
+    val opponentTeamFilters: List<List<PokemonFilter>>
+) {
+    val isNotEmpty get() = opponentTeamFilters.isNotEmpty()
+}
 
 data class FormatData(
     val popularPokemons: List<PokemonName>,

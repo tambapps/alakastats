@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 class UsagesViewModel(
     override val useCase: ManageTeamReplaysUseCase,
     override val pokemonImageService: PokemonImageService,
+    override val formatData: FormatData?,
 ): TeamlyticsFiltersTabViewModel() {
 
     override var isTabLoading by mutableStateOf(false)

@@ -8,6 +8,7 @@ import com.tambapps.pokemon.alakastats.domain.model.CommonFilters
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
+import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -36,6 +37,6 @@ class LocalFormatDataRepository(
 private fun FormatDataEntity.toDomain() = FormatData(
     popularPokemons = popularPokemons.map { PokemonName(it) },
     commonFilters = CommonFilters(
-        opponentTeamFilters = commonFilters.opponentTeam.map { team -> team.map { PokemonName(it) } }
+        opponentTeamFilters = commonFilters.opponentTeam.map { team -> team.map { PokemonFilter(PokemonName(it), asLead = false) } }
     )
 )

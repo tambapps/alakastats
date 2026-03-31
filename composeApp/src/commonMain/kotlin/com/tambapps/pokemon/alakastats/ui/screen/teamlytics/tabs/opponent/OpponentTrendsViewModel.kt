@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
@@ -21,6 +22,7 @@ const val MATCHUP_LIST_MAX_LENGTH = 10
 class MatchupsViewModel(
     override val useCase: ManageReplayFiltersUseCase,
     override val pokemonImageService: PokemonImageService,
+    override val formatData: FormatData?,
 ): TeamlyticsFiltersTabViewModel() {
 
     override var isTabLoading by mutableStateOf(false)

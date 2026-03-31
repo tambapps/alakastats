@@ -43,6 +43,7 @@ fun ExpansionTile(
     subtitle: @Composable (Boolean) -> Unit = {},
     disableWhenOpened: Boolean = false,
     modifier: Modifier = Modifier,
+    initiallyExpanded: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     AbstractExpansionTile(
@@ -54,7 +55,8 @@ fun ExpansionTile(
             ExpandButton(isCardExpandedState, translateX = false)
         },
         disableWhenOpened=disableWhenOpened,
-        shrinkTitleWeightOnExpanded=false
+        shrinkTitleWeightOnExpanded=false,
+        initiallyExpanded=initiallyExpanded
     )
 }
 
@@ -69,6 +71,7 @@ fun ExpansionTile(
     onClick: (() -> Unit)? = null,
     borderColor: Color? = null,
     disableWhenOpened: Boolean = false,
+    initiallyExpanded: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     AbstractExpansionTile(
@@ -78,6 +81,7 @@ fun ExpansionTile(
         content = content,
         gradientBackgroundColors = gradientBackgroundColors,
         disableWhenOpened=disableWhenOpened,
+        initiallyExpanded=initiallyExpanded,
         expandButton = { isCardExpandedState ->
             Box {
                 val expandButtonScale by animateFloatAsState(
@@ -116,8 +120,9 @@ private fun AbstractExpansionTile(
     disableWhenOpened: Boolean = false,
     onClick: (() -> Unit)? = null,
     borderColor: Color? = null,
+    initiallyExpanded: Boolean = false,
 ) {
-    val isCardExpandedState = remember { mutableStateOf(false) }
+    val isCardExpandedState = remember { mutableStateOf(initiallyExpanded) }
 
     MyCard(
         enabled = !disableWhenOpened || !isCardExpandedState.value,

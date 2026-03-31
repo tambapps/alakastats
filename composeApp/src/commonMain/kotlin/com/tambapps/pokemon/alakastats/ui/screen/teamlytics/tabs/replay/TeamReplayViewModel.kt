@@ -24,7 +24,7 @@ class TeamReplayViewModel(
     override val useCase: ManageTeamReplaysUseCase,
     private val replayService: ReplayAnalyticsService,
     override val pokemonImageService: PokemonImageService,
-    val formatData: FormatData?
+    override val formatData: FormatData?
 ): TeamlyticsFiltersTabViewModel() {
     val team get() = useCase.filteredTeam
 

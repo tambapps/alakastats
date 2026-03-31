@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
@@ -20,6 +21,7 @@ import kotlin.collections.component2
 class LeadStatsViewModel(
     override val useCase: ManageReplayFiltersUseCase,
     override val pokemonImageService: PokemonImageService,
+    override val formatData: FormatData?,
     ): TeamlyticsFiltersTabViewModel() {
 
     val hasNoData: Boolean get() = leadAndWinStats.isEmpty() && mostCommonLeadsStats.isEmpty() && mostEffectiveLeadsStats.isEmpty()

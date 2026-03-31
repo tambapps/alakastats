@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs
 
+import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.TabViewModel
@@ -22,6 +23,8 @@ abstract class TeamlyticsTabViewModel: TabViewModel {
 
 abstract class TeamlyticsFiltersTabViewModel: TeamlyticsTabViewModel() {
     abstract override val useCase: ManageReplayFiltersUseCase
+
+    abstract val formatData: FormatData?
 
     val filters get() = useCase.filters
 }

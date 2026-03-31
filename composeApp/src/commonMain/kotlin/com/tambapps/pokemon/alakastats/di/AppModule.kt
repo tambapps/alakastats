@@ -104,14 +104,14 @@ val appModules = listOf(module {
     factory { (useCase: ManageTeamReplaysUseCase, formatData: FormatData?) ->
         TeamReplayViewModel(useCase, get(), get(), formatData)
     }
-    factory { (useCase: ManageReplayFiltersUseCase) ->
-        LeadStatsViewModel(useCase, get())
+    factory { (useCase: ManageReplayFiltersUseCase, formatData: FormatData?) ->
+        LeadStatsViewModel(useCase, get(), formatData)
     }
-    factory { (useCase: ManageTeamReplaysUseCase) ->
-        UsagesViewModel(useCase, get())
+    factory { (useCase: ManageTeamReplaysUseCase, formatData: FormatData?) ->
+        UsagesViewModel(useCase, get(), formatData)
     }
-    factory { (useCase: ManageReplayFiltersUseCase) ->
-        MatchupsViewModel(useCase, get())
+    factory { (useCase: ManageReplayFiltersUseCase, formatData: FormatData?) ->
+        MatchupsViewModel(useCase, get(), formatData)
     }
     factory { (useCase: ManageMatchupPlansUseCase) ->
         MatchupPlansViewModel(useCase, get())
