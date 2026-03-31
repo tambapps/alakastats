@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -329,16 +330,4 @@ private fun DesktopSelection(
             }
         }
     }
-}
-
-@Composable
-private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutcome: GameOutcome) {
-    val text =
-        if (gameOutcome != GameOutcome.UNKNOWN) "VS ${opponentPlayer.name.value}"
-        else "${currentPlayer.name.value} VS ${opponentPlayer.name.value}"
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(start = 8.dp)
-    )
 }

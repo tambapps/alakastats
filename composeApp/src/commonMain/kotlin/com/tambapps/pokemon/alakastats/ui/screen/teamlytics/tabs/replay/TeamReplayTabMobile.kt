@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -193,20 +194,4 @@ private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String,
             )
         }
     }
-}
-
-
-@Composable
-private fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutcome: GameOutcome, modifier: Modifier = Modifier) {
-    val text =
-        if (gameOutcome != GameOutcome.UNKNOWN) "VS ${opponentPlayer.name.value}"
-        else "${currentPlayer.name.value}\nVS\n${opponentPlayer.name.value}"
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleLarge,
-        modifier = modifier.padding(start = 8.dp),
-        textAlign = if (gameOutcome != GameOutcome.UNKNOWN) null else TextAlign.Center,
-        overflow = TextOverflow.Ellipsis,
-        maxLines = 1
-    )
 }

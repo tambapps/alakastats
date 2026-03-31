@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -43,11 +44,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.TeraType
+import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
@@ -245,14 +249,20 @@ internal fun ColumnScope.PlayerNameEloText(player: Player, playerName: String) {
                 tint = outputColor
             )
             Spacer(Modifier.width(4.dp))
-            Text(player.beforeElo.toString(), style = playerNameTextStyle)
+            SelectionContainer {
+                Text(player.beforeElo.toString(), style = playerNameTextStyle)
+            }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Spacer(Modifier.width(iconSize + 4.dp))
-            Text(player.afterElo.toString(), style = playerNameTextStyle, color = outputColor)
+            SelectionContainer {
+                Text(player.afterElo.toString(), style = playerNameTextStyle, color = outputColor)
+            }
         }
     } else if (player.beforeElo != null) {
-        Text(player.beforeElo.toString(), style = playerNameTextStyle)
+        SelectionContainer {
+            Text(player.beforeElo.toString(), style = playerNameTextStyle)
+        }
     }
 }
 
@@ -446,6 +456,23 @@ internal fun ReplayDropDownMenu(
 }
 
 @Composable
+internal fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutcome: GameOutcome, modifier: Modifier = Modifier) {
+    val text =
+        if (gameOutcome != GameOutcome.UNKNOWN) "VS ${opponentPlayer.name.value}"
+        else "${currentPlayer.name.value}\nVS\n${opponentPlayer.name.value}"
+    SelectionContainer {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = modifier.padding(start = 8.dp),
+            textAlign = if (gameOutcome != GameOutcome.UNKNOWN) null else TextAlign.Center,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
 fun NoReplay(viewModel: TeamlyticsFiltersTabViewModel) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -460,5 +487,4 @@ fun NoReplay(viewModel: TeamlyticsFiltersTabViewModel) {
 
         FiltersBar(viewModel, Modifier.align(Alignment.TopStart).padding(16.dp))
     }
-
 }
