@@ -149,7 +149,7 @@ internal fun Pager(
 @Composable
 private inline fun <reified USE_CASE, reified T: TeamlyticsTabViewModel> PagerTab(pagerViewModel: TeamlyticsViewModel, index: Int, tab: @Composable (T) -> Unit) {
     val viewModel = koinInject<T> {
-        parametersOf(pagerViewModel as USE_CASE)
+        parametersOf(pagerViewModel as USE_CASE, pagerViewModel.formatData)
     }
     EmitScrollEffect(pagerViewModel, viewModel, index)
     Box(Modifier.fillMaxSize()) {

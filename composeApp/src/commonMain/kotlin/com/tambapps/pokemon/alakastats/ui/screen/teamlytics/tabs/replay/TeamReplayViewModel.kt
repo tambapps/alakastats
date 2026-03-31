@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import arrow.core.flatMap
 import arrow.core.getOrElse
+import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
@@ -23,6 +24,7 @@ class TeamReplayViewModel(
     override val useCase: ManageTeamReplaysUseCase,
     private val replayService: ReplayAnalyticsService,
     override val pokemonImageService: PokemonImageService,
+    val formatData: FormatData?
 ): TeamlyticsFiltersTabViewModel() {
     val team get() = useCase.filteredTeam
 

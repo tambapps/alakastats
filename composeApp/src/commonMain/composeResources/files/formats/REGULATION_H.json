@@ -1,4 +1,8 @@
 {
+  "commonFilters": {
+    "opponentTeam": [
+    ]
+  },
   "popularPokemons": [
     "incineroar",
     "ursaluna-bloodmoon",

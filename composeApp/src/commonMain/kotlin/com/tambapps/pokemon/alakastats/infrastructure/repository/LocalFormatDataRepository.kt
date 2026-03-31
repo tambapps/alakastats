@@ -4,6 +4,7 @@ import alakastats.composeapp.generated.resources.Res
 import arrow.core.Either
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.error.LoadFormatDataError
+import com.tambapps.pokemon.alakastats.domain.model.CommonFilters
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
@@ -11,8 +12,14 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
+data class CommonFiltersEntity(
+    val opponentTeam: List<List<String>> = emptyList()
+)
+
+@Serializable
 data class FormatDataEntity(
-    val popularPokemons: List<String>
+    val popularPokemons: List<String>,
+    val commonFilters: CommonFiltersEntity = CommonFiltersEntity()
 )
 class LocalFormatDataRepository(
     private val json: Json
@@ -27,5 +34,8 @@ class LocalFormatDataRepository(
 }
 
 private fun FormatDataEntity.toDomain() = FormatData(
-    popularPokemons = popularPokemons.map { PokemonName(it) }
+    popularPokemons = popularPokemons.map { PokemonName(it) },
+    commonFilters = CommonFilters(
+        opponentTeamFilters = commonFilters.opponentTeam.map { team -> team.map { PokemonName(it) } }
+    )
 )

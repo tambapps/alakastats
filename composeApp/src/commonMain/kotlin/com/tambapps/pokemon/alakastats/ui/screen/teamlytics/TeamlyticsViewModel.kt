@@ -7,6 +7,8 @@ import arrow.core.Either
 import arrow.core.raise.either
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
+import com.tambapps.pokemon.alakastats.domain.model.Format
+import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
@@ -14,6 +16,7 @@ import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsData
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
 import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.domain.model.withContext
+import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupPlansUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
@@ -30,14 +33,14 @@ import kotlin.uuid.Uuid
 
 sealed class TeamState {
     data object Loading : TeamState()
-    data class Loaded(val team: Teamlytics) : TeamState()
+    data class Loaded(val team: Teamlytics, val formatData: FormatData?) : TeamState()
     data class Error(val error: DomainError) : TeamState()
 }
 
 class TeamlyticsViewModel(
     private val teamId: Uuid,
     private val useCase: ManageTeamlyticsUseCase,
-    val imageService: PokemonImageService,
+    val formatDataRepository: FormatDataRepository,
 ) : ScreenModel, ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase,
     ManageMatchupPlansUseCase, PagerViewModel {
 
@@ -51,6 +54,8 @@ class TeamlyticsViewModel(
 
     override val originalTeam: Teamlytics
         get() = (teamState as TeamState.Loaded).team
+
+    val formatData get() = (teamState as TeamState.Loaded).formatData
 
     override val filteredTeam: Teamlytics
         get() = _filteredTeam ?: originalTeam
@@ -69,10 +74,16 @@ class TeamlyticsViewModel(
     private fun loadTeam() {
         scope.launch {
             val teamlyticsResult = useCase.get(teamId)
+
+            val formatData = teamlyticsResult.getOrNull()
+                ?.format
+                ?.takeIf { it != Format.NONE }
+                ?.let { formatDataRepository.get(it) }
+                ?.getOrNull()
             withContext(Dispatchers.Main) {
                 teamState = teamlyticsResult.fold(
                     ifLeft = { TeamState.Error(it) },
-                    ifRight = { TeamState.Loaded(it) }
+                    ifRight = { TeamState.Loaded(it, formatData) }
                 )
             }
         }
@@ -148,7 +159,7 @@ class TeamlyticsViewModel(
     private suspend fun save(team: Teamlytics): Either<DomainError, Unit> = either {
         val updatedTeam = useCase.save(team).bind()
         withContext(Dispatchers.Main) {
-            teamState = TeamState.Loaded(updatedTeam)
+            teamState = TeamState.Loaded(updatedTeam, (teamState as? TeamState.Loaded)?.formatData)
         }
     }
 

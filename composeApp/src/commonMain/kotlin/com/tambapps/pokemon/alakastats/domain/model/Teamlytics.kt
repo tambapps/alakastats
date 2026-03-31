@@ -18,8 +18,13 @@ enum class Format(
 
 }
 
+data class CommonFilters(
+    val opponentTeamFilters: List<List<PokemonName>>
+)
+
 data class FormatData(
-    val popularPokemons: List<PokemonName>
+    val popularPokemons: List<PokemonName>,
+    val commonFilters: CommonFilters
 )
 
 data class Teamlytics(

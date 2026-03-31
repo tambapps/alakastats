@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.di
 
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
@@ -100,8 +101,8 @@ val appModules = listOf(module {
     factory { (state: TeamPokemonStateState.Loaded) ->
         PokemonSpeedScaleViewModel(get(), state.team, state.pokemon, state.pokemonData, get(), get())
     }
-    factory { (useCase: ManageTeamReplaysUseCase) ->
-        TeamReplayViewModel(useCase, get(), get())
+    factory { (useCase: ManageTeamReplaysUseCase, formatData: FormatData?) ->
+        TeamReplayViewModel(useCase, get(), get(), formatData)
     }
     factory { (useCase: ManageReplayFiltersUseCase) ->
         LeadStatsViewModel(useCase, get())

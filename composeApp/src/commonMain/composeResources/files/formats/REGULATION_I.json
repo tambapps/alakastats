@@ -1,4 +1,21 @@
 {
+  "commonFilters": {
+    "opponentTeam": [
+      [ "miraidon", "lunala" ],
+      [ "koraidon", "lunala" ],
+      [ "calyrex-shadow", "zamazenta" ],
+      [ "koraidon", "calyrex-ice" ],
+      [ "miraidon", "lunala" ],
+      [ "zamazenta", "kyogre" ],
+      [ "miraidon", "terapagos" ],
+      [ "miraidon", "calyrex-ice" ],
+      [ "miraidon", "ho-oh" ],
+      [ "koraidon", "terapagos" ],
+      [ "miraidon", "calyrex-shadow" ],
+      [ "miraidon", "zamazenta" ],
+      [ "zacian", "kyogre" ]
+    ]
+  },
   "popularPokemons": [
     "mewtwo",
     "lugia",

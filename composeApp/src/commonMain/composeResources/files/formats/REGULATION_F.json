@@ -1,4 +1,8 @@
 {
+  "commonFilters": {
+    "opponentTeam": [
+    ]
+  },
   "popularPokemons": [
     "urshifu-rapid-strike",
     "incineroar",
