@@ -146,7 +146,11 @@ fun FiltersBar(
                     yourSelectionFilter -> viewModel.applyFilters(filters.copy(yourSelection = it))
                 }
             },
-            onDismiss = { showPokemonDialogFilterState.value = null }
+            onDismiss = { showPokemonDialogFilterState.value = null },
+            myPokemons = when {
+                filter == yourSelectionFilter -> remember { parentViewModel.useCase.originalTeam.pokePaste.pokemons.map { it.name } }
+                else -> null
+            }
         )
     }
 }
@@ -156,7 +160,8 @@ private fun SetPokemonFilterDialog(
     filter: PokemonsFilter,
     pokemonImageService: PokemonImageService,
     onComplete: (List<PokemonFilter>) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    myPokemons: List<PokemonName>? = null
 ) {
     val pokemons = remember { mutableStateListOf<PokemonFilter>().apply { addAll(filter.pokemons) } }
     var addPokemonDialogState by remember { mutableStateOf<AddPokemonDialogState?>(null) }
@@ -241,13 +246,26 @@ private fun SetPokemonFilterDialog(
     )
 
     addPokemonDialogState?.let { state ->
-        AddPokemonNameDialog(
-            pokemonImageService = pokemonImageService,
-            containsValidator = { pName -> pokemons.isNotEmpty() && pokemons.any { it.name.matches(pName) } },
-            onDismissRequest = { addPokemonDialogState = null },
-            asLead = state.asLead,
-            onAdd = { pokemons.add(it) }
-        )
+        val pickOtherState = remember { mutableStateOf(false) }
+        if (!pickOtherState.value && myPokemons != null && myPokemons.isNotEmpty()) {
+            AddMyPokemonNameDialog(
+                pokemonImageService = pokemonImageService,
+                containsValidator = { pName -> pokemons.isNotEmpty() && pokemons.any { it.name.matches(pName) } },
+                onDismissRequest = { addPokemonDialogState = null },
+                asLead = state.asLead,
+                onAdd = { pokemons.add(it) },
+                myPokemons = myPokemons,
+                pickOtherState = pickOtherState
+            )
+        } else {
+            AddPokemonNameDialog(
+                pokemonImageService = pokemonImageService,
+                containsValidator = { pName -> pokemons.isNotEmpty() && pokemons.any { it.name.matches(pName) } },
+                onDismissRequest = { addPokemonDialogState = null },
+                asLead = state.asLead,
+                onAdd = { pokemons.add(it) },
+            )
+        }
     }
 }
 
@@ -357,6 +375,57 @@ private fun OppUsernameButton(viewModel: FiltersViewModel) {
     }
 }
 
+@Composable
+private fun AddMyPokemonNameDialog(
+    pokemonImageService: PokemonImageService,
+    myPokemons: List<PokemonName>,
+    containsValidator: (PokemonName) -> Boolean,
+    asLead: Boolean,
+    onAdd: (PokemonFilter) -> Unit,
+    onDismissRequest: () -> Unit,
+    pickOtherState: MutableState<Boolean>
+) {
+    val wheelState = rememberWheelPickerState(myPokemons.size, initialIndex = myPokemons.size / 2)
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Add Pokemon Filter") },
+        text = {
+            PokemonWheelPicker(
+                pokemonImageService = pokemonImageService,
+                pokemons = myPokemons,
+                state = wheelState
+            )
+        },
+        confirmButton = {
+            val snackBar = LocalSnackBar.current
+            TextButton(
+                onClick = {
+                    val pokemonName = myPokemons.getOrNull(wheelState.index)
+                    if (pokemonName == null) {
+                        snackBar.show("No Pokemon was selected", SnackBar.Severity.ERROR)
+                    } else if (containsValidator.invoke(pokemonName)) {
+                        snackBar.show("${pokemonName.pretty} was already selected", SnackBar.Severity.ERROR)
+                    } else {
+                        onAdd.invoke(PokemonFilter(pokemonName, asLead))
+                    }
+                    onDismissRequest.invoke()
+                },
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Cancel")
+            }
+
+            TextButton(onClick = { pickOtherState.value = true }) {
+                Text("Pick Another")
+            }
+        }
+    )
+
+}
 @Composable
 private fun AddPokemonNameDialog(
     pokemonImageService: PokemonImageService,
