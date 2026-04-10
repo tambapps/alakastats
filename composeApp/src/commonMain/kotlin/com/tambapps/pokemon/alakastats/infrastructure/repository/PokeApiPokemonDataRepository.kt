@@ -103,6 +103,17 @@ private val PokemonName.pokeApiNormalized: PokemonName get() {
         name == "dudunsparce" -> PokemonName("dudunsparce-two-segment")
         name == "tatsugiri" -> PokemonName("tatsugiri-droopy")
         name == "giratina" -> PokemonName("giratina-altered")
+        name == "giratina" -> PokemonName("giratina-altered")
+        name == "palafin" -> PokemonName("palafin-zero")
+        name == "tauros-paldea-combat" -> PokemonName("tauros-paldea-combat-breed")
+        name == "tauros-paldea-blaze" -> PokemonName("tauros-paldea-blaze-breed")
+        name == "tauros-paldea-aqua" -> PokemonName("tauros-paldea-aqua-breed")
+        name == "aegislash" -> PokemonName("aegislash-shield")
+        name == "lycanroc" -> PokemonName("lycanroc-midday")
+        name == "mimikyu" -> PokemonName("mimikyu-totem-disguised")
+        name == "mr.-rime" -> PokemonName("mr-rime")
+        name == "morpeko" -> PokemonName("morpeko-full-belly")
+        name.startsWith("gourgeist") -> PokemonName("gourgeist-average")
         else -> n
     }
 }

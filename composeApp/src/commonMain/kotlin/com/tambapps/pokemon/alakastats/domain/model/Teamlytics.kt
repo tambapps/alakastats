@@ -15,8 +15,8 @@ enum class Format(
     NONE("<none>"),
     REGULATION_H("Regulation H", pokemonLevel = 50),
     REGULATION_F("Regulation F", pokemonLevel = 50),
-    REGULATION_I("Regulation I", pokemonLevel = 50);
-
+    REGULATION_I("Regulation I", pokemonLevel = 50),
+    REGULATION_MA("Regulation M-A", pokemonLevel = 50);
 }
 
 data class CommonFilters(
