@@ -1,11 +1,11 @@
 package com.tambapps.pokemon.alakastats.di
 
+import com.tambapps.pokemon.alakastats.ui.service.GhPagesImageService
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
-import com.tambapps.pokemon.alakastats.ui.service.PokemonUrlMappingImageService
 import org.koin.dsl.module
 
 val iosModule = module {
-    single<PokemonImageService> { PokemonUrlMappingImageService(get()) }
+    single<PokemonImageService> { GhPagesImageService(get()) }
     /* HttpClient to make calls to graphql.pokeApi work on simulator.
     Don't forget the allowOverride(true) in IosApp.kt
     single<HttpClient> {
