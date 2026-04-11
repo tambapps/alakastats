@@ -53,12 +53,12 @@ internal fun PokemonDetailsOverview(
             if (viewModel.pokemonData != null) {
                 Text("Stats (lvl ${pokemon.level})", style = MaterialTheme.typography.headlineSmall)
                 PokemonStatsRow(
-                    pokemon, viewModel.pokemonData, Modifier.fillMaxWidth(),
+                    pokemon, viewModel.pokemonData, viewModel.team.format, Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(16.dp))
             }
             Text("Investments", style = MaterialTheme.typography.headlineSmall)
-            PokemonStatsRow(pokemon, pokemonData = null, Modifier.fillMaxWidth())
+            PokemonStatsRow(pokemon, pokemonData = null, viewModel.team.format, Modifier.fillMaxWidth())
             Spacer(Modifier.height(16.dp))
         }
         Text("Moves", style = MaterialTheme.typography.headlineSmall)

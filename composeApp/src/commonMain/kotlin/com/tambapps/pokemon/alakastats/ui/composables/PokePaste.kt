@@ -53,6 +53,7 @@ import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
+import com.tambapps.pokemon.alakastats.domain.model.usesLegacySystem
 import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -130,7 +131,7 @@ private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonI
 }
 
 @Composable
-fun PokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, modifier: Modifier = Modifier) {
+fun PokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, format: Format, modifier: Modifier = Modifier) {
     AnimatedContent(
         targetState = pokemon.name,
         transitionSpec = { (fadeIn() + slideInVertically { it }) togetherWith (fadeOut() + slideOutVertically { -it }) },
@@ -139,7 +140,7 @@ fun PokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, modifier: Modif
         Row {
             for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
                 val statModifier = if (LocalIsCompact.current) Modifier.weight(1f) else Modifier.padding(horizontal = 4.dp)
-                PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, pokemonData?.baseStatsOf(name), statModifier)
+                PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, pokemonData?.baseStatsOf(name), format, statModifier)
             }
         }
     }
@@ -171,6 +172,7 @@ private fun PokemonStatColumn(
     ivs: PokeStats,
     evs: PokeStats,
     baseStats: PokeStats?,
+    format: Format,
     modifier: Modifier = Modifier) {
     Column(
         modifier,
@@ -190,6 +192,7 @@ private fun PokemonStatColumn(
             else -> Color.Unspecified
         }
         Text(txt, color = textColor, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
+        val usesLegacySystem = remember(evs) { format.usesLegacySystem(evs) }
         if (baseStats != null) {
             val stats = remember(baseStats) {
                 PokeStats.compute(
@@ -197,13 +200,16 @@ private fun PokemonStatColumn(
                     evs = pokemon.evs,
                     ivs = pokemon.ivs,
                     nature = pokemon.nature ?: Nature.QUIRKY,
-                    level = pokemon.level
+                    level = pokemon.level,
+                    legacySystem = usesLegacySystem
                 )
             }
             StatText(stats[stat], textColor)
         } else {
             StatText(evs[stat], textColor)
-            StatText(ivs[stat], textColor)
+            if (usesLegacySystem) {
+                StatText(ivs[stat], textColor)
+            }
         }
     }
 }
@@ -331,7 +337,7 @@ private fun PokepastePokemonCard(
                 notesComposer.invoke(this)
             }
             if (!isOts) {
-                PokemonStatsRow(pokemon, pokemonData, Modifier.fillMaxWidth())
+                PokemonStatsRow(pokemon, pokemonData, format, Modifier.fillMaxWidth())
                 Spacer(Modifier.height(16.dp))
             }
             PokemonMoves(pokemon, pokemonImageService, disableTooltip = disableTooltip)

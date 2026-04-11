@@ -3,7 +3,6 @@ package com.tambapps.pokemon.alakastats.domain.model
 import com.tambapps.pokemon.Mechanic
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeStats
-import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
@@ -16,10 +15,22 @@ enum class Format(
     val pokemonLevel: Int? = null
 ) {
     NONE("<none>", Mechanic.entries),
-    REGULATION_H("Regulation H", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
     REGULATION_F("Regulation F", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
+    REGULATION_H("Regulation H", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
     REGULATION_I("Regulation I", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
     REGULATION_MA("Regulation M-A", allowedMechanics = listOf(Mechanic.MEGA_EVOLUTION), pokemonLevel = 50);
+}
+
+val Teamlytics.usesLegacySystem
+    get() = when(format) {
+        Format.REGULATION_F, Format.REGULATION_H, Format.REGULATION_I -> true
+        Format.NONE -> pokePaste.pokemons.any { p -> p.evs.any { it > 32 } }
+        else -> false
+    }
+fun Format.usesLegacySystem(evs: PokeStats) = when(this) {
+    Format.REGULATION_F, Format.REGULATION_H, Format.REGULATION_I -> true
+    Format.NONE -> evs.any { it > 32 }
+    else -> false
 }
 
 data class CommonFilters(

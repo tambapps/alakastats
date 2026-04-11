@@ -15,6 +15,7 @@ import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.usesLegacySystem
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonDataRepository
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.PokemonDetailTabViewModel
@@ -106,7 +107,8 @@ class PokemonSpeedScaleViewModel(
             baseStats = pokemonBaseStats,
             evs = pokemon.evs,
             nature = pokemon.nature ?: Nature.QUIRKY,
-            level = pokemonLevel
+            level = pokemonLevel,
+            legacySystem = team.usesLegacySystem
         ).speed.let { if (ownScarfBoost) (it * 1.5f).toInt() else it }.toStage(ownStage)
         val interestPokemon = PokemonSpeed(
             pokemonName = pokemon.name,
@@ -122,7 +124,8 @@ class PokemonSpeedScaleViewModel(
                     baseStats,
                     evs = PokeStats.default(if (maxEvs) 252 else 0),
                     nature = if (speedNature) Nature.JOLLY else Nature.QUIRKY,
-                    level = pokemonLevel
+                    level = pokemonLevel,
+                    legacySystem = team.usesLegacySystem
                 ).speed.let { if (scarfBoost) (it * 1.5f).toInt()  else it }.toStage(stage)
                 val statsNotFound = baseStats.speed == 0
                 add(PokemonSpeed(pokeName, speed, speedNature, 0, statsNotFound = statsNotFound))
@@ -176,6 +179,15 @@ class PokemonSpeedScaleViewModel(
         this.ownStage = value
         loadSpeedScale()
     }
+
+    private fun Pokemon.isScarfOrBooster(pokemonData: PokemonData?): Boolean {
+        val item = item ?: return false
+        val baseStats = pokemonData?.baseStatsOf(name)
+        return item.normalized.value.let {
+            it == "choice-scarf"
+                    || it == "booster-energy" && baseStats != null && PokeStats.compute(this, baseStats, legacySystem = team.usesLegacySystem).isSpeedHighestStat() }
+    }
+
 }
 
 fun Int.toStage(level: Int): Int {
@@ -184,14 +196,6 @@ fun Int.toStage(level: Int): Int {
     else 2f to (2f - level)
 
     return (this * num / denom).toInt()
-}
-
-private fun Pokemon.isScarfOrBooster(pokemonData: PokemonData?): Boolean {
-    val item = item ?: return false
-    val baseStats = pokemonData?.baseStatsOf(name)
-    return item.normalized.value.let {
-        it == "choice-scarf"
-                || it == "booster-energy" && baseStats != null && PokeStats.compute(this, baseStats).isSpeedHighestStat() }
 }
 
 private fun PokeStats.isSpeedHighestStat(): Boolean = (Stat.entries - Stat.HP).maxOfOrNull { this[it] } == speed
