@@ -36,6 +36,7 @@ internal fun UsagesTabMobile(viewModel: UsagesViewModel, scrollState: ScrollStat
         entries.forEach { (pokemonName, moveUsage) ->
             PokemonUsagesCard(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                format = viewModel.team.format,
                 replays = viewModel.replays,
                 pokemonImageService = viewModel.pokemonImageService,
                 name = pokemonName,

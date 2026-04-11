@@ -25,9 +25,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tambapps.pokemon.Mechanic
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
+import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
@@ -84,6 +86,7 @@ internal val UsagesViewModel.sortedPokemonMovesUsageEntries get() =
 @Composable
 fun PokemonUsagesCard(
     pokemonImageService: PokemonImageService,
+    format: Format,
     replays: List<ReplayAnalytics>,
     name: PokemonName,
     usages: PokemonUsages,
@@ -130,14 +133,17 @@ fun PokemonUsagesCard(
                     winCount == 0 -> "Won none of them"
                     else -> "Won $winCount of them"
                 }, fontSize = 16.sp, modifier = Modifier.alpha(0.9f))
-                Text(when {
-                    teraCount == 0 -> "Did not tera"
-                    teraCount == 1 && teraAndWinCount == 0 -> "Tera-ed in 1 game and did not win it"
-                    teraCount == 1 -> "Tera-ed in 1 game and won it"
-                    teraCount == teraAndWinCount -> "Tera-ed in $teraCount games and won all of them"
-                    teraAndWinCount == 0 -> "Tera-ed in $teraCount games and won none of them"
-                    else -> "Tera-ed in $teraCount games and won $teraAndWinCount of them"
-                }, fontSize = 16.sp, modifier = Modifier.alpha(0.75f))
+
+                if (teraCount > 0 || format.allowedMechanics.contains(Mechanic.TERASTALLIZATION)) {
+                    Text(when {
+                        teraCount == 0 -> "Did not tera"
+                        teraCount == 1 && teraAndWinCount == 0 -> "Tera-ed in 1 game and did not win it"
+                        teraCount == 1 -> "Tera-ed in 1 game and won it"
+                        teraCount == teraAndWinCount -> "Tera-ed in $teraCount games and won all of them"
+                        teraAndWinCount == 0 -> "Tera-ed in $teraCount games and won none of them"
+                        else -> "Tera-ed in $teraCount games and won $teraAndWinCount of them"
+                    }, fontSize = 16.sp, modifier = Modifier.alpha(0.75f))
+                }
             }
         }
         Spacer(Modifier.height(8.dp))

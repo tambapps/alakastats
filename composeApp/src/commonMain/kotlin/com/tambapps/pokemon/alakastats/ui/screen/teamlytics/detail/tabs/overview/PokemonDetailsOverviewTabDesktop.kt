@@ -47,6 +47,7 @@ fun PokemonDetailsOverviewDesktop(
                 viewModel.usages?.let {
                     PokemonUsagesCard(
                         pokemonImageService = viewModel.pokemonImageService,
+                        viewModel.team.format,
                         replays = viewModel.team.replays,
                         name = viewModel.pokemon.name,
                         usages = it,
