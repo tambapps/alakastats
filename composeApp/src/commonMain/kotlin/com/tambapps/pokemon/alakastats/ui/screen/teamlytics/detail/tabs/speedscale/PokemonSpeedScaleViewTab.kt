@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -165,10 +166,17 @@ private fun PokemonSpeedItem(viewModel: PokemonSpeedScaleViewModel, pSpeed: Poke
 
 @Composable
 private fun PokemonSpeedSprite(viewModel: PokemonSpeedScaleViewModel, pSpeed: PokemonSpeed) {
+    val isCompact = LocalIsCompact.current
+    val isMega = pSpeed.pokemonName.isMega
+
+    val modifier = Modifier.then(
+        if (isCompact) Modifier.size(76.dp).padding(8.dp)
+        else Modifier.size(128.dp).padding(16.dp)
+    ).scale(if (isMega) 2f else 1.5f)
+        .then(if (isMega) Modifier.offset(y = if (isCompact) 19.dp else 32.dp) else Modifier)
     viewModel.pokemonImageService.PokemonSprite(
         pSpeed.pokemonName,
-        modifier = if (LocalIsCompact.current) Modifier.size(75.dp).scale(1.5f).padding(8.dp)
-        else Modifier.size(128.dp).scale(1.5f).padding(16.dp),
+        modifier = modifier,
         facingDirection = if (pSpeed.isPokemonOfInterest) FacingDirection.LEFT else FacingDirection.RIGHT,
         disableTooltip = false
     )
