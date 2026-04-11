@@ -81,6 +81,12 @@ data class TerastallizationEntity(
 )
 
 @Serializable
+data class MegaEvolutionEntity(
+    val pokemon: String,
+    val item: String
+)
+
+@Serializable
 data class ReplayAnalyticsEntity(
     val players: List<PlayerEntity>,
     val uploadTime: Long,
@@ -129,6 +135,7 @@ data class PlayerEntity(
     val beforeElo: Int?,
     val afterElo: Int?,
     val terastallization: TerastallizationEntity?,
+    val megaEvolution: MegaEvolutionEntity? = null,
     val ots: OpenTeamSheetEntity?,
     val movesUsage: Map<String, Map<String, Int>>
 )

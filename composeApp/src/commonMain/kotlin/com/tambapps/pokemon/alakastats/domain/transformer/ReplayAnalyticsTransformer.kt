@@ -12,6 +12,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamPreview
 import com.tambapps.pokemon.alakastats.domain.model.TeamPreviewPokemon
+import com.tambapps.pokemon.alakastats.domain.model.MegaEvolution
 import com.tambapps.pokemon.alakastats.domain.model.Terastallization
 import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
@@ -20,6 +21,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamPreviewPokemonEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.OpenTeamSheetEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.OtsPokemonEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.MegaEvolutionEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TerastallizationEntity
 
 fun ReplayAnalytics.toEntity() = ReplayAnalyticsEntity(
@@ -55,6 +57,7 @@ fun Player.toEntity() = PlayerEntity(
     beforeElo = beforeElo,
     afterElo = afterElo,
     terastallization = terastallization?.toEntity(),
+    megaEvolution = megaEvolution?.toEntity(),
     ots = ots?.toEntity(),
     movesUsage = movesUsage.entries.associate { (pName, usages) ->
         pName.value to usages.mapKeys { (key, _) -> key.value }
@@ -68,6 +71,7 @@ fun PlayerEntity.toDomain() = Player(
     beforeElo = beforeElo,
     afterElo = afterElo,
     terastallization = terastallization?.toDomain(),
+    megaEvolution = megaEvolution?.toDomain(),
     ots = ots?.toDomain(),
     movesUsage = movesUsage.entries.associate { (pName, usages) ->
         PokemonName(pName) to usages.mapKeys { (key, _) ->
@@ -137,4 +141,14 @@ fun Terastallization.toEntity() = TerastallizationEntity(
 fun TerastallizationEntity.toDomain() = Terastallization(
     pokemon = PokemonName(pokemon),
     type = TeraType.valueOf(type)
+)
+
+fun MegaEvolution.toEntity() = MegaEvolutionEntity(
+    pokemon = pokemon.value,
+    item = item.value
+)
+
+fun MegaEvolutionEntity.toDomain() = MegaEvolution(
+    pokemon = PokemonName(pokemon),
+    item = ItemName(item)
 )

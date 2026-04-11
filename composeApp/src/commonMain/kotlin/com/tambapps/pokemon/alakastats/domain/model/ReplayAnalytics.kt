@@ -123,6 +123,11 @@ data class Terastallization(
     val type: TeraType
 )
 
+data class MegaEvolution(
+    val pokemon: PokemonName,
+    val item: ItemName
+)
+
 data class OpenTeamSheet(
     val pokemons: List<OtsPokemon>,
 ) {
@@ -182,6 +187,7 @@ data class Player(
     val beforeElo: Int?,
     val afterElo: Int?,
     val terastallization: Terastallization?,
+    val megaEvolution: MegaEvolution?,
     val ots: OpenTeamSheet?,
     val movesUsage: Map<PokemonName, Map<MoveName, Int>>
 ) {
@@ -193,6 +199,8 @@ data class Player(
     fun hasSelected(pokemonName: PokemonName) = selection.any { pokemonName.baseMatches(it) }
 
     fun hasTerastallized(pokemonName: PokemonName) = terastallization?.pokemon?.baseMatches(pokemonName) == true
+
+    fun hasMegaEvolved(pokemonName: PokemonName) = megaEvolution?.pokemon?.baseMatches(pokemonName) == true
 
     fun isLead(pokemonName: PokemonName) = lead.any { pokemonName.baseMatches(it) }
 }

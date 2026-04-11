@@ -15,6 +15,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamPreviewPokemonEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.MegaEvolutionEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TerastallizationEntity
 import com.tambapps.pokemon.sd.replay.log.visitor.OtsPokemon
 import com.tambapps.pokemon.sd.replay.log.visitor.SdReplayLogVisitor
@@ -162,6 +163,14 @@ internal class ReplayAnalyticsBuilderVisitor(
         )
     }
 
+    override fun visitMegaLog(pokemonSlot: String, pokemonName: String, item: String) {
+        val player = getPlayer(pokemonSlot)
+        player.megaEvolution = MegaEvolutionEntity(
+            pokemon = getActualPokemonName(player, pokemonName),
+            item = formatPokemonTrait(item)
+        )
+    }
+
     override fun visitWinLog(winner: String) {
         this.winner = winner
     }
@@ -201,6 +210,7 @@ private data class PlayerBuilderEntityBuilder(
     var beforeElo: Int? = null,
     var afterElo: Int? = null,
     var terastallization: TerastallizationEntity? = null,
+    var megaEvolution: MegaEvolutionEntity? = null,
     var ots: OpenTeamSheetEntity? = null,
     val movesUsage: MutableMap<String, MutableMap<String, Int>> = mutableMapOf(),
 ) {
@@ -227,6 +237,7 @@ private data class PlayerBuilderEntityBuilder(
         beforeElo = beforeElo,
         afterElo = afterElo,
         terastallization = terastallization,
+        megaEvolution = megaEvolution,
         ots = ots,
         movesUsage = movesUsage.toMap()
     )
