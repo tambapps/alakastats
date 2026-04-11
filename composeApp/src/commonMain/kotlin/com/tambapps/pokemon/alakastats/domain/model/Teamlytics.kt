@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.domain.model
 
+import com.tambapps.pokemon.Mechanic
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
@@ -10,13 +11,14 @@ import kotlin.uuid.Uuid
 
 enum class Format(
     val displayedName: String,
+    val allowedMechanics: List<Mechanic>,
     val pokemonLevel: Int? = null
 ) {
-    NONE("<none>"),
-    REGULATION_H("Regulation H", pokemonLevel = 50),
-    REGULATION_F("Regulation F", pokemonLevel = 50),
-    REGULATION_I("Regulation I", pokemonLevel = 50),
-    REGULATION_MA("Regulation M-A", pokemonLevel = 50);
+    NONE("<none>", Mechanic.entries),
+    REGULATION_H("Regulation H", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
+    REGULATION_F("Regulation F", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
+    REGULATION_I("Regulation I", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
+    REGULATION_MA("Regulation M-A", allowedMechanics = listOf(Mechanic.MEGA_EVOLUTION), pokemonLevel = 50);
 }
 
 data class CommonFilters(

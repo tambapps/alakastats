@@ -26,7 +26,7 @@ fun PokemonDetailsOverviewDesktop(
             .verticalScroll(scrollState)
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
-        PokepastePokemonHeader(viewModel.pokemon, viewModel.pokemonImageService,)
+        PokepastePokemonHeader(viewModel.pokemon, viewModel.pokemonImageService, format = viewModel.team.format)
         Spacer(Modifier.height(16.dp))
         Row(Modifier.fillMaxWidth()) {
             PokemonDetailsOverview(viewModel, Modifier.weight(0.6f))

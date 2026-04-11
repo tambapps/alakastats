@@ -51,6 +51,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.TeraType
+import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
@@ -306,6 +307,7 @@ internal fun EditSdNamesButton(viewModel: TeamReplayViewModel) {
 
 @Composable
 internal fun OtsButton(
+    format: Format,
     player: Player,
     ots: OpenTeamSheet,
     pokemonImageService: PokemonImageService,
@@ -332,7 +334,7 @@ internal fun OtsButton(
             ) {
                 // Mobile on purpose because we want a vertical pokepaste display on desktop too, as
                 // for some mysterious reason the dialog can't have full screen width
-                VerticalPokepaste(pokepaste, pokemonImageService)
+                VerticalPokepaste(pokepaste, pokemonImageService, format)
             }
         },
         confirmButton = {

@@ -129,13 +129,13 @@ fun ReplayCompact(
                 Row(Modifier.fillMaxWidth()
                     .padding(horizontal = 8.dp)) {
                     Spacer(Modifier.weight(1f))
-                    OtsButton(opponentPlayer, opponentPlayer.ots, pokemonImageService)
+                    OtsButton(team.format, opponentPlayer, opponentPlayer.ots, pokemonImageService)
                     Spacer(Modifier.width(32.dp))
                     ViewReplayButton(team, replay, replay.url)
                     Spacer(Modifier.weight(1f))
                 }
             } else if (gameOutput != GameOutcome.UNKNOWN && opponentPlayer.ots != null) {
-                OtsButton(opponentPlayer, opponentPlayer.ots, pokemonImageService, modifier = Modifier.align(Alignment.CenterHorizontally))
+                OtsButton(team.format, opponentPlayer, opponentPlayer.ots, pokemonImageService, modifier = Modifier.align(Alignment.CenterHorizontally))
             } else if (replay.url != null) {
                 ViewReplayButton(team, replay, replay.url, modifier = Modifier.align(Alignment.CenterHorizontally))
             }

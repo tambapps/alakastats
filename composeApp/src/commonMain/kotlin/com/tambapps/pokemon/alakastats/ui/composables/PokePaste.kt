@@ -35,11 +35,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.Mechanic
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.PlatformType
+import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -54,14 +56,15 @@ import org.jetbrains.compose.resources.painterResource
 fun Pokepaste(
     pokePaste: PokePaste,
     pokemonImageService: PokemonImageService,
+    format: Format,
     modifier: Modifier = Modifier,
     pokemonNotes: Map<Pokemon, String>? = null
 ) {
     val isCompact = LocalIsCompact.current
     if (isCompact) {
-        VerticalPokepaste(pokePaste, pokemonImageService, modifier, pokemonNotes)
+        VerticalPokepaste(pokePaste, pokemonImageService, format, modifier, pokemonNotes)
     } else {
-        DesktopPokepaste(pokePaste, pokemonImageService, modifier, pokemonNotes)
+        DesktopPokepaste(pokePaste, pokemonImageService, format, modifier, pokemonNotes)
     }
 }
 
@@ -71,13 +74,14 @@ val verticalPokemonSpace = 32.dp
 fun VerticalPokepaste(
     pokePaste: PokePaste,
     pokemonImageService: PokemonImageService,
+    format: Format,
     modifier: Modifier = Modifier,
     pokemonNotes: Map<Pokemon, String>? = null) {
     Column(modifier = modifier) {
         Spacer(Modifier.height(verticalPokemonSpace))
         for (pokemon in pokePaste.pokemons) {
             val notes = pokemonNotes?.get(pokemon)
-            PokepastePokemon(pokePaste.isOts, pokemon, pokemonData = null, pokemonImageService, Modifier.fillMaxWidth(), notes)
+            PokepastePokemon(pokePaste.isOts, pokemon, pokemonData = null, pokemonImageService, format, Modifier.fillMaxWidth(), notes)
             Spacer(Modifier.height(verticalPokemonSpace))
         }
 
@@ -85,10 +89,10 @@ fun VerticalPokepaste(
 }
 
 @Composable
-private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonImageService, modifier: Modifier, pokemonNotes: Map<Pokemon, String>? = null) {
+private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonImageService, format: Format, modifier: Modifier, pokemonNotes: Map<Pokemon, String>? = null) {
     Column(modifier = modifier) {
         for (pokemonBlock in pokePaste.pokemons.chunked(3)) {
-            DesktopPokemonRow(pokePaste.isOts, pokemonBlock, pokemonImageService, pokemonNotes)
+            DesktopPokemonRow(pokePaste.isOts, pokemonBlock, pokemonImageService, format, pokemonNotes)
         }
     }
 }
@@ -98,6 +102,7 @@ private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonI
     isOts: Boolean,
     pokemons: List<Pokemon>,
     pokemonImageService: PokemonImageService,
+    format: Format,
     pokemonNotes: Map<Pokemon, String>?
 ) {
     Row(
@@ -109,7 +114,7 @@ private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonI
                 Spacer(Modifier.width(16.dp))
             }
             val notes = pokemonNotes?.get(pokemon)
-            PokepastePokemon(isOts, pokemon, pokemonData = null, pokemonImageService, Modifier.weight(1f), notes)
+            PokepastePokemon(isOts, pokemon, pokemonData = null, pokemonImageService, format, Modifier.weight(1f), notes)
         }
     }
 }
@@ -198,6 +203,7 @@ fun PokepastePokemon(
     pokemon: Pokemon,
     pokemonData: PokemonData?,
     pokemonImageService: PokemonImageService,
+    format: Format,
     modifier: Modifier = Modifier,
     notes: String? = null,
     onClick: (() -> Unit)? = null,
@@ -206,6 +212,7 @@ fun PokepastePokemon(
     pokemon,
     pokemonData,
     pokemonImageService,
+    format,
     modifier,
     notes,
     onClick
@@ -221,6 +228,7 @@ fun PokepastePokemon(
     pokemon: Pokemon,
     pokemonData: PokemonData?,
     pokemonImageService: PokemonImageService,
+    format: Format,
     modifier: Modifier = Modifier,
     notes: String? = null,
     onClick: (() -> Unit)? = null,
@@ -235,6 +243,7 @@ fun PokepastePokemon(
             pokemon = pokemon,
             pokemonData = pokemonData,
             pokemonImageService = pokemonImageService,
+            format = format,
             modifier = modifier,
             notes = notes,
             onClick = onClick,
@@ -262,6 +271,7 @@ fun PokepastePokemon(
             pokemon = pokemon,
             pokemonData = pokemonData,
             pokemonImageService = pokemonImageService,
+            format = format,
             modifier = modifier,
             notes = notes,
             onClick = onClick,
@@ -276,6 +286,7 @@ private fun PokepastePokemonCard(
     pokemon: Pokemon,
     pokemonData: PokemonData?,
     pokemonImageService: PokemonImageService,
+    format: Format,
     modifier: Modifier = Modifier,
     notes: String? = null,
     onClick: (() -> Unit)? = null,
@@ -300,7 +311,7 @@ private fun PokepastePokemonCard(
         Column(
             verticalArrangement = Arrangement.Center,
         ) {
-            PokepastePokemonHeader(pokemon, pokemonImageService, megaSwitch=megaSwitch, disableTooltip=disableTooltip)
+            PokepastePokemonHeader(pokemon, pokemonImageService, format=format, megaSwitch=megaSwitch, disableTooltip=disableTooltip)
             Spacer(Modifier.height(16.dp))
             PokepastePokemonItemAndAbility(pokemon, pokemonImageService, disableTooltip=disableTooltip)
             Spacer(Modifier.height(16.dp))
@@ -323,16 +334,21 @@ fun PokepastePokemonHeader(
     pokemon: Pokemon,
     pokemonImageService: PokemonImageService,
     disableTooltip: Boolean = false,
-    megaSwitch: @Composable (() -> Unit)? = null
+    megaSwitch: @Composable (() -> Unit)? = null,
+    format: Format
 ) {
     Row(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.weight(1f))
-        megaSwitch?.invoke()
-        pokemon.teraType?.let {
-            pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(if (LocalIsCompact.current) 50.dp else 60.dp), disableTooltip = disableTooltip)
+        if (format.allowedMechanics.contains(Mechanic.MEGA_EVOLUTION)) {
+            megaSwitch?.invoke()
+        }
+        if (format.allowedMechanics.contains(Mechanic.TERASTALLIZATION)) {
+            pokemon.teraType?.let {
+                pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(if (LocalIsCompact.current) 50.dp else 60.dp), disableTooltip = disableTooltip)
+            }
         }
     }
 }

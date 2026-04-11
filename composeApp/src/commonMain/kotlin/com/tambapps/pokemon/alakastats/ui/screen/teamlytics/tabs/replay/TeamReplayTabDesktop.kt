@@ -167,7 +167,7 @@ private fun HeadRow(
 
             opponentPlayer.ots?.let { openTeamSheet ->
                 Spacer(Modifier.width(16.dp))
-                OtsButton(opponentPlayer, opponentPlayer.ots, pokemonImageService)
+                OtsButton(team.format, opponentPlayer, opponentPlayer.ots, pokemonImageService)
             }
         }
         replay.url?.let { replayUrl ->

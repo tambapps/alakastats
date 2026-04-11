@@ -209,7 +209,7 @@ internal fun NotedPokepastePokemon(
     val notes = viewModel.pokemonNotes[pokemon]
     if (viewModel.isEditingNotes) {
         PokepastePokemon(
-            isOts = team.pokePaste.isOts,
+            team = team,
             pokemon = pokemon,
             pokemonData = team.data.pokemonData[pokemon.name],
             pokemonImageService = viewModel.pokemonImageService,
@@ -220,6 +220,7 @@ internal fun NotedPokepastePokemon(
     } else {
         val navigator = LocalNavigator.currentOrThrow
         PokepastePokemon(
+            format = team.format,
             isOts = team.pokePaste.isOts,
             pokemon = pokemon,
             pokemonData = team.data.pokemonData[pokemon.name.normalized],
@@ -241,7 +242,7 @@ internal fun NotedPokepastePokemon(
 
 @Composable
 fun PokepastePokemon(
-    isOts: Boolean,
+    team: Teamlytics,
     pokemon: Pokemon,
     pokemonData: PokemonData?,
     pokemonImageService: PokemonImageService,
@@ -249,7 +250,8 @@ fun PokepastePokemon(
     onNotesChanged: (String) -> Unit,
     notes: String? = null,
 ) = PokepastePokemon(
-    isOts = isOts,
+    format = team.format,
+    isOts = team.pokePaste.isOts,
     pokemon = pokemon,
     pokemonData = pokemonData,
     pokemonImageService = pokemonImageService,
