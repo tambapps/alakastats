@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.di
 
+import androidx.compose.runtime.MutableState
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
@@ -95,8 +96,8 @@ val appModules = listOf(module {
     factory { (useCase: ManageTeamOverviewUseCase) ->
         OverviewViewModel(useCase, get(), get())
     }
-    factory { (state: TeamPokemonStateState.Loaded) ->
-        PokemonDetailOverviewModel(get(), state.team, state.pokemon, state.pokemonData, state.notes, state.usages)
+    factory { (state: TeamPokemonStateState.Loaded, megaSelectedState: MutableState<Boolean>) ->
+        PokemonDetailOverviewModel(get(), state.team, state.pokemon, state.megaPokemon, state.pokemonData, state.notes, state.usages, megaSelectedState)
     }
     factory { (state: TeamPokemonStateState.Loaded) ->
         PokemonSpeedScaleViewModel(get(), state.team, state.pokemon, state.pokemonData, get(), get())

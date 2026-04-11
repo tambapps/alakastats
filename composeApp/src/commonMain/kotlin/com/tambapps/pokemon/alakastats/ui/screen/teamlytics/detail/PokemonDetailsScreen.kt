@@ -1,10 +1,12 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -131,20 +134,36 @@ private fun PokemonDetails(
                 }
         ) {
             Pager(viewModel, pagerState, state, Modifier.fillMaxSize())
-            viewModel.pokemonImageService.PokemonArtwork(
-                name = state.pokemon.name,
-                disableTooltip = true,
-                modifier = Modifier.align(Alignment.BottomEnd)
-                    .padding(bottom = 16.dp, end = 8.dp)
-                    .height(if (LocalIsCompact.current) 175.dp else 250.dp)
-                    // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
-                    .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
-                    .offset(y = 16.dp)
+            val pokemonName = if (state.megaPokemon != null && viewModel.megaSelectedState.value) state.megaPokemon
+            else state.pokemon.name
+            PokemonArtwork(
+                viewModel = viewModel,
+                pokemonName = pokemonName,
+                contentWidth = contentWidth
             )
         }
         if (isCompact) {
             TabRowWithBackButton(viewModel, pagerState, TABS, modifier = Modifier.fillMaxWidth())
         }
+    }
+}
+
+@Composable
+private fun BoxScope.PokemonArtwork(
+    viewModel: PokemonDetailViewModel,
+    pokemonName: PokemonName,
+    contentWidth: Dp
+) {
+    Crossfade(
+        targetState = pokemonName,
+        modifier = Modifier.align(Alignment.BottomEnd)
+            .padding(bottom = 16.dp, end = 8.dp)
+            .height(if (LocalIsCompact.current) 175.dp else 250.dp)
+            // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
+            .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
+            .offset(y = 16.dp)
+    ) { name ->
+        viewModel.pokemonImageService.PokemonArtwork(name = name, disableTooltip = true)
     }
 }
 
@@ -173,7 +192,7 @@ private fun Pager(
 @Composable
 private inline fun <reified T: PokemonDetailTabViewModel> PagerTab(pagerViewModel: PokemonDetailViewModel, state: TeamPokemonStateState.Loaded, page: Int, tab: @Composable (T) -> Unit) {
     val viewModel = koinInject<T> {
-        parametersOf(state)
+        parametersOf(state, pagerViewModel.megaSelectedState)
     }
     EmitScrollEffect(pagerViewModel, viewModel, page)
     Box(Modifier.fillMaxSize()) {

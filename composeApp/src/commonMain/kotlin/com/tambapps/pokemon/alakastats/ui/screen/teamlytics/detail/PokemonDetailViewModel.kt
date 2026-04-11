@@ -15,6 +15,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ConsultPokemonDetailUseCas
 import com.tambapps.pokemon.alakastats.ui.composables.PagerViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.PokemonUsages
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.util.MegaUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,6 +27,7 @@ sealed class TeamPokemonStateState {
     data class Loaded(
         val team: Teamlytics,
         val pokemon: Pokemon,
+        val megaPokemon: PokemonName?,
         val pokemonData: PokemonData?,
         val notes: String?,
         val usages: PokemonUsages?
@@ -50,6 +52,8 @@ class PokemonDetailViewModel(
         loadTeamPokemon()
     }
 
+    val megaSelectedState = mutableStateOf(true)
+
     private fun loadTeamPokemon() {
         scope.launch {
             val teamlyticsResult = useCase.get(teamId)
@@ -62,7 +66,7 @@ class PokemonDetailViewModel(
                         val notes = team.notes?.pokemonNotes?.get(pokemon?.name)
                         val usages = computeUsages(team)
                         if (pokemon == null) TeamPokemonStateState.Error(GetPokemonDataError("Could not find pokemon on team"))
-                        else TeamPokemonStateState.Loaded(team, pokemon, data, notes, usages)
+                        else TeamPokemonStateState.Loaded(team, pokemon, MegaUtils.getMegaPokemon(pokemon.item), data, notes, usages)
                     }
                 )
             }

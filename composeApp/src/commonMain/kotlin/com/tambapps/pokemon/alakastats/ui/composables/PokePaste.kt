@@ -252,7 +252,7 @@ fun PokepastePokemon(
     var megaSelected by remember { mutableStateOf(true) }
     PokepastePokemonCard(
         isOts = isOts,
-        pokemon = if (megaPokemon != null && megaSelected) pokemon.copy(name = megaPokemon) else pokemon,
+        pokemon = remember(megaPokemon, megaSelected) { if (megaPokemon != null && megaSelected) pokemon.copy(name = megaPokemon) else pokemon },
         pokemonData = pokemonData,
         pokemonImageService = pokemonImageService,
         format = format,

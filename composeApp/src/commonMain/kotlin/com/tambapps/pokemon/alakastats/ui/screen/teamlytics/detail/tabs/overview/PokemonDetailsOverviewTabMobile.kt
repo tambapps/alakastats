@@ -30,15 +30,13 @@ fun PokemonDetailsOverviewMobile(
             .then(Modifier.padding(horizontal = 8.dp, vertical = 8.dp))
     ){
 
-        val megaPokemon = MegaUtils.getMegaPokemon(viewModel.pokemon.item)
-        var megaSelected by remember { mutableStateOf(true) }
-        val pokemon = if (megaPokemon != null && megaSelected) viewModel.pokemon.copy(name = megaPokemon) else viewModel.pokemon
+        val pokemon = remember(viewModel.megaPokemon, viewModel.megaSelected) { if (viewModel.megaPokemon != null && viewModel.megaSelected) viewModel.pokemon.copy(name = viewModel.megaPokemon) else viewModel.pokemon }
 
         PokepastePokemonHeader(
             pokemon = pokemon,
             pokemonImageService = viewModel.pokemonImageService,
             format = viewModel.team.format,
-            megaSwitch = if (megaPokemon != null) ({ MegaSwitch(megaSelected, onCheckedChange = { megaSelected = it }) })
+            megaSwitch = if (viewModel.megaPokemon != null) ({ MegaSwitch(viewModel.megaSelected, onCheckedChange = { viewModel.megaSelected = it }) })
             else null
         )
         Spacer(Modifier.height(16.dp))
