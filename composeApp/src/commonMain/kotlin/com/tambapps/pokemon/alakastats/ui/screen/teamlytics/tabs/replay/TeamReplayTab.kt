@@ -3,6 +3,10 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.arrow_forward
+import alakastats.composeapp.generated.resources.mega
+import alakastats.composeapp.generated.resources.mega_stone
+import alakastats.composeapp.generated.resources.more_vert
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,6 +74,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFilte
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -369,7 +374,10 @@ internal fun OtsButton(
 
 @Composable
 internal fun SelectedPokemon(
-    pokemon: PokemonName, teraType: TeraType?, pokemonImageService: PokemonImageService,
+    pokemon: PokemonName,
+    megaPokemon: PokemonName?,
+    teraType: TeraType?,
+    pokemonImageService: PokemonImageService,
     isYouPlayer: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -386,12 +394,23 @@ internal fun SelectedPokemon(
             contentAlignment = Alignment.Center
         ) {
             pokemonImageService.PokemonArtwork(
-                pokemon,
+                megaPokemon ?: pokemon,
                 modifier = Modifier.height(128.dp),
                 facingDirection = if (isYouPlayer) FacingDirection.RIGHT else FacingDirection.LEFT
             )
         }
         val offset = 16.dp
+        megaPokemon?.let {
+            Image(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 0.dp, y = -offset)
+                    .size(50.dp),
+                painter = painterResource(Res.drawable.mega),
+                contentDescription = "Mega",
+            )
+        }
+
         teraType?.let {
             pokemonImageService.TeraTypeImage(
                 it, modifier = Modifier

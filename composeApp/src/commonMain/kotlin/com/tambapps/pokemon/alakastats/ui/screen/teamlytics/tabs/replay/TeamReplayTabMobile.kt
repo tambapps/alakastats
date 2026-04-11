@@ -36,6 +36,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.Header
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
+import com.tambapps.pokemon.util.MegaUtils.toMega
 
 @Composable
 internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: LazyListState) {
@@ -186,11 +187,15 @@ private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String,
 
         for (pokemon in player.selection) {
             val teraType = player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
+            val megaPokemon = player.megaEvolution
+                ?.takeIf { it.pokemon.baseMatches(pokemon) }
+                ?.let { it.pokemon.toMega(it.item) }
             SelectedPokemon(
                 pokemon = pokemon,
                 teraType = teraType,
                 pokemonImageService = pokemonImageService,
-                isYouPlayer = isYouPlayer
+                isYouPlayer = isYouPlayer,
+                megaPokemon = megaPokemon
             )
         }
     }

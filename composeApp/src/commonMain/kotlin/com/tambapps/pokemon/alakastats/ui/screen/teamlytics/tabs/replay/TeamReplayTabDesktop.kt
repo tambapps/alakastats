@@ -47,6 +47,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.Header
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
+import com.tambapps.pokemon.util.MegaUtils.toMega
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -312,12 +313,16 @@ private fun DesktopSelection(
                     }
                     val teraType =
                         player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
+                    val megaPokemon = player.megaEvolution
+                        ?.takeIf { it.pokemon.baseMatches(pokemon) }
+                        ?.let { it.pokemon.toMega(it.item) }
                     SelectedPokemon(
                         modifier = Modifier.widthIn(max = 175.dp),
                         pokemon = pokemon,
                         teraType = teraType,
                         pokemonImageService = pokemonImageService,
-                        isYouPlayer = isYouPlayer
+                        isYouPlayer = isYouPlayer,
+                        megaPokemon = megaPokemon
                     )
                 }
                 if (!isYouPlayer) {
