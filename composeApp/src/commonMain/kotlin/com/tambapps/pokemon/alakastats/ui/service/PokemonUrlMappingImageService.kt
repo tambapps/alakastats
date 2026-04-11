@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.service
 
 import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.mega_stone
 import alakastats.composeapp.generated.resources.move_bug
 import alakastats.composeapp.generated.resources.move_dark
 import alakastats.composeapp.generated.resources.move_dragon
@@ -53,10 +54,10 @@ import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.alakastats.ui.composables.TooltipIfEnabled
 import com.tambapps.pokemon.alakastats.util.titlecase
+import com.tambapps.pokemon.util.MegaUtils.isMegaStone
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -70,6 +71,7 @@ private val placeHolderDrawable = Res.drawable.pokeball
 enum class FacingDirection {
     LEFT, RIGHT
 }
+
 interface PokemonImageService {
 
     fun listAvailableNames(): List<PokemonName>
@@ -93,6 +95,7 @@ interface PokemonImageService {
 
     @Composable
     fun MoveSpecImages(move: MoveName, disableTooltip: Boolean = false, iconModifier: Modifier = Modifier)
+
 
     @Composable
     fun ItemImage(item: ItemName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
@@ -119,6 +122,25 @@ abstract class AbstractPokemonImageService(
             }
         }
     }
+
+    @Composable
+    override fun ItemImage(item: ItemName, modifier: Modifier, disableTooltip: Boolean) {
+        if (!item.isMegaStone) {
+            NonMegaStoneItemName(item, modifier, disableTooltip)
+        } else {
+            TooltipIfEnabled(disableTooltip, item.pretty, modifier) { mod ->
+                Image(
+                    painter = painterResource(Res.drawable.mega_stone),
+                    contentDescription = item.pretty,
+                    modifier = mod,
+                    contentScale = ContentScale.Fit
+                )
+            }
+        }
+    }
+
+    @Composable
+    abstract fun NonMegaStoneItemName(item: ItemName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
 
     @Composable
     override fun PokemonSprite(
@@ -283,7 +305,7 @@ class PokemonLocalUrlImageService(
 ): AbstractPokemonImageService(json) {
 
     @Composable
-    override fun ItemImage(
+    override fun NonMegaStoneItemName(
         item: ItemName,
         modifier: Modifier,
         disableTooltip: Boolean
@@ -323,7 +345,7 @@ class GhPagesImageService(
 ): AbstractPokemonImageService(json) {
 
     @Composable
-    override fun ItemImage(
+    override fun NonMegaStoneItemName(
         item: ItemName,
         modifier: Modifier,
         disableTooltip: Boolean
@@ -388,7 +410,7 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
     }
 
     @Composable
-    override fun ItemImage(item: ItemName, modifier: Modifier, disableTooltip: Boolean) {
+    override fun NonMegaStoneItemName(item: ItemName, modifier: Modifier, disableTooltip: Boolean) {
         TooltipIfEnabled(disableTooltip, item.pretty, modifier) { mod ->
             // lazy loading
             if (itemsData.isEmpty()) {
