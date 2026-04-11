@@ -24,6 +24,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -183,8 +184,11 @@ private fun Pager(
             0 -> PagerTab<PokemonDetailOverviewModel>(pagerViewModel, state, page) {
                 PokemonDetailsOverviewTab(it)
             }
-            1 -> PagerTab<PokemonSpeedScaleViewModel>(pagerViewModel, state, page) {
-                PokemonSpeedScaleViewTab(it)
+            // key used to refresh speed scale tab when we change megaSelected state
+            1 -> key(pagerViewModel.megaSelectedState.value) {
+                PagerTab<PokemonSpeedScaleViewModel>(pagerViewModel, state, page) {
+                    PokemonSpeedScaleViewTab(it)
+                }
             }
         }
     }

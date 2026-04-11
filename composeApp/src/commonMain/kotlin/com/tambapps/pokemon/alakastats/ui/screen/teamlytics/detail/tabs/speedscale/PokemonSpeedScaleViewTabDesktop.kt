@@ -44,7 +44,7 @@ private fun SettingsBar(viewModel: PokemonSpeedScaleViewModel, modifier: Modifie
                 Modifier.weight(1f),
                 horizontalAlignment = Alignment.End
             ) {
-                Text("${viewModel.pokemon.name.value}'s Boosts", style = MaterialTheme.typography.titleLarge)
+                Text("${viewModel.pokemon.name.pretty}'s Boosts", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(8.dp))
                 PokemonBoostsFlowRow(viewModel)
             }

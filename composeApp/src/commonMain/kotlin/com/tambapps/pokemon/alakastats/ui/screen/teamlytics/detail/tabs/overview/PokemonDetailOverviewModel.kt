@@ -1,7 +1,9 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
@@ -14,7 +16,7 @@ import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 class PokemonDetailOverviewModel(
     override val pokemonImageService: PokemonImageService,
     val team: Teamlytics,
-    val pokemon: Pokemon,
+    private val privatePokemon: Pokemon,
     val megaPokemon: PokemonName?,
     val pokemonData: PokemonData?,
     val notes: String?,
@@ -23,5 +25,7 @@ class PokemonDetailOverviewModel(
 ) : PokemonDetailTabViewModel() {
     override val isTabLoading = false
     var megaSelected by megaSelectedState
+
+    val pokemon @Composable get() = remember(megaPokemon, megaSelected) { if (megaPokemon != null && megaSelected) privatePokemon.copy(name = megaPokemon) else privatePokemon }
 
 }

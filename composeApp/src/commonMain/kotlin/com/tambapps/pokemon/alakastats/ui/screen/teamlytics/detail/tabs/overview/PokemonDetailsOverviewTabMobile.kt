@@ -30,10 +30,8 @@ fun PokemonDetailsOverviewMobile(
             .then(Modifier.padding(horizontal = 8.dp, vertical = 8.dp))
     ){
 
-        val pokemon = remember(viewModel.megaPokemon, viewModel.megaSelected) { if (viewModel.megaPokemon != null && viewModel.megaSelected) viewModel.pokemon.copy(name = viewModel.megaPokemon) else viewModel.pokemon }
-
         PokepastePokemonHeader(
-            pokemon = pokemon,
+            pokemon = viewModel.pokemon,
             pokemonImageService = viewModel.pokemonImageService,
             format = viewModel.team.format,
             megaSwitch = if (viewModel.megaPokemon != null) ({ MegaSwitch(viewModel.megaSelected, onCheckedChange = { viewModel.megaSelected = it }) })
@@ -41,7 +39,7 @@ fun PokemonDetailsOverviewMobile(
         )
         Spacer(Modifier.height(16.dp))
 
-        PokemonDetailsOverview(viewModel, pokemon=pokemon, Modifier.fillMaxWidth())
+        PokemonDetailsOverview(viewModel, pokemon=viewModel.pokemon, Modifier.fillMaxWidth())
         Spacer(Modifier.height(64.dp))
     }
 }

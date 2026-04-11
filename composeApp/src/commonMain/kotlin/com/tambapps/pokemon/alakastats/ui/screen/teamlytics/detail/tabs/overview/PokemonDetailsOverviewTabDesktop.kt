@@ -32,10 +32,8 @@ fun PokemonDetailsOverviewDesktop(
             .verticalScroll(scrollState)
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
-        val pokemon = remember(viewModel.megaPokemon, viewModel.megaSelected) { if (viewModel.megaPokemon != null && viewModel.megaSelected) viewModel.pokemon.copy(name = viewModel.megaPokemon) else viewModel.pokemon }
-
         PokepastePokemonHeader(
-            pokemon = pokemon,
+            pokemon = viewModel.pokemon,
             pokemonImageService = viewModel.pokemonImageService,
             format = viewModel.team.format,
             megaSwitch = if (viewModel.megaPokemon != null) ({ MegaSwitch(viewModel.megaSelected, onCheckedChange = { viewModel.megaSelected = it }) })
@@ -43,7 +41,7 @@ fun PokemonDetailsOverviewDesktop(
         )
         Spacer(Modifier.height(16.dp))
         Row(Modifier.fillMaxWidth()) {
-            PokemonDetailsOverview(viewModel, pokemon, Modifier.weight(0.6f))
+            PokemonDetailsOverview(viewModel, viewModel.pokemon, Modifier.weight(0.6f))
             Column(Modifier.weight(0.4f)) {
 
                 viewModel.usages?.let {

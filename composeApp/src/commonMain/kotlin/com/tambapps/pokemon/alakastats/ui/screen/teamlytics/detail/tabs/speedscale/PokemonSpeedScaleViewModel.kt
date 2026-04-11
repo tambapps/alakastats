@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -40,11 +41,15 @@ data class SpeedScale(
 class PokemonSpeedScaleViewModel(
     override val pokemonImageService: PokemonImageService,
     val team: Teamlytics,
-    val pokemon: Pokemon,
+    originalPokemon: Pokemon,
+    megaPokemon: PokemonName?,
+    megaSelected: Boolean,
     val pokemonData: PokemonData?,
     private val pokeApi: PokeApiPokemonDataRepository,
     private val formatRepository: FormatDataRepository
 ) : PokemonDetailTabViewModel() {
+    val pokemon: Pokemon = if (megaPokemon != null && megaSelected) originalPokemon.copy(name = megaPokemon) else originalPokemon
+
     override var isTabLoading by mutableStateOf(false)
     var maxEvs by mutableStateOf(true)
         private set

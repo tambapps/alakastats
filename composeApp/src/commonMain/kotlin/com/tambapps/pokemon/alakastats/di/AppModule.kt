@@ -99,8 +99,8 @@ val appModules = listOf(module {
     factory { (state: TeamPokemonStateState.Loaded, megaSelectedState: MutableState<Boolean>) ->
         PokemonDetailOverviewModel(get(), state.team, state.pokemon, state.megaPokemon, state.pokemonData, state.notes, state.usages, megaSelectedState)
     }
-    factory { (state: TeamPokemonStateState.Loaded) ->
-        PokemonSpeedScaleViewModel(get(), state.team, state.pokemon, state.pokemonData, get(), get())
+    factory { (state: TeamPokemonStateState.Loaded, megaSelectedState: MutableState<Boolean>) ->
+        PokemonSpeedScaleViewModel(get(), state.team, state.pokemon, state.megaPokemon, megaSelectedState.value, state.pokemonData, get(), get())
     }
     factory { (useCase: ManageTeamReplaysUseCase, formatData: FormatData?) ->
         TeamReplayViewModel(useCase, get(), get(), formatData)
