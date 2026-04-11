@@ -1,5 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.mega
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -13,15 +15,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -30,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
-import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
@@ -40,6 +47,8 @@ import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
+import com.tambapps.pokemon.util.MegaUtils
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun Pokepaste(
@@ -217,6 +226,62 @@ fun PokepastePokemon(
     onClick: (() -> Unit)? = null,
     notesComposer: @Composable ColumnScope.() -> Unit
 ) {
+    val megaPokemon = MegaUtils.MEGA_STONE_TO_POKEMON[pokemon.item]
+    if (megaPokemon != null && megaPokemon.baseNormalized == pokemon.name.normalized) {
+        var megaSelected by mutableStateOf(false)
+        // TODO change pokemon name supplied
+        PokepastePokemonCard(
+            isOts = isOts,
+            pokemon = pokemon,
+            pokemonData = pokemonData,
+            pokemonImageService = pokemonImageService,
+            modifier = modifier,
+            notes = notes,
+            onClick = onClick,
+            notesComposer = notesComposer,
+            megaSwitch = {
+
+                Switch(
+                    megaSelected,
+                    onCheckedChange = { megaSelected = it },
+                    modifier = Modifier.scale(1.2f).padding(horizontal = 8.dp),
+                    thumbContent = {
+                        Icon(
+                            painter = painterResource(Res.drawable.mega),
+                            contentDescription = "Mega"
+                        )
+
+                    }
+                )
+            }
+        )
+
+    } else {
+        PokepastePokemonCard(
+            isOts = isOts,
+            pokemon = pokemon,
+            pokemonData = pokemonData,
+            pokemonImageService = pokemonImageService,
+            modifier = modifier,
+            notes = notes,
+            onClick = onClick,
+            notesComposer = notesComposer
+        )
+    }
+}
+
+@Composable
+private fun PokepastePokemonCard(
+    isOts: Boolean,
+    pokemon: Pokemon,
+    pokemonData: PokemonData?,
+    pokemonImageService: PokemonImageService,
+    modifier: Modifier = Modifier,
+    notes: String? = null,
+    onClick: (() -> Unit)? = null,
+    megaSwitch: (@Composable () -> Unit)? = null,
+    notesComposer: @Composable ColumnScope.() -> Unit
+) {
     PokemonCard(
         modifier = modifier,
         onClick=onClick,
@@ -235,7 +300,7 @@ fun PokepastePokemon(
         Column(
             verticalArrangement = Arrangement.Center,
         ) {
-            PokepastePokemonHeader(pokemon, pokemonImageService, disableTooltip=disableTooltip)
+            PokepastePokemonHeader(pokemon, pokemonImageService, megaSwitch=megaSwitch, disableTooltip=disableTooltip)
             Spacer(Modifier.height(16.dp))
             PokepastePokemonItemAndAbility(pokemon, pokemonImageService, disableTooltip=disableTooltip)
             Spacer(Modifier.height(16.dp))
@@ -252,13 +317,20 @@ fun PokepastePokemon(
     }
 }
 
+
 @Composable
-fun PokepastePokemonHeader(pokemon: Pokemon, pokemonImageService: PokemonImageService, disableTooltip: Boolean = false) {
+fun PokepastePokemonHeader(
+    pokemon: Pokemon,
+    pokemonImageService: PokemonImageService,
+    disableTooltip: Boolean = false,
+    megaSwitch: @Composable (() -> Unit)? = null
+) {
     Row(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.weight(1f))
+        megaSwitch?.invoke()
         pokemon.teraType?.let {
             pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(if (LocalIsCompact.current) 50.dp else 60.dp), disableTooltip = disableTooltip)
         }
