@@ -1,5 +1,7 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity
 
+import com.tambapps.pokemon.PokeStats
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.util.Identifiable
 import kotlin.time.Instant
 import kotlinx.serialization.Serializable
@@ -34,7 +36,8 @@ data class TeamlyticsDataEntity(
 data class PokemonDataEntity(
     val name: String,
     val moves: Map<String, PokemonMoveEntity>,
-    val baseStats: List<Int>? = null
+    // needed to not crash when parsing old documents
+    val baseStatsPerForms: Map<String, List<Int>>? = null,
 )
 
 @Serializable

@@ -39,6 +39,7 @@ import com.tambapps.pokemon.Mechanic
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.domain.model.Format
@@ -124,7 +125,7 @@ fun PokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, modifier: Modif
     Row(modifier) {
         for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
             val modifier = if (LocalIsCompact.current) Modifier.weight(1f) else Modifier.padding(horizontal = 4.dp)
-            PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, pokemonData?.baseStats, modifier)
+            PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, pokemonData?.baseStatsOf(pokemon.name), modifier)
         }
     }
 }
@@ -234,13 +235,12 @@ fun PokepastePokemon(
     onClick: (() -> Unit)? = null,
     notesComposer: @Composable ColumnScope.() -> Unit
 ) {
-    val megaPokemon = MegaUtils.MEGA_STONE_TO_POKEMON[pokemon.item]
+    val megaPokemon = MegaUtils.getMegaPokemon(pokemon.item)
     if (megaPokemon != null && megaPokemon.baseNormalized == pokemon.name.normalized) {
-        var megaSelected by mutableStateOf(false)
-        // TODO change pokemon name supplied
+        var megaSelected by remember { mutableStateOf(false) }
         PokepastePokemonCard(
             isOts = isOts,
-            pokemon = pokemon,
+            pokemon = if (megaSelected) pokemon.copy(name = megaPokemon) else pokemon,
             pokemonData = pokemonData,
             pokemonImageService = pokemonImageService,
             format = format,

@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.domain.model
 import com.tambapps.pokemon.Mechanic
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeStats
+import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
@@ -73,8 +74,11 @@ data class TeamlyticsData(
 data class PokemonData(
     val name: PokemonName,
     val moves: Map<MoveName, PokemonMove>,
-    val baseStats: PokeStats?
-)
+    val baseStatsPerForms: Map<PokemonName, PokeStats>,
+) {
+    fun baseStatsOf(pokemon: PokemonName) = baseStatsPerForms[pokemon.normalized]
+    fun shouldReload() = !baseStatsPerForms.containsKey(name.normalized)
+}
 
 
 data class TeamlyticsPreview(

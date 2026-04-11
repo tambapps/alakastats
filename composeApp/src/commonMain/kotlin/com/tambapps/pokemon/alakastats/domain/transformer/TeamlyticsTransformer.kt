@@ -152,7 +152,7 @@ fun PokemonData.toEntity() = PokemonDataEntity(
             accuracy = value.accuracy
         )
     },
-    baseStats = baseStats?.run { listOf(hp, attack, defense, specialAttack, specialDefense, speed) }
+    baseStatsPerForms = baseStatsPerForms.map { (pName, baseStats) -> pName.value to baseStats.toList() }.toMap(),
 )
 
 fun TeamlyticsDataEntity.toDomain() = TeamlyticsData(
@@ -171,14 +171,18 @@ fun PokemonDataEntity.toDomain() = PokemonData(
         )
         move.name to move
     },
-    baseStats = baseStats?.run {
-        PokeStats(
-            hp = getOrElse(0) { 0 },
-            attack = getOrElse(1) { 0 },
-            defense = getOrElse(2) { 0 },
-            specialAttack = getOrElse(3) { 0 },
-            specialDefense = getOrElse(4) { 0 },
-            speed = getOrElse(5) { 0 }
-        )
-    }
+    baseStatsPerForms = baseStatsPerForms?.map { (pName, baseStatList) -> PokemonName(pName) to baseStatList.toBaseStats() }?.toMap()
+        ?: emptyMap(),
 )
+
+private fun List<Int>.toBaseStats() = PokeStats(
+    hp = getOrElse(0) { 0 },
+    attack = getOrElse(1) { 0 },
+    defense = getOrElse(2) { 0 },
+    specialAttack = getOrElse(3) { 0 },
+    specialDefense = getOrElse(4) { 0 },
+    speed = getOrElse(5) { 0 }
+)
+
+private fun PokeStats.toList()
+= listOf(hp, attack, defense, specialAttack, specialDefense, speed)

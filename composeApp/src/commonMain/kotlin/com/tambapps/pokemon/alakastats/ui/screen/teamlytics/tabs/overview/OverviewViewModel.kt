@@ -147,5 +147,5 @@ class OverviewViewModel(
 }
 
 private fun Teamlytics.shouldLoadPokemonData() = pokePaste.pokemons.any { !data.pokemonData.containsKey(it.name.normalized) }
-        || data.pokemonData.values.any { it.baseStats == null }
+        || data.pokemonData.values.any { it.shouldReload() }
 

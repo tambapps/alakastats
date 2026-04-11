@@ -1,8 +1,8 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository
 
 import arrow.core.Either
+import arrow.core.mapValuesNotNull
 import com.tambapps.pokemon.MoveName
-import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.Pokemon
@@ -17,6 +17,7 @@ import com.tambapps.pokemon.pokeapi.client.GqlBatchResult
 import com.tambapps.pokemon.pokeapi.client.GqlMove
 import com.tambapps.pokemon.pokeapi.client.GqlPokemon
 import com.tambapps.pokemon.pokeapi.client.PokeApiGqlClient
+import com.tambapps.pokemon.util.MegaUtils
 
 class PokeApiPokemonDataRepository(
     private val pokeapiClient: PokeApiGqlClient
@@ -28,10 +29,14 @@ class PokeApiPokemonDataRepository(
             .map { it.normalized }
             .distinctBy { it.value }
             .toList()
+        // map pokemon -> pokemon forms
+        val pokemonNames = pokemons.associateWith { pokemon ->
+            listOfNotNull(pokemon.name.normalized, MegaUtils.getMegaPokemon(pokemon.item))
+        }
         return Either.catch {
-            pokeapiClient.getPokemons(pokemons.map { it.name.pokeApiNormalized }, moves)
+            pokeapiClient.getPokemons(pokemonNames.values.flatMap { it }.map { it.pokeApiNormalized }, moves)
         }.mapLeft { GetPokemonDataError("Couldn't retrieve pokemon data", it) }
-            .map { toPokemonDataWithMoves(pokemons, it) }
+            .map { toPokemonDataWithMoves(pokemonNames, it) }
     }
 
     override suspend fun getBaseStats(pokemons: List<PokemonName>): Either<GetPokemonDataError, Map<PokemonName, PokeStats>> {
@@ -51,18 +56,20 @@ class PokeApiPokemonDataRepository(
     }
 
     private fun toPokemonDataWithMoves(
-        pokemons: List<Pokemon>,
+        pokemons: Map<Pokemon, List<PokemonName>>,
         result: GqlBatchResult
     ): List<PokemonData> {
-        return pokemons.map { pokemon ->
-            val baseStats = result.pokemons.find { it.name == pokemon.name.pokeApiNormalized.value }
-                ?.toPokeStats()
+        return pokemons.map { (pokemon, pokemonForms) ->
+            val baseStatsPerForms = pokemonForms.associateWith { pokemonForm ->
+                result.pokemons.find { it.name == pokemonForm.pokeApiNormalized.value }
+                    ?.toPokeStats()
+            }.mapValuesNotNull { (_, value) -> value }
             PokemonData(
                 name = pokemon.name,
                 moves = result.moves.filter { pokemon.moves.any { m -> m.normalized.value == it.name } }
                     .map { it.toMove() }
                     .associateBy { it.name.normalized },
-                baseStats = baseStats
+                baseStatsPerForms = baseStatsPerForms,
             )
         }
     }

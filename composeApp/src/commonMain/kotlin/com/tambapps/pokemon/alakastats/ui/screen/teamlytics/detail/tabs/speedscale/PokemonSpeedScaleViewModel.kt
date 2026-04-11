@@ -183,9 +183,10 @@ fun Int.toStage(level: Int): Int {
 
 private fun Pokemon.isScarfOrBooster(pokemonData: PokemonData?): Boolean {
     val item = item ?: return false
+    val baseStats = pokemonData?.baseStatsOf(name)
     return item.normalized.value.let {
         it == "choice-scarf"
-                || it == "booster-energy" && pokemonData?.baseStats != null && PokeStats.compute(this, pokemonData.baseStats).isSpeedHighestStat() }
+                || it == "booster-energy" && baseStats != null && PokeStats.compute(this, baseStats).isSpeedHighestStat() }
 }
 
 private fun PokeStats.isSpeedHighestStat(): Boolean = (Stat.entries - Stat.HP).maxOfOrNull { this[it] } == speed
