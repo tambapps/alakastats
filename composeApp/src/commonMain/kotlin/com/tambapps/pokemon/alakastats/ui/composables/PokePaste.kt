@@ -249,47 +249,39 @@ fun PokepastePokemon(
     notesComposer: @Composable ColumnScope.() -> Unit
 ) {
     val megaPokemon = MegaUtils.getMegaPokemon(pokemon.item)
-    if (megaPokemon != null && megaPokemon.baseNormalized == pokemon.name.normalized) {
-        var megaSelected by remember { mutableStateOf(false) }
-        PokepastePokemonCard(
-            isOts = isOts,
-            pokemon = if (megaSelected) pokemon.copy(name = megaPokemon) else pokemon,
-            pokemonData = pokemonData,
-            pokemonImageService = pokemonImageService,
-            format = format,
-            modifier = modifier,
-            notes = notes,
-            onClick = onClick,
-            notesComposer = notesComposer,
-            megaSwitch = {
-                Switch(
-                    megaSelected,
-                    onCheckedChange = { megaSelected = it },
-                    modifier = Modifier.scale(1.2f).padding(horizontal = 8.dp),
-                    thumbContent = {
-                        Icon(
-                            painter = painterResource(Res.drawable.mega),
-                            contentDescription = "Mega"
-                        )
+    var megaSelected by remember { mutableStateOf(true) }
+    PokepastePokemonCard(
+        isOts = isOts,
+        pokemon = if (megaPokemon != null && megaSelected) pokemon.copy(name = megaPokemon) else pokemon,
+        pokemonData = pokemonData,
+        pokemonImageService = pokemonImageService,
+        format = format,
+        modifier = modifier,
+        notes = notes,
+        onClick = onClick,
+        notesComposer = notesComposer,
+        megaSwitch = if (megaPokemon != null) ({ MegaSwitch(megaSelected, onCheckedChange = { megaSelected = it }) })
+        else null
+    )
+}
 
-                    }
-                )
-            }
-        )
+@Composable
+fun MegaSwitch(
+    megaSelected: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Switch(
+        megaSelected,
+        onCheckedChange = onCheckedChange,
+        modifier = Modifier.scale(1.2f).padding(horizontal = 8.dp),
+        thumbContent = {
+            Icon(
+                painter = painterResource(Res.drawable.mega),
+                contentDescription = "Mega"
+            )
 
-    } else {
-        PokepastePokemonCard(
-            isOts = isOts,
-            pokemon = pokemon,
-            pokemonData = pokemonData,
-            pokemonImageService = pokemonImageService,
-            format = format,
-            modifier = modifier,
-            notes = notes,
-            onClick = onClick,
-            notesComposer = notesComposer
-        )
-    }
+        }
+    )
 }
 
 @Composable

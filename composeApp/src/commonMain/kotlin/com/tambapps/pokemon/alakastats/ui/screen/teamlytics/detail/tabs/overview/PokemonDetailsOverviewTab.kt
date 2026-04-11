@@ -9,13 +9,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonMoves
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatsRow
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonItemAndAbility
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.util.MegaUtils
 
 
 @Composable
@@ -34,26 +40,29 @@ fun PokemonDetailsOverviewTab(
 @Composable
 internal fun PokemonDetailsOverview(
     viewModel: PokemonDetailOverviewModel,
+    pokemon: Pokemon,
     modifier: Modifier = Modifier
 ) {
     Column(modifier) {
-        PokepastePokemonItemAndAbility(viewModel.pokemon, viewModel.pokemonImageService)
+        PokepastePokemonItemAndAbility(pokemon, viewModel.pokemonImageService)
         Spacer(Modifier.height(16.dp))
         if (!viewModel.notes.isNullOrBlank()) {
             Text(viewModel.notes, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(bottom = 16.dp))
         }
         if (!viewModel.team.pokePaste.isOts) {
+
             if (viewModel.pokemonData != null) {
-                Text("Stats (lvl ${viewModel.pokemon.level})", style = MaterialTheme.typography.headlineSmall)
-                PokemonStatsRow(viewModel.pokemon, viewModel.pokemonData, Modifier.fillMaxWidth())
+                Text("Stats (lvl ${pokemon.level})", style = MaterialTheme.typography.headlineSmall)
+                PokemonStatsRow(pokemon, viewModel.pokemonData, Modifier.fillMaxWidth(),
+                    )
                 Spacer(Modifier.height(16.dp))
             }
             Text("Investments", style = MaterialTheme.typography.headlineSmall)
-            PokemonStatsRow(viewModel.pokemon, pokemonData=null, Modifier.fillMaxWidth())
+            PokemonStatsRow(pokemon, pokemonData=null, Modifier.fillMaxWidth())
             Spacer(Modifier.height(16.dp))
         }
         Text("Moves", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(8.dp))
-        PokemonMoves(viewModel.pokemon, viewModel.pokemonImageService)
+        PokemonMoves(pokemon, viewModel.pokemonImageService)
     }
 }
