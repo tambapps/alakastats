@@ -112,7 +112,9 @@ data class PokemonUsages(
     val usageCount: Int,
     val winCount: Int,
     val teraCount: Int,
-    val teraAndWinCount: Int
+    val teraAndWinCount: Int,
+    val megaCount: Int,
+    val megaAndWinCount: Int
 ) {
 
     companion object {
@@ -124,13 +126,16 @@ data class PokemonUsages(
         ): PokemonUsages {
             val hasWon = replay.hasWon(player)
             val hasTerastallized = player.hasTerastallized(pokemonName)
+            val hasMegaEvolved = player.hasMegaEvolved(pokemonName)
 
             return PokemonUsages(
                 movesCount = player.movesUsage[pokemonName] ?: emptyMap(),
                 usageCount = 1,
-                winCount = if (replay.hasWon(player)) 1 else 0,
+                winCount = if (hasWon) 1 else 0,
                 teraCount = if (hasTerastallized) 1 else 0,
-                teraAndWinCount = if (hasWon && hasTerastallized) 1 else 0
+                teraAndWinCount = if (hasWon && hasTerastallized) 1 else 0,
+                megaCount = if (hasMegaEvolved) 1 else 0,
+                megaAndWinCount = if (hasWon && hasMegaEvolved) 1 else 0
             )
         }
     }
@@ -141,6 +146,8 @@ data class PokemonUsages(
         usageCount = this.usageCount + pokemonUsages.usageCount,
         winCount = this.winCount + pokemonUsages.winCount,
         teraCount = this.teraCount + pokemonUsages.teraCount,
-        teraAndWinCount = this.teraAndWinCount + pokemonUsages.teraAndWinCount
+        teraAndWinCount = this.teraAndWinCount + pokemonUsages.teraAndWinCount,
+        megaCount = this.megaCount + pokemonUsages.megaCount,
+        megaAndWinCount = this.megaAndWinCount + pokemonUsages.megaAndWinCount
     )
 }

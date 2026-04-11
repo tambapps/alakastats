@@ -71,7 +71,7 @@ internal fun DesktopRow(
             ) {
                 PokemonUsagesCard(
                     modifier = Modifier,
-                    format = viewModel.team.format,
+                    team = viewModel.team,
                     replays = viewModel.replays,
                     pokemonImageService = viewModel.pokemonImageService,
                     name = pokemonName,

@@ -18,6 +18,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -31,12 +32,14 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.NoReplay
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.util.MegaUtils
 import io.github.koalaplot.core.pie.PieChart
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import kotlin.collections.component1
@@ -86,7 +89,8 @@ internal val UsagesViewModel.sortedPokemonMovesUsageEntries get() =
 @Composable
 fun PokemonUsagesCard(
     pokemonImageService: PokemonImageService,
-    format: Format,
+    team: Teamlytics,
+    // need a separate field for replays because we might want filter some
     replays: List<ReplayAnalytics>,
     name: PokemonName,
     usages: PokemonUsages,
@@ -134,7 +138,7 @@ fun PokemonUsagesCard(
                     else -> "Won $winCount of them"
                 }, fontSize = 16.sp, modifier = Modifier.alpha(0.9f))
 
-                if (teraCount > 0 || format.allowedMechanics.contains(Mechanic.TERASTALLIZATION)) {
+                if (teraCount > 0 || team.format.allowedMechanics.contains(Mechanic.TERASTALLIZATION)) {
                     Text(when {
                         teraCount == 0 -> "Did not tera"
                         teraCount == 1 && teraAndWinCount == 0 -> "Tera-ed in 1 game and did not win it"
@@ -142,6 +146,21 @@ fun PokemonUsagesCard(
                         teraCount == teraAndWinCount -> "Tera-ed in $teraCount games and won all of them"
                         teraAndWinCount == 0 -> "Tera-ed in $teraCount games and won none of them"
                         else -> "Tera-ed in $teraCount games and won $teraAndWinCount of them"
+                    }, fontSize = 16.sp, modifier = Modifier.alpha(0.75f))
+                }
+
+                val canMegaEvolve = remember {
+                    team.pokePaste.pokemons.find { it.name.baseMatches(name) }
+                        ?.let { MegaUtils.getMegaPokemon(it.item) != null } == true
+                }
+                if (canMegaEvolve && (megaCount > 0 || team.format.allowedMechanics.contains(Mechanic.MEGA_EVOLUTION))) {
+                    Text(when {
+                        megaCount == 0 -> "Did not mega"
+                        megaCount == 1 && megaAndWinCount == 0 -> "Mega-ed in 1 game and did not win it"
+                        megaCount == 1 -> "Mega-ed in 1 game and won it"
+                        megaCount == megaAndWinCount -> "Mega-ed in $megaCount games and won all of them"
+                        megaAndWinCount == 0 -> "Mega-ed in $megaCount games and won none of them"
+                        else -> "Mega-ed in $megaCount games and won $megaAndWinCount of them"
                     }, fontSize = 16.sp, modifier = Modifier.alpha(0.75f))
                 }
             }
