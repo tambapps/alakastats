@@ -40,8 +40,8 @@ private fun SettingsBar(viewModel: PokemonSpeedScaleViewModel) {
             val opposingString = buildString {
                 if (viewModel.stage != 0) append(if (viewModel.stage > 0) "+${viewModel.stage}" else viewModel.stage).append(" ")
                 when {
-                    viewModel.maxEvs && viewModel.speedNature -> append("252+ ")
-                    viewModel.maxEvs -> append("252 ")
+                    viewModel.maxEvs && viewModel.speedNature -> append("${viewModel.maxEvsValue}+ ")
+                    viewModel.maxEvs -> append("${viewModel.maxEvsValue} ")
                     viewModel.speedNature -> append("+Spe Nature ")
                 }
                 if (viewModel.scarfBoost) append("Scarf")

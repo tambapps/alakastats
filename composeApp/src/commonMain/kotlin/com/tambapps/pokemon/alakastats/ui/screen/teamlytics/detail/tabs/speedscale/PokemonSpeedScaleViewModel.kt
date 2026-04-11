@@ -1,6 +1,5 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -50,6 +49,8 @@ class PokemonSpeedScaleViewModel(
     private val formatRepository: FormatDataRepository
 ) : PokemonDetailTabViewModel() {
     val pokemon: Pokemon = if (megaPokemon != null && megaSelected) originalPokemon.copy(name = megaPokemon) else originalPokemon
+    val usesLegacySystem = team.usesLegacySystem
+    val maxEvsValue = if (usesLegacySystem) 252 else 32
 
     override var isTabLoading by mutableStateOf(false)
     var maxEvs by mutableStateOf(true)
@@ -108,7 +109,7 @@ class PokemonSpeedScaleViewModel(
             evs = pokemon.evs,
             nature = pokemon.nature ?: Nature.QUIRKY,
             level = pokemonLevel,
-            legacySystem = team.usesLegacySystem
+            legacySystem = usesLegacySystem
         ).speed.let { if (ownScarfBoost) (it * 1.5f).toInt() else it }.toStage(ownStage)
         val interestPokemon = PokemonSpeed(
             pokemonName = pokemon.name,
@@ -122,10 +123,10 @@ class PokemonSpeedScaleViewModel(
             pokemons.forEach { (pokeName, baseStats) ->
                 val speed = PokeStats.compute(
                     baseStats,
-                    evs = PokeStats.default(if (maxEvs) 252 else 0),
+                    evs = PokeStats.default(if (maxEvs) maxEvsValue else 0),
                     nature = if (speedNature) Nature.JOLLY else Nature.QUIRKY,
                     level = pokemonLevel,
-                    legacySystem = team.usesLegacySystem
+                    legacySystem = usesLegacySystem
                 ).speed.let { if (scarfBoost) (it * 1.5f).toInt()  else it }.toStage(stage)
                 val statsNotFound = baseStats.speed == 0
                 add(PokemonSpeed(pokeName, speed, speedNature, 0, statsNotFound = statsNotFound))
@@ -185,7 +186,7 @@ class PokemonSpeedScaleViewModel(
         val baseStats = pokemonData?.baseStatsOf(name)
         return item.normalized.value.let {
             it == "choice-scarf"
-                    || it == "booster-energy" && baseStats != null && PokeStats.compute(this, baseStats, legacySystem = team.usesLegacySystem).isSpeedHighestStat() }
+                    || it == "booster-energy" && baseStats != null && PokeStats.compute(this, baseStats, legacySystem = usesLegacySystem).isSpeedHighestStat() }
     }
 
 }

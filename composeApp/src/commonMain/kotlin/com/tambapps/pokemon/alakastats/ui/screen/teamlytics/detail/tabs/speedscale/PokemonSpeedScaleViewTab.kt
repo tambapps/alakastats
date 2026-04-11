@@ -194,7 +194,8 @@ fun OpposingInvestmentsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
             modifier = Modifier.padding(horizontal = flowRowPadding),
             onClick = { viewModel.flipMaxEvs() },
             label = {
-                Text("252${separator}EVs", textAlign = TextAlign.Center)
+                val suffix = if (viewModel.usesLegacySystem) "EVs" else "SPs"
+                Text("${viewModel.maxEvsValue}${separator}EVs", textAlign = TextAlign.Center)
             },
             selected = viewModel.maxEvs
         )
