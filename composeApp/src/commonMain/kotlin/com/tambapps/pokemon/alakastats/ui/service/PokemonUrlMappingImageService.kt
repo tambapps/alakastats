@@ -120,6 +120,35 @@ abstract class AbstractPokemonImageService(
         }
     }
 
+    @Composable
+    override fun PokemonSprite(
+        name: PokemonName,
+        modifier: Modifier,
+        disableTooltip: Boolean,
+        facingDirection: FacingDirection
+    ) = PokemonImage(ImageType.SPRITE, name, modifier, facingDirection, disableTooltip)
+
+    @Composable
+    override fun PokemonArtwork(
+        name: PokemonName,
+        modifier: Modifier,
+        disableTooltip: Boolean,
+        facingDirection: FacingDirection
+    ) = PokemonImage(
+        ImageType.ARTWORK, name, modifier,
+        facingDirection,
+        disableTooltip = disableTooltip
+    )
+
+    @Composable
+    protected abstract fun PokemonImage(
+        type: ImageType,
+        name: PokemonName,
+        modifier: Modifier,
+        facingDirection: FacingDirection,
+        disableTooltip: Boolean
+    )
+
     // needs to be @Composable to listen to the map changes
     @Composable
     protected fun getPokemonImageData(name: PokemonName, type: ImageType) = when (type) {
@@ -252,25 +281,6 @@ class PokemonLocalUrlImageService(
     json: Json,
     private val baseUrl: String
 ): AbstractPokemonImageService(json) {
-    @Composable
-    override fun PokemonSprite(
-        name: PokemonName,
-        modifier: Modifier,
-        disableTooltip: Boolean,
-        facingDirection: FacingDirection
-    ) = WebPokemonImage(ImageType.SPRITE, name, modifier, facingDirection, disableTooltip)
-
-    @Composable
-    override fun PokemonArtwork(
-        name: PokemonName,
-        modifier: Modifier,
-        disableTooltip: Boolean,
-        facingDirection: FacingDirection
-    ) = WebPokemonImage(
-        ImageType.ARTWORK, name, modifier,
-        facingDirection,
-        disableTooltip = disableTooltip
-    )
 
     @Composable
     override fun ItemImage(
@@ -289,7 +299,7 @@ class PokemonLocalUrlImageService(
     }
 
     @Composable
-    private fun WebPokemonImage(
+    override fun PokemonImage(
         type: ImageType,
         name: PokemonName,
         modifier: Modifier,
@@ -311,29 +321,15 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
     private val itemsData = mutableStateMapOf<String, ItemData>()
 
     @Composable
-    override fun PokemonSprite(name: PokemonName, modifier: Modifier, disableTooltip: Boolean, facingDirection: FacingDirection) = PokemonImage(
-        name,
-        ImageType.SPRITE,
-        modifier,
-        disableTooltip = disableTooltip,
-        facingDirection = facingDirection)
-
-    @Composable
-    override fun PokemonArtwork(
+    override fun PokemonImage(
+        type: ImageType,
         name: PokemonName,
         modifier: Modifier,
-        disableTooltip: Boolean,
-        facingDirection: FacingDirection
-    ) = PokemonImage(
-        name,
-        ImageType.ARTWORK,
-        modifier, disableTooltip = disableTooltip,
-        facingDirection = facingDirection)
-
-    @Composable
-    private fun PokemonImage(pokemonName: PokemonName, imageType: ImageType, modifier: Modifier, disableTooltip: Boolean = false, facingDirection: FacingDirection) {
-        val imageData = getPokemonImageData(pokemonName, imageType)
-        val prettyName = pokemonName.pretty
+        facingDirection: FacingDirection,
+        disableTooltip: Boolean
+    ) {
+        val imageData = getPokemonImageData(name, type)
+        val prettyName = name.pretty
         TooltipIfEnabled(disableTooltip, prettyName, modifier) { mod ->
             val imageUrl = imageData?.url
             if (imageUrl != null) {
