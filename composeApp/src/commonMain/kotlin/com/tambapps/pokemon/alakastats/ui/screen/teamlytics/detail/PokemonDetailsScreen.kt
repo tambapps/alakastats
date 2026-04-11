@@ -50,6 +50,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.TabRowWithBackButton
 import com.tambapps.pokemon.alakastats.ui.composables.TabViewModel
 import com.tambapps.pokemon.alakastats.ui.composables.artworkModifier
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
+import com.tambapps.pokemon.alakastats.ui.composables.pokemonForm
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.PokemonDetailTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailOverviewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailsOverviewTab
@@ -136,8 +137,8 @@ private fun PokemonDetails(
                 }
         ) {
             Pager(viewModel, pagerState, state, Modifier.fillMaxSize())
-            val pokemonName = if (state.megaPokemon != null && viewModel.megaSelectedState.value) state.megaPokemon
-            else state.pokemon.name
+            val pokemonName = pokemonForm(state.pokemon, state.megaPokemon, viewModel.megaSelectedState.value)
+                .name
             PokemonArtwork(
                 viewModel = viewModel,
                 pokemonName = pokemonName,

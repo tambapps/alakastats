@@ -9,6 +9,7 @@ import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.ui.composables.pokemonForm
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.PokemonDetailTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.PokemonUsages
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -26,6 +27,6 @@ class PokemonDetailOverviewModel(
     override val isTabLoading = false
     var megaSelected by megaSelectedState
 
-    val pokemon @Composable get() = remember(megaPokemon, megaSelected) { if (megaPokemon != null && megaSelected) privatePokemon.copy(name = megaPokemon) else privatePokemon }
+    val pokemon @Composable get() = remember(megaPokemon, megaSelected) { pokemonForm(privatePokemon, megaPokemon, megaSelected) }
 
 }

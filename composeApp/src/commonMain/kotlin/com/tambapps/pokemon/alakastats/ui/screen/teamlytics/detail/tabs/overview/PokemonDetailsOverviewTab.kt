@@ -16,6 +16,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonMoves
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonStatsRow
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonItemAndAbility
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
+import com.tambapps.pokemon.alakastats.ui.composables.StaticPokemonStatsRow
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
 
@@ -58,7 +59,7 @@ internal fun PokemonDetailsOverview(
                 Spacer(Modifier.height(16.dp))
             }
             Text("Investments", style = MaterialTheme.typography.headlineSmall)
-            PokemonStatsRow(pokemon, pokemonData = null, viewModel.team.format, Modifier.fillMaxWidth())
+            StaticPokemonStatsRow(pokemon, pokemonData = null, viewModel.team.format, Modifier.fillMaxWidth())
             Spacer(Modifier.height(16.dp))
         }
         Text("Moves", style = MaterialTheme.typography.headlineSmall)

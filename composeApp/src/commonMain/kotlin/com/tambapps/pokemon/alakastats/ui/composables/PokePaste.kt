@@ -129,19 +129,22 @@ private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonI
         }
     }
 }
-
 @Composable
 fun PokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, format: Format, modifier: Modifier = Modifier) {
     AnimatedContent(
         targetState = pokemon.name,
         transitionSpec = { (fadeIn() + slideInVertically { it }) togetherWith (fadeOut() + slideOutVertically { -it }) },
         modifier = modifier
-    ) { name ->
-        Row {
-            for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
-                val statModifier = if (LocalIsCompact.current) Modifier.weight(1f) else Modifier.padding(horizontal = 4.dp)
-                PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, pokemonData?.baseStatsOf(name), format, statModifier)
-            }
+    ) {
+        StaticPokemonStatsRow(pokemon, pokemonData, format)
+    }
+}
+@Composable
+fun StaticPokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, format: Format, modifier: Modifier = Modifier) {
+    Row(modifier=modifier) {
+        for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
+            val statModifier = if (LocalIsCompact.current) Modifier.weight(1f) else Modifier.padding(horizontal = 4.dp)
+            PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, pokemonData?.baseStatsOf(pokemon.name), format, statModifier)
         }
     }
 }
@@ -244,6 +247,13 @@ fun PokepastePokemon(
     }
 }
 
+fun pokemonForm(
+    pokemon: Pokemon,
+    megaPokemon: PokemonName?,
+    megaSelected: Boolean
+    // using base because some pokepaste explicitly reference mega-pokemon but we also want to be able to see the base pokemon
+) = if (megaPokemon != null) pokemon.copy(name = if (megaSelected) megaPokemon else pokemon.name.baseNormalized) else pokemon
+
 @Composable
 fun PokepastePokemon(
     isOts: Boolean,
@@ -260,7 +270,7 @@ fun PokepastePokemon(
     var megaSelected by remember { mutableStateOf(true) }
     PokepastePokemonCard(
         isOts = isOts,
-        pokemon = remember(megaPokemon, megaSelected) { if (megaPokemon != null && megaSelected) pokemon.copy(name = megaPokemon) else pokemon },
+        pokemon = remember(megaPokemon, megaSelected) { pokemonForm(pokemon, megaPokemon, megaSelected) },
         pokemonData = pokemonData,
         pokemonImageService = pokemonImageService,
         format = format,

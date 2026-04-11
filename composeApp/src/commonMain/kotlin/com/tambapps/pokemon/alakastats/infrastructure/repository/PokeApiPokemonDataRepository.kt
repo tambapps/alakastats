@@ -31,7 +31,8 @@ class PokeApiPokemonDataRepository(
             .toList()
         // map pokemon -> pokemon forms
         val pokemonNames = pokemons.associateWith { pokemon ->
-            listOfNotNull(pokemon.name.normalized, MegaUtils.getMegaPokemon(pokemon.item))
+            if (pokemon.name.isMega) listOfNotNull(pokemon.name.baseNormalized, pokemon.name.normalized)
+            else listOfNotNull(pokemon.name.normalized, MegaUtils.getMegaPokemon(pokemon.item))
         }
         return Either.catch {
             pokeapiClient.getPokemons(pokemonNames.values.flatMap { it }.map { it.pokeApiNormalized }, moves)
