@@ -29,6 +29,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -122,10 +129,16 @@ private fun DesktopPokepaste(pokePaste: PokePaste, pokemonImageService: PokemonI
 
 @Composable
 fun PokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, modifier: Modifier = Modifier) {
-    Row(modifier) {
-        for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
-            val modifier = if (LocalIsCompact.current) Modifier.weight(1f) else Modifier.padding(horizontal = 4.dp)
-            PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, pokemonData?.baseStatsOf(pokemon.name), modifier)
+    AnimatedContent(
+        targetState = pokemon.name,
+        transitionSpec = { (fadeIn() + slideInVertically { it }) togetherWith (fadeOut() + slideOutVertically { -it }) },
+        modifier = modifier
+    ) { name ->
+        Row {
+            for (stat in listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)) {
+                val statModifier = if (LocalIsCompact.current) Modifier.weight(1f) else Modifier.padding(horizontal = 4.dp)
+                PokemonStatColumn(pokemon, stat, pokemon.ivs, pokemon.evs, pokemonData?.baseStatsOf(name), statModifier)
+            }
         }
     }
 }
@@ -249,7 +262,6 @@ fun PokepastePokemon(
             onClick = onClick,
             notesComposer = notesComposer,
             megaSwitch = {
-
                 Switch(
                     megaSelected,
                     onCheckedChange = { megaSelected = it },
@@ -297,14 +309,15 @@ private fun PokepastePokemonCard(
         modifier = modifier,
         onClick=onClick,
         pokemonArtwork = { contentWidth, contentHeight ->
-            pokemonImageService.PokemonArtwork(
-                name = pokemon.name,
+            Crossfade(
+                targetState = pokemon.name,
                 modifier = Modifier.align(Alignment.BottomEnd)
                     .height(if (LocalIsCompact.current) 175.dp else 200.dp)
                     // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
                     .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
-                    .offset(y = 16.dp)
-            )
+            ) { name ->
+                pokemonImageService.PokemonArtwork(name = name, modifier = Modifier.offset(y = 16.dp))
+            }
         }
     ) {
         val disableTooltip = onClick != null
@@ -341,7 +354,13 @@ fun PokepastePokemonHeader(
         Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(pokemon.name.pretty, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.weight(1f))
+        AnimatedContent(
+            targetState = pokemon.name.pretty,
+            transitionSpec = { (fadeIn() + slideInVertically { it }) togetherWith (fadeOut() + slideOutVertically { -it }) },
+            modifier = Modifier.weight(1f)
+        ) { name ->
+            Text(name, style = MaterialTheme.typography.headlineLarge)
+        }
         if (format.allowedMechanics.contains(Mechanic.MEGA_EVOLUTION)) {
             megaSwitch?.invoke()
         }
