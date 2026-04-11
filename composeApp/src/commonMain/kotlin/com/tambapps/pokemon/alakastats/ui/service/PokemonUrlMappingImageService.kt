@@ -317,6 +317,47 @@ class PokemonLocalUrlImageService(
     }
 }
 
+class GhPagesImageService(
+    json: Json,
+    val baseUrl: String = "https://github.com/tambapps/alakastats/blob/gh-pages/images"
+): AbstractPokemonImageService(json) {
+
+    @Composable
+    override fun ItemImage(
+        item: ItemName,
+        modifier: Modifier,
+        disableTooltip: Boolean
+    ) {
+        val prettyItemName = item.pretty
+        val formattedItemName = item.normalized.value
+        TooltipIfEnabled(disableTooltip, prettyItemName, modifier) { mod ->
+            MyImage(url = "$baseUrl/items/$formattedItemName.png?raw=true",
+                contentDescription = prettyItemName,
+                modifier = modifier,
+            )
+        }
+    }
+
+    @Composable
+    override fun PokemonImage(
+        type: ImageType,
+        name: PokemonName,
+        modifier: Modifier,
+        facingDirection: FacingDirection,
+        disableTooltip: Boolean
+    ) {
+        val imageData = getPokemonImageData(name, type)
+        val prettyName = name.pretty
+        TooltipIfEnabled(disableTooltip, prettyName, modifier) { mod ->
+            MyImage(url = "$baseUrl/pokemons/${type.name.lowercase()}/${name.normalized.value}.png?raw=true",
+                contentDescription = prettyName,
+                modifier = mod.flipXIfNecessary(facingDirection, imageData?.direction),
+            )
+        }
+    }
+}
+
+// was previously used. loaded urls from pokemon-sprites.json file. Now this file is only relevant for sprite data such as lookup direction
 class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(json) {
     private val itemsData = mutableStateMapOf<String, ItemData>()
 
