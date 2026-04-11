@@ -36,11 +36,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.Mechanic
 import com.tambapps.pokemon.Nature
@@ -285,6 +287,13 @@ fun MegaSwitch(
 }
 
 @Composable
+fun BoxScope.artworkModifier(pokemonName: PokemonName, contentWidth: Dp) = Modifier.align(Alignment.BottomEnd)
+    .height(if (LocalIsCompact.current) 175.dp else 200.dp)
+    // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
+    .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
+    .offset(y = if (pokemonName.isMega) 32.dp else 16.dp)
+
+@Composable
 private fun PokepastePokemonCard(
     isOts: Boolean,
     pokemon: Pokemon,
@@ -303,12 +312,9 @@ private fun PokepastePokemonCard(
         pokemonArtwork = { contentWidth, contentHeight ->
             Crossfade(
                 targetState = pokemon.name,
-                modifier = Modifier.align(Alignment.BottomEnd)
-                    .height(if (LocalIsCompact.current) 175.dp else 200.dp)
-                    // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
-                    .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
+                modifier = artworkModifier(pokemon.name, contentWidth),
             ) { name ->
-                pokemonImageService.PokemonArtwork(name = name, modifier = Modifier.offset(y = 16.dp))
+                pokemonImageService.PokemonArtwork(name = name)
             }
         }
     ) {

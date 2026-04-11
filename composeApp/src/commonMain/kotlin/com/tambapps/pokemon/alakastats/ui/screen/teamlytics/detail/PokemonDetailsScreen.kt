@@ -47,6 +47,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.EmitScrollEffect
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.TabRowWithBackButton
 import com.tambapps.pokemon.alakastats.ui.composables.TabViewModel
+import com.tambapps.pokemon.alakastats.ui.composables.artworkModifier
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.PokemonDetailTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailOverviewModel
