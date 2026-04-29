@@ -334,11 +334,10 @@ private fun PokepastePokemonCard(
             }
         }
     ) {
-        val disableTooltip = onClick != null
         Column(
             verticalArrangement = Arrangement.Center,
         ) {
-            PokepastePokemonHeader(pokemon, pokemonImageService, format=format, megaSwitch=megaSwitch, disableTooltip=disableTooltip)
+            PokepastePokemonHeader(pokemon, pokemonImageService, format=format, megaSwitch=megaSwitch)
             Spacer(Modifier.height(16.dp))
             PokepastePokemonItemAndAbility(pokemon, pokemonImageService)
             Spacer(Modifier.height(16.dp))
@@ -360,7 +359,6 @@ private fun PokepastePokemonCard(
 fun PokepastePokemonHeader(
     pokemon: Pokemon,
     pokemonImageService: PokemonImageService,
-    disableTooltip: Boolean = false,
     megaSwitch: @Composable (() -> Unit)? = null,
     format: Format
 ) {
@@ -380,27 +378,23 @@ fun PokepastePokemonHeader(
         }
         if (format.allowedMechanics.contains(Mechanic.TERASTALLIZATION)) {
             pokemon.teraType?.let { teraType ->
-                Tooltip(teraType.name) {
-                    pokemonImageService.TeraTypeImage(
-                        teraType,
-                        modifier = Modifier.size(if (LocalIsCompact.current) 50.dp else 60.dp)
-                    )
-                }
+                pokemonImageService.TeraTypeImage(
+                    teraType,
+                    modifier = Modifier.size(if (LocalIsCompact.current) 50.dp else 60.dp)
+                )
             }
         }
     }
 }
 
 @Composable
-fun PokepastePokemonItemAndAbility(pokemon: Pokemon, pokemonImageService: PokemonImageService, disableTooltip: Boolean = false) {
+fun PokepastePokemonItemAndAbility(pokemon: Pokemon, pokemonImageService: PokemonImageService) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         pokemon.item?.let { item ->
-            TooltipIfEnabled(disableTooltip, item.pretty) {
-                pokemonImageService.ItemImage(
-                    item,
-                    modifier = Modifier.size(if (LocalIsCompact.current) 32.dp else 42.dp)
-                )
-            }
+            pokemonImageService.ItemImage(
+                item,
+                modifier = Modifier.size(if (LocalIsCompact.current) 32.dp else 42.dp)
+            )
         }
         Spacer(Modifier.width(4.dp))
         Text((pokemon.item?.pretty ?: "<no item>") + " | " + (pokemon.ability?.pretty ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)
