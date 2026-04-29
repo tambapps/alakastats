@@ -3,7 +3,6 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,12 +28,11 @@ import androidx.compose.ui.unit.sp
 import com.tambapps.pokemon.Mechanic
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.PokemonNormalizer
-import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
+import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.NoReplay
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
@@ -202,7 +200,9 @@ private fun PokemonUsagesDonut(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                pokemonImageService.PokemonSprite(name)
+                Tooltip(name.pretty) {
+                    pokemonImageService.PokemonSprite(name)
+                }
             }
         }
     )

@@ -3,7 +3,6 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -58,7 +57,6 @@ import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonWheelPicker
-import com.tambapps.pokemon.alakastats.ui.composables.ScrollableRow
 import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
@@ -321,7 +319,7 @@ private fun PokemonFilterButton(
                                 Modifier.size(iconSize)
                                     .scale(1.5f)
                                     .offset(y = offset)
-                                , disableTooltip = true)
+                            )
                         }
                     }
                 }
@@ -418,7 +416,7 @@ private fun CommonFiltersDialog(
                                                 .scale(1.5f)
                                                 .padding(all = 4.dp)
                                                 .offset(y = offset)
-                                            , disableTooltip = true)
+                                        )
                                     }
                                 }
                             }

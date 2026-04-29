@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,6 +41,7 @@ import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
+import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -174,12 +173,13 @@ private fun PokemonSpeedSprite(viewModel: PokemonSpeedScaleViewModel, pSpeed: Po
         if (isCompact) Modifier.height(100.dp).padding(8.dp)
         else Modifier.height(130.dp).padding(16.dp)
     )
-    viewModel.pokemonImageService.PokemonSprite(
-        pSpeed.pokemonName,
-        modifier = modifier,
-        facingDirection = if (pSpeed.isPokemonOfInterest) FacingDirection.LEFT else FacingDirection.RIGHT,
-        disableTooltip = false
-    )
+    Tooltip(pSpeed.pokemonName.pretty) {
+        viewModel.pokemonImageService.PokemonSprite(
+            pSpeed.pokemonName,
+            modifier = modifier,
+            facingDirection = if (pSpeed.isPokemonOfInterest) FacingDirection.LEFT else FacingDirection.RIGHT
+        )
+    }
 }
 
 val flowRowPadding @Composable get() = if (LocalIsCompact.current) 8.dp else 16.dp

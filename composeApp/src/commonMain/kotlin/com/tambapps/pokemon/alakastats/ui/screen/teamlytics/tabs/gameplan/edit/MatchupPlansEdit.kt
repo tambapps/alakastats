@@ -56,6 +56,7 @@ import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
+import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ReplayCompact
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -419,14 +420,16 @@ private fun GamePlanComposition(
         val isCompact = LocalIsCompact.current
         Row(Modifier.fillMaxWidth()) {
             composition.forEach { pokemonName ->
-                viewModel.pokemonImageService.PokemonSprite(
-                    pokemonName,
-                    modifier = Modifier.then(
-                        if (isCompact) Modifier.weight(1f) else Modifier.size(
-                            64.dp
+                Tooltip(pokemonName.pretty) {
+                    viewModel.pokemonImageService.PokemonSprite(
+                        pokemonName,
+                        modifier = Modifier.then(
+                            if (isCompact) Modifier.weight(1f) else Modifier.size(
+                                64.dp
+                            )
                         )
                     )
-                )
+                }
             }
         }
     }

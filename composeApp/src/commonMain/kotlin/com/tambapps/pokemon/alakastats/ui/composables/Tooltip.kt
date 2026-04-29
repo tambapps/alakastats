@@ -3,7 +3,6 @@ package com.tambapps.pokemon.alakastats.ui.composables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -26,13 +25,12 @@ import kotlin.time.Duration.Companion.seconds
 
 // Tooltip only works for Mobile
 @Composable
-fun TooltipIfEnabled(disabled: Boolean, tooltip: String, modifier: Modifier, composer: @Composable (Modifier) -> Unit) {
+fun TooltipIfEnabled(disabled: Boolean, tooltip: String, composer: @Composable () -> Unit) {
     if (disabled) {
-        composer.invoke(modifier)
+        composer.invoke()
     } else {
-        // TODO this is a bad idea. remove it
         Tooltip(tooltip) {
-            composer.invoke(modifier)
+            composer.invoke()
         }
     }
 }

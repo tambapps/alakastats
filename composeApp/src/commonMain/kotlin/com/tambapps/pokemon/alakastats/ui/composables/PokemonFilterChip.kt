@@ -32,9 +32,8 @@ fun PokemonFilterChip(
         leadingIcon = {
             pokemonImageService.PokemonSprite(
                 pokemonName,
-                disableTooltip = true,
-                facingDirection = FacingDirection.RIGHT,
-                modifier = Modifier.size(height).padding(bottom = 8.dp)
+                modifier = Modifier.size(height).padding(bottom = 8.dp),
+                facingDirection = FacingDirection.RIGHT
             )
         },
         label = { Text(

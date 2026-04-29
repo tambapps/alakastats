@@ -86,7 +86,7 @@ fun PokemonNameTextField(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            pokemonImageService.PokemonSprite(suggestion, Modifier.size(40.dp), disableTooltip = true)
+                            pokemonImageService.PokemonSprite(suggestion, Modifier.size(40.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(suggestion.pretty)
                         }

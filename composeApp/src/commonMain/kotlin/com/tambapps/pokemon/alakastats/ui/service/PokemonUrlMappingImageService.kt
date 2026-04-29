@@ -55,8 +55,6 @@ import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.TeraType
-import com.tambapps.pokemon.alakastats.ui.composables.TooltipIfEnabled
-import com.tambapps.pokemon.alakastats.util.titlecase
 import com.tambapps.pokemon.util.MegaUtils.isMegaStone
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -77,7 +75,11 @@ interface PokemonImageService {
     fun listAvailableNames(): List<PokemonName>
 
     @Composable
-    fun PokemonSprite(name: PokemonName, modifier: Modifier = Modifier, disableTooltip: Boolean = false, facingDirection: FacingDirection = FacingDirection.LEFT)
+    fun PokemonSprite(
+        name: PokemonName,
+        modifier: Modifier = Modifier,
+        facingDirection: FacingDirection = FacingDirection.LEFT
+    )
 
     @Composable
     fun PokemonArtwork(
@@ -87,17 +89,17 @@ interface PokemonImageService {
     )
 
     @Composable
-    fun TeraTypeImage(type: TeraType, disableTooltip: Boolean = false, modifier: Modifier = Modifier)
+    fun TeraTypeImage(type: TeraType, modifier: Modifier = Modifier)
 
     @Composable
-    fun MoveTypeImage(type: PokeType, disableTooltip: Boolean = false, modifier: Modifier = Modifier)
+    fun MoveTypeImage(type: PokeType, modifier: Modifier = Modifier)
 
     @Composable
-    fun MoveSpecImages(move: MoveName, disableTooltip: Boolean = false, iconModifier: Modifier = Modifier)
+    fun MoveSpecImages(move: MoveName, iconModifier: Modifier = Modifier)
 
 
     @Composable
-    fun ItemImage(item: ItemName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
+    fun ItemImage(item: ItemName, modifier: Modifier = Modifier)
 }
 
 abstract class AbstractPokemonImageService(
@@ -123,31 +125,28 @@ abstract class AbstractPokemonImageService(
     }
 
     @Composable
-    override fun ItemImage(item: ItemName, modifier: Modifier, disableTooltip: Boolean) {
+    override fun ItemImage(item: ItemName, modifier: Modifier) {
         if (!item.isMegaStone) {
-            NonMegaStoneItemName(item, modifier, disableTooltip)
+            NonMegaStoneItemName(item, modifier)
         } else {
-            TooltipIfEnabled(disableTooltip, item.pretty, modifier) { mod ->
-                Image(
-                    painter = painterResource(Res.drawable.mega_stone),
-                    contentDescription = item.pretty,
-                    modifier = mod,
-                    contentScale = ContentScale.Fit
-                )
-            }
+            Image(
+                painter = painterResource(Res.drawable.mega_stone),
+                contentDescription = item.pretty,
+                modifier = modifier,
+                contentScale = ContentScale.Fit
+            )
         }
     }
 
     @Composable
-    abstract fun NonMegaStoneItemName(item: ItemName, modifier: Modifier = Modifier, disableTooltip: Boolean = false)
+    abstract fun NonMegaStoneItemName(item: ItemName, modifier: Modifier = Modifier)
 
     @Composable
     override fun PokemonSprite(
         name: PokemonName,
         modifier: Modifier,
-        disableTooltip: Boolean,
         facingDirection: FacingDirection
-    ) = PokemonImage(ImageType.SPRITE, name, modifier, facingDirection, disableTooltip)
+    ) = PokemonImage(ImageType.SPRITE, name, modifier, facingDirection)
 
     @Composable
     override fun PokemonArtwork(
@@ -156,8 +155,7 @@ abstract class AbstractPokemonImageService(
         facingDirection: FacingDirection
     ) = PokemonImage(
         ImageType.ARTWORK, name, modifier,
-        facingDirection,
-        disableTooltip = true
+        facingDirection
     )
 
     @Composable
@@ -165,8 +163,7 @@ abstract class AbstractPokemonImageService(
         type: ImageType,
         name: PokemonName,
         modifier: Modifier,
-        facingDirection: FacingDirection,
-        disableTooltip: Boolean
+        facingDirection: FacingDirection
     )
 
     // needs to be @Composable to listen to the map changes
@@ -179,7 +176,7 @@ abstract class AbstractPokemonImageService(
     override fun listAvailableNames() = availableNames
 
     @Composable
-    override fun TeraTypeImage(type: TeraType, disableTooltip: Boolean, modifier: Modifier) {
+    override fun TeraTypeImage(type: TeraType, modifier: Modifier) {
         val resource = when(type) {
             TeraType.STEEL -> Res.drawable.tera_type_steel
             TeraType.FIGHTING -> Res.drawable.tera_type_fighting
@@ -202,19 +199,16 @@ abstract class AbstractPokemonImageService(
             TeraType.BUG -> Res.drawable.tera_type_bug
             TeraType.STELLAR -> Res.drawable.tera_type_stellar
         }
-        TooltipIfEnabled(disableTooltip,
-            "Tera " + type.name.titlecase(), modifier) { mod ->
-            Image(
-                painter = painterResource(resource),
-                contentDescription = "Tera $type",
-                modifier = mod,
-                contentScale = ContentScale.Fit
-            )
-        }
+        Image(
+            painter = painterResource(resource),
+            contentDescription = "Tera $type",
+            modifier = modifier,
+            contentScale = ContentScale.Fit
+        )
     }
 
     @Composable
-    override fun MoveTypeImage(type: PokeType, disableTooltip: Boolean, modifier: Modifier) {
+    override fun MoveTypeImage(type: PokeType, modifier: Modifier) {
         val resource = when(type) {
             PokeType.STEEL -> Res.drawable.move_steel
             PokeType.FIGHTING -> Res.drawable.move_fighting
@@ -236,18 +230,16 @@ abstract class AbstractPokemonImageService(
             PokeType.PSYCHIC -> Res.drawable.move_psychic
             PokeType.BUG -> Res.drawable.move_bug
         }
-        TooltipIfEnabled(disableTooltip, type.name.titlecase(), modifier) { mod ->
-            Image(
-                painter = painterResource(resource),
-                contentDescription = "$type",
-                modifier = mod,
-                contentScale = ContentScale.Fit
-            )
-        }
+        Image(
+            painter = painterResource(resource),
+            contentDescription = "$type",
+            modifier = modifier,
+            contentScale = ContentScale.Fit
+        )
     }
 
     @Composable
-    override fun MoveSpecImages(move: MoveName, disableTooltip: Boolean, iconModifier: Modifier) {
+    override fun MoveSpecImages(move: MoveName, iconModifier: Modifier) {
         // lazy loading
         if (movesData.isEmpty()) {
             loadMoves()
@@ -259,7 +251,7 @@ abstract class AbstractPokemonImageService(
             DefaultIcon(modifier = iconModifier)
             return
         }
-        MoveTypeImage(data.type, modifier = iconModifier, disableTooltip = disableTooltip)
+        MoveTypeImage(data.type, modifier = iconModifier)
         /*
           val categoryRes = when(category.lowercase()) {
             "physical" -> Res.drawable.move_physical
@@ -306,16 +298,13 @@ class PokemonLocalUrlImageService(
     override fun NonMegaStoneItemName(
         item: ItemName,
         modifier: Modifier,
-        disableTooltip: Boolean
     ) {
         val prettyItemName = item.pretty
         val formattedItemName = item.normalized.value
-        TooltipIfEnabled(disableTooltip, prettyItemName, modifier) { mod ->
-            MyImage(url = "$baseUrl/images/items/$formattedItemName.png",
-                contentDescription = prettyItemName,
-                modifier = modifier,
-            )
-        }
+        MyImage(url = "$baseUrl/images/items/$formattedItemName.png",
+            contentDescription = prettyItemName,
+            modifier = modifier,
+        )
     }
 
     @Composable
@@ -323,17 +312,14 @@ class PokemonLocalUrlImageService(
         type: ImageType,
         name: PokemonName,
         modifier: Modifier,
-        facingDirection: FacingDirection,
-        disableTooltip: Boolean
+        facingDirection: FacingDirection
     ) {
         val imageFacingDirection = getPokemonImageData(name, type)?.direction
         val displayedName = name.pretty
-        TooltipIfEnabled(disableTooltip, displayedName, modifier) { mod ->
-            MyImage(url = "$baseUrl/images/pokemons/${type.name.lowercase()}/${name.normalized.value}.png",
-                contentDescription = displayedName,
-                modifier = mod.flipXIfNecessary(facingDirection, imageFacingDirection),
-            )
-        }
+        MyImage(url = "$baseUrl/images/pokemons/${type.name.lowercase()}/${name.normalized.value}.png",
+            contentDescription = displayedName,
+            modifier = modifier.flipXIfNecessary(facingDirection, imageFacingDirection),
+        )
     }
 }
 
@@ -346,16 +332,13 @@ class GhPagesImageService(
     override fun NonMegaStoneItemName(
         item: ItemName,
         modifier: Modifier,
-        disableTooltip: Boolean
     ) {
         val prettyItemName = item.pretty
         val formattedItemName = item.normalized.value
-        TooltipIfEnabled(disableTooltip, prettyItemName, modifier) { mod ->
-            MyImage(url = "$baseUrl/items/$formattedItemName.png?raw=true",
-                contentDescription = prettyItemName,
-                modifier = modifier,
-            )
-        }
+        MyImage(url = "$baseUrl/items/$formattedItemName.png?raw=true",
+            contentDescription = prettyItemName,
+            modifier = modifier,
+        )
     }
 
     @Composable
@@ -363,17 +346,15 @@ class GhPagesImageService(
         type: ImageType,
         name: PokemonName,
         modifier: Modifier,
-        facingDirection: FacingDirection,
-        disableTooltip: Boolean
+        facingDirection: FacingDirection
     ) {
         val imageData = getPokemonImageData(name, type)
         val prettyName = name.pretty
-        TooltipIfEnabled(disableTooltip, prettyName, modifier) { mod ->
-            MyImage(url = "$baseUrl/pokemons/${type.name.lowercase()}/${name.normalized.value}.png?raw=true",
-                contentDescription = prettyName,
-                modifier = mod.flipXIfNecessary(facingDirection, imageData?.direction),
-            )
-        }
+        MyImage(url = "$baseUrl/pokemons/${type.name.lowercase()}/${name.normalized.value}.png?raw=true",
+            contentDescription = prettyName,
+            modifier = modifier.flipXIfNecessary(facingDirection, imageData?.direction),
+        )
+
     }
 }
 
@@ -386,48 +367,43 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
         type: ImageType,
         name: PokemonName,
         modifier: Modifier,
-        facingDirection: FacingDirection,
-        disableTooltip: Boolean
+        facingDirection: FacingDirection
     ) {
         val imageData = getPokemonImageData(name, type)
         val prettyName = name.pretty
-        TooltipIfEnabled(disableTooltip, prettyName, modifier) { mod ->
-            val imageUrl = imageData?.url
-            if (imageUrl != null) {
-                MyImage(url = imageUrl,
-                    contentDescription = prettyName,
-                    modifier = mod.flipXIfNecessary(facingDirection, imageData.direction),
-                )
-            } else {
-                DefaultIcon(
-                    contentDescription = prettyName,
-                    modifier = mod
-                )
-            }
+        val imageUrl = imageData?.url
+        if (imageUrl != null) {
+            MyImage(url = imageUrl,
+                contentDescription = prettyName,
+                modifier = modifier.flipXIfNecessary(facingDirection, imageData.direction),
+            )
+        } else {
+            DefaultIcon(
+                contentDescription = prettyName,
+                modifier = modifier
+            )
         }
     }
 
     @Composable
-    override fun NonMegaStoneItemName(item: ItemName, modifier: Modifier, disableTooltip: Boolean) {
-        TooltipIfEnabled(disableTooltip, item.pretty, modifier) { mod ->
-            // lazy loading
-            if (itemsData.isEmpty()) {
-                loadItems()
-                DefaultIcon()
-                return@TooltipIfEnabled
-            }
-            val data = itemsData[item.normalized.value]
-            if (data == null) {
-                DefaultIcon()
-                return@TooltipIfEnabled
-            }
-
-            MyImage(
-                url = data.spriteUrl,
-                contentDescription = data.name,
-                modifier = mod,
-                )
+    override fun NonMegaStoneItemName(item: ItemName, modifier: Modifier) {
+        // lazy loading
+        if (itemsData.isEmpty()) {
+            loadItems()
+            DefaultIcon()
+            return
         }
+        val data = itemsData[item.normalized.value]
+        if (data == null) {
+            DefaultIcon()
+            return
+        }
+
+        MyImage(
+            url = data.spriteUrl,
+            contentDescription = data.name,
+            modifier = modifier,
+        )
     }
 
     private fun loadItems() {

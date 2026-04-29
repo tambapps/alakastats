@@ -149,14 +149,14 @@ fun StaticPokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, format: F
     }
 }
 @Composable
-fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageService, disableTooltip: Boolean = false, modifier: Modifier = Modifier) {
+fun PokemonMoves(pokemon: Pokemon, pokemonImageService: PokemonImageService, modifier: Modifier = Modifier) {
     Column(modifier) {
         pokemon.moves.forEachIndexed { index, move ->
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val iconModifier = Modifier.size(32.dp)
-                pokemonImageService.MoveSpecImages(move, disableTooltip = disableTooltip, iconModifier = iconModifier)
+                pokemonImageService.MoveSpecImages(move, iconModifier = iconModifier)
                 Spacer(Modifier.width(8.dp))
                 val prettyMove = move.pretty
                 Text(prettyMove, textAlign = TextAlign.Start, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
@@ -340,7 +340,7 @@ private fun PokepastePokemonCard(
         ) {
             PokepastePokemonHeader(pokemon, pokemonImageService, format=format, megaSwitch=megaSwitch, disableTooltip=disableTooltip)
             Spacer(Modifier.height(16.dp))
-            PokepastePokemonItemAndAbility(pokemon, pokemonImageService, disableTooltip=disableTooltip)
+            PokepastePokemonItemAndAbility(pokemon, pokemonImageService)
             Spacer(Modifier.height(16.dp))
 
             if (notes != null) {
@@ -350,7 +350,7 @@ private fun PokepastePokemonCard(
                 PokemonStatsRow(pokemon, pokemonData, format, Modifier.fillMaxWidth())
                 Spacer(Modifier.height(16.dp))
             }
-            PokemonMoves(pokemon, pokemonImageService, disableTooltip = disableTooltip)
+            PokemonMoves(pokemon, pokemonImageService)
         }
     }
 }
@@ -379,8 +379,13 @@ fun PokepastePokemonHeader(
             megaSwitch?.invoke()
         }
         if (format.allowedMechanics.contains(Mechanic.TERASTALLIZATION)) {
-            pokemon.teraType?.let {
-                pokemonImageService.TeraTypeImage(it, modifier = Modifier.size(if (LocalIsCompact.current) 50.dp else 60.dp), disableTooltip = disableTooltip)
+            pokemon.teraType?.let { teraType ->
+                Tooltip(teraType.name) {
+                    pokemonImageService.TeraTypeImage(
+                        teraType,
+                        modifier = Modifier.size(if (LocalIsCompact.current) 50.dp else 60.dp)
+                    )
+                }
             }
         }
     }
@@ -389,8 +394,13 @@ fun PokepastePokemonHeader(
 @Composable
 fun PokepastePokemonItemAndAbility(pokemon: Pokemon, pokemonImageService: PokemonImageService, disableTooltip: Boolean = false) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        pokemon.item?.let {
-            pokemonImageService.ItemImage(it, modifier = Modifier.size(if (LocalIsCompact.current) 32.dp else 42.dp), disableTooltip = disableTooltip)
+        pokemon.item?.let { item ->
+            TooltipIfEnabled(disableTooltip, item.pretty) {
+                pokemonImageService.ItemImage(
+                    item,
+                    modifier = Modifier.size(if (LocalIsCompact.current) 32.dp else 42.dp)
+                )
+            }
         }
         Spacer(Modifier.width(4.dp))
         Text((pokemon.item?.pretty ?: "<no item>") + " | " + (pokemon.ability?.pretty ?: "<no ability>"), style = MaterialTheme.typography.bodyLarge)

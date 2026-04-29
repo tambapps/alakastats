@@ -1,13 +1,10 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Player
@@ -40,9 +37,6 @@ fun PokemonTeamPreview(
             imageService.PokemonSprite(
                 name = pokemon,
                 modifier = if (fillWidth) Modifier.weight(1f) else Modifier,
-                facingDirection = facingDirection,
-                // disabling tooltip to allow handling card click listener
-                disableTooltip = true
             )
         }
     }

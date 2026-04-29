@@ -63,6 +63,7 @@ import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
+import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
@@ -72,6 +73,7 @@ import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
+import com.tambapps.pokemon.alakastats.util.titlecase
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
@@ -407,13 +409,15 @@ internal fun SelectedPokemon(
             )
         }
 
-        teraType?.let {
-            pokemonImageService.TeraTypeImage(
-                it, modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 0.dp, y = -offset)
-                    .size(50.dp)
-            )
+        teraType?.let { teraType ->
+            Tooltip(teraType.name.titlecase(), modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = 0.dp, y = -offset)
+            ) {
+                pokemonImageService.TeraTypeImage(
+                    teraType, modifier = Modifier.size(50.dp)
+                )
+            }
         }
     }
 }

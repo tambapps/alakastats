@@ -55,7 +55,10 @@ fun PokemonWheelPicker(
                     },
             ) {
                 val pokemonName = pokemons[index]
-                pokemonImageService.PokemonSprite(pokemonName, Modifier.size(if (LocalIsCompact.current) 64.dp else 128.dp), disableTooltip = true)
+                pokemonImageService.PokemonSprite(
+                    pokemonName,
+                    Modifier.size(if (LocalIsCompact.current) 64.dp else 128.dp)
+                )
                 Text(
                     text = pokemonName.pretty,
                     style = MaterialTheme.typography.headlineMedium,
