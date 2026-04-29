@@ -109,6 +109,7 @@ fun PokemonStatCard(
         pokemonArtwork = { contentWidth, contentHeight ->
             var spriteWidth by remember { mutableStateOf(0.dp) }
             pokemonImageService.PokemonArtwork(
+                disableTooltip = true,
                 name = pokemonName,
                 modifier = Modifier.align(Alignment.BottomEnd)
                     .height(if (LocalIsCompact.current) 175.dp else 200.dp)
@@ -127,6 +128,7 @@ fun PokemonStatCard(
                 var spriteWidth by remember { mutableStateOf(0.dp) }
 
                 pokemonImageService.PokemonArtwork(
+                    disableTooltip = true,
                     name = it,
                     facingDirection = FacingDirection.RIGHT,
                     modifier = Modifier.align(Alignment.BottomStart)

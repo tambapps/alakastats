@@ -108,8 +108,10 @@ internal fun SpeedScale(
                 else -> Color.Transparent
             }
             Column(Modifier.fillMaxSize().background(backgroundColor)) {
-                FlowRow(Modifier.padding(horizontal = if (isCompact) 8.dp else 32.dp)) {
-
+                FlowRow(
+                    modifier = Modifier.padding(horizontal = if (isCompact) 8.dp else 32.dp),
+                    verticalArrangement = Arrangement.Center,
+                ) {
                     pokemonSpeeds.forEach { pSpeed ->
                         if (pSpeed.isPokemonOfInterest) {
                             // just to add more padding
@@ -167,13 +169,11 @@ private fun PokemonSpeedItem(viewModel: PokemonSpeedScaleViewModel, pSpeed: Poke
 @Composable
 private fun PokemonSpeedSprite(viewModel: PokemonSpeedScaleViewModel, pSpeed: PokemonSpeed) {
     val isCompact = LocalIsCompact.current
-    val isMega = pSpeed.pokemonName.isMega
 
     val modifier = Modifier.then(
-        if (isCompact) Modifier.size(76.dp).padding(8.dp)
-        else Modifier.size(128.dp).padding(16.dp)
-    ).scale(if (isMega) 2f else 1.5f)
-        .then(if (isMega) Modifier.offset(y = if (isCompact) 19.dp else 32.dp) else Modifier)
+        if (isCompact) Modifier.height(100.dp).padding(8.dp)
+        else Modifier.height(130.dp).padding(16.dp)
+    )
     viewModel.pokemonImageService.PokemonSprite(
         pSpeed.pokemonName,
         modifier = modifier,
@@ -195,7 +195,7 @@ fun OpposingInvestmentsFlowRow(viewModel: PokemonSpeedScaleViewModel) {
             onClick = { viewModel.flipMaxEvs() },
             label = {
                 val suffix = if (viewModel.usesLegacySystem) "EVs" else "SPs"
-                Text("${viewModel.maxEvsValue}${separator}EVs", textAlign = TextAlign.Center)
+                Text("${viewModel.maxEvsValue}${separator}$suffix", textAlign = TextAlign.Center)
             },
             selected = viewModel.maxEvs
         )

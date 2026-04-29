@@ -1,8 +1,14 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
@@ -12,26 +18,28 @@ import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 fun PokemonTeamPreview(
     imageService: PokemonImageService,
     player: Player,
-    childModifier: Modifier = Modifier,
     fillWidth: Boolean = false,
+    modifier: Modifier = Modifier,
     facingDirection: FacingDirection = FacingDirection.LEFT,
     ) {
-    PokemonTeamPreview(imageService, player.teamPreview.pokemons.map { it.name }, childModifier, fillWidth, facingDirection)
+    PokemonTeamPreview(imageService, player.teamPreview.pokemons.map { it.name }, modifier, fillWidth, facingDirection)
 }
 
 @Composable
 fun PokemonTeamPreview(
     imageService: PokemonImageService,
     pokemons: List<PokemonName>,
-    childModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     fillWidth: Boolean = false,
     facingDirection: FacingDirection = FacingDirection.LEFT) {
-    Row {
+    Row(
+        modifier = modifier.heightIn(max = 100.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         for (pokemon in pokemons) {
-            val modifier = if (fillWidth) childModifier.weight(1f) else childModifier
             imageService.PokemonSprite(
                 name = pokemon,
-                modifier = modifier,
+                modifier = if (fillWidth) Modifier.weight(1f) else Modifier,
                 facingDirection = facingDirection,
                 // disabling tooltip to allow handling card click listener
                 disableTooltip = true

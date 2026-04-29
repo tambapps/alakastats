@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.composables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -29,8 +30,9 @@ fun TooltipIfEnabled(disabled: Boolean, tooltip: String, modifier: Modifier, com
     if (disabled) {
         composer.invoke(modifier)
     } else {
-        Tooltip(tooltip, modifier) {
-            composer.invoke(Modifier)
+        // TODO this is a bad idea. remove it
+        Tooltip(tooltip) {
+            composer.invoke(modifier)
         }
     }
 }

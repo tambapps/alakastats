@@ -45,6 +45,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.Header
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import com.tambapps.pokemon.util.MegaUtils.toMega
@@ -132,6 +133,7 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
             pokemonImageService = viewModel.pokemonImageService,
             viewModel
         )
+        Spacer(Modifier.height(16.dp))
         ReplayContent(
             replay,
             gameOutput,
@@ -140,6 +142,7 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
             viewModel.pokemonImageService,
             viewModel
         )
+        Spacer(Modifier.height(8.dp))
     }
 }
 
@@ -161,10 +164,8 @@ private fun HeadRow(
         VsText(currentPlayer, opponentPlayer, gameOutcome)
         Spacer(Modifier.width(16.dp))
         if (gameOutcome != GameOutcome.UNKNOWN) {
-            PokemonTeamPreview(
-                pokemonImageService, opponentPlayer,
-                childModifier = Modifier.size(100.dp).padding(bottom = 16.dp)
-            )
+            PokemonTeamPreview(pokemonImageService, opponentPlayer,
+                modifier = if (LocalIsCompact.current) Modifier else Modifier.weight(1f), fillWidth = true)
 
             opponentPlayer.ots?.let { openTeamSheet ->
                 Spacer(Modifier.width(16.dp))
@@ -175,7 +176,7 @@ private fun HeadRow(
             Spacer(Modifier.width(20.dp))
             ViewReplayButton(team, replay, replayUrl)
         }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.width(20.dp))
 
         if (viewModel != null) {
             val isMenuExpandedState = remember { mutableStateOf(false) }

@@ -396,7 +396,8 @@ internal fun SelectedPokemon(
             pokemonImageService.PokemonArtwork(
                 megaPokemon ?: pokemon,
                 modifier = Modifier.height(128.dp),
-                facingDirection = if (isYouPlayer) FacingDirection.RIGHT else FacingDirection.LEFT
+                facingDirection = if (isYouPlayer) FacingDirection.RIGHT else FacingDirection.LEFT,
+                disableTooltip = true
             )
         }
         val offset = 16.dp
