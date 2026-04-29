@@ -209,8 +209,10 @@ internal fun Composition(composition: List<PokemonName>,
                 Text(if (index == 0) "Lead" else "Back", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.width(16.dp))
                 chunk.forEach { pokemonName ->
-                    pokemonImageService.PokemonArtwork(pokemonName, Modifier.size(pokemonSize).padding(horizontal = 4.dp)
-                        , facingDirection = facingDirection)
+                    pokemonImageService.PokemonArtwork(
+                        pokemonName, Modifier.size(pokemonSize).padding(horizontal = 4.dp)
+                        , facingDirection = facingDirection
+                    )
                 }
             }
             if (index == 0 && composition.size > 1) {

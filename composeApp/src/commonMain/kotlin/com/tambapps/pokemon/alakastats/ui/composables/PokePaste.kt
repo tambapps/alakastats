@@ -330,7 +330,7 @@ private fun PokepastePokemonCard(
                 targetState = pokemon.name,
                 modifier = artworkModifier(pokemon.name, contentWidth),
             ) { name ->
-                pokemonImageService.PokemonArtwork(name = name, disableTooltip = true)
+                pokemonImageService.PokemonArtwork(name = name)
             }
         }
     ) {

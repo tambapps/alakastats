@@ -83,7 +83,6 @@ interface PokemonImageService {
     fun PokemonArtwork(
         name: PokemonName,
         modifier: Modifier = Modifier,
-        disableTooltip: Boolean = false,
         facingDirection: FacingDirection = FacingDirection.LEFT
     )
 
@@ -154,12 +153,11 @@ abstract class AbstractPokemonImageService(
     override fun PokemonArtwork(
         name: PokemonName,
         modifier: Modifier,
-        disableTooltip: Boolean,
         facingDirection: FacingDirection
     ) = PokemonImage(
         ImageType.ARTWORK, name, modifier,
         facingDirection,
-        disableTooltip = disableTooltip
+        disableTooltip = true
     )
 
     @Composable

@@ -4,8 +4,6 @@ import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.arrow_forward
 import alakastats.composeapp.generated.resources.mega
-import alakastats.composeapp.generated.resources.mega_stone
-import alakastats.composeapp.generated.resources.more_vert
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,7 +62,6 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
-import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
@@ -74,7 +71,6 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFilte
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
-import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -396,8 +392,7 @@ internal fun SelectedPokemon(
             pokemonImageService.PokemonArtwork(
                 megaPokemon ?: pokemon,
                 modifier = Modifier.height(128.dp),
-                facingDirection = if (isYouPlayer) FacingDirection.RIGHT else FacingDirection.LEFT,
-                disableTooltip = true
+                facingDirection = if (isYouPlayer) FacingDirection.RIGHT else FacingDirection.LEFT
             )
         }
         val offset = 16.dp

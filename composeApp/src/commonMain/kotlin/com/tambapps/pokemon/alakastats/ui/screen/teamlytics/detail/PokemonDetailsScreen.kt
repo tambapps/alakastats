@@ -22,7 +22,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.LaunchedEffect
@@ -47,8 +46,6 @@ import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.EmitScrollEffect
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.composables.TabRowWithBackButton
-import com.tambapps.pokemon.alakastats.ui.composables.TabViewModel
-import com.tambapps.pokemon.alakastats.ui.composables.artworkModifier
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.composables.pokemonForm
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.PokemonDetailTabViewModel
@@ -166,7 +163,7 @@ private fun BoxScope.PokemonArtwork(
             .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
             .offset(y = 16.dp)
     ) { name ->
-        viewModel.pokemonImageService.PokemonArtwork(name = name, disableTooltip = true)
+        viewModel.pokemonImageService.PokemonArtwork(name = name)
     }
 }
 

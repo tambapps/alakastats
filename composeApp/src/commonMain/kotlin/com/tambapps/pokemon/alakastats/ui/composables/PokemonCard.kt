@@ -109,7 +109,6 @@ fun PokemonStatCard(
         pokemonArtwork = { contentWidth, contentHeight ->
             var spriteWidth by remember { mutableStateOf(0.dp) }
             pokemonImageService.PokemonArtwork(
-                disableTooltip = true,
                 name = pokemonName,
                 modifier = Modifier.align(Alignment.BottomEnd)
                     .height(if (LocalIsCompact.current) 175.dp else 200.dp)
@@ -128,9 +127,7 @@ fun PokemonStatCard(
                 var spriteWidth by remember { mutableStateOf(0.dp) }
 
                 pokemonImageService.PokemonArtwork(
-                    disableTooltip = true,
                     name = it,
-                    facingDirection = FacingDirection.RIGHT,
                     modifier = Modifier.align(Alignment.BottomStart)
                         .height(if (LocalIsCompact.current) 175.dp else 200.dp)
                         // to avoid artworks like basculegion's to take the whole width and make the moves difficult to read
@@ -142,7 +139,8 @@ fun PokemonStatCard(
                             spriteWidth,
                             minOffsetDp = minOffsetDp,
                             maxOffsetDp = maxOffsetDp
-                        ))
+                        )),
+                    facingDirection = FacingDirection.RIGHT
                 )
             }
         }
