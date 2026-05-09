@@ -20,10 +20,12 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCas
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.downloadToFile
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.getFilePickerSettings
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.openFilePicker
 import io.github.vinceglb.filekit.readBytes
@@ -66,7 +68,7 @@ class HomeViewModel(
     fun importTeam(snackBar: SnackBar) {
         scope.launch {
             val file = FileKit.openFilePicker(
-                title = "Pick Alakastats or PokeShowStats team",
+                dialogSettings = getFilePickerSettings("Pick Alakastats or PokeShowStats team"),
                 type = FileKitType.File("json"),
             )
             if (file == null) {
