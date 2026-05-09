@@ -13,9 +13,9 @@
 
 ## 2. Update the version in Xcode
 
-In **Xcode**:
+In **Xcode** after clicking on the `iosApp` on the left file explorer:
 
-`Target → General`
+`General → Identity`
 
 Set for example:
 
@@ -47,13 +47,13 @@ Any iOS Device (arm64)
 Product → Archive
 ```
 
-Xcode will open **Organizer**.
+Xcode will a new window **Archive**.
 
 ---
 
 ## 4. Upload the build
 
-In **Organizer**:
+In the new window **Archive**:
 
 ```
 Distribute App
