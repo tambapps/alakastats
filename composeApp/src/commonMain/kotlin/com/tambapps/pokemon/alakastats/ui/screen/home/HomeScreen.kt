@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.home
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.more_horiz
+import alakastats.composeapp.generated.resources.quiz
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +53,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.about.AboutScreen
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizzesHomeScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
 
@@ -236,6 +239,20 @@ internal fun AboutButton(modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.currentOrThrow
     TextButton(onClick = { navigator.push(AboutScreen) }, modifier = modifier) {
         Text("About", style = buttonTextStyle)
+    }
+}
+
+@Composable
+internal fun QuizzesButton(modifier: Modifier = Modifier) {
+    val navigator = LocalNavigator.currentOrThrow
+    FilledTonalButton(onClick = { navigator.push(QuizzesHomeScreen) }, modifier = modifier) {
+        Icon(
+            painter = painterResource(Res.drawable.quiz),
+            contentDescription = null,
+            modifier = Modifier.size(ButtonDefaults.IconSize)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text("Quizzes", style = buttonTextStyle)
     }
 }
 
