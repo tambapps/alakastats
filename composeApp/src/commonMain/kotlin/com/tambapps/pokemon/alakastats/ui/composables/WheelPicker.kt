@@ -93,7 +93,7 @@ fun <T> WheelPickerDialog(
                 WheelPicker(
                     modifier = Modifier.align(Alignment.Center),
                     state = state,
-                    bufferSize = BUFFER_SIZE,
+                    bufferSize = 6,
                     window = {
                         Box(
                             Modifier.background(

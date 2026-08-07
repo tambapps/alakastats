@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.Nature
 
 class NatureQuizSetupViewModel : ScreenModel {
@@ -15,6 +16,8 @@ class NatureQuizSetupViewModel : ScreenModel {
         Nature.DOCILE, Nature.BASHFUL, Nature.QUIRKY, Nature.SERIOUS
     )
     private var ignoredNaturesBackup: List<Nature> = emptyList()
+
+    var direction by mutableStateOf(QuizDirection.NAME_TO_STATS)
 
     var showIgnoredNaturesDialog by mutableStateOf(false)
         private set
@@ -40,6 +43,10 @@ class NatureQuizSetupViewModel : ScreenModel {
         }
     }
 
-    fun startQuiz() {
+    fun startQuiz(navigator: Navigator) {
+        val activeNatures = natures.filterNot { it in ignoredNatures }
+        if (activeNatures.isNotEmpty()) {
+            navigator.push(NatureQuizScreen(activeNatures, direction))
+        }
     }
 }

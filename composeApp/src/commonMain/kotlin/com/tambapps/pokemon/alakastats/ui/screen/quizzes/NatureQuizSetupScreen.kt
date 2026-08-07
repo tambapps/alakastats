@@ -17,15 +17,18 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -35,6 +38,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
@@ -59,7 +64,7 @@ object NatureQuizSetupScreen : Screen {
     }
 }
 
-private val statOrder = listOf(Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)
+internal val statOrder = listOf(Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)
 private val diagonalNatures = listOf(Nature.HARDY, Nature.DOCILE, Nature.BASHFUL, Nature.QUIRKY, Nature.SERIOUS)
 
 private fun natureFor(increasedStat: Stat, decreasedStat: Stat): Nature =
@@ -176,6 +181,22 @@ private fun NatureCell(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun QuizDirectionSelector(viewModel: NatureQuizSetupViewModel, modifier: Modifier = Modifier) {
+    SingleChoiceSegmentedButtonRow(modifier = modifier) {
+        QuizDirection.entries.forEachIndexed { index, direction ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = QuizDirection.entries.size),
+                onClick = { viewModel.direction = direction },
+                selected = viewModel.direction == direction,
+                icon = {},
+                label = { Text(direction.displayName, style = buttonTextStyle, maxLines = 1, softWrap = false) }
+            )
+        }
+    }
+}
+
 @Composable
 internal fun IgnoreNaturesButton(viewModel: NatureQuizSetupViewModel, modifier: Modifier = Modifier) {
     OutlinedButton(onClick = { viewModel.openIgnoredNaturesDialog() }, modifier = modifier) {
@@ -189,8 +210,10 @@ internal fun IgnoreNaturesButton(viewModel: NatureQuizSetupViewModel, modifier: 
 
 @Composable
 internal fun StartQuizButton(viewModel: NatureQuizSetupViewModel, modifier: Modifier = Modifier) {
+    val navigator = LocalNavigator.currentOrThrow
     Button(
-        onClick = { viewModel.startQuiz() },
+        onClick = { viewModel.startQuiz(navigator) },
+        enabled = viewModel.ignoredNatures.size < viewModel.natures.size,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -237,25 +260,29 @@ private fun IgnoredNaturesDialog(viewModel: NatureQuizSetupViewModel) {
 }
 
 @Composable
-private fun NatureStatsCaption(nature: Nature) {
+internal fun NatureStatsCaption(
+    nature: Nature,
+    style: TextStyle = MaterialTheme.typography.bodySmall,
+    fontWeight: FontWeight? = null
+) {
     if (nature.isNeutral) {
-        Text("Neutral", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("Neutral", style = style, fontWeight = fontWeight, color = MaterialTheme.colorScheme.onSurfaceVariant)
     } else {
         Row {
-            Text("+${nature.bonusStat!!.abbreviation}", color = increasedStatColor, style = MaterialTheme.typography.bodySmall)
-            Text(" / ", style = MaterialTheme.typography.bodySmall)
-            Text("-${nature.malusStat!!.abbreviation}", color = decreasedStatColor, style = MaterialTheme.typography.bodySmall)
+            Text("+${nature.bonusStat!!.abbreviation}", color = increasedStatColor, style = style, fontWeight = fontWeight)
+            Text(" / ", style = style, fontWeight = fontWeight)
+            Text("-${nature.malusStat!!.abbreviation}", color = decreasedStatColor, style = style, fontWeight = fontWeight)
         }
     }
 }
 
-private val increasedStatColor @Composable get() = if (isDarkThemeEnabled()) Color(0xFFE57373) else Color.Red
-private val decreasedStatColor @Composable get() = if (isDarkThemeEnabled()) Color.Cyan else Color.Blue
+internal val increasedStatColor @Composable get() = if (isDarkThemeEnabled()) Color(0xFFE57373) else Color.Red
+internal val decreasedStatColor @Composable get() = if (isDarkThemeEnabled()) Color.Cyan else Color.Blue
 
-private val Nature.displayName: String
+internal val Nature.displayName: String
     get() = name.lowercase().replaceFirstChar { it.uppercase() }
 
-private val Stat.shortLabel: String
+internal val Stat.shortLabel: String
     get() = when (this) {
         Stat.ATTACK -> "Attack"
         Stat.DEFENSE -> "Defense"
@@ -265,7 +292,7 @@ private val Stat.shortLabel: String
         Stat.HP -> "HP"
     }
 
-private val Stat.abbreviation: String
+internal val Stat.abbreviation: String
     get() = when (this) {
         Stat.ATTACK -> "Atk"
         Stat.DEFENSE -> "Def"

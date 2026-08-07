@@ -46,10 +46,13 @@ internal fun NatureQuizSetupScreenMobile(viewModel: NatureQuizSetupViewModel) {
             }
             Spacer(Modifier.height(16.dp))
 
+            QuizDirectionSelector(viewModel, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+            Spacer(Modifier.height(16.dp))
+
             IgnoreNaturesButton(viewModel)
             Spacer(Modifier.height(16.dp))
 
-            NatureGrid(viewModel, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))
+            NatureGrid(viewModel, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
             Spacer(Modifier.height(16.dp))
 
             StartQuizButton(viewModel)

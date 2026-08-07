@@ -12,7 +12,10 @@ import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizzesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizSetupViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizDirection
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsViewModel
+import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
@@ -90,6 +93,10 @@ val appModules = listOf(module {
     factoryOf(::MatchupPlanEditViewModel)
     factoryOf(::QuizzesViewModel)
     factoryOf(::NatureQuizSetupViewModel)
+
+    factory { (natures: List<Nature>, direction: QuizDirection) ->
+        NatureQuizViewModel(natures, direction)
+    }
 
     factory { (teamId: Uuid) ->
         TeamlyticsViewModel(teamId, get(), get())
