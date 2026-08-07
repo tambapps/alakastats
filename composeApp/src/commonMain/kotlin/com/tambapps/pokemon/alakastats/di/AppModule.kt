@@ -29,7 +29,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalFormatDataRepository
-import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonBaseStatsRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalPokemonBaseStatsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonMovesRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
@@ -73,7 +73,7 @@ val appModules = listOf(module {
     single<PokepasteParser> { PokepasteParser() }
     single<ReplayAnalyticsService> { ReplayAnalyticsService(get()) }
     single { PokeApiGqlClient(get()) }
-    singleOf(::PokeApiPokemonBaseStatsRepository).bind(PokemonBaseStatsRepository::class)
+    singleOf(::LocalPokemonBaseStatsRepository).bind(PokemonBaseStatsRepository::class)
     singleOf(::PokeApiPokemonMovesRepository).bind(PokemonMovesRepository::class)
     singleOf(::LocalFormatDataRepository).bind(FormatDataRepository::class)
 
