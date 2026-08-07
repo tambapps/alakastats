@@ -11,7 +11,7 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.usesLegacySystem
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
-import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
+import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +38,7 @@ class SpeedStatQuizViewModel(
     val useSpeedBoostingNature: Boolean,
     val pokemonImageService: PokemonImageService,
     private val formatRepository: FormatDataRepository,
-    private val pokemonDataRepository: PokemonDataRepository
+    private val pokemonBaseStatsRepository: PokemonBaseStatsRepository
 ) : ScreenModel {
 
     var isLoading by mutableStateOf(true)
@@ -78,7 +78,7 @@ class SpeedStatQuizViewModel(
         scope.launch {
             formatRepository.get(format)
                 .flatMap { formatData ->
-                    pokemonDataRepository.getBaseStats(formatData.popularPokemons)
+                    pokemonBaseStatsRepository.getBaseStats(formatData.popularPokemons)
                         .map { statsByPokemon -> formatData.popularPokemons.shuffled() to statsByPokemon }
                 }
                 .fold(

@@ -16,7 +16,7 @@ import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.usesLegacySystem
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
-import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonDataRepository
+import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.PokemonDetailTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +45,7 @@ class PokemonSpeedScaleViewModel(
     megaPokemon: PokemonName?,
     megaSelected: Boolean,
     val pokemonData: PokemonData?,
-    private val pokeApi: PokeApiPokemonDataRepository,
+    private val pokemonBaseStatsRepository: PokemonBaseStatsRepository,
     private val formatRepository: FormatDataRepository
 ) : PokemonDetailTabViewModel() {
     val pokemon: Pokemon = if (megaPokemon != null && megaSelected) originalPokemon.copy(name = megaPokemon) else originalPokemon
@@ -82,7 +82,7 @@ class PokemonSpeedScaleViewModel(
             when {
                 pokemons.isNotEmpty() -> Either.Right(pokemons)
                 else -> formatRepository.get(format)
-                    .flatMap { pokeApi.getBaseStats(it.popularPokemons) }
+                    .flatMap { pokemonBaseStatsRepository.getBaseStats(it.popularPokemons) }
             }.fold(
                     ifLeft = {
                         withContext(Dispatchers.Main) {

@@ -1,44 +1,19 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository
 
 import arrow.core.Either
-import arrow.core.mapValuesNotNull
-import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeStats
-import com.tambapps.pokemon.PokeType
-import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.domain.error.GetPokemonDataError
-import com.tambapps.pokemon.alakastats.domain.model.DamageClass
-import com.tambapps.pokemon.alakastats.domain.model.PokemonData
-import com.tambapps.pokemon.alakastats.domain.model.PokemonMove
-import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
+import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
 import com.tambapps.pokemon.pokeapi.client.GqlBatchResult
-import com.tambapps.pokemon.pokeapi.client.GqlMove
 import com.tambapps.pokemon.pokeapi.client.GqlPokemon
 import com.tambapps.pokemon.pokeapi.client.PokeApiGqlClient
-import com.tambapps.pokemon.util.MegaUtils
 
-class PokeApiPokemonDataRepository(
+// TODO replace this with an inmemory base stats repository (store all of them in a json)
+class PokeApiPokemonBaseStatsRepository(
     private val pokeapiClient: PokeApiGqlClient
-): PokemonDataRepository {
-
-    override suspend fun bulkGetWithMoves(pokemons: List<Pokemon>): Either<GetPokemonDataError, List<PokemonData>> {
-        val moves = pokemons.asSequence()
-            .flatMap { it.moves }
-            .map { it.normalized }
-            .distinctBy { it.value }
-            .toList()
-        // map pokemon -> pokemon forms
-        val pokemonNames = pokemons.associateWith { pokemon ->
-            if (pokemon.name.isMega) listOfNotNull(pokemon.name.baseNormalized, pokemon.name.normalized)
-            else listOfNotNull(pokemon.name.normalized, MegaUtils.getMegaPokemon(pokemon.item))
-        }
-        return Either.catch {
-            pokeapiClient.getPokemons(pokemonNames.values.flatMap { it }.map { it.pokeApiNormalized }, moves)
-        }.mapLeft { GetPokemonDataError("Couldn't retrieve pokemon data", it) }
-            .map { toPokemonDataWithMoves(pokemonNames, it) }
-    }
+): PokemonBaseStatsRepository {
 
     override suspend fun getBaseStats(pokemons: List<PokemonName>): Either<GetPokemonDataError, Map<PokemonName, PokeStats>> {
         return Either.catch {
@@ -55,34 +30,7 @@ class PokeApiPokemonDataRepository(
             ?.toPokeStats() ?: PokeStats.default(0)
         pokemonName.normalized to baseStats
     }
-
-    private fun toPokemonDataWithMoves(
-        pokemons: Map<Pokemon, List<PokemonName>>,
-        result: GqlBatchResult
-    ): List<PokemonData> {
-        return pokemons.map { (pokemon, pokemonForms) ->
-            val baseStatsPerForms = pokemonForms.associateWith { pokemonForm ->
-                result.pokemons.find { it.name == pokemonForm.pokeApiNormalized.value }
-                    ?.toPokeStats()
-            }.mapValuesNotNull { (_, value) -> value }
-            PokemonData(
-                name = pokemon.name,
-                moves = result.moves.filter { pokemon.moves.any { m -> m.normalized.value == it.name } }
-                    .map { it.toMove() }
-                    .associateBy { it.name.normalized },
-                baseStatsPerForms = baseStatsPerForms,
-            )
-        }
-    }
 }
-
-private fun GqlMove.toMove() = PokemonMove(
-    name = MoveName(name),
-    type = PokeType.valueOf(type.name.uppercase()),
-    damageClass = DamageClass.valueOf(damageClass.name.uppercase()),
-    power = power ?: 0,
-    accuracy = accuracy ?: 0
-)
 
 private fun GqlPokemon.toPokeStats() = PokeStats(
     hp = findStat(Stat.HP),
@@ -110,7 +58,6 @@ private val PokemonName.pokeApiNormalized: PokemonName get() {
         name == "maushold" -> PokemonName("maushold-family-of-four")
         name == "dudunsparce" -> PokemonName("dudunsparce-two-segment")
         name == "tatsugiri" -> PokemonName("tatsugiri-droopy")
-        name == "giratina" -> PokemonName("giratina-altered")
         name == "giratina" -> PokemonName("giratina-altered")
         name == "palafin" -> PokemonName("palafin-zero")
         name == "tauros-paldea-combat" -> PokemonName("tauros-paldea-combat-breed")

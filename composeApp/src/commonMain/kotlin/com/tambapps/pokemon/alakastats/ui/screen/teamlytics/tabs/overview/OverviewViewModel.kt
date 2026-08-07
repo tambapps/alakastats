@@ -4,16 +4,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import arrow.core.mapValuesNotNull
+import arrow.core.raise.either
 import com.tambapps.pokemon.Pokemon
+import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsData
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsNotes
-import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
+import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
+import com.tambapps.pokemon.alakastats.domain.repository.PokemonMovesRepository
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.downloadToFile
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.util.MegaUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,7 +27,8 @@ import kotlinx.coroutines.withContext
 class OverviewViewModel(
     override val useCase: ManageTeamOverviewUseCase,
     override val pokemonImageService: PokemonImageService,
-    private val pokemonDataRepository: PokemonDataRepository
+    private val pokemonMovesRepository: PokemonMovesRepository,
+    private val pokemonBaseStatsRepository: PokemonBaseStatsRepository
 ): TeamlyticsTabViewModel() {
     // important. In this tab we don't want to consider filters
     val team get() = useCase.originalTeam
@@ -128,7 +134,28 @@ class OverviewViewModel(
         }
         isTabLoading = true
         scope.launch {
-            val either = pokemonDataRepository.bulkGetWithMoves(team.pokePaste.pokemons)
+            val pokemons = team.pokePaste.pokemons
+            val moveNames = pokemons.asSequence()
+                .flatMap { it.moves }
+                .map { it.normalized }
+                .distinctBy { it.value }
+                .toList()
+            // map pokemon -> pokemon forms
+            val pokemonForms = pokemons.associateWith { pokemon ->
+                if (pokemon.name.isMega) listOfNotNull(pokemon.name.baseNormalized, pokemon.name.normalized)
+                else listOfNotNull(pokemon.name.normalized, MegaUtils.getMegaPokemon(pokemon.item))
+            }
+            val either = either {
+                val moves = pokemonMovesRepository.getMoves(moveNames).bind()
+                val baseStats = pokemonBaseStatsRepository.getBaseStats(pokemonForms.values.flatten().distinct()).bind()
+                pokemonForms.map { (pokemon, forms) ->
+                    PokemonData(
+                        name = pokemon.name,
+                        moves = pokemon.moves.mapNotNull { moves[it.normalized] }.associateBy { it.name.normalized },
+                        baseStatsPerForms = forms.associateWith { baseStats[it] }.mapValuesNotNull { (_, value) -> value },
+                    )
+                }
+            }
             withContext(Dispatchers.Main) {
                 either.fold(
                     ifLeft = {

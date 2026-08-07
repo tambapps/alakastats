@@ -4,7 +4,8 @@ import androidx.compose.runtime.MutableState
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
-import com.tambapps.pokemon.alakastats.domain.repository.PokemonDataRepository
+import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
+import com.tambapps.pokemon.alakastats.domain.repository.PokemonMovesRepository
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultPokemonDetailUseCase
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
@@ -28,7 +29,8 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalFormatDataRepository
-import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonDataRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonBaseStatsRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonMovesRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsPreviewKStorage
@@ -71,7 +73,8 @@ val appModules = listOf(module {
     single<PokepasteParser> { PokepasteParser() }
     single<ReplayAnalyticsService> { ReplayAnalyticsService(get()) }
     single { PokeApiGqlClient(get()) }
-    singleOf(::PokeApiPokemonDataRepository).bind(PokemonDataRepository::class)
+    singleOf(::PokeApiPokemonBaseStatsRepository).bind(PokemonBaseStatsRepository::class)
+    singleOf(::PokeApiPokemonMovesRepository).bind(PokemonMovesRepository::class)
     singleOf(::LocalFormatDataRepository).bind(FormatDataRepository::class)
 
     // need to name them as they have both the same signature after generic type erasure
@@ -113,7 +116,7 @@ val appModules = listOf(module {
         PokemonDetailViewModel(teamId, pokemonName, get(), get())
     }
     factory { (useCase: ManageTeamOverviewUseCase) ->
-        OverviewViewModel(useCase, get(), get())
+        OverviewViewModel(useCase, get(), get(), get())
     }
     factory { (state: TeamPokemonStateState.Loaded, megaSelectedState: MutableState<Boolean>) ->
         PokemonDetailOverviewModel(get(), state.team, state.pokemon, state.megaPokemon, state.pokemonData, state.notes, state.usages, megaSelectedState)
