@@ -2,5 +2,5 @@ package com.tambapps.pokemon.alakastats.domain.model
 
 enum class QuizType(val displayedName: String) {
     NATURES("Natures"),
-    SPEED("Speed"),
+    SPEED_STAT("Speed Stat"),
 }

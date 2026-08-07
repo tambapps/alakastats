@@ -38,7 +38,7 @@ internal fun QuizCard(quiz: QuizType, modifier: Modifier = Modifier) {
             navigator.push(
                 when (quiz) {
                     QuizType.NATURES -> NatureQuizSetupScreen
-                    QuizType.SPEED -> SpeedQuizSetupScreen
+                    QuizType.SPEED_STAT -> SpeedStatQuizSetupScreen
                 }
             )
         },

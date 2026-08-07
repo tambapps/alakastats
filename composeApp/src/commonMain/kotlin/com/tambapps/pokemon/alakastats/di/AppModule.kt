@@ -14,6 +14,9 @@ import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizzesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizSetupViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizDirection
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedStatQuizSetupViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedStatQuizViewModel
+import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsViewModel
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
@@ -93,9 +96,14 @@ val appModules = listOf(module {
     factoryOf(::MatchupPlanEditViewModel)
     factoryOf(::QuizzesViewModel)
     factoryOf(::NatureQuizSetupViewModel)
+    factoryOf(::SpeedStatQuizSetupViewModel)
 
     factory { (natures: List<Nature>, direction: QuizDirection) ->
         NatureQuizViewModel(natures, direction)
+    }
+
+    factory { (format: Format, allowChoiceScarf: Boolean, useMaxStatPoints: Boolean, useSpeedBoostingNature: Boolean) ->
+        SpeedStatQuizViewModel(format, allowChoiceScarf, useMaxStatPoints, useSpeedBoostingNature, get(), get(), get())
     }
 
     factory { (teamId: Uuid) ->
