@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.QuizType
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
@@ -29,9 +31,17 @@ object QuizzesHomeScreen : Screen {
 
 @Composable
 internal fun QuizCard(quiz: QuizType, modifier: Modifier = Modifier) {
+    val navigator = LocalNavigator.currentOrThrow
     MyCard(
         modifier = modifier,
-        enabled = true,
+        onClick = {
+            navigator.push(
+                when (quiz) {
+                    QuizType.NATURES -> NatureQuizSetupScreen
+                    QuizType.SPEED -> SpeedQuizSetupScreen
+                }
+            )
+        },
         gradientBackgroundColors = elevatedCardGradientColors
     ) {
         Text(
