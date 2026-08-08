@@ -39,6 +39,7 @@ internal fun QuizCard(quiz: QuizType, modifier: Modifier = Modifier) {
                 when (quiz) {
                     QuizType.NATURES -> NatureQuizSetupScreen
                     QuizType.SPEED_STAT -> SpeedStatQuizSetupScreen
+                    QuizType.SPEED_INTERACTIONS -> SpeedInteractionsHomeSetupScreen
                 }
             )
         },

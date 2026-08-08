@@ -40,6 +40,8 @@ import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.EmitScrollEffect
 import com.tambapps.pokemon.alakastats.ui.composables.LinearProgressBarIfEnabled
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsTabViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.quizzes.QuizzesTab
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.quizzes.QuizzesTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.lead.LeadStatsViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.MatchupPlansTab
@@ -59,7 +61,7 @@ import kotlin.uuid.Uuid
 
 data class TeamlyticsScreen(val teamId: Uuid) : Screen {
     private companion object {
-        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Opponent Trends", "Game Plans")
+        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Opponent Trends", "Game Plans", "Quizzes")
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -141,6 +143,9 @@ internal fun Pager(
             }
             5 -> PagerTab<ManageMatchupPlansUseCase, MatchupPlansViewModel>(viewModel, page) {
                 MatchupPlansTab(it)
+            }
+            6 -> PagerTab<ConsultTeamlyticsUseCase, QuizzesTabViewModel>(viewModel, page) {
+                QuizzesTab(it)
             }
         }
     }
