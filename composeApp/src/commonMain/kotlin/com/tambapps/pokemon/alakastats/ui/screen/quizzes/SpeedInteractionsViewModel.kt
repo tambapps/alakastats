@@ -14,14 +14,16 @@ import com.tambapps.pokemon.alakastats.domain.model.NEUTRAL_INVESTMENT_EVS
 import com.tambapps.pokemon.alakastats.domain.model.NEUTRAL_INVESTMENT_IVS
 import com.tambapps.pokemon.alakastats.domain.model.SPEED_INTERACTIONS_QUIZ_LEVEL
 import com.tambapps.pokemon.alakastats.domain.model.SPEED_NEUTRAL_NATURE
+import com.tambapps.pokemon.alakastats.domain.model.OpponentSpeedRange
+import com.tambapps.pokemon.alakastats.domain.model.RevealedNature
 import com.tambapps.pokemon.alakastats.domain.model.SpeedComparisonResult
 import com.tambapps.pokemon.alakastats.domain.model.SpeedModifier
-import com.tambapps.pokemon.alakastats.domain.model.SpeedRange
 import com.tambapps.pokemon.alakastats.domain.model.applyChoiceScarf
 import com.tambapps.pokemon.alakastats.domain.model.applyParalysis
 import com.tambapps.pokemon.alakastats.domain.model.applyTailwind
-import com.tambapps.pokemon.alakastats.domain.model.computeSpeedRange
+import com.tambapps.pokemon.alakastats.domain.model.computeOpponentSpeedRange
 import com.tambapps.pokemon.alakastats.domain.model.isHoldingChoiceScarf
+import com.tambapps.pokemon.alakastats.domain.model.minInvestmentToReach
 import com.tambapps.pokemon.alakastats.domain.model.speedComparisonResultFor
 import com.tambapps.pokemon.alakastats.domain.model.usesLegacySystem
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
@@ -43,7 +45,8 @@ sealed interface SpeedInteractionsMode {
         val allowOpponentScarf: Boolean = false,
         val allowParalysis: Boolean = false,
         val allowTailwind: Boolean = false,
-        val includeNonMegaBaseForms: Boolean = false
+        val includeNonMegaBaseForms: Boolean = false,
+        val allowReducingNature: Boolean = false
     ) : SpeedInteractionsMode
 }
 
@@ -55,7 +58,9 @@ data class SpeedInteractionQuestion(
     // Home mode
     val speedB: Int?,
     // Team mode
-    val range: SpeedRange?,
+    val opponentRange: OpponentSpeedRange?,
+    val opponentNature: RevealedNature?,
+    val investmentThreshold: Int?,
     val correctResult: SpeedComparisonResult,
     val modifier: SpeedModifier = SpeedModifier.NONE
 )
@@ -160,7 +165,17 @@ class SpeedInteractionsViewModel(
                             speedA < speedB -> SpeedComparisonResult.SLOWER
                             else -> SpeedComparisonResult.SPEED_TIE
                         }
-                        SpeedInteractionQuestion(nameA, nameB, null, speedA, speedB, null, result)
+                        SpeedInteractionQuestion(
+                            pokemonA = nameA,
+                            pokemonB = nameB,
+                            itemA = null,
+                            speedA = speedA,
+                            speedB = speedB,
+                            opponentRange = null,
+                            opponentNature = null,
+                            investmentThreshold = null,
+                            correctResult = result
+                        )
                     }
                     withContext(Dispatchers.Main) {
                         isLoading = false
@@ -223,6 +238,11 @@ class SpeedInteractionsViewModel(
                         }
                         if (mode.allowTailwind) add(SpeedModifier.A_TAILWIND)
                     }
+                    val naturePool = if (mode.allowReducingNature) {
+                        RevealedNature.entries
+                    } else {
+                        RevealedNature.entries.filter { it != RevealedNature.REDUCING }
+                    }
                     val generatedQuestions = entries.shuffled().mapNotNull { entry ->
                         val pokemon = entry.pokemon
                         val baseStatsA = statsByPokemon[entry.resolvedName.normalized] ?: return@mapNotNull null
@@ -241,25 +261,42 @@ class SpeedInteractionsViewModel(
                         if (isHoldingChoiceScarf(pokemon.item)) {
                             speedA = applyChoiceScarf(speedA)
                         }
-                        var range = computeSpeedRange(baseStatsB, legacySystem)
+                        val revealedNature = naturePool.random()
                         val modifier = if (enabledModifiers.isEmpty() || Random.nextBoolean()) {
                             SpeedModifier.NONE
                         } else {
                             enabledModifiers.random()
                         }
+                        val bTransform: (Int) -> Int = when (modifier) {
+                            SpeedModifier.B_CHOICE_SCARF -> { s -> applyChoiceScarf(s) }
+                            SpeedModifier.B_PARALYSIS -> { s -> applyParalysis(s) }
+                            else -> { s -> s }
+                        }
                         when (modifier) {
-                            SpeedModifier.B_CHOICE_SCARF -> range = range.copy(max = applyChoiceScarf(range.max))
-                            SpeedModifier.B_PARALYSIS -> range = SpeedRange(
-                                min = applyParalysis(range.min),
-                                neutral = applyParalysis(range.neutral),
-                                max = applyParalysis(range.max)
-                            )
                             SpeedModifier.A_PARALYSIS -> speedA = applyParalysis(speedA)
                             SpeedModifier.A_TAILWIND -> speedA = applyTailwind(speedA)
-                            SpeedModifier.NONE -> {}
+                            else -> {}
                         }
+                        val rawRange = computeOpponentSpeedRange(baseStatsB, revealedNature, legacySystem)
+                        val range = OpponentSpeedRange(bTransform(rawRange.min), bTransform(rawRange.max))
                         val result = speedComparisonResultFor(speedA, range)
-                        SpeedInteractionQuestion(entry.resolvedName, pokemonB, pokemon.item, speedA, null, range, result, modifier)
+                        val threshold = if (result == SpeedComparisonResult.DEPENDS_ON_INVESTMENT) {
+                            minInvestmentToReach(baseStatsB, revealedNature, legacySystem, speedA, bTransform)
+                        } else {
+                            null
+                        }
+                        SpeedInteractionQuestion(
+                            pokemonA = entry.resolvedName,
+                            pokemonB = pokemonB,
+                            itemA = pokemon.item,
+                            speedA = speedA,
+                            speedB = null,
+                            opponentRange = range,
+                            opponentNature = revealedNature,
+                            investmentThreshold = threshold,
+                            correctResult = result,
+                            modifier = modifier
+                        )
                     }
                     withContext(Dispatchers.Main) {
                         isLoading = false

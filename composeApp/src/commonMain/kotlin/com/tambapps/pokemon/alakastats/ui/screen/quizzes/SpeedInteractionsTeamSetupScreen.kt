@@ -61,6 +61,13 @@ internal fun SpeedInteractionsTeamSetupOptions(viewModel: SpeedInteractionsTeamS
         checked = viewModel.includeNonMegaBaseForms,
         onCheckedChange = { viewModel.toggleNonMegaBaseForms() }
     )
+
+    QuizOptionCheckbox(
+        label = "Negative Speed natures",
+        description = "The opponent's revealed nature could also be Speed-reducing (by default, only neutral or Speed-boosting are proposed)",
+        checked = viewModel.allowReducingNature,
+        onCheckedChange = { viewModel.toggleReducingNature() }
+    )
 }
 
 @Composable

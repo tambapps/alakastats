@@ -30,6 +30,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -43,6 +44,8 @@ import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.domain.model.OpponentSpeedRange
+import com.tambapps.pokemon.alakastats.domain.model.RevealedNature
 import com.tambapps.pokemon.alakastats.domain.model.SpeedComparisonResult
 import com.tambapps.pokemon.alakastats.domain.model.SpeedModifier
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
@@ -50,6 +53,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.koin.core.parameter.parametersOf
 
 data class SpeedInteractionsQuizScreen(val mode: SpeedInteractionsMode) : Screen {
@@ -243,6 +247,14 @@ private fun MatchupHeader(viewModel: SpeedInteractionsViewModel, question: Speed
             if (viewModel.isTeamMode) {
                 Text("Opponent", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+            question.opponentNature?.let { nature ->
+                Text(
+                    nature.label(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = nature.color()
+                )
+            }
         }
     }
 }
@@ -261,13 +273,9 @@ private fun TeamAnswerButtons(viewModel: SpeedInteractionsViewModel, enabled: Bo
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             AnswerButton("Guaranteed faster", SpeedComparisonResult.GUARANTEED_FASTER, viewModel, enabled, Modifier.weight(1f))
-            AnswerButton("Faster", SpeedComparisonResult.FASTER, viewModel, enabled, Modifier.weight(1f))
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            AnswerButton("Slower", SpeedComparisonResult.SLOWER, viewModel, enabled, Modifier.weight(1f))
             AnswerButton("Guaranteed slower", SpeedComparisonResult.GUARANTEED_SLOWER, viewModel, enabled, Modifier.weight(1f))
         }
-        AnswerButton("Speed tie", SpeedComparisonResult.SPEED_TIE, viewModel, enabled, Modifier.fillMaxWidth())
+        AnswerButton("Depends on investment", SpeedComparisonResult.DEPENDS_ON_INVESTMENT, viewModel, enabled, Modifier.fillMaxWidth())
     }
 }
 
@@ -302,15 +310,23 @@ private fun SpeedInteractionsAnswerFeedback(question: SpeedInteractionQuestion, 
         Text(message, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = color)
         Spacer(Modifier.height(4.dp))
         if (isTeamMode) {
-            val range = question.range
+            val range = question.opponentRange
+            val nature = question.opponentNature
             Text(
                 "Your ${question.pokemonA.pretty}'s Speed: ${question.speedA}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            if (range != null) {
+            if (range != null && nature != null) {
                 Text(
-                    "Opponent's possible range: ${range.min} - ${range.neutral} (neutral) - ${range.max}",
+                    "${question.pokemonB.pretty} (${nature.label()}) — possible Speed: ${range.min} (0 inv.) to ${range.max} (max inv.)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    teamModeExplanation(question, range),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -384,9 +400,42 @@ private fun SpeedInteractionsResultsContent(viewModel: SpeedInteractionsViewMode
 private fun SpeedComparisonResult.label(): String = when (this) {
     SpeedComparisonResult.FASTER -> "Faster"
     SpeedComparisonResult.SLOWER -> "Slower"
+    SpeedComparisonResult.SPEED_TIE -> "Speed tie"
     SpeedComparisonResult.GUARANTEED_FASTER -> "Guaranteed faster"
     SpeedComparisonResult.GUARANTEED_SLOWER -> "Guaranteed slower"
-    SpeedComparisonResult.SPEED_TIE -> "Speed tie"
+    SpeedComparisonResult.DEPENDS_ON_INVESTMENT -> "Depends on investment"
+}
+
+private fun RevealedNature.label(): String = when (this) {
+    RevealedNature.BOOSTING -> "+Spe nature"
+    RevealedNature.NEUTRAL -> "Neutral nature"
+    RevealedNature.REDUCING -> "−Spe nature"
+}
+
+@Composable
+private fun RevealedNature.color(): Color = when (this) {
+    RevealedNature.BOOSTING -> if (isDarkThemeEnabled()) Color(0xFFE57373) else Color.Red
+    RevealedNature.NEUTRAL -> Color.Unspecified
+    RevealedNature.REDUCING -> if (isDarkThemeEnabled()) Color.Cyan else Color.Blue
+}
+
+private fun teamModeExplanation(question: SpeedInteractionQuestion, range: OpponentSpeedRange): String {
+    val pokemonB = question.pokemonB.pretty
+    val mine = question.speedA
+    val base = when (question.correctResult) {
+        SpeedComparisonResult.GUARANTEED_FASTER -> "Your $mine beats $pokemonB's max (${range.max}) — you always outspeed."
+        SpeedComparisonResult.GUARANTEED_SLOWER -> "Your $mine is below $pokemonB's min (${range.min}) — they always outspeed you."
+        SpeedComparisonResult.DEPENDS_ON_INVESTMENT ->
+            "Your $mine is inside $pokemonB's range (${range.min}–${range.max}) — it depends on how much Speed they invested."
+        else -> ""
+    }
+    val thresholdNote = question.investmentThreshold?.let { " $pokemonB outspeeds you from $it stat points invested." } ?: ""
+    val boundaryNote = when (mine) {
+        range.max -> " (you tie a fully-invested $pokemonB; anything less, you outspeed)"
+        range.min -> " (you tie an uninvested $pokemonB; any investment outspeeds you)"
+        else -> ""
+    }
+    return base + thresholdNote + boundaryNote
 }
 
 private fun SpeedModifier.caption(): String = when (this) {

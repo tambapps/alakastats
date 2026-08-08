@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.quizzes
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +22,7 @@ fun QuizzesTab(viewModel: QuizzesTabViewModel) {
     Column(Modifier.fillMaxWidth().safeContentPadding().padding(16.dp)) {
         val navigator = LocalNavigator.currentOrThrow
         MyCard(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(120.dp),
             onClick = { navigator.push(SpeedInteractionsTeamSetupScreen(viewModel.team.id)) },
             gradientBackgroundColors = elevatedCardGradientColors
         ) {

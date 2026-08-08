@@ -5,7 +5,10 @@ import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 
 enum class SpeedComparisonResult {
-    FASTER, SLOWER, GUARANTEED_FASTER, GUARANTEED_SLOWER, SPEED_TIE
+    // Home mode
+    FASTER, SLOWER, SPEED_TIE,
+    // Team mode
+    GUARANTEED_FASTER, GUARANTEED_SLOWER, DEPENDS_ON_INVESTMENT
 }
 
 const val SPEED_INTERACTIONS_QUIZ_LEVEL = 50
@@ -32,24 +35,25 @@ fun applyTailwind(speed: Int): Int = speed * 2
 fun applyParalysis(speed: Int): Int = speed / 2
 
 /**
- * B's legal Speed range boundaries (min/neutral/max investment), at [SPEED_INTERACTIONS_QUIZ_LEVEL].
+ * Team mode reveals B's Speed nature but hides its stat-point investment (mirrors Open Team Sheets).
  */
-data class SpeedRange(val min: Int, val neutral: Int, val max: Int)
+enum class RevealedNature(val nature: Nature) {
+    BOOSTING(SPEED_BOOST_NATURE),
+    NEUTRAL(SPEED_NEUTRAL_NATURE),
+    REDUCING(SPEED_MALUS_NATURE)
+}
 
-fun computeSpeedRange(baseStats: PokeStats, legacySystem: Boolean): SpeedRange {
+/**
+ * B's legal Speed bounds at its [RevealedNature], from 0 to max stat-point investment.
+ */
+data class OpponentSpeedRange(val min: Int, val max: Int)
+
+fun computeOpponentSpeedRange(baseStats: PokeStats, revealedNature: RevealedNature, legacySystem: Boolean): OpponentSpeedRange {
     val min = PokeStats.compute(
         baseStats = baseStats,
         evs = PokeStats.default(0),
-        ivs = PokeStats.default(0),
-        nature = SPEED_MALUS_NATURE,
-        level = SPEED_INTERACTIONS_QUIZ_LEVEL,
-        legacySystem = legacySystem
-    ).speed
-    val neutral = PokeStats.compute(
-        baseStats = baseStats,
-        evs = NEUTRAL_INVESTMENT_EVS,
-        ivs = NEUTRAL_INVESTMENT_IVS,
-        nature = SPEED_NEUTRAL_NATURE,
+        ivs = PokeStats.default(31),
+        nature = revealedNature.nature,
         level = SPEED_INTERACTIONS_QUIZ_LEVEL,
         legacySystem = legacySystem
     ).speed
@@ -57,21 +61,48 @@ fun computeSpeedRange(baseStats: PokeStats, legacySystem: Boolean): SpeedRange {
         baseStats = baseStats,
         evs = PokeStats.default(maxSpeedInvestmentEvs(legacySystem)),
         ivs = PokeStats.default(31),
-        nature = SPEED_BOOST_NATURE,
+        nature = revealedNature.nature,
         level = SPEED_INTERACTIONS_QUIZ_LEVEL,
         legacySystem = legacySystem
     ).speed
-    return SpeedRange(min, neutral, max)
+    return OpponentSpeedRange(min, max)
 }
 
 /**
- * Answer key for team mode: compares A's known exact speed [sA] against B's legal [range].
- * Open intervals; landing exactly on any of the three references is a tie.
+ * Smallest Speed stat-point investment (at [revealedNature]) for [baseStats] to reach or pass [mine],
+ * after applying [transform] (the same modifier, if any, used to derive the displayed range) to each
+ * scanned value. Null if [mine] is never reached within the legal investment range.
  */
-fun speedComparisonResultFor(sA: Int, range: SpeedRange): SpeedComparisonResult = when {
-    sA == range.max || sA == range.neutral || sA == range.min -> SpeedComparisonResult.SPEED_TIE
-    sA > range.max -> SpeedComparisonResult.GUARANTEED_FASTER
-    sA > range.neutral -> SpeedComparisonResult.FASTER
-    sA > range.min -> SpeedComparisonResult.SLOWER
-    else -> SpeedComparisonResult.GUARANTEED_SLOWER
+fun minInvestmentToReach(
+    baseStats: PokeStats,
+    revealedNature: RevealedNature,
+    legacySystem: Boolean,
+    mine: Int,
+    transform: (Int) -> Int = { it }
+): Int? {
+    val maxEv = maxSpeedInvestmentEvs(legacySystem)
+    for (ev in 0..maxEv) {
+        val speed = transform(
+            PokeStats.compute(
+                baseStats = baseStats,
+                evs = PokeStats.default(ev),
+                ivs = PokeStats.default(31),
+                nature = revealedNature.nature,
+                level = SPEED_INTERACTIONS_QUIZ_LEVEL,
+                legacySystem = legacySystem
+            ).speed
+        )
+        if (speed >= mine) return ev
+    }
+    return null
+}
+
+/**
+ * Team-mode answer key: compares A's known exact Speed [mine] against B's [range] at its revealed
+ * nature. Boundary ties fall inside DEPENDS_ON_INVESTMENT (surfaced in feedback, not a separate answer).
+ */
+fun speedComparisonResultFor(mine: Int, range: OpponentSpeedRange): SpeedComparisonResult = when {
+    mine > range.max -> SpeedComparisonResult.GUARANTEED_FASTER
+    mine < range.min -> SpeedComparisonResult.GUARANTEED_SLOWER
+    else -> SpeedComparisonResult.DEPENDS_ON_INVESTMENT
 }

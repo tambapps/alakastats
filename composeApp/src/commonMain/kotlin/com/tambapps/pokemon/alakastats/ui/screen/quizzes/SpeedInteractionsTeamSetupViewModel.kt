@@ -34,6 +34,8 @@ class SpeedInteractionsTeamSetupViewModel(
         private set
     var includeNonMegaBaseForms by mutableStateOf(false)
         private set
+    var allowReducingNature by mutableStateOf(false)
+        private set
 
     init {
         scope.launch {
@@ -65,6 +67,10 @@ class SpeedInteractionsTeamSetupViewModel(
         includeNonMegaBaseForms = !includeNonMegaBaseForms
     }
 
+    fun toggleReducingNature() {
+        allowReducingNature = !allowReducingNature
+    }
+
     fun startQuiz(navigator: Navigator) {
         navigator.push(
             SpeedInteractionsQuizScreen(
@@ -73,7 +79,8 @@ class SpeedInteractionsTeamSetupViewModel(
                     allowOpponentScarf = allowOpponentScarf,
                     allowParalysis = allowParalysis,
                     allowTailwind = allowTailwind && hasTailwindUser,
-                    includeNonMegaBaseForms = includeNonMegaBaseForms
+                    includeNonMegaBaseForms = includeNonMegaBaseForms,
+                    allowReducingNature = allowReducingNature
                 )
             )
         )
