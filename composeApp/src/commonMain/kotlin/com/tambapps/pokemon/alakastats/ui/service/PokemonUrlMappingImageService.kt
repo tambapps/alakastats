@@ -63,6 +63,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
+import kotlin.collections.putAll
 
 private val placeHolderDrawable = Res.drawable.pokeball
 
@@ -107,14 +108,13 @@ abstract class AbstractPokemonImageService(
 ): PokemonImageService {
     protected val coroutineScope = CoroutineScope(Dispatchers.Default)
     private val movesData = mutableStateMapOf<String, MoveData>()
-    private val pokemonImages = mutableStateMapOf<String, PokemonImages>()
     private val availableNames = mutableStateListOf<PokemonName>()
 
     init {
         coroutineScope.launch {
+            // TODO there may be a better way to get all pokemon names?
             val map: Map<String, PokemonImages> = readMappingFile(json, "pokemon-sprites.json")
             withContext(Dispatchers.Main) {
-                pokemonImages.putAll(map)
                 availableNames.addAll(
                     map.keys.asSequence()
                         .sorted()
@@ -165,13 +165,6 @@ abstract class AbstractPokemonImageService(
         modifier: Modifier,
         facingDirection: FacingDirection
     )
-
-    // needs to be @Composable to listen to the map changes
-    @Composable
-    protected fun getPokemonImageData(name: PokemonName, type: ImageType) = when (type) {
-        ImageType.SPRITE -> pokemonImages[name.normalized.value]?.sprite
-        ImageType.ARTWORK -> pokemonImages[name.normalized.value]?.artwork
-    }
 
     override fun listAvailableNames() = availableNames
 
@@ -314,11 +307,10 @@ class PokemonLocalUrlImageService(
         modifier: Modifier,
         facingDirection: FacingDirection
     ) {
-        val imageFacingDirection = getPokemonImageData(name, type)?.direction
         val displayedName = name.pretty
         MyImage(url = "$baseUrl/images/pokemons/${type.name.lowercase()}/${name.normalized.value}.png",
             contentDescription = displayedName,
-            modifier = modifier.flipXIfNecessary(facingDirection, imageFacingDirection),
+            modifier = modifier.flipXIfNecessary(facingDirection),
         )
     }
 }
@@ -348,19 +340,27 @@ class GhPagesImageService(
         modifier: Modifier,
         facingDirection: FacingDirection
     ) {
-        val imageData = getPokemonImageData(name, type)
         val prettyName = name.pretty
         MyImage(url = "$baseUrl/pokemons/${type.name.lowercase()}/${name.normalized.value}.png?raw=true",
             contentDescription = prettyName,
-            modifier = modifier.flipXIfNecessary(facingDirection, imageData?.direction),
+            modifier = modifier.flipXIfNecessary(facingDirection),
         )
-
     }
 }
 
 // was previously used. loaded urls from pokemon-sprites.json file. Now this file is only relevant for sprite data such as lookup direction
 class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(json) {
     private val itemsData = mutableStateMapOf<String, ItemData>()
+    private val pokemonImages = mutableStateMapOf<String, PokemonImages>()
+
+    init {
+        coroutineScope.launch {
+            val map: Map<String, PokemonImages> = readMappingFile(json, "pokemon-sprites.json")
+            withContext(Dispatchers.Main) {
+                pokemonImages.putAll(map)
+            }
+        }
+    }
 
     @Composable
     override fun PokemonImage(
@@ -369,13 +369,12 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
         modifier: Modifier,
         facingDirection: FacingDirection
     ) {
-        val imageData = getPokemonImageData(name, type)
+        val imageUrl = getPokemonImageData(name, type)?.url
         val prettyName = name.pretty
-        val imageUrl = imageData?.url
         if (imageUrl != null) {
             MyImage(url = imageUrl,
                 contentDescription = prettyName,
-                modifier = modifier.flipXIfNecessary(facingDirection, imageData.direction),
+                modifier = modifier.flipXIfNecessary(facingDirection),
             )
         } else {
             DefaultIcon(
@@ -383,6 +382,13 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
                 modifier = modifier
             )
         }
+    }
+
+    // needs to be @Composable to listen to the map changes
+    @Composable
+    protected fun getPokemonImageData(name: PokemonName, type: ImageType) = when (type) {
+        ImageType.SPRITE -> pokemonImages[name.normalized.value]?.sprite
+        ImageType.ARTWORK -> pokemonImages[name.normalized.value]?.artwork
     }
 
     @Composable
@@ -459,13 +465,12 @@ data class PokemonImages(
 @Serializable
 data class PokemonImageData(
     val url: String,
-    val direction: FacingDirection = FacingDirection.LEFT
 )
 
 enum class ImageType {
     SPRITE, ARTWORK
 }
 
-private fun Modifier.flipXIfNecessary(wantedFacingDirection: FacingDirection?, pokemonFacingDirection: FacingDirection?) =
-    if (wantedFacingDirection != null && wantedFacingDirection != pokemonFacingDirection) scale(scaleX = - 1f, scaleY = 1f)
+private fun Modifier.flipXIfNecessary(wantedFacingDirection: FacingDirection) =
+    if (wantedFacingDirection == FacingDirection.RIGHT) scale(scaleX = -1f, scaleY = 1f)
     else this
