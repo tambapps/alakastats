@@ -15,8 +15,8 @@ enum class Format(
     val pokemonLevel: Int? = null
 ) {
     NONE("<none>", Mechanic.entries),
-    REGULATION_MA("Regulation M-A", allowedMechanics = listOf(Mechanic.MEGA_EVOLUTION), pokemonLevel = 50),
     REGULATION_MB("Regulation M-B", allowedMechanics = listOf(Mechanic.MEGA_EVOLUTION), pokemonLevel = 50),
+    REGULATION_MA("Regulation M-A", allowedMechanics = listOf(Mechanic.MEGA_EVOLUTION), pokemonLevel = 50),
     REGULATION_I("Regulation I", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
     REGULATION_F("Regulation F", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
     REGULATION_H("Regulation H", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
