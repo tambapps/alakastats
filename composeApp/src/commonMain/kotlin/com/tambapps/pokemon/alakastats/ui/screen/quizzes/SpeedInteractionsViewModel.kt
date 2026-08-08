@@ -7,6 +7,7 @@ import arrow.core.flatMap
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.PokeStats
+import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.NEUTRAL_INVESTMENT_EVS
@@ -14,7 +15,11 @@ import com.tambapps.pokemon.alakastats.domain.model.NEUTRAL_INVESTMENT_IVS
 import com.tambapps.pokemon.alakastats.domain.model.SPEED_INTERACTIONS_QUIZ_LEVEL
 import com.tambapps.pokemon.alakastats.domain.model.SPEED_NEUTRAL_NATURE
 import com.tambapps.pokemon.alakastats.domain.model.SpeedComparisonResult
+import com.tambapps.pokemon.alakastats.domain.model.SpeedModifier
 import com.tambapps.pokemon.alakastats.domain.model.SpeedRange
+import com.tambapps.pokemon.alakastats.domain.model.applyChoiceScarf
+import com.tambapps.pokemon.alakastats.domain.model.applyParalysis
+import com.tambapps.pokemon.alakastats.domain.model.applyTailwind
 import com.tambapps.pokemon.alakastats.domain.model.computeSpeedRange
 import com.tambapps.pokemon.alakastats.domain.model.isHoldingChoiceScarf
 import com.tambapps.pokemon.alakastats.domain.model.speedComparisonResultFor
@@ -23,15 +28,23 @@ import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.util.MegaUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.random.Random
 import kotlin.uuid.Uuid
 
 sealed interface SpeedInteractionsMode {
     data class Home(val format: Format) : SpeedInteractionsMode
-    data class Team(val teamId: Uuid) : SpeedInteractionsMode
+    data class Team(
+        val teamId: Uuid,
+        val allowOpponentScarf: Boolean = false,
+        val allowParalysis: Boolean = false,
+        val allowTailwind: Boolean = false,
+        val includeNonMegaBaseForms: Boolean = false
+    ) : SpeedInteractionsMode
 }
 
 data class SpeedInteractionQuestion(
@@ -43,8 +56,26 @@ data class SpeedInteractionQuestion(
     val speedB: Int?,
     // Team mode
     val range: SpeedRange?,
-    val correctResult: SpeedComparisonResult
+    val correctResult: SpeedComparisonResult,
+    val modifier: SpeedModifier = SpeedModifier.NONE
 )
+
+private data class TeamEntry(val pokemon: Pokemon, val resolvedName: PokemonName)
+
+/**
+ * A mega-capable member yields either just its mega form (default) or both its base and mega
+ * forms when [includeNonMegaBaseForms] is on. Handles both pokepaste conventions: the mega form
+ * written directly, or the base form holding a mega stone.
+ */
+private fun teamEntriesFor(pokemon: Pokemon, includeNonMegaBaseForms: Boolean): List<TeamEntry> {
+    val baseName = if (pokemon.name.isMega) pokemon.name.baseNormalized else pokemon.name.normalized
+    val megaName = if (pokemon.name.isMega) pokemon.name.normalized else MegaUtils.getMegaPokemon(pokemon.item)
+    return when {
+        megaName == null -> listOf(TeamEntry(pokemon, baseName))
+        includeNonMegaBaseForms -> listOf(TeamEntry(pokemon, baseName), TeamEntry(pokemon, megaName))
+        else -> listOf(TeamEntry(pokemon, megaName))
+    }
+}
 
 data class SpeedInteractionsResult(
     val question: SpeedInteractionQuestion,
@@ -101,7 +132,7 @@ class SpeedInteractionsViewModel(
         scope.launch {
             when (val m = mode) {
                 is SpeedInteractionsMode.Home -> loadHomeQuestions(m.format)
-                is SpeedInteractionsMode.Team -> loadTeamQuestions(m.teamId)
+                is SpeedInteractionsMode.Team -> loadTeamQuestions(m)
             }
         }
     }
@@ -149,8 +180,8 @@ class SpeedInteractionsViewModel(
         legacySystem = legacySystem
     ).speed
 
-    private suspend fun loadTeamQuestions(teamId: Uuid) {
-        val team = teamlyticsRepository.get(teamId).fold(ifLeft = { null }, ifRight = { it })
+    private suspend fun loadTeamQuestions(mode: SpeedInteractionsMode.Team) {
+        val team = teamlyticsRepository.get(mode.teamId).fold(ifLeft = { null }, ifRight = { it })
         if (team == null) {
             withContext(Dispatchers.Main) {
                 isLoading = false
@@ -169,10 +200,10 @@ class SpeedInteractionsViewModel(
         withContext(Dispatchers.Main) {
             resolvedFormat = format
         }
-        val teamPokemons = team.pokePaste.pokemons
+        val entries = team.pokePaste.pokemons.flatMap { teamEntriesFor(it, mode.includeNonMegaBaseForms) }
         formatRepository.get(format)
             .flatMap { formatData ->
-                pokemonBaseStatsRepository.getBaseStats(formatData.popularPokemons + teamPokemons.map { it.name })
+                pokemonBaseStatsRepository.getBaseStats(formatData.popularPokemons + entries.map { it.resolvedName })
                     .map { statsByPokemon -> formatData.popularPokemons to statsByPokemon }
             }
             .fold(
@@ -184,23 +215,51 @@ class SpeedInteractionsViewModel(
                 },
                 ifRight = { (popularPokemons, statsByPokemon) ->
                     val validOpponents = popularPokemons.filter { (statsByPokemon[it.normalized]?.speed ?: 0) > 0 }
-                    val generatedQuestions = teamPokemons.shuffled().mapNotNull { pokemon ->
-                        val baseStatsA = statsByPokemon[pokemon.name.normalized] ?: return@mapNotNull null
+                    val enabledModifiers = buildList {
+                        if (mode.allowOpponentScarf) add(SpeedModifier.B_CHOICE_SCARF)
+                        if (mode.allowParalysis) {
+                            add(SpeedModifier.B_PARALYSIS)
+                            add(SpeedModifier.A_PARALYSIS)
+                        }
+                        if (mode.allowTailwind) add(SpeedModifier.A_TAILWIND)
+                    }
+                    val generatedQuestions = entries.shuffled().mapNotNull { entry ->
+                        val pokemon = entry.pokemon
+                        val baseStatsA = statsByPokemon[entry.resolvedName.normalized] ?: return@mapNotNull null
                         if (baseStatsA.speed <= 0 || validOpponents.isEmpty()) return@mapNotNull null
                         val pokemonB = validOpponents.random()
                         val baseStatsB = statsByPokemon.getValue(pokemonB.normalized)
                         val legacySystem = format.usesLegacySystem(pokemon.evs)
-                        val speedA = PokeStats.compute(
+                        var speedA = PokeStats.compute(
                             baseStats = baseStatsA,
                             evs = pokemon.evs,
                             ivs = pokemon.ivs,
                             nature = pokemon.nature ?: SPEED_NEUTRAL_NATURE,
                             level = SPEED_INTERACTIONS_QUIZ_LEVEL,
                             legacySystem = legacySystem
-                        ).speed.let { if (isHoldingChoiceScarf(pokemon.item)) (it * 1.5f).toInt() else it }
-                        val range = computeSpeedRange(baseStatsB, legacySystem)
+                        ).speed
+                        if (isHoldingChoiceScarf(pokemon.item)) {
+                            speedA = applyChoiceScarf(speedA)
+                        }
+                        var range = computeSpeedRange(baseStatsB, legacySystem)
+                        val modifier = if (enabledModifiers.isEmpty() || Random.nextBoolean()) {
+                            SpeedModifier.NONE
+                        } else {
+                            enabledModifiers.random()
+                        }
+                        when (modifier) {
+                            SpeedModifier.B_CHOICE_SCARF -> range = range.copy(max = applyChoiceScarf(range.max))
+                            SpeedModifier.B_PARALYSIS -> range = SpeedRange(
+                                min = applyParalysis(range.min),
+                                neutral = applyParalysis(range.neutral),
+                                max = applyParalysis(range.max)
+                            )
+                            SpeedModifier.A_PARALYSIS -> speedA = applyParalysis(speedA)
+                            SpeedModifier.A_TAILWIND -> speedA = applyTailwind(speedA)
+                            SpeedModifier.NONE -> {}
+                        }
                         val result = speedComparisonResultFor(speedA, range)
-                        SpeedInteractionQuestion(pokemon.name, pokemonB, pokemon.item, speedA, null, range, result)
+                        SpeedInteractionQuestion(entry.resolvedName, pokemonB, pokemon.item, speedA, null, range, result, modifier)
                     }
                     withContext(Dispatchers.Main) {
                         isLoading = false

@@ -21,6 +21,17 @@ fun isHoldingChoiceScarf(item: ItemName?) = item?.normalized?.value == "choice-s
 fun maxSpeedInvestmentEvs(legacySystem: Boolean): Int = if (legacySystem) 252 else 32
 
 /**
+ * At most one of these applies to a given team-mode question (never stacked).
+ */
+enum class SpeedModifier {
+    NONE, B_CHOICE_SCARF, B_PARALYSIS, A_PARALYSIS, A_TAILWIND
+}
+
+fun applyChoiceScarf(speed: Int): Int = (speed * 1.5f).toInt()
+fun applyTailwind(speed: Int): Int = speed * 2
+fun applyParalysis(speed: Int): Int = speed / 2
+
+/**
  * B's legal Speed range boundaries (min/neutral/max investment), at [SPEED_INTERACTIONS_QUIZ_LEVEL].
  */
 data class SpeedRange(val min: Int, val neutral: Int, val max: Int)

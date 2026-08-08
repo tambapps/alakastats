@@ -44,6 +44,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.SpeedComparisonResult
+import com.tambapps.pokemon.alakastats.domain.model.SpeedModifier
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
@@ -169,12 +170,24 @@ private fun SpeedInteractionsQuestionContent(viewModel: SpeedInteractionsViewMod
         Spacer(Modifier.height(20.dp))
 
         MatchupHeader(viewModel, question)
+
+        if (question.modifier != SpeedModifier.NONE) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                question.modifier.caption(),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center
+            )
+        }
         Spacer(Modifier.height(28.dp))
 
         Text(
             if (viewModel.isTeamMode) "Does your Pokemon outspeed the opponent's?" else "Which Pokemon is faster?",
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(16.dp))
 
@@ -374,6 +387,14 @@ private fun SpeedComparisonResult.label(): String = when (this) {
     SpeedComparisonResult.GUARANTEED_FASTER -> "Guaranteed faster"
     SpeedComparisonResult.GUARANTEED_SLOWER -> "Guaranteed slower"
     SpeedComparisonResult.SPEED_TIE -> "Speed tie"
+}
+
+private fun SpeedModifier.caption(): String = when (this) {
+    SpeedModifier.B_CHOICE_SCARF -> "Opponent could be holding a Choice Scarf"
+    SpeedModifier.B_PARALYSIS -> "Opponent is paralyzed"
+    SpeedModifier.A_PARALYSIS -> "You are paralyzed"
+    SpeedModifier.A_TAILWIND -> "Under your Tailwind"
+    SpeedModifier.NONE -> ""
 }
 
 private fun assumptionsCaption(viewModel: SpeedInteractionsViewModel): String {

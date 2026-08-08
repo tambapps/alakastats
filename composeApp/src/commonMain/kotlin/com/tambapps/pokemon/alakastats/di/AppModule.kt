@@ -19,6 +19,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedStatQuizSetupViewM
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedStatQuizViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsHomeSetupViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsMode
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsTeamSetupViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsViewModel
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
@@ -117,6 +118,10 @@ val appModules = listOf(module {
 
     factory { (mode: SpeedInteractionsMode) ->
         SpeedInteractionsViewModel(mode, get(), get(), get(), get())
+    }
+
+    factory { (teamId: Uuid) ->
+        SpeedInteractionsTeamSetupViewModel(teamId, get())
     }
 
     factory { (useCase: ConsultTeamlyticsUseCase) ->
