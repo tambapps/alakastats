@@ -163,7 +163,7 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
             TextButton(
                 onClick = {
                     viewModel.hideAddReplayDialog()
-                    navigator.push(ManualReplayScreen(onReplayAdded = {}))
+                    navigator.push(ManualReplayScreen(viewModel.team, onReplayAdded = {}))
                 },
                 modifier = Modifier.padding(top = 4.dp)
             ) {

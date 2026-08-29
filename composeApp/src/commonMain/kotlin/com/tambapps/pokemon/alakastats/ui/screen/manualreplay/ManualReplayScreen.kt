@@ -47,9 +47,9 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
@@ -64,13 +64,15 @@ import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.util.MegaUtils
 import org.jetbrains.compose.resources.painterResource
+import org.koin.core.parameter.parametersOf
 
 data class ManualReplayScreen(
+    val team: Teamlytics,
     val onReplayAdded: (ReplayAnalytics) -> Unit
 ) : Screen {
     @Composable
     override fun Content() {
-        val viewModel = koinScreenModel<ManualReplayViewModel>()
+        val viewModel = koinScreenModel<ManualReplayViewModel> { parametersOf(team) }
         val navigator = LocalNavigator.currentOrThrow
         val isCompact = LocalIsCompact.current
 
@@ -84,7 +86,12 @@ data class ManualReplayScreen(
         ) { scaffoldPadding ->
             Box(modifier = Modifier.fillMaxSize().padding(scaffoldPadding)) {
                 FabLayout(
-                    fab = { DoneButton(viewModel, navigator) }
+                    fab = {
+                        DoneButton(viewModel) {
+                            onReplayAdded(viewModel.buildReplayAnalytics())
+                            navigator.pop()
+                        }
+                    }
                 ) {
                     if (isCompact) {
                         ManualReplayScreenMobile(viewModel)
@@ -105,11 +112,11 @@ data class ManualReplayScreen(
 }
 
 @Composable
-private fun DoneButton(viewModel: ManualReplayViewModel, navigator: Navigator, modifier: Modifier = Modifier) {
+private fun DoneButton(viewModel: ManualReplayViewModel, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val enabled = viewModel.pokemonStates.isNotEmpty()
     // FABs have no enabled flag, the disabled look has to be done through the colors
     ExtendedFloatingActionButton(
-        onClick = { if (enabled) navigator.pop() },
+        onClick = { if (enabled) onClick() },
         modifier = modifier,
         containerColor =
             if (enabled) FloatingActionButtonDefaults.containerColor

@@ -7,13 +7,24 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.MegaEvolution
+import com.tambapps.pokemon.alakastats.domain.model.Player
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamPreview
+import com.tambapps.pokemon.alakastats.domain.model.TeamPreviewPokemon
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.util.MegaUtils
 import com.tambapps.pokemon.util.MegaUtils.canMega
 import com.tambapps.pokemon.util.MegaUtils.toMega
+import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 internal const val MAX_POKEMONS = 6
+private const val VERSION = "1.0"
+private val OPPONENT_NAME = UserName("opponent")
 
-class ManualReplayViewModel : ScreenModel {
+class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
 
     val pokemonStates = mutableStateListOf<ManualPokemonState>()
 
@@ -88,6 +99,50 @@ class ManualReplayViewModel : ScreenModel {
             it.updateMega(if (it === pokemonState) megaStone else null)
         }
     }
+
+    fun buildReplayAnalytics() = ReplayAnalytics(
+        players = listOf(youPlayer(), opponentPlayer()),
+        uploadTime = Clock.System.now().epochSeconds,
+        format = team.format.name,
+        rating = null,
+        version = VERSION,
+        winner = null,
+        url = null,
+        // manual replays have no showdown replay to refer to
+        reference = "manual_" + Uuid.random(),
+        nextBattleRef = null,
+        notes = null,
+    )
+
+    private fun youPlayer() = emptyPlayer(
+        name = team.sdNames.first(),
+        teamPreviewPokemons = team.pokePaste.pokemons.map { TeamPreviewPokemon(it.name, it.level) }
+    )
+
+    private fun opponentPlayer() = emptyPlayer(
+        name = OPPONENT_NAME,
+        teamPreviewPokemons = pokemonStates.map { TeamPreviewPokemon(it.name, team.format.pokemonLevel) },
+        megaEvolution = pokemonStates.firstNotNullOfOrNull { pokemonState ->
+            pokemonState.megaStone?.let { MegaEvolution(pokemonState.name, it) }
+        }
+    )
+
+    // only what was entered on this screen is known, everything else is left empty
+    private fun emptyPlayer(
+        name: UserName,
+        teamPreviewPokemons: List<TeamPreviewPokemon>,
+        megaEvolution: MegaEvolution? = null
+    ) = Player(
+        name = name,
+        teamPreview = TeamPreview(teamPreviewPokemons),
+        selection = emptyList(),
+        beforeElo = null,
+        afterElo = null,
+        terastallization = null,
+        megaEvolution = megaEvolution,
+        ots = null,
+        movesUsage = emptyMap()
+    )
 }
 
 class ManualPokemonState(val name: PokemonName) {

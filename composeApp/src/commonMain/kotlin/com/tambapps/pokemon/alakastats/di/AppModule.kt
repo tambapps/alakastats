@@ -23,6 +23,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsMode
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsTeamSetupViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsViewModel
 import com.tambapps.pokemon.alakastats.domain.model.Format
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.quizzes.QuizzesTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsViewModel
@@ -103,7 +104,6 @@ val appModules = listOf(module {
 
     factoryOf(::HomeViewModel)
     factoryOf(::EditTeamViewModel)
-    factoryOf(::ManualReplayViewModel)
     factoryOf(::MatchupPlanEditViewModel)
     factoryOf(::QuizzesViewModel)
     factoryOf(::NatureQuizSetupViewModel)
@@ -132,6 +132,9 @@ val appModules = listOf(module {
 
     factory { (teamId: Uuid) ->
         TeamlyticsViewModel(teamId, get(), get())
+    }
+    factory { (team: Teamlytics) ->
+        ManualReplayViewModel(team)
     }
     factory { (teamId: Uuid, pokemonName: PokemonName) ->
         PokemonDetailViewModel(teamId, pokemonName, get())
