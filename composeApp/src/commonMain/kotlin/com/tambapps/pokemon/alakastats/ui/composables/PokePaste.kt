@@ -282,11 +282,13 @@ fun PokepastePokemon(
 @Composable
 fun MegaSwitch(
     megaSelected: Boolean,
+    enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Switch(
         megaSelected,
         onCheckedChange = onCheckedChange,
+        enabled = enabled,
         modifier = Modifier.scale(1.2f).padding(horizontal = 8.dp),
         thumbContent = {
             Icon(

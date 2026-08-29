@@ -19,17 +19,24 @@ import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 private const val POKEMONS_PER_ROW = 3
 
 @Composable
-internal fun ManualReplayScreenDesktop(viewModel: ManualReplayViewModel) {
+internal fun <T> ManualPokemonGridDesktop(
+    pokemonStates: List<T>,
+    modifier: Modifier = Modifier,
+    header: @Composable () -> Unit,
+    addCard: @Composable ((Modifier) -> Unit)?,
+    card: @Composable (T, Modifier) -> Unit
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        // the null cell is the add button, taking the next free slot of the grid
-        val cells: List<ManualPokemonState?> = buildList {
-            addAll(viewModel.pokemonStates)
-            if (viewModel.canAddPokemon) {
+        header()
+        // the null cell is the add card, taking the next free slot of the grid
+        val cells: List<T?> = buildList {
+            addAll(pokemonStates)
+            if (addCard != null) {
                 add(null)
             }
         }
@@ -42,9 +49,9 @@ internal fun ManualReplayScreenDesktop(viewModel: ManualReplayViewModel) {
                         Spacer(Modifier.width(16.dp))
                     }
                     if (pokemonState != null) {
-                        ManualPokemonCard(viewModel, pokemonState, Modifier.weight(1f))
+                        card(pokemonState, Modifier.weight(1f))
                     } else {
-                        AddPokemonCard(viewModel, Modifier.weight(1f))
+                        addCard?.invoke(Modifier.weight(1f))
                     }
                 }
                 // keep cards of incomplete rows the same width as the ones of full rows

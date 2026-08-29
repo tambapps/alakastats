@@ -2,14 +2,6 @@
 
 package com.tambapps.pokemon.alakastats.ui.screen.manualreplay
 
-import alakastats.composeapp.generated.resources.Res
-import alakastats.composeapp.generated.resources.add
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,24 +14,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,18 +48,15 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
-import com.tambapps.pokemon.alakastats.ui.composables.MegaSwitch
-import com.tambapps.pokemon.alakastats.ui.composables.MyCard
-import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
-import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.ItemImage
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.service.availablePokemonNames
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
-import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.util.MegaUtils
-import org.jetbrains.compose.resources.painterResource
+import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
+
+private val TABS = listOf("You", "Opponent")
 
 data class ManualReplayScreen(
     val team: Teamlytics,
@@ -74,7 +66,7 @@ data class ManualReplayScreen(
     override fun Content() {
         val viewModel = koinScreenModel<ManualReplayViewModel> { parametersOf(team) }
         val navigator = LocalNavigator.currentOrThrow
-        val isCompact = LocalIsCompact.current
+        val pagerState = rememberPagerState(pageCount = { TABS.size })
 
         Scaffold(
             topBar = {
@@ -93,10 +85,23 @@ data class ManualReplayScreen(
                         }
                     }
                 ) {
-                    if (isCompact) {
-                        ManualReplayScreenMobile(viewModel)
-                    } else {
-                        ManualReplayScreenDesktop(viewModel)
+                    Column(Modifier.fillMaxSize()) {
+                        val scope = rememberCoroutineScope()
+                        SecondaryTabRow(selectedTabIndex = pagerState.currentPage) {
+                            TABS.forEachIndexed { index, title ->
+                                Tab(
+                                    selected = pagerState.currentPage == index,
+                                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                                    text = { Text(title) }
+                                )
+                            }
+                        }
+                        HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
+                            when (page) {
+                                0 -> YouPage(viewModel)
+                                1 -> OpponentPage(viewModel)
+                            }
+                        }
                     }
                 }
             }
@@ -113,7 +118,7 @@ data class ManualReplayScreen(
 
 @Composable
 private fun DoneButton(viewModel: ManualReplayViewModel, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val enabled = viewModel.pokemonStates.isNotEmpty()
+    val enabled = viewModel.canBuildReplayAnalytics
     // FABs have no enabled flag, the disabled look has to be done through the colors
     ExtendedFloatingActionButton(
         onClick = { if (enabled) onClick() },
@@ -129,78 +134,19 @@ private fun DoneButton(viewModel: ManualReplayViewModel, modifier: Modifier = Mo
     }
 }
 
-// takes the place of the next pokemon card, so that adding one stays where the eye already is
+// both pages display pokemon cards the same way, only the cards themselves differ
 @Composable
-internal fun AddPokemonCard(viewModel: ManualReplayViewModel, modifier: Modifier = Modifier) {
-    MyCard(
-        modifier = modifier,
-        onClick = { viewModel.showSelectPokemonDialog() },
-        gradientBackgroundColors = cardGradientColors,
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.add),
-                contentDescription = "Add Pokemon",
-                tint = MaterialTheme.colorScheme.defaultIconColor,
-                modifier = Modifier.size(40.dp)
-            )
-            Spacer(Modifier.height(8.dp))
-            Text("Add Pokemon", style = MaterialTheme.typography.titleMedium)
-        }
-    }
-}
-
-@Composable
-internal fun ManualPokemonCard(
-    viewModel: ManualReplayViewModel,
-    pokemonState: ManualPokemonState,
-    modifier: Modifier = Modifier
+internal fun <T> ManualPokemonGrid(
+    pokemonStates: List<T>,
+    modifier: Modifier = Modifier,
+    header: @Composable () -> Unit = {},
+    addCard: @Composable ((Modifier) -> Unit)? = null,
+    card: @Composable (T, Modifier) -> Unit
 ) {
-    MyCard(
-        modifier = modifier,
-        gradientBackgroundColors = cardGradientColors,
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                PokemonSprite(
-                    pokemonState.displayedName,
-                    Modifier.size(56.dp),
-                    facingDirection = FacingDirection.RIGHT
-                )
-                Spacer(Modifier.width(8.dp))
-                AnimatedContent(
-                    targetState = pokemonState.displayedName.pretty,
-                    transitionSpec = { (fadeIn() + slideInVertically { it }) togetherWith (fadeOut() + slideOutVertically { -it }) },
-                    modifier = Modifier.weight(1f)
-                ) { name ->
-                    Text(name, style = MaterialTheme.typography.titleMedium)
-                }
-                if (pokemonState.canMega) {
-                    MegaSwitch(
-                        megaSelected = pokemonState.megaSelected,
-                        onCheckedChange = { viewModel.updateMegaSelected(pokemonState, it) }
-                    )
-                }
-                TextButton(onClick = { viewModel.removePokemon(pokemonState) }) {
-                    Text("×", style = MaterialTheme.typography.titleLarge)
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = pokemonState.item,
-                onValueChange = pokemonState::updateItem,
-                label = { Text("Item") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                // the item is the mega stone it mega evolved with
-                readOnly = pokemonState.megaSelected,
-            )
-        }
+    if (LocalIsCompact.current) {
+        ManualPokemonGridMobile(pokemonStates, modifier, header, addCard, card)
+    } else {
+        ManualPokemonGridDesktop(pokemonStates, modifier, header, addCard, card)
     }
 }
 
@@ -241,9 +187,10 @@ private fun SelectMegaStoneDialog(viewModel: ManualReplayViewModel, pokemonState
 private fun SelectPokemonDialog(viewModel: ManualReplayViewModel) {
     val allPokemons = availablePokemonNames()
     var text by remember { mutableStateOf("") }
-    val pokemons = remember(text, viewModel.pokemonStates.size) {
+    val pokemons = remember(text, viewModel.opponentPokemonStates.size) {
         allPokemons.filter {
-            !viewModel.contains(it) && (text.isBlank() || it.value.contains(text, ignoreCase = true))
+            !viewModel.containsOpponentPokemon(it) &&
+                    (text.isBlank() || it.value.contains(text, ignoreCase = true))
         }
     }
 
@@ -265,7 +212,7 @@ private fun SelectPokemonDialog(viewModel: ManualReplayViewModel) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { viewModel.addPokemon(pokemon) }
+                                .clickable { viewModel.addOpponentPokemon(pokemon) }
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)

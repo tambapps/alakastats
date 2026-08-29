@@ -15,20 +15,25 @@ import com.tambapps.pokemon.alakastats.ui.composables.verticalPokemonSpace
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 
 @Composable
-internal fun ManualReplayScreenMobile(viewModel: ManualReplayViewModel) {
+internal fun <T> ManualPokemonGridMobile(
+    pokemonStates: List<T>,
+    modifier: Modifier = Modifier,
+    header: @Composable () -> Unit,
+    addCard: @Composable ((Modifier) -> Unit)?,
+    card: @Composable (T, Modifier) -> Unit
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        viewModel.pokemonStates.forEach { pokemonState ->
-            ManualPokemonCard(viewModel, pokemonState, Modifier.fillMaxWidth())
+        header()
+        pokemonStates.forEach { pokemonState ->
+            card(pokemonState, Modifier.fillMaxWidth())
             Spacer(Modifier.height(verticalPokemonSpace))
         }
-        if (viewModel.canAddPokemon) {
-            AddPokemonCard(viewModel, Modifier.fillMaxWidth())
-        }
+        addCard?.invoke(Modifier.fillMaxWidth())
         Spacer(Modifier.height(teamlyticsTabPaddingBottom))
     }
 }
