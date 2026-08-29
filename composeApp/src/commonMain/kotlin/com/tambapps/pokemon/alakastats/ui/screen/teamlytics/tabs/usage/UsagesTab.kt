@@ -35,7 +35,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.NoReplay
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.util.MegaUtils
 import io.github.koalaplot.core.pie.PieChart
@@ -86,7 +86,6 @@ internal val UsagesViewModel.sortedPokemonMovesUsageEntries get() =
 
 @Composable
 fun PokemonUsagesCard(
-    pokemonImageService: PokemonImageService,
     team: Teamlytics,
     // need a separate field for replays because we might want filter some
     replays: List<ReplayAnalytics>,
@@ -117,7 +116,7 @@ fun PokemonUsagesCard(
             }
             Spacer(Modifier.height(8.dp))
         }
-        PokemonUsagesDonut(pokemonImageService, name, usages, Modifier.fillMaxWidth())
+        PokemonUsagesDonut(name, usages, Modifier.fillMaxWidth())
         Spacer(Modifier.height(8.dp))
         HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
         Spacer(Modifier.height(8.dp))
@@ -171,7 +170,6 @@ private val MOVE_STRUGGLE = MoveName("struggle")
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 private fun PokemonUsagesDonut(
-    pokemonImageService: PokemonImageService,
     name: PokemonName,
     usages: PokemonUsages,
     modifier: Modifier = Modifier,
@@ -201,7 +199,7 @@ private fun PokemonUsagesDonut(
                 contentAlignment = Alignment.Center,
             ) {
                 Tooltip(name.pretty) {
-                    pokemonImageService.PokemonSprite(name)
+                    LocalPokemonImageService.current.PokemonSprite(name)
                 }
             }
         }

@@ -9,26 +9,25 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 
 @Composable
 fun PokemonTeamPreview(
-    imageService: PokemonImageService,
     player: Player,
     fillWidth: Boolean = false,
     modifier: Modifier = Modifier,
     facingDirection: FacingDirection = FacingDirection.LEFT,
     ) {
-    PokemonTeamPreview(imageService, player.teamPreview.pokemons.map { it.name }, modifier, fillWidth, facingDirection)
+    PokemonTeamPreview(player.teamPreview.pokemons.map { it.name }, modifier, fillWidth, facingDirection)
 }
 
 @Composable
 fun PokemonTeamPreview(
-    imageService: PokemonImageService,
     pokemons: List<PokemonName>,
     modifier: Modifier = Modifier,
     fillWidth: Boolean = false,
     facingDirection: FacingDirection = FacingDirection.LEFT) {
+    val imageService = LocalPokemonImageService.current
     Row(
         modifier = modifier.heightIn(max = 100.dp),
         verticalAlignment = Alignment.CenterVertically

@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlin.math.pow
 
@@ -96,12 +96,12 @@ inline fun <T> PokemonStatsRow(
 
 @Composable
 fun PokemonStatCard(
-    pokemonImageService: PokemonImageService,
     title: String,
     text: String,
     pokemonName: PokemonName,
     pokemonName2: PokemonName? = null,
     modifier: Modifier) {
+    val pokemonImageService = LocalPokemonImageService.current
     val density = LocalDensity.current
     val (minOffsetDp, maxOffsetDp) = if (pokemonName2 == null) 12.dp  to 80.dp else 24.dp to 100.dp
     PokemonCard(

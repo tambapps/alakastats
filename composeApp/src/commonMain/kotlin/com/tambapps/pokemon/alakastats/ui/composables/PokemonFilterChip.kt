@@ -12,18 +12,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 
 
 @Composable
 fun PokemonFilterChip(
     pokemonName: PokemonName,
-    pokemonImageService: PokemonImageService,
     onClick: () -> Unit,
     asLead: Boolean,
     selected: Boolean = asLead,
     modifier: Modifier = Modifier
     ) {
+    val pokemonImageService = LocalPokemonImageService.current
     val height = 70.dp
 
     FilterChip(

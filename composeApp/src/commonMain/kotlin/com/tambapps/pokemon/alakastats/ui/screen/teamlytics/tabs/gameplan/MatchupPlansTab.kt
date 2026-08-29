@@ -53,7 +53,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit.M
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ExpandableDesktopReplay
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ReplayCompact
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
 
@@ -147,7 +147,6 @@ internal fun MatchNotes(
         subtitle = {
             matchupPlan.pokePaste?.let { pokePaste ->
                 PokemonTeamPreview(
-                    viewModel.pokemonImageService,
                     pokePaste.pokemons.map { it.name },
                     fillWidth = true,
                     facingDirection = FacingDirection.LEFT
@@ -179,10 +178,10 @@ internal fun MatchNotes(
 
 @Composable
 internal fun Composition(composition: List<PokemonName>,
-                         pokemonImageService: PokemonImageService,
                          pokemonSize: Dp,
                          facingDirection: FacingDirection,
                          modifier: Modifier = Modifier) {
+    val pokemonImageService = LocalPokemonImageService.current
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
         val chunks = buildList {
             add(composition.take(2))
@@ -233,9 +232,9 @@ internal fun ExampleReplays(viewModel: MatchupPlansViewModel, gamePlan: GamePlan
     Spacer(Modifier.height(16.dp))
     gamePlan.exampleReplays.forEach { replay ->
         if (LocalIsCompact.current) {
-            ReplayCompact(viewModel.team, replay, viewModel.pokemonImageService)
+            ReplayCompact(viewModel.team, replay)
         } else {
-            ExpandableDesktopReplay(viewModel.team, replay, viewModel.pokemonImageService)
+            ExpandableDesktopReplay(viewModel.team, replay)
         }
         Spacer(Modifier.height(16.dp))
     }

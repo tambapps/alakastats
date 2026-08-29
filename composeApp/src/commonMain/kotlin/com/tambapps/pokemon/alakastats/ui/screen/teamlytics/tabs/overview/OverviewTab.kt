@@ -44,7 +44,6 @@ import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailsScreen
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -212,7 +211,6 @@ internal fun NotedPokepastePokemon(
             team = team,
             pokemon = pokemon,
             pokemonData = team.data.pokemonData[pokemon.name],
-            pokemonImageService = viewModel.pokemonImageService,
             modifier = modifier,
             onNotesChanged = { viewModel.pokemonNotes[pokemon] = it },
             notes = notes
@@ -224,7 +222,6 @@ internal fun NotedPokepastePokemon(
             isOts = team.pokePaste.isOts,
             pokemon = pokemon,
             pokemonData = team.data.pokemonData[pokemon.name.normalized],
-            pokemonImageService = viewModel.pokemonImageService,
             modifier = modifier,
             notes = notes,
             onClick = {
@@ -245,7 +242,6 @@ fun PokepastePokemon(
     team: Teamlytics,
     pokemon: Pokemon,
     pokemonData: PokemonData?,
-    pokemonImageService: PokemonImageService,
     modifier: Modifier = Modifier,
     onNotesChanged: (String) -> Unit,
     notes: String? = null,
@@ -254,7 +250,6 @@ fun PokepastePokemon(
     isOts = team.pokePaste.isOts,
     pokemon = pokemon,
     pokemonData = pokemonData,
-    pokemonImageService = pokemonImageService,
     modifier = modifier,
     notes = notes,
     onClick = null

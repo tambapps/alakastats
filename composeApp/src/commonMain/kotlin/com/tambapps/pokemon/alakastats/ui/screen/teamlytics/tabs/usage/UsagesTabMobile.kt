@@ -38,7 +38,6 @@ internal fun UsagesTabMobile(viewModel: UsagesViewModel, scrollState: ScrollStat
                 modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                 team = viewModel.team,
                 replays = viewModel.replays,
-                pokemonImageService = viewModel.pokemonImageService,
                 name = pokemonName,
                 usages = moveUsage
             )

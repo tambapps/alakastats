@@ -58,7 +58,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.isSdNameValid
@@ -67,7 +67,6 @@ import kotlin.jvm.JvmInline
 
 private class FiltersViewModel(
     private val useCase: ManageReplayFiltersUseCase,
-    val pokemonImageService: PokemonImageService
 ) {
     val filters get() = useCase.filters
     fun applyFilters(filters: ReplayFilters) = useCase.applyFilters(filters)
@@ -91,7 +90,7 @@ fun FiltersBar(
     additionalFilters: (@Composable () -> Unit)? = null
 ) {
     val filters = parentViewModel.filters
-    val viewModel = remember(filters) { FiltersViewModel(parentViewModel.useCase, parentViewModel.pokemonImageService) }
+    val viewModel = remember(filters) { FiltersViewModel(parentViewModel.useCase) }
     val opponentTeamFilter = remember(filters) {
         PokemonsFilter("Opp. Team", "Opponent's Team", filters.opponentTeam, allowLead = false, max = 6)
     }
@@ -105,14 +104,12 @@ fun FiltersBar(
             Spacer(Modifier.height(8.dp))
             FlowRow {
                 PokemonFilterButton(
-                    pokemonImageService = viewModel.pokemonImageService,
                     filter = opponentTeamFilter,
                     dialogState = showPokemonDialogFilterState,
                     onClear = { viewModel.applyFilters(filters.copy(opponentTeam = emptyList())) }
                 )
 
                 PokemonFilterButton(
-                    pokemonImageService = viewModel.pokemonImageService,
                     filter = opponentSelectionFilter,
                     dialogState = showPokemonDialogFilterState,
                     onClear = { viewModel.applyFilters(filters.copy(opponentSelection = emptyList())) }
@@ -121,7 +118,6 @@ fun FiltersBar(
                 OppUsernameButton(viewModel)
 
                 PokemonFilterButton(
-                    pokemonImageService = viewModel.pokemonImageService,
                     filter = yourSelectionFilter,
                     dialogState = showPokemonDialogFilterState,
                     onClear = { viewModel.applyFilters(filters.copy(yourSelection = emptyList())) }
@@ -141,7 +137,6 @@ fun FiltersBar(
     showPokemonDialogFilterState.value?.let { filter ->
         SetPokemonFilterDialog(
             filter = filter,
-            pokemonImageService = viewModel.pokemonImageService,
             onComplete = {
                 when(filter) {
                     opponentTeamFilter -> viewModel.applyFilters(filters.copy(opponentTeam = it))
@@ -161,7 +156,6 @@ fun FiltersBar(
 @Composable
 private fun SetPokemonFilterDialog(
     filter: PokemonsFilter,
-    pokemonImageService: PokemonImageService,
     onComplete: (List<PokemonFilter>) -> Unit,
     onDismiss: () -> Unit,
     myPokemons: List<PokemonName>? = null
@@ -183,7 +177,6 @@ private fun SetPokemonFilterDialog(
                     pokemons.forEach { pokemonFilter ->
                         PokemonFilterChip(
                             pokemonName = pokemonFilter.name,
-                            pokemonImageService = pokemonImageService,
                             onClick = { pokemons.remove(pokemonFilter) },
                             asLead = pokemonFilter.asLead
                         )
@@ -252,7 +245,6 @@ private fun SetPokemonFilterDialog(
         val pickOtherState = remember { mutableStateOf(false) }
         if (!pickOtherState.value && myPokemons != null && myPokemons.isNotEmpty()) {
             AddMyPokemonNameDialog(
-                pokemonImageService = pokemonImageService,
                 containsValidator = { pName -> pokemons.isNotEmpty() && pokemons.any { it.name.matches(pName) } },
                 onDismissRequest = { addPokemonDialogState = null },
                 asLead = state.asLead,
@@ -262,7 +254,6 @@ private fun SetPokemonFilterDialog(
             )
         } else {
             SelectPokemonDialog(
-                pokemonImageService = pokemonImageService,
                 containsValidator = { pName -> pokemons.isNotEmpty() && pokemons.any { it.name.matches(pName) } },
                 onDismissRequest = { addPokemonDialogState = null },
                 asLead = state.asLead,
@@ -292,11 +283,11 @@ fun FilterBarButton(
 
 @Composable
 private fun PokemonFilterButton(
-    pokemonImageService: PokemonImageService,
     onClear: () -> Unit,
     dialogState: MutableState<PokemonsFilter?>,
     filter: PokemonsFilter,
 ) {
+    val pokemonImageService = LocalPokemonImageService.current
     val pokemons = filter.pokemons
     val isCompact = LocalIsCompact.current
     FilterBarButton(
@@ -409,7 +400,7 @@ private fun CommonFiltersDialog(
                                     modifier = Modifier.padding(all = 8.dp)
                                 ) {
                                     pokemons.forEach {
-                                        viewModel.pokemonImageService.PokemonSprite(
+                                        LocalPokemonImageService.current.PokemonSprite(
                                             it.name,
                                             Modifier.size(iconSize)
                                                 .scale(1.5f)
@@ -459,7 +450,6 @@ private fun OppUsernameButton(viewModel: FiltersViewModel) {
 
 @Composable
 private fun AddMyPokemonNameDialog(
-    pokemonImageService: PokemonImageService,
     myPokemons: List<PokemonName>,
     containsValidator: (PokemonName) -> Boolean,
     asLead: Boolean,
@@ -473,7 +463,6 @@ private fun AddMyPokemonNameDialog(
         title = { Text("Add Pokemon Filter") },
         text = {
             PokemonWheelPicker(
-                pokemonImageService = pokemonImageService,
                 pokemons = myPokemons,
                 state = wheelState
             )

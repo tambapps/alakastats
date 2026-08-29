@@ -113,11 +113,11 @@ val appModules = listOf(module {
     }
 
     factory { (format: Format, allowChoiceScarf: Boolean, useMaxStatPoints: Boolean, useSpeedBoostingNature: Boolean) ->
-        SpeedStatQuizViewModel(format, allowChoiceScarf, useMaxStatPoints, useSpeedBoostingNature, get(), get(), get())
+        SpeedStatQuizViewModel(format, allowChoiceScarf, useMaxStatPoints, useSpeedBoostingNature, get(), get())
     }
 
     factory { (mode: SpeedInteractionsMode) ->
-        SpeedInteractionsViewModel(mode, get(), get(), get(), get())
+        SpeedInteractionsViewModel(mode, get(), get(), get())
     }
 
     factory { (teamId: Uuid) ->
@@ -125,37 +125,37 @@ val appModules = listOf(module {
     }
 
     factory { (useCase: ConsultTeamlyticsUseCase) ->
-        QuizzesTabViewModel(useCase, get())
+        QuizzesTabViewModel(useCase)
     }
 
     factory { (teamId: Uuid) ->
         TeamlyticsViewModel(teamId, get(), get())
     }
     factory { (teamId: Uuid, pokemonName: PokemonName) ->
-        PokemonDetailViewModel(teamId, pokemonName, get(), get())
+        PokemonDetailViewModel(teamId, pokemonName, get())
     }
     factory { (useCase: ManageTeamOverviewUseCase) ->
-        OverviewViewModel(useCase, get(), get(), get())
+        OverviewViewModel(useCase, get(), get())
     }
     factory { (state: TeamPokemonStateState.Loaded, megaSelectedState: MutableState<Boolean>) ->
-        PokemonDetailOverviewModel(get(), state.team, state.pokemon, state.megaPokemon, state.pokemonData, state.notes, state.usages, megaSelectedState)
+        PokemonDetailOverviewModel(state.team, state.pokemon, state.megaPokemon, state.pokemonData, state.notes, state.usages, megaSelectedState)
     }
     factory { (state: TeamPokemonStateState.Loaded, megaSelectedState: MutableState<Boolean>) ->
-        PokemonSpeedScaleViewModel(get(), state.team, state.pokemon, state.megaPokemon, megaSelectedState.value, state.pokemonData, get(), get())
+        PokemonSpeedScaleViewModel(state.team, state.pokemon, state.megaPokemon, megaSelectedState.value, state.pokemonData, get(), get())
     }
     factory { (useCase: ManageTeamReplaysUseCase, formatData: FormatData?) ->
-        TeamReplayViewModel(useCase, get(), get(), formatData)
+        TeamReplayViewModel(useCase, get(), formatData)
     }
     factory { (useCase: ManageReplayFiltersUseCase, formatData: FormatData?) ->
-        LeadStatsViewModel(useCase, get(), formatData)
+        LeadStatsViewModel(useCase, formatData)
     }
     factory { (useCase: ManageTeamReplaysUseCase, formatData: FormatData?) ->
-        UsagesViewModel(useCase, get(), formatData)
+        UsagesViewModel(useCase, formatData)
     }
     factory { (useCase: ManageReplayFiltersUseCase, formatData: FormatData?) ->
-        MatchupsViewModel(useCase, get(), formatData)
+        MatchupsViewModel(useCase, formatData)
     }
     factory { (useCase: ManageMatchupPlansUseCase) ->
-        MatchupPlansViewModel(useCase, get())
+        MatchupPlansViewModel(useCase)
     }
 })

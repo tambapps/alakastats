@@ -4,7 +4,6 @@ import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.TabViewModel
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.util.VoidSignal
 
 abstract class TeamlyticsTabViewModel: TabViewModel {
@@ -16,8 +15,6 @@ abstract class TeamlyticsTabViewModel: TabViewModel {
     override val scrollToTopSignal = VoidSignal()
 
     protected abstract val isTabLoading: Boolean
-
-    abstract val pokemonImageService: PokemonImageService
 
 }
 

@@ -44,6 +44,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -174,7 +175,7 @@ private fun PokemonSpeedSprite(viewModel: PokemonSpeedScaleViewModel, pSpeed: Po
         else Modifier.height(130.dp).padding(16.dp)
     )
     Tooltip(pSpeed.pokemonName.pretty) {
-        viewModel.pokemonImageService.PokemonSprite(
+        LocalPokemonImageService.current.PokemonSprite(
             pSpeed.pokemonName,
             modifier = modifier,
             facingDirection = if (pSpeed.isPokemonOfInterest) FacingDirection.LEFT else FacingDirection.RIGHT

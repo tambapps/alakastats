@@ -14,7 +14,6 @@ import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultPokemonDetailUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.PagerViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.PokemonUsages
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.util.MegaUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +38,6 @@ class PokemonDetailViewModel(
     private val teamId: Uuid,
     private val pokemonName: PokemonName,
     private val useCase: ConsultPokemonDetailUseCase,
-    val pokemonImageService: PokemonImageService
 ): ScreenModel, PagerViewModel {
 
     var state by mutableStateOf<TeamPokemonStateState>(TeamPokemonStateState.Loading)

@@ -59,7 +59,7 @@ private fun MatchNotesMobile(
                     ?.takeIf { it.isNotEmpty() }
                     ?.let { composition ->
                         Composition(
-                            composition, viewModel.pokemonImageService,
+                            composition,
                             pokemonSize = 80.dp,
                             facingDirection = FacingDirection.RIGHT,
                             Modifier.align(Alignment.CenterHorizontally).padding(vertical = 8.dp)

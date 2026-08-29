@@ -62,7 +62,7 @@ private fun MatchNotesDesktop(
                         ?.takeIf { it.isNotEmpty() }
                         ?.let { composition ->
                             Composition(
-                                composition, viewModel.pokemonImageService,
+                                composition,
                                 pokemonSize = 120.dp,
                                 facingDirection = FacingDirection.RIGHT,
                                 Modifier.padding(end = 8.dp).weight(4f)

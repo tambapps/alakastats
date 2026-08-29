@@ -11,7 +11,6 @@ import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,7 +19,6 @@ import kotlin.collections.component2
 
 class LeadStatsViewModel(
     override val useCase: ManageReplayFiltersUseCase,
-    override val pokemonImageService: PokemonImageService,
     override val formatData: FormatData?,
     ): TeamlyticsFiltersTabViewModel() {
 

@@ -73,7 +73,6 @@ internal fun DesktopRow(
                     modifier = Modifier,
                     team = viewModel.team,
                     replays = viewModel.replays,
-                    pokemonImageService = viewModel.pokemonImageService,
                     name = pokemonName,
                     usages = usages
                 )

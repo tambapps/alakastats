@@ -17,7 +17,6 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.downloadToFile
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsTabViewModel
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.util.MegaUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +25,6 @@ import kotlinx.coroutines.withContext
 
 class OverviewViewModel(
     override val useCase: ManageTeamOverviewUseCase,
-    override val pokemonImageService: PokemonImageService,
     private val pokemonMovesRepository: PokemonMovesRepository,
     private val pokemonBaseStatsRepository: PokemonBaseStatsRepository
 ): TeamlyticsTabViewModel() {

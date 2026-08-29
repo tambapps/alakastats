@@ -59,6 +59,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ReplayCompact
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -257,7 +258,6 @@ private fun SelectReplayExampleDialog(
                         ReplayCompact(
                             team,
                             replay,
-                            viewModel.pokemonImageService,
                             onClick = {
                                 if (isSelected) {
                                     selectedReplays.remove(replay)
@@ -325,7 +325,6 @@ private fun AddToCompositionDialog(
                         val isSelected = selectedPokemons.contains(pokemonName)
                         PokemonFilterChip(
                             pokemonName = pokemonName,
-                            pokemonImageService = viewModel.pokemonImageService,
                             onClick = {
                                 when {
                                     // 5 and not 4 because I allow the user to have many back pokemon options
@@ -421,7 +420,7 @@ private fun GamePlanComposition(
         Row(Modifier.fillMaxWidth()) {
             composition.forEach { pokemonName ->
                 Tooltip(pokemonName.pretty) {
-                    viewModel.pokemonImageService.PokemonSprite(
+                    LocalPokemonImageService.current.PokemonSprite(
                         pokemonName,
                         modifier = Modifier.then(
                             if (isCompact) Modifier.weight(1f) else Modifier.size(
@@ -458,7 +457,7 @@ private fun ReplayExamples(
     }
     VerticalSpacer()
     gamePlanState.exampleReplays.forEach { replay ->
-        ReplayCompact(team, replay, viewModel.pokemonImageService)
+        ReplayCompact(team, replay)
         VerticalSpacer()
     }
 

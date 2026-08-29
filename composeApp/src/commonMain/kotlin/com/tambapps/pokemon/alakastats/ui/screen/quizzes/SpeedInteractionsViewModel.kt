@@ -29,7 +29,6 @@ import com.tambapps.pokemon.alakastats.domain.model.usesLegacySystem
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.util.MegaUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -90,7 +89,6 @@ data class SpeedInteractionsResult(
 
 class SpeedInteractionsViewModel(
     val mode: SpeedInteractionsMode,
-    val pokemonImageService: PokemonImageService,
     private val formatRepository: FormatDataRepository,
     private val pokemonBaseStatsRepository: PokemonBaseStatsRepository,
     private val teamlyticsRepository: TeamlyticsRepository

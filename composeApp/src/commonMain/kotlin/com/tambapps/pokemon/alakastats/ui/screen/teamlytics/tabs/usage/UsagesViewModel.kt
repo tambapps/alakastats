@@ -14,7 +14,6 @@ import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsContext
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +21,6 @@ import kotlinx.coroutines.launch
 
 class UsagesViewModel(
     override val useCase: ManageTeamReplaysUseCase,
-    override val pokemonImageService: PokemonImageService,
     override val formatData: FormatData?,
 ): TeamlyticsFiltersTabViewModel() {
 

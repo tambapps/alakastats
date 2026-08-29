@@ -24,7 +24,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 
 @Composable
 fun PokemonNameTextField(
@@ -34,8 +34,8 @@ fun PokemonNameTextField(
     isError: Boolean = false,
     supportingText: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier,
-    pokemonImageService: PokemonImageService,
 ) {
+    val pokemonImageService = LocalPokemonImageService.current
     var expanded by remember { mutableStateOf(false) }
 
     var textFieldValue by remember(value) {

@@ -90,7 +90,6 @@ fun BestMatchupsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
     stats = viewModel.bestMatchups,
     isDuo = false) { matchupStats ->
     PokemonStatCard(
-        pokemonImageService = viewModel.pokemonImageService,
         title = "${matchupStats.rate.times(100).toInt()}%",
         text = winRatioText(winCount = matchupStats.winCount, total = matchupStats.attendanceCount),
         pokemonName = matchupStats.pokemonName,
@@ -105,7 +104,6 @@ fun WorstMatchupsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
     stats = viewModel.worstMatchups,
     isDuo = false) { matchupStats ->
     PokemonStatCard(
-        pokemonImageService = viewModel.pokemonImageService,
         title = "${matchupStats.rate.times(100).toInt()}%",
         text = winRatioText(winCount = matchupStats.winCount, total = matchupStats.attendanceCount),
         pokemonName = matchupStats.pokemonName,
@@ -128,7 +126,6 @@ fun HighestAttendancesRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
         else -> "Seen ${attendanceCount}\nout of ${total}\ngames"
     }
     PokemonStatCard(
-        pokemonImageService = viewModel.pokemonImageService,
         title = "${attendanceStats.rate.times(100).toInt()}%",
         text = text,
         pokemonName = attendanceStats.pokemonName,
@@ -151,7 +148,6 @@ fun LowestAttendancesRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
         else -> "Seen ${attendanceCount}\nout of ${total}\ngames"
     }
     PokemonStatCard(
-        pokemonImageService = viewModel.pokemonImageService,
         title = "${attendanceStats.rate.times(100).toInt()}%",
         text = text,
         pokemonName = attendanceStats.pokemonName,
@@ -176,7 +172,6 @@ private fun CommonLeadsStatsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
         else -> "Led ${attendanceCount}\nout of $total\ngames"
     }
     PokemonStatCard(
-        pokemonImageService = viewModel.pokemonImageService,
         title = "${leadStats.attendanceRate.times(100).toInt()}%",
         text = text,
         pokemonName = leadStats.lead.first(),
@@ -195,7 +190,6 @@ private fun WorstLeadsStatsRow(viewModel: MatchupsViewModel) = PokemonStatsRow(
     emptyMessage = if (!viewModel.filters.hasAny()) "Apply filters to see worst opposing leads in a matchup" else "No data to display"
 ) { leadStats ->
     PokemonStatCard(
-        pokemonImageService = viewModel.pokemonImageService,
         title = "${leadStats.winRate.times(100).toInt()}%",
         text = winRatioText(winCount = leadStats.winCount, total = leadStats.attendanceCount, isDuo = true),
         pokemonName = leadStats.lead.first(),

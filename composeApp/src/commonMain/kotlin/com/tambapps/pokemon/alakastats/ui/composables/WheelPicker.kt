@@ -21,7 +21,7 @@ import com.swmansion.kmpwheelpicker.WheelPicker
 import com.swmansion.kmpwheelpicker.WheelPickerState
 import com.swmansion.kmpwheelpicker.rememberWheelPickerState
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlin.math.abs
 
@@ -29,11 +29,11 @@ private const val BUFFER_SIZE = 3
 
 @Composable
 fun PokemonWheelPicker(
-    pokemonImageService: PokemonImageService,
     pokemons: List<PokemonName>,
     modifier: Modifier = Modifier,
     state: WheelPickerState = rememberWheelPickerState(itemCount = pokemons.size, initialIndex = 0),
 ) {
+    val pokemonImageService = LocalPokemonImageService.current
     Box(modifier.clipToBounds()) {
         WheelPicker(
             state = state,

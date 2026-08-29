@@ -44,6 +44,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.Modifier
@@ -69,6 +70,10 @@ private val placeHolderDrawable = Res.drawable.pokeball
 
 enum class FacingDirection {
     LEFT, RIGHT
+}
+
+val LocalPokemonImageService = compositionLocalOf<PokemonImageService> {
+    error("PokemonImageService not provided")
 }
 
 interface PokemonImageService {

@@ -34,7 +34,6 @@ fun PokemonDetailsOverviewDesktop(
     ) {
         PokepastePokemonHeader(
             pokemon = viewModel.pokemon,
-            pokemonImageService = viewModel.pokemonImageService,
             format = viewModel.team.format,
             megaSwitch = if (viewModel.megaPokemon != null) ({ MegaSwitch(viewModel.megaSelected, onCheckedChange = { viewModel.megaSelected = it }) })
             else null
@@ -46,7 +45,6 @@ fun PokemonDetailsOverviewDesktop(
 
                 viewModel.usages?.let {
                     PokemonUsagesCard(
-                        pokemonImageService = viewModel.pokemonImageService,
                         team = viewModel.team,
                         replays = viewModel.team.replays,
                         name = viewModel.pokemon.name,

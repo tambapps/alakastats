@@ -104,7 +104,6 @@ private fun LeadCard(
         else -> "Won ${winCount}\nout of $total\ngames"
     }
     PokemonStatCard(
-        pokemonImageService = viewModel.pokemonImageService,
         title = "${stat.winRate.times(100).toInt()}%",
         text = text,
         pokemonName = pokemonName,

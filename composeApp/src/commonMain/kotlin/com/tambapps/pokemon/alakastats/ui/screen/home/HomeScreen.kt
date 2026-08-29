@@ -184,7 +184,7 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
                 }
             }
 
-            PokemonTeamPreview(viewModel.imageService, team.pokemons, fillWidth = true)
+            PokemonTeamPreview(team.pokemons, fillWidth = true)
             HorizontalDivider(thickness = 1.dp, modifier = Modifier.padding(vertical = 4.dp))
             Row {
                 Text("${team.nbReplays} replays")
@@ -278,7 +278,7 @@ private fun SamplesDialog(viewModel: HomeViewModel, samplePreviews: List<Teamlyt
                         })
                     ) {
                         Text(preview.name, style = MaterialTheme.typography.titleLarge)
-                        PokemonTeamPreview(viewModel.imageService, preview.pokemons, fillWidth = true)
+                        PokemonTeamPreview(preview.pokemons, fillWidth = true)
                         Spacer(Modifier.height(4.dp))
                         Row {
                             Text("${preview.nbReplays} replays")
@@ -323,7 +323,7 @@ private fun TeamActionDialog(
             }
 
             Text(teamName, style = MaterialTheme.typography.titleMedium)
-            PokemonTeamPreview(viewModel.imageService, pokemons, fillWidth = true)
+            PokemonTeamPreview(pokemons, fillWidth = true)
             Spacer(Modifier.height(4.dp))
             Row {
                 Text("$nbReplays replays")

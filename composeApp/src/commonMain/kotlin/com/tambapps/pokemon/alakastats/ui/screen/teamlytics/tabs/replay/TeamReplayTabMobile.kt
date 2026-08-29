@@ -33,7 +33,6 @@ import com.tambapps.pokemon.alakastats.ui.composables.GameOutcomeCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.Header
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import com.tambapps.pokemon.util.MegaUtils.toMega
@@ -92,14 +91,13 @@ private fun MobileSdNamesWarning(viewModel: TeamReplayViewModel) {
 
 @Composable
 private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
-    ReplayCompact(team, replay, viewModel.pokemonImageService, viewModel)
+    ReplayCompact(team, replay, viewModel)
 }
 
 @Composable
 fun ReplayCompact(
     team: Teamlytics,
     replay: ReplayAnalytics,
-    pokemonImageService: PokemonImageService,
     viewModel: TeamReplayViewModel? = null,
     onClick: (() -> Unit)? = null,
     gradientBackgroundColors: List<Color>? = null,
@@ -114,7 +112,7 @@ fun ReplayCompact(
         },
         subtitle = {
             if (gameOutput != GameOutcome.UNKNOWN) {
-                PokemonTeamPreview(pokemonImageService, opponentPlayer, fillWidth = true)
+                PokemonTeamPreview(opponentPlayer, fillWidth = true)
             }
         },
         menu = if (viewModel != null) ({ isMenuExpandedState ->
@@ -130,13 +128,13 @@ fun ReplayCompact(
                 Row(Modifier.fillMaxWidth()
                     .padding(horizontal = 8.dp)) {
                     Spacer(Modifier.weight(1f))
-                    OtsButton(team.format, opponentPlayer, opponentPlayer.ots, pokemonImageService)
+                    OtsButton(team.format, opponentPlayer, opponentPlayer.ots)
                     Spacer(Modifier.width(32.dp))
                     ViewReplayButton(team, replay, replay.url)
                     Spacer(Modifier.weight(1f))
                 }
             } else if (gameOutput != GameOutcome.UNKNOWN && opponentPlayer.ots != null) {
-                OtsButton(team.format, opponentPlayer, opponentPlayer.ots, pokemonImageService, modifier = Modifier.align(Alignment.CenterHorizontally))
+                OtsButton(team.format, opponentPlayer, opponentPlayer.ots, modifier = Modifier.align(Alignment.CenterHorizontally))
             } else if (replay.url != null) {
                 ViewReplayButton(team, replay, replay.url, modifier = Modifier.align(Alignment.CenterHorizontally))
             }
@@ -151,7 +149,6 @@ fun ReplayCompact(
                         modifier = Modifier.weight(1f),
                         player = currentPlayer,
                         playerName = "You",
-                        pokemonImageService = pokemonImageService,
                         isYouPlayer = true
                     )
 
@@ -159,7 +156,6 @@ fun ReplayCompact(
                         modifier = Modifier.weight(1f),
                         player = opponentPlayer,
                         playerName = "Opponent",
-                        pokemonImageService = pokemonImageService
                     )
                 }
             }
@@ -177,7 +173,7 @@ fun ReplayCompact(
 }
 
 @Composable
-private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String, pokemonImageService: PokemonImageService, isYouPlayer: Boolean = false) {
+private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String, isYouPlayer: Boolean = false) {
     Column(
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -193,7 +189,6 @@ private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String,
             SelectedPokemon(
                 pokemon = pokemon,
                 teraType = teraType,
-                pokemonImageService = pokemonImageService,
                 isYouPlayer = isYouPlayer,
                 megaPokemon = megaPokemon
             )

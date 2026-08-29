@@ -71,7 +71,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
 import com.tambapps.pokemon.alakastats.util.titlecase
@@ -327,7 +327,6 @@ internal fun OtsButton(
     format: Format,
     player: Player,
     ots: OpenTeamSheet,
-    pokemonImageService: PokemonImageService,
     modifier: Modifier = Modifier
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -351,7 +350,7 @@ internal fun OtsButton(
             ) {
                 // Mobile on purpose because we want a vertical pokepaste display on desktop too, as
                 // for some mysterious reason the dialog can't have full screen width
-                VerticalPokepaste(pokepaste, pokemonImageService, format)
+                VerticalPokepaste(pokepaste, format)
             }
         },
         confirmButton = {
@@ -389,10 +388,10 @@ internal fun SelectedPokemon(
     pokemon: PokemonName,
     megaPokemon: PokemonName?,
     teraType: TeraType?,
-    pokemonImageService: PokemonImageService,
     isYouPlayer: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val pokemonImageService = LocalPokemonImageService.current
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center

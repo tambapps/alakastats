@@ -7,7 +7,6 @@ import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupPlansUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsTabViewModel
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,7 +20,6 @@ object CreateMatchup: EditMatchupMode()
 
 class MatchupPlansViewModel(
     override val useCase: ManageMatchupPlansUseCase,
-    override val pokemonImageService: PokemonImageService,
 ): TeamlyticsTabViewModel() {
 
     override val isTabLoading = false

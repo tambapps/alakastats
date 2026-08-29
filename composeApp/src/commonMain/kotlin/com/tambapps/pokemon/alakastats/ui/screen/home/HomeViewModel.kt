@@ -23,7 +23,6 @@ import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.getFilePickerSettings
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.FileKitType
@@ -38,7 +37,6 @@ import kotlinx.coroutines.withContext
 import kotlin.uuid.Uuid
 
 class HomeViewModel(
-    val imageService: PokemonImageService,
     private val replayAnalyticsService: ReplayAnalyticsService,
     private val useCase: ManageTeamlyticsListUseCase
 ): ScreenModel {

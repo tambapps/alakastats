@@ -18,7 +18,6 @@ import com.tambapps.pokemon.alakastats.domain.model.usesLegacySystem
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.PokemonDetailTabViewModel
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,7 +38,6 @@ data class SpeedScale(
     val speedGroups: List<List<PokemonSpeed>>
 )
 class PokemonSpeedScaleViewModel(
-    override val pokemonImageService: PokemonImageService,
     val team: Teamlytics,
     originalPokemon: Pokemon,
     megaPokemon: PokemonName?,

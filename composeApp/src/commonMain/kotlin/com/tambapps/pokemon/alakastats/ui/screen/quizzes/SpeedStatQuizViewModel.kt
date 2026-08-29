@@ -12,7 +12,6 @@ import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.usesLegacySystem
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,7 +35,6 @@ class SpeedStatQuizViewModel(
     private val allowChoiceScarf: Boolean,
     val useMaxStatPoints: Boolean,
     val useSpeedBoostingNature: Boolean,
-    val pokemonImageService: PokemonImageService,
     private val formatRepository: FormatDataRepository,
     private val pokemonBaseStatsRepository: PokemonBaseStatsRepository
 ) : ScreenModel {

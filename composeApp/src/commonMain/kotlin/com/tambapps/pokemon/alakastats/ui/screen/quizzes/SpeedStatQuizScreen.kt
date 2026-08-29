@@ -54,6 +54,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.koin.core.parameter.parametersOf
 
@@ -184,7 +185,7 @@ private fun SpeedQuestionContent(viewModel: SpeedStatQuizViewModel, modifier: Mo
         )
         Spacer(Modifier.height(20.dp))
 
-        viewModel.pokemonImageService.PokemonArtwork(
+        LocalPokemonImageService.current.PokemonArtwork(
             question.pokemonName,
             modifier = Modifier.size(if (LocalIsCompact.current) 160.dp else 220.dp)
         )

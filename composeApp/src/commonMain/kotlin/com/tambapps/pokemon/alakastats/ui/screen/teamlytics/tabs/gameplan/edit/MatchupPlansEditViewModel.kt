@@ -9,7 +9,6 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
 import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
-import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import io.ktor.client.HttpClient
@@ -18,7 +17,6 @@ import kotlin.uuid.Uuid
 class MatchupPlanEditViewModel(
     pokepasteParser: PokepasteParser,
     httpClient: HttpClient,
-    val pokemonImageService: PokemonImageService,
 ) : PokepasteEditingViewModel(pokepasteParser, httpClient), ScreenModel {
 
     val isFormValid: Boolean get() = name.isNotBlank() && (gamePlanStates.isNotEmpty() && gamePlanStates.all { it.isValid })

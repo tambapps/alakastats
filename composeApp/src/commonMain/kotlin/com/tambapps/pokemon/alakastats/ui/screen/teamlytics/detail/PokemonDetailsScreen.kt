@@ -53,6 +53,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.overview.PokemonDetailsOverviewTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale.PokemonSpeedScaleViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.tabs.speedscale.PokemonSpeedScaleViewTab
+import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
@@ -163,7 +164,7 @@ private fun BoxScope.PokemonArtwork(
             .widthIn(max = remember(contentWidth) { contentWidth * 0.75f })
             .offset(y = 16.dp)
     ) { name ->
-        viewModel.pokemonImageService.PokemonArtwork(name = name)
+        LocalPokemonImageService.current.PokemonArtwork(name = name)
     }
 }
 

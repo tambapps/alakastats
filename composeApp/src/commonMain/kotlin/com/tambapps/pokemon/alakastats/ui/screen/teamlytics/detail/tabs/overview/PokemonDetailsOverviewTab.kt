@@ -40,7 +40,7 @@ internal fun PokemonDetailsOverview(
     modifier: Modifier = Modifier
 ) {
     Column(modifier) {
-        PokepastePokemonItemAndAbility(pokemon, viewModel.pokemonImageService)
+        PokepastePokemonItemAndAbility(pokemon)
         Spacer(Modifier.height(16.dp))
         if (!viewModel.notes.isNullOrBlank()) {
             Text(
@@ -64,6 +64,6 @@ internal fun PokemonDetailsOverview(
         }
         Text("Moves", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(8.dp))
-        PokemonMoves(pokemon, viewModel.pokemonImageService)
+        PokemonMoves(pokemon)
     }
 }
