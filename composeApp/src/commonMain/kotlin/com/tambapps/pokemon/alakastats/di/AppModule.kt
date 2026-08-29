@@ -11,6 +11,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ConsultPokemonDetailUseCas
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizzesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizSetupViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizViewModel
@@ -102,6 +103,7 @@ val appModules = listOf(module {
 
     factoryOf(::HomeViewModel)
     factoryOf(::EditTeamViewModel)
+    factoryOf(::ManualReplayViewModel)
     factoryOf(::MatchupPlanEditViewModel)
     factoryOf(::QuizzesViewModel)
     factoryOf(::NatureQuizSetupViewModel)
