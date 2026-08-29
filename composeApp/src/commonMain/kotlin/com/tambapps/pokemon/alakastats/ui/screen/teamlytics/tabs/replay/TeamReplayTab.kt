@@ -170,8 +170,6 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
                 Text("Enter Manually")
             }
 
-            Text("Or", style = MaterialTheme.typography.bodyLarge)
-
             TextButton(
                 onClick = { viewModel.addReplays(snackBar) },
                 enabled = viewModel.replayUrlsText.isNotBlank() && viewModel.getValidationMessage()
