@@ -37,7 +37,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.NoReplay
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
-import com.tambapps.pokemon.util.MegaUtils
+import com.tambapps.pokemon.util.MegaUtils.canMega
 import io.github.koalaplot.core.pie.PieChart
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import kotlin.collections.component1
@@ -147,8 +147,7 @@ fun PokemonUsagesCard(
                 }
 
                 val canMegaEvolve = remember {
-                    team.pokePaste.pokemons.find { it.name.baseMatches(name) }
-                        ?.let { MegaUtils.getMegaPokemon(it.item) != null } == true
+                    team.pokePaste.pokemons.find { it.name.baseMatches(name) }?.name?.canMega == true
                 }
                 if (canMegaEvolve && (megaCount > 0 || team.format.allowedMechanics.contains(Mechanic.MEGA_EVOLUTION))) {
                     Text(when {
