@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -45,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
@@ -58,6 +61,7 @@ import com.tambapps.pokemon.alakastats.ui.service.ItemImage
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.service.availablePokemonNames
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.util.MegaUtils
 import org.jetbrains.compose.resources.painterResource
 
@@ -80,11 +84,9 @@ data class ManualReplayScreen(
         ) { scaffoldPadding ->
             Box(modifier = Modifier.fillMaxSize().padding(scaffoldPadding)) {
                 FabLayout(
-                    fab = { AddPokemonButton(viewModel) }
+                    fab = { DoneButton(viewModel, navigator) }
                 ) {
-                    if (viewModel.pokemonStates.isEmpty()) {
-                        NoPokemon()
-                    } else if (isCompact) {
+                    if (isCompact) {
                         ManualReplayScreenMobile(viewModel)
                     } else {
                         ManualReplayScreenDesktop(viewModel)
@@ -103,28 +105,44 @@ data class ManualReplayScreen(
 }
 
 @Composable
-private fun AddPokemonButton(viewModel: ManualReplayViewModel, modifier: Modifier = Modifier) {
-    if (!viewModel.canAddPokemon) {
-        return
-    }
-    FloatingActionButton(
-        onClick = { viewModel.showSelectPokemonDialog() },
+private fun DoneButton(viewModel: ManualReplayViewModel, navigator: Navigator, modifier: Modifier = Modifier) {
+    val enabled = viewModel.pokemonStates.isNotEmpty()
+    // FABs have no enabled flag, the disabled look has to be done through the colors
+    ExtendedFloatingActionButton(
+        onClick = { if (enabled) navigator.pop() },
         modifier = modifier,
+        containerColor =
+            if (enabled) FloatingActionButtonDefaults.containerColor
+            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+        contentColor =
+            if (enabled) contentColorFor(FloatingActionButtonDefaults.containerColor)
+            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
     ) {
-        Icon(
-            painter = painterResource(Res.drawable.add),
-            contentDescription = "Add Pokemon",
-        )
+        Text("Done")
     }
 }
 
+// takes the place of the next pokemon card, so that adding one stays where the eye already is
 @Composable
-private fun NoPokemon() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+internal fun AddPokemonCard(viewModel: ManualReplayViewModel, modifier: Modifier = Modifier) {
+    MyCard(
+        modifier = modifier,
+        onClick = { viewModel.showSelectPokemonDialog() },
+        gradientBackgroundColors = cardGradientColors,
     ) {
-        Text("No Pokemon were added yet")
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.add),
+                contentDescription = "Add Pokemon",
+                tint = MaterialTheme.colorScheme.defaultIconColor,
+                modifier = Modifier.size(40.dp)
+            )
+            Spacer(Modifier.height(8.dp))
+            Text("Add Pokemon", style = MaterialTheme.typography.titleMedium)
+        }
     }
 }
 

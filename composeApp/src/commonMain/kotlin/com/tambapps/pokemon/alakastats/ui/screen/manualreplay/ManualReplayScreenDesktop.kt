@@ -26,18 +26,29 @@ internal fun ManualReplayScreenDesktop(viewModel: ManualReplayViewModel) {
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        for (pokemonBlock in viewModel.pokemonStates.chunked(POKEMONS_PER_ROW)) {
+        // the null cell is the add button, taking the next free slot of the grid
+        val cells: List<ManualPokemonState?> = buildList {
+            addAll(viewModel.pokemonStates)
+            if (viewModel.canAddPokemon) {
+                add(null)
+            }
+        }
+        for (cellBlock in cells.chunked(POKEMONS_PER_ROW)) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(bottom = verticalPokemonSpace)
             ) {
-                pokemonBlock.forEachIndexed { index, pokemonState ->
+                cellBlock.forEachIndexed { index, pokemonState ->
                     if (index > 0) {
                         Spacer(Modifier.width(16.dp))
                     }
-                    ManualPokemonCard(viewModel, pokemonState, Modifier.weight(1f))
+                    if (pokemonState != null) {
+                        ManualPokemonCard(viewModel, pokemonState, Modifier.weight(1f))
+                    } else {
+                        AddPokemonCard(viewModel, Modifier.weight(1f))
+                    }
                 }
                 // keep cards of incomplete rows the same width as the ones of full rows
-                repeat(POKEMONS_PER_ROW - pokemonBlock.size) {
+                repeat(POKEMONS_PER_ROW - cellBlock.size) {
                     Spacer(Modifier.width(16.dp))
                     Spacer(Modifier.weight(1f))
                 }

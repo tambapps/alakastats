@@ -26,6 +26,9 @@ internal fun ManualReplayScreenMobile(viewModel: ManualReplayViewModel) {
             ManualPokemonCard(viewModel, pokemonState, Modifier.fillMaxWidth())
             Spacer(Modifier.height(verticalPokemonSpace))
         }
+        if (viewModel.canAddPokemon) {
+            AddPokemonCard(viewModel, Modifier.fillMaxWidth())
+        }
         Spacer(Modifier.height(teamlyticsTabPaddingBottom))
     }
 }
