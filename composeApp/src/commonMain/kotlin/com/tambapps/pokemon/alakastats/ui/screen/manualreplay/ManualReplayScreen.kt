@@ -45,6 +45,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
@@ -56,8 +58,6 @@ import com.tambapps.pokemon.util.MegaUtils
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
 
-private val TABS = listOf("You", "Opponent", "Notes")
-
 data class ManualReplayScreen(
     val team: Teamlytics,
     val onReplayAdded: (ReplayAnalytics) -> Unit
@@ -66,7 +66,10 @@ data class ManualReplayScreen(
     override fun Content() {
         val viewModel = koinScreenModel<ManualReplayViewModel> { parametersOf(team) }
         val navigator = LocalNavigator.currentOrThrow
-        val pagerState = rememberPagerState(pageCount = { TABS.size })
+        val snackBar = LocalSnackBar.current
+        val scope = rememberCoroutineScope()
+        val pages = ManualReplayPage.entries
+        val pagerState = rememberPagerState(pageCount = { pages.size })
 
         Scaffold(
             topBar = {
@@ -79,28 +82,34 @@ data class ManualReplayScreen(
             Box(modifier = Modifier.fillMaxSize().padding(scaffoldPadding)) {
                 FabLayout(
                     fab = {
-                        DoneButton(viewModel) {
-                            onReplayAdded(viewModel.buildReplayAnalytics())
-                            navigator.pop()
+                        DoneButton(enabled = viewModel.canBuildReplayAnalytics) {
+                            val error = viewModel.validationError
+                            if (error == null) {
+                                onReplayAdded(viewModel.buildReplayAnalytics())
+                                navigator.pop()
+                            } else {
+                                // bring the user where the missing information is asked
+                                scope.launch { pagerState.animateScrollToPage(error.page.ordinal) }
+                                snackBar.show(error.message, SnackBar.Severity.ERROR)
+                            }
                         }
                     }
                 ) {
                     Column(Modifier.fillMaxSize()) {
-                        val scope = rememberCoroutineScope()
                         SecondaryTabRow(selectedTabIndex = pagerState.currentPage) {
-                            TABS.forEachIndexed { index, title ->
+                            pages.forEachIndexed { index, page ->
                                 Tab(
                                     selected = pagerState.currentPage == index,
                                     onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                                    text = { Text(title) }
+                                    text = { Text(page.title) }
                                 )
                             }
                         }
                         HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
-                            when (page) {
-                                0 -> YouPage(viewModel)
-                                1 -> OpponentPage(viewModel)
-                                2 -> NotesPage(viewModel)
+                            when (pages[page]) {
+                                ManualReplayPage.YOU -> YouPage(viewModel)
+                                ManualReplayPage.OPPONENT -> OpponentPage(viewModel)
+                                ManualReplayPage.NOTES -> NotesPage(viewModel)
                             }
                         }
                     }
@@ -118,11 +127,11 @@ data class ManualReplayScreen(
 }
 
 @Composable
-private fun DoneButton(viewModel: ManualReplayViewModel, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val enabled = viewModel.canBuildReplayAnalytics
-    // FABs have no enabled flag, the disabled look has to be done through the colors
+private fun DoneButton(enabled: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    // FABs have no enabled flag, the disabled look has to be done through the colors. It stays
+    // clickable on purpose, to tell the user what is missing
     ExtendedFloatingActionButton(
-        onClick = { if (enabled) onClick() },
+        onClick = onClick,
         modifier = modifier,
         containerColor =
             if (enabled) FloatingActionButtonDefaults.containerColor

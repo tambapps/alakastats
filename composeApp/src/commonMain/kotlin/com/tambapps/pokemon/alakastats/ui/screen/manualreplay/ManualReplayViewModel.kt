@@ -27,6 +27,14 @@ internal const val LEAD_SIZE = 2
 private const val VERSION = "1.0"
 private val OPPONENT_NAME = UserName("opponent")
 
+enum class ManualReplayPage(val title: String) {
+    YOU("You"),
+    OPPONENT("Opponent"),
+    NOTES("Notes")
+}
+
+data class ManualReplayValidationError(val page: ManualReplayPage, val message: String)
+
 class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
 
     val youPokemonStates = team.pokePaste.pokemons.map(::YouPokemonState)
@@ -48,7 +56,20 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
 
     val canAddOpponentPokemon get() = opponentPokemonStates.size < MAX_OPPONENT_POKEMONS
 
-    val canBuildReplayAnalytics get() = opponentPokemonStates.isNotEmpty()
+    // only the first missing thing, as there is no point overwhelming the user with all of them
+    val validationError get() = when {
+        youSelection.size < MAX_SELECTION -> ManualReplayValidationError(
+            ManualReplayPage.YOU,
+            "Select the $MAX_SELECTION pokemons you brought"
+        )
+        opponentPokemonStates.isEmpty() -> ManualReplayValidationError(
+            ManualReplayPage.OPPONENT,
+            "Add at least one pokemon of the opponent's team"
+        )
+        else -> null
+    }
+
+    val canBuildReplayAnalytics get() = validationError == null
 
     fun updateNotes(notes: String) {
         this.notes = notes
