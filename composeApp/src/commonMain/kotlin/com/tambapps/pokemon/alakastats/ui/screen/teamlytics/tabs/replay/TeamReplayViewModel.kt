@@ -125,6 +125,25 @@ class TeamReplayViewModel(
         hideNoteReplayDialog()
     }
 
+    // manually entered replays are already built, they just have to be saved
+    fun addReplay(snackBar: SnackBar, replay: ReplayAnalytics) {
+        if (isLoading) {
+            return
+        }
+        isTabLoading = true
+        scope.launch {
+            val error = useCase.addReplays(listOf(replay)).leftOrNull()
+            withContext(Dispatchers.Main) {
+                isTabLoading = false
+                if (error != null) {
+                    snackBar.show("Couldn't add replay: ${error.message}", SnackBar.Severity.ERROR)
+                } else {
+                    snackBar.show("Successfully added replay", SnackBar.Severity.SUCCESS)
+                }
+            }
+        }
+    }
+
     fun addReplays(snackBar: SnackBar) {
         if (isLoading) {
             return
