@@ -4,19 +4,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import cafe.adriel.voyager.core.model.ScreenModel
+import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.util.MegaUtils
 import com.tambapps.pokemon.util.MegaUtils.canMega
+import com.tambapps.pokemon.util.MegaUtils.toMega
 
 internal const val MAX_POKEMONS = 6
-private const val MOVES_COUNT = 4
 
 class ManualReplayViewModel : ScreenModel {
 
     val pokemonStates = mutableStateListOf<ManualPokemonState>()
 
     var showSelectPokemonDialog by mutableStateOf(false)
+        private set
+
+    // the pokemon we're asking the mega stone of, when it has several ones
+    var megaStoneSelectionFor by mutableStateOf<ManualPokemonState?>(null)
         private set
 
     val canAddPokemon get() = pokemonStates.size < MAX_POKEMONS
@@ -29,23 +34,59 @@ class ManualReplayViewModel : ScreenModel {
         showSelectPokemonDialog = false
     }
 
-    fun contains(pokemonName: PokemonName) = pokemonStates.any { it.name == pokemonName }
+    fun contains(pokemonName: PokemonName) = pokemonStates.any { it.name == pokemonName.baseForm }
 
     fun addPokemon(pokemonName: PokemonName) {
         if (!canAddPokemon || contains(pokemonName)) {
             return
         }
-        pokemonStates.add(ManualPokemonState(pokemonName))
+        val pokemonState = ManualPokemonState(pokemonName.baseForm)
+        pokemonStates.add(pokemonState)
+        if (pokemonName.isMega) {
+            megaStoneOf(pokemonName)?.let { applyMega(pokemonState, it) }
+        }
         hideSelectPokemonDialog()
     }
+
+    // mega forms are stored as their base form, with the mega switch turned on
+    private val PokemonName.baseForm get() = if (isMega) baseNormalized else normalized
+
+    // the picked mega form tells us which mega stone it holds
+    private fun megaStoneOf(megaName: PokemonName) = MegaUtils.getMegaStones(megaName)
+        .find { MegaUtils.getMegaPokemon(it)?.matches(megaName) == true }
 
     fun removePokemon(pokemonState: ManualPokemonState) {
         pokemonStates.remove(pokemonState)
     }
 
-    // only one pokemon can mega evolve per battle
     fun updateMegaSelected(pokemonState: ManualPokemonState, megaSelected: Boolean) {
-        pokemonStates.forEach { it.updateMegaSelected(megaSelected && it === pokemonState) }
+        if (!megaSelected) {
+            applyMega(pokemonState, null)
+            return
+        }
+        val megaStones = MegaUtils.getMegaStones(pokemonState.name)
+        if (megaStones.size > 1) {
+            // we can't guess which one it mega evolved into, let the user tell us
+            megaStoneSelectionFor = pokemonState
+        } else {
+            applyMega(pokemonState, megaStones.firstOrNull())
+        }
+    }
+
+    fun selectMegaStone(pokemonState: ManualPokemonState, megaStone: ItemName) {
+        applyMega(pokemonState, megaStone)
+        hideMegaStoneSelectionDialog()
+    }
+
+    fun hideMegaStoneSelectionDialog() {
+        megaStoneSelectionFor = null
+    }
+
+    // only one pokemon can mega evolve per battle
+    private fun applyMega(pokemonState: ManualPokemonState, megaStone: ItemName?) {
+        pokemonStates.forEach {
+            it.updateMega(if (it === pokemonState) megaStone else null)
+        }
     }
 }
 
@@ -53,26 +94,24 @@ class ManualPokemonState(val name: PokemonName) {
     var item by mutableStateOf("")
         private set
 
-    var megaSelected by mutableStateOf(false)
+    var megaStone by mutableStateOf<ItemName?>(null)
         private set
 
-    val moves = List(MOVES_COUNT) { "" }.toMutableStateList()
+    val megaSelected get() = megaStone != null
 
     val canMega get() = name.canMega
 
-    val displayedName get() =
-        if (megaSelected) PokemonName("${name.normalized.value}-mega")
-        else name
+    // the mega stone tells which mega form it evolved into (charizard-mega-x vs charizard-mega-y)
+    val displayedName get() = megaStone?.let { name.toMega(it) } ?: name
 
     fun updateItem(item: String) {
         this.item = item
     }
 
-    fun updateMegaSelected(megaSelected: Boolean) {
-        this.megaSelected = megaSelected
-    }
-
-    fun updateMove(index: Int, move: String) {
-        moves[index] = move
+    fun updateMega(megaStone: ItemName?) {
+        this.megaStone = megaStone
+        if (megaStone != null) {
+            item = megaStone.pretty
+        }
     }
 }

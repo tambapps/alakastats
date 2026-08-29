@@ -54,9 +54,11 @@ import com.tambapps.pokemon.alakastats.ui.composables.MegaSwitch
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
+import com.tambapps.pokemon.alakastats.ui.service.ItemImage
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.service.availablePokemonNames
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.util.MegaUtils
 import org.jetbrains.compose.resources.painterResource
 
 data class ManualReplayScreen(
@@ -93,6 +95,9 @@ data class ManualReplayScreen(
 
         if (viewModel.showSelectPokemonDialog) {
             SelectPokemonDialog(viewModel)
+        }
+        viewModel.megaStoneSelectionFor?.let {
+            SelectMegaStoneDialog(viewModel, it)
         }
     }
 }
@@ -167,20 +172,44 @@ internal fun ManualPokemonCard(
                 label = { Text("Item") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                // the item is the mega stone it mega evolved with
+                readOnly = pokemonState.megaSelected,
             )
-
-            pokemonState.moves.forEachIndexed { index, move ->
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = move,
-                    onValueChange = { pokemonState.updateMove(index, it) },
-                    label = { Text("Move ${index + 1}") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                )
-            }
         }
     }
+}
+
+@Composable
+private fun SelectMegaStoneDialog(viewModel: ManualReplayViewModel, pokemonState: ManualPokemonState) {
+    val megaStones = remember(pokemonState.name) { MegaUtils.getMegaStones(pokemonState.name).toList() }
+
+    AlertDialog(
+        onDismissRequest = { viewModel.hideMegaStoneSelectionDialog() },
+        title = { Text("Select Mega Stone") },
+        text = {
+            Column {
+                megaStones.forEach { megaStone ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { viewModel.selectMegaStone(pokemonState, megaStone) }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        ItemImage(megaStone, Modifier.size(40.dp))
+                        Text(megaStone.pretty)
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = { viewModel.hideMegaStoneSelectionDialog() }) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
