@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.swmansion.kmpwheelpicker.rememberWheelPickerState
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.availablePokemonNames
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
 @Composable
@@ -35,8 +35,7 @@ fun SelectPokemonDialog(
     title: String,
     confirmButtonText: String,
 ) {
-    val pokemonImageService = LocalPokemonImageService.current
-    val allPokemons = remember { pokemonImageService.listAvailableNames() }
+    val allPokemons = availablePokemonNames()
     var text by remember { mutableStateOf("") }
     val pokemons = remember(text) {
         if (text.isBlank()) allPokemons

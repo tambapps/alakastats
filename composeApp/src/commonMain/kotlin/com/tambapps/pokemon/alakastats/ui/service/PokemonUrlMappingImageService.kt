@@ -108,6 +108,39 @@ interface PokemonImageService {
     fun ItemImage(item: ItemName, modifier: Modifier = Modifier)
 }
 
+@Composable
+fun availablePokemonNames(): List<PokemonName> = LocalPokemonImageService.current.listAvailableNames()
+
+@Composable
+fun PokemonSprite(
+    name: PokemonName,
+    modifier: Modifier = Modifier,
+    facingDirection: FacingDirection = FacingDirection.LEFT
+) = LocalPokemonImageService.current.PokemonSprite(name, modifier, facingDirection)
+
+@Composable
+fun PokemonArtwork(
+    name: PokemonName,
+    modifier: Modifier = Modifier,
+    facingDirection: FacingDirection = FacingDirection.LEFT
+) = LocalPokemonImageService.current.PokemonArtwork(name, modifier, facingDirection)
+
+@Composable
+fun TeraTypeImage(type: TeraType, modifier: Modifier = Modifier) =
+    LocalPokemonImageService.current.TeraTypeImage(type, modifier)
+
+@Composable
+fun MoveTypeImage(type: PokeType, modifier: Modifier = Modifier) =
+    LocalPokemonImageService.current.MoveTypeImage(type, modifier)
+
+@Composable
+fun MoveSpecImages(move: MoveName, iconModifier: Modifier = Modifier) =
+    LocalPokemonImageService.current.MoveSpecImages(move, iconModifier)
+
+@Composable
+fun ItemImage(item: ItemName, modifier: Modifier = Modifier) =
+    LocalPokemonImageService.current.ItemImage(item, modifier)
+
 abstract class AbstractPokemonImageService(
     protected val json: Json
 ): PokemonImageService {

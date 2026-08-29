@@ -24,7 +24,8 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
+import com.tambapps.pokemon.alakastats.ui.service.availablePokemonNames
 
 @Composable
 fun PokemonNameTextField(
@@ -35,7 +36,6 @@ fun PokemonNameTextField(
     supportingText: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
-    val pokemonImageService = LocalPokemonImageService.current
     var expanded by remember { mutableStateOf(false) }
 
     var textFieldValue by remember(value) {
@@ -45,7 +45,7 @@ fun PokemonNameTextField(
         ))
     }
 
-    val allNames = remember { pokemonImageService.listAvailableNames() }
+    val allNames = availablePokemonNames()
     val filteredSuggestions = remember(value) {
         val formattedValue = value.normalized
         if (formattedValue.value.isEmpty()) allNames
@@ -86,7 +86,7 @@ fun PokemonNameTextField(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            pokemonImageService.PokemonSprite(suggestion, Modifier.size(40.dp))
+                            PokemonSprite(suggestion, Modifier.size(40.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(suggestion.pretty)
                         }

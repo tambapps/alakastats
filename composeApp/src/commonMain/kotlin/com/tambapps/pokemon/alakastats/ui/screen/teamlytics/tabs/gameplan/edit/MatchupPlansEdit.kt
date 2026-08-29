@@ -59,7 +59,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ReplayCompact
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -420,7 +420,7 @@ private fun GamePlanComposition(
         Row(Modifier.fillMaxWidth()) {
             composition.forEach { pokemonName ->
                 Tooltip(pokemonName.pretty) {
-                    LocalPokemonImageService.current.PokemonSprite(
+                    PokemonSprite(
                         pokemonName,
                         modifier = Modifier.then(
                             if (isCompact) Modifier.weight(1f) else Modifier.size(

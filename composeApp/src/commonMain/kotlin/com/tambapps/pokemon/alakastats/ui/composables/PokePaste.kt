@@ -55,7 +55,10 @@ import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.usesLegacySystem
 import com.tambapps.pokemon.alakastats.platform
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.ItemImage
+import com.tambapps.pokemon.alakastats.ui.service.MoveSpecImages
+import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
+import com.tambapps.pokemon.alakastats.ui.service.TeraTypeImage
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
@@ -147,14 +150,13 @@ fun StaticPokemonStatsRow(pokemon: Pokemon, pokemonData: PokemonData?, format: F
 }
 @Composable
 fun PokemonMoves(pokemon: Pokemon, modifier: Modifier = Modifier) {
-    val pokemonImageService = LocalPokemonImageService.current
     Column(modifier) {
         pokemon.moves.forEachIndexed { index, move ->
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val iconModifier = Modifier.size(32.dp)
-                pokemonImageService.MoveSpecImages(move, iconModifier = iconModifier)
+                MoveSpecImages(move, iconModifier = iconModifier)
                 Spacer(Modifier.width(8.dp))
                 val prettyMove = move.pretty
                 Text(prettyMove, textAlign = TextAlign.Start, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
@@ -315,7 +317,6 @@ private fun PokepastePokemonCard(
     megaSwitch: (@Composable () -> Unit)? = null,
     notesComposer: @Composable ColumnScope.() -> Unit
 ) {
-    val pokemonImageService = LocalPokemonImageService.current
     PokemonCard(
         modifier = modifier,
         onClick=onClick,
@@ -324,7 +325,7 @@ private fun PokepastePokemonCard(
                 targetState = pokemon.name,
                 modifier = artworkModifier(pokemon.name, contentWidth),
             ) { name ->
-                pokemonImageService.PokemonArtwork(name = name)
+                PokemonArtwork(name = name)
             }
         }
     ) {
@@ -371,7 +372,7 @@ fun PokepastePokemonHeader(
         }
         if (format.allowedMechanics.contains(Mechanic.TERASTALLIZATION)) {
             pokemon.teraType?.let { teraType ->
-                LocalPokemonImageService.current.TeraTypeImage(
+                TeraTypeImage(
                     teraType,
                     modifier = Modifier.size(if (LocalIsCompact.current) 50.dp else 60.dp)
                 )
@@ -384,7 +385,7 @@ fun PokepastePokemonHeader(
 fun PokepastePokemonItemAndAbility(pokemon: Pokemon) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         pokemon.item?.let { item ->
-            LocalPokemonImageService.current.ItemImage(
+            ItemImage(
                 item,
                 modifier = Modifier.size(if (LocalIsCompact.current) 32.dp else 42.dp)
             )

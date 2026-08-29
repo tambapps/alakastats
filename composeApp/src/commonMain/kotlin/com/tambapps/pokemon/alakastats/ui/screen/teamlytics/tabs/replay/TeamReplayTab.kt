@@ -71,7 +71,8 @@ import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
+import com.tambapps.pokemon.alakastats.ui.service.TeraTypeImage
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
 import com.tambapps.pokemon.alakastats.util.titlecase
@@ -391,7 +392,6 @@ internal fun SelectedPokemon(
     isYouPlayer: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val pokemonImageService = LocalPokemonImageService.current
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
@@ -404,7 +404,7 @@ internal fun SelectedPokemon(
             },
             contentAlignment = Alignment.Center
         ) {
-            pokemonImageService.PokemonArtwork(
+            PokemonArtwork(
                 megaPokemon ?: pokemon,
                 modifier = Modifier.height(128.dp),
                 facingDirection = if (isYouPlayer) FacingDirection.RIGHT else FacingDirection.LEFT
@@ -427,7 +427,7 @@ internal fun SelectedPokemon(
                 .align(Alignment.TopEnd)
                 .offset(x = 0.dp, y = -offset)
             ) {
-                pokemonImageService.TeraTypeImage(
+                TeraTypeImage(
                     teraType, modifier = Modifier.size(50.dp)
                 )
             }

@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 
 @Composable
 fun PokemonTeamPreview(
@@ -27,13 +27,12 @@ fun PokemonTeamPreview(
     modifier: Modifier = Modifier,
     fillWidth: Boolean = false,
     facingDirection: FacingDirection = FacingDirection.LEFT) {
-    val imageService = LocalPokemonImageService.current
     Row(
         modifier = modifier.heightIn(max = 100.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         for (pokemon in pokemons) {
-            imageService.PokemonSprite(
+            PokemonSprite(
                 name = pokemon,
                 modifier = if (fillWidth) Modifier.weight(1f) else Modifier,
             )

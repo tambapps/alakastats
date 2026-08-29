@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlin.math.pow
 
@@ -101,14 +101,13 @@ fun PokemonStatCard(
     pokemonName: PokemonName,
     pokemonName2: PokemonName? = null,
     modifier: Modifier) {
-    val pokemonImageService = LocalPokemonImageService.current
     val density = LocalDensity.current
     val (minOffsetDp, maxOffsetDp) = if (pokemonName2 == null) 12.dp  to 80.dp else 24.dp to 100.dp
     PokemonCard(
         modifier = modifier,
         pokemonArtwork = { contentWidth, contentHeight ->
             var spriteWidth by remember { mutableStateOf(0.dp) }
-            pokemonImageService.PokemonArtwork(
+            PokemonArtwork(
                 name = pokemonName,
                 modifier = Modifier.align(Alignment.BottomEnd)
                     .height(if (LocalIsCompact.current) 175.dp else 200.dp)
@@ -126,7 +125,7 @@ fun PokemonStatCard(
             pokemonName2?.let {
                 var spriteWidth by remember { mutableStateOf(0.dp) }
 
-                pokemonImageService.PokemonArtwork(
+                PokemonArtwork(
                     name = it,
                     modifier = Modifier.align(Alignment.BottomStart)
                         .height(if (LocalIsCompact.current) 175.dp else 200.dp)

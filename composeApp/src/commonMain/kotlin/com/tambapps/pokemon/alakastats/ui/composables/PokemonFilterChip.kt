@@ -12,7 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 
 
 @Composable
@@ -23,14 +23,13 @@ fun PokemonFilterChip(
     selected: Boolean = asLead,
     modifier: Modifier = Modifier
     ) {
-    val pokemonImageService = LocalPokemonImageService.current
     val height = 70.dp
 
     FilterChip(
         modifier = modifier.height(height).padding(vertical = 4.dp),
         onClick = onClick,
         leadingIcon = {
-            pokemonImageService.PokemonSprite(
+            PokemonSprite(
                 pokemonName,
                 modifier = Modifier.size(height).padding(bottom = 8.dp),
                 facingDirection = FacingDirection.RIGHT

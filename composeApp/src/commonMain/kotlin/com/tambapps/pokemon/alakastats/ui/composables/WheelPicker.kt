@@ -21,7 +21,7 @@ import com.swmansion.kmpwheelpicker.WheelPicker
 import com.swmansion.kmpwheelpicker.WheelPickerState
 import com.swmansion.kmpwheelpicker.rememberWheelPickerState
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlin.math.abs
 
@@ -33,7 +33,6 @@ fun PokemonWheelPicker(
     modifier: Modifier = Modifier,
     state: WheelPickerState = rememberWheelPickerState(itemCount = pokemons.size, initialIndex = 0),
 ) {
-    val pokemonImageService = LocalPokemonImageService.current
     Box(modifier.clipToBounds()) {
         WheelPicker(
             state = state,
@@ -55,7 +54,7 @@ fun PokemonWheelPicker(
                     },
             ) {
                 val pokemonName = pokemons[index]
-                pokemonImageService.PokemonSprite(
+                PokemonSprite(
                     pokemonName,
                     Modifier.size(if (LocalIsCompact.current) 64.dp else 128.dp)
                 )

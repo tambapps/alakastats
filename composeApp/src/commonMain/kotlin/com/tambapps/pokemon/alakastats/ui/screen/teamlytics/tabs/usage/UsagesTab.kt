@@ -35,7 +35,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.NoReplay
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.util.MegaUtils
 import io.github.koalaplot.core.pie.PieChart
@@ -199,7 +199,7 @@ private fun PokemonUsagesDonut(
                 contentAlignment = Alignment.Center,
             ) {
                 Tooltip(name.pretty) {
-                    LocalPokemonImageService.current.PokemonSprite(name)
+                    PokemonSprite(name)
                 }
             }
         }

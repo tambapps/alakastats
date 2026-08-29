@@ -52,7 +52,8 @@ import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.ItemImage
+import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.koin.core.parameter.parametersOf
@@ -220,18 +221,17 @@ private fun SpeedInteractionsQuestionContent(viewModel: SpeedInteractionsViewMod
 
 @Composable
 private fun MatchupHeader(viewModel: SpeedInteractionsViewModel, question: SpeedInteractionQuestion) {
-    val pokemonImageService = LocalPokemonImageService.current
     val artworkSize = if (LocalIsCompact.current) 120.dp else 160.dp
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box {
-                pokemonImageService.PokemonArtwork(
+                PokemonArtwork(
                     question.pokemonA,
                     modifier = Modifier.size(artworkSize),
                     facingDirection = FacingDirection.RIGHT
                 )
                 if (question.itemA != null) {
-                    pokemonImageService.ItemImage(
+                    ItemImage(
                         question.itemA,
                         modifier = Modifier.size(28.dp).align(Alignment.BottomEnd)
                     )
@@ -244,7 +244,7 @@ private fun MatchupHeader(viewModel: SpeedInteractionsViewModel, question: Speed
         }
         Text("VS", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            pokemonImageService.PokemonArtwork(question.pokemonB, modifier = Modifier.size(artworkSize))
+            PokemonArtwork(question.pokemonB, modifier = Modifier.size(artworkSize))
             Text(question.pokemonB.pretty, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             if (viewModel.isTeamMode) {
                 Text("Opponent", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

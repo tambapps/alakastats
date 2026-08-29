@@ -58,7 +58,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.isSdNameValid
@@ -287,7 +287,6 @@ private fun PokemonFilterButton(
     dialogState: MutableState<PokemonsFilter?>,
     filter: PokemonsFilter,
 ) {
-    val pokemonImageService = LocalPokemonImageService.current
     val pokemons = filter.pokemons
     val isCompact = LocalIsCompact.current
     FilterBarButton(
@@ -304,7 +303,7 @@ private fun PokemonFilterButton(
                 pokemons.chunked(3).forEach { pokemonChunk ->
                     Row {
                         pokemonChunk.forEach { p ->
-                            pokemonImageService.PokemonSprite(
+                            PokemonSprite(
                                 p.name,
                                 Modifier.size(iconSize)
                                     .scale(1.5f)
@@ -400,7 +399,7 @@ private fun CommonFiltersDialog(
                                     modifier = Modifier.padding(all = 8.dp)
                                 ) {
                                     pokemons.forEach {
-                                        LocalPokemonImageService.current.PokemonSprite(
+                                        PokemonSprite(
                                             it.name,
                                             Modifier.size(iconSize)
                                                 .scale(1.5f)

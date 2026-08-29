@@ -53,7 +53,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit.M
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ExpandableDesktopReplay
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ReplayCompact
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
+import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
 
@@ -181,7 +181,6 @@ internal fun Composition(composition: List<PokemonName>,
                          pokemonSize: Dp,
                          facingDirection: FacingDirection,
                          modifier: Modifier = Modifier) {
-    val pokemonImageService = LocalPokemonImageService.current
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
         val chunks = buildList {
             add(composition.take(2))
@@ -208,7 +207,7 @@ internal fun Composition(composition: List<PokemonName>,
                 Text(if (index == 0) "Lead" else "Back", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.width(16.dp))
                 chunk.forEach { pokemonName ->
-                    pokemonImageService.PokemonArtwork(
+                    PokemonArtwork(
                         pokemonName, Modifier.size(pokemonSize).padding(horizontal = 4.dp)
                         , facingDirection = facingDirection
                     )
