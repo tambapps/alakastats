@@ -67,6 +67,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
+import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
@@ -126,6 +127,7 @@ private fun AddReplayButton(viewModel: TeamReplayViewModel, modifier: Modifier =
 
 @Composable
 private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
+    val navigator = LocalNavigator.currentOrThrow
     AlertDialog(
         onDismissRequest = { viewModel.hideAddReplayDialog() },
         title = { Text("Add Replay(s)") },
@@ -157,6 +159,18 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
         },
         confirmButton = {
             val snackBar = LocalSnackBar.current
+            TextButton(
+                onClick = {
+                    viewModel.hideAddReplayDialog()
+                    navigator.push(ManualReplayScreen(onReplayAdded = {}))
+                },
+                modifier = Modifier.padding(top = 4.dp)
+            ) {
+                Text("Enter Manually")
+            }
+
+            Text("Or", style = MaterialTheme.typography.bodyLarge)
+
             TextButton(
                 onClick = { viewModel.addReplays(snackBar) },
                 enabled = viewModel.replayUrlsText.isNotBlank() && viewModel.getValidationMessage()
