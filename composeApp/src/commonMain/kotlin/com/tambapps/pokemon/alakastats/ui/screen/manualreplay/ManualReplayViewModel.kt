@@ -36,6 +36,9 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
 
     val opponentPokemonStates = mutableStateListOf<OpponentPokemonState>()
 
+    var notes by mutableStateOf("")
+        private set
+
     var showSelectPokemonDialog by mutableStateOf(false)
         private set
 
@@ -46,6 +49,10 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
     val canAddOpponentPokemon get() = opponentPokemonStates.size < MAX_OPPONENT_POKEMONS
 
     val canBuildReplayAnalytics get() = opponentPokemonStates.isNotEmpty()
+
+    fun updateNotes(notes: String) {
+        this.notes = notes
+    }
 
     fun showSelectPokemonDialog() {
         showSelectPokemonDialog = true
@@ -141,7 +148,7 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
         // manual replays have no showdown replay to refer to
         reference = "manual_" + Uuid.random(),
         nextBattleRef = null,
-        notes = null,
+        notes = notes.takeIf { it.isNotBlank() },
     )
 
     private fun youPlayer() = emptyPlayer(

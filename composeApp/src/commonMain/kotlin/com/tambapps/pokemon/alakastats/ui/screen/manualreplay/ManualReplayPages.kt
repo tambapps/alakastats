@@ -12,6 +12,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,6 +33,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -58,6 +60,23 @@ internal fun OpponentPage(viewModel: ManualReplayViewModel) {
         }) else null
     ) { pokemonState, modifier ->
         OpponentPokemonCard(viewModel, pokemonState, modifier)
+    }
+}
+
+@Composable
+internal fun NotesPage(viewModel: ManualReplayViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        PageHeader("Write down anything worth remembering about this game.")
+        OutlinedTextField(
+            value = viewModel.notes,
+            onValueChange = viewModel::updateNotes,
+            modifier = Modifier.fillMaxWidth().weight(1f).padding(bottom = teamlyticsTabPaddingBottom),
+            label = { Text("Notes") },
+        )
     }
 }
 

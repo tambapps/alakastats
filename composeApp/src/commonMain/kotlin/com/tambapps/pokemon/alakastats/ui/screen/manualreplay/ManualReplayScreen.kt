@@ -56,7 +56,7 @@ import com.tambapps.pokemon.util.MegaUtils
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
 
-private val TABS = listOf("You", "Opponent")
+private val TABS = listOf("You", "Opponent", "Notes")
 
 data class ManualReplayScreen(
     val team: Teamlytics,
@@ -100,6 +100,7 @@ data class ManualReplayScreen(
                             when (page) {
                                 0 -> YouPage(viewModel)
                                 1 -> OpponentPage(viewModel)
+                                2 -> NotesPage(viewModel)
                             }
                         }
                     }
