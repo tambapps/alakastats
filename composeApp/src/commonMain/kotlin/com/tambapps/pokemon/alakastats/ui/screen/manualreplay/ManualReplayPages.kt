@@ -10,6 +10,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,7 +47,8 @@ internal fun YouPage(viewModel: ManualReplayViewModel) {
             )
         }
     ) { pokemonState, modifier ->
-        YouPokemonCard(viewModel, pokemonState, modifier)
+        // the user's pokemons are already known, they only have to be selected
+        SelectableManualPokemonCard(viewModel, pokemonState, modifier)
     }
 }
 
@@ -54,7 +56,6 @@ internal fun YouPage(viewModel: ManualReplayViewModel) {
 internal fun OpponentPage(viewModel: ManualReplayViewModel) {
     ManualPokemonGrid(
         pokemonStates = viewModel.opponentPokemonStates,
-        header = { PageHeader("Add the pokemons the opponent had on team preview.") },
         addCard = if (viewModel.canAddOpponentPokemon) ({ modifier ->
             AddPokemonCard(viewModel, modifier)
         }) else null
@@ -91,10 +92,42 @@ private fun PageHeader(text: String) {
 }
 
 @Composable
-private fun YouPokemonCard(
+private fun OpponentPokemonCard(
     viewModel: ManualReplayViewModel,
-    pokemonState: YouPokemonState,
+    pokemonState: OpponentPokemonState,
     modifier: Modifier = Modifier
+) {
+    SelectableManualPokemonCard(
+        viewModel = viewModel,
+        pokemonState = pokemonState,
+        modifier = modifier,
+        trailingContent = {
+            TextButton(onClick = { viewModel.removeOpponentPokemon(pokemonState) }) {
+                Text("×", style = MaterialTheme.typography.titleLarge)
+            }
+        }
+    ) {
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = pokemonState.item,
+            onValueChange = pokemonState::updateItem,
+            label = { Text("Item") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            // the item is the mega stone it mega evolved with
+            readOnly = pokemonState.megaSelected,
+        )
+    }
+}
+
+// both players tell which pokemons they brought the same way
+@Composable
+private fun SelectableManualPokemonCard(
+    viewModel: ManualReplayViewModel,
+    pokemonState: ManualPokemonState,
+    modifier: Modifier = Modifier,
+    trailingContent: @Composable () -> Unit = {},
+    content: @Composable ColumnScope.() -> Unit = {}
 ) {
     val selectionIndex = viewModel.selectionIndexOf(pokemonState)
     val selected = selectionIndex >= 0
@@ -107,7 +140,7 @@ private fun YouPokemonCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // it can only have mega evolved in a battle it was brought to
-            ManualPokemonCardHeader(viewModel, pokemonState, megaEnabled = selected)
+            ManualPokemonCardHeader(viewModel, pokemonState, selected, trailingContent)
 
             Spacer(Modifier.height(8.dp))
 
@@ -122,38 +155,8 @@ private fun YouPokemonCard(
                     if (selected) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
-    }
-}
 
-@Composable
-private fun OpponentPokemonCard(
-    viewModel: ManualReplayViewModel,
-    pokemonState: OpponentPokemonState,
-    modifier: Modifier = Modifier
-) {
-    MyCard(
-        modifier = modifier,
-        gradientBackgroundColors = cardGradientColors,
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            ManualPokemonCardHeader(viewModel, pokemonState) {
-                TextButton(onClick = { viewModel.removeOpponentPokemon(pokemonState) }) {
-                    Text("×", style = MaterialTheme.typography.titleLarge)
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = pokemonState.item,
-                onValueChange = pokemonState::updateItem,
-                label = { Text("Item") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                // the item is the mega stone it mega evolved with
-                readOnly = pokemonState.megaSelected,
-            )
+            content()
         }
     }
 }

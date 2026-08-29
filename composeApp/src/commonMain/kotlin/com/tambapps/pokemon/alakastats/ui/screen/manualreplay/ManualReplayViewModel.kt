@@ -40,9 +40,11 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
     val youPokemonStates = team.pokePaste.pokemons.map(::YouPokemonState)
 
     // ordered, as the first selected pokemons are the lead
-    val youSelection = mutableStateListOf<YouPokemonState>()
+    val youSelection = mutableStateListOf<ManualPokemonState>()
 
     val opponentPokemonStates = mutableStateListOf<OpponentPokemonState>()
+
+    val opponentSelection = mutableStateListOf<ManualPokemonState>()
 
     var notes by mutableStateOf("")
         private set
@@ -65,6 +67,11 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
         opponentPokemonStates.isEmpty() -> ManualReplayValidationError(
             ManualReplayPage.OPPONENT,
             "Add at least one pokemon of the opponent's team"
+        )
+        // the opponent's lead is always known, whatever happened next
+        opponentSelection.size < LEAD_SIZE -> ManualReplayValidationError(
+            ManualReplayPage.OPPONENT,
+            "Select at least the $LEAD_SIZE pokemons the opponent led with"
         )
         else -> null
     }
@@ -107,18 +114,24 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
 
     fun removeOpponentPokemon(pokemonState: OpponentPokemonState) {
         opponentPokemonStates.remove(pokemonState)
+        opponentSelection.remove(pokemonState)
     }
 
-    fun selectionIndexOf(pokemonState: YouPokemonState) = youSelection.indexOf(pokemonState)
+    fun selectionIndexOf(pokemonState: ManualPokemonState) =
+        selectionOf(pokemonState).indexOf(pokemonState)
 
-    fun toggleSelected(pokemonState: YouPokemonState) {
-        if (youSelection.remove(pokemonState)) {
+    fun toggleSelected(pokemonState: ManualPokemonState) {
+        val selection = selectionOf(pokemonState)
+        if (selection.remove(pokemonState)) {
             // it can't have mega evolved in a battle it wasn't brought to
             applyMega(pokemonState, null)
-        } else if (youSelection.size < MAX_SELECTION) {
-            youSelection.add(pokemonState)
+        } else if (selection.size < MAX_SELECTION) {
+            selection.add(pokemonState)
         }
     }
+
+    private fun selectionOf(pokemonState: ManualPokemonState) =
+        if (pokemonState is YouPokemonState) youSelection else opponentSelection
 
     fun updateMegaSelected(pokemonState: ManualPokemonState, megaSelected: Boolean) {
         if (!megaSelected) {
@@ -184,6 +197,7 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
         teamPreviewPokemons = opponentPokemonStates.map {
             TeamPreviewPokemon(it.name, team.format.pokemonLevel)
         },
+        selection = opponentSelection.map { it.name },
         megaEvolution = megaEvolutionOf(opponentPokemonStates)
     )
 
