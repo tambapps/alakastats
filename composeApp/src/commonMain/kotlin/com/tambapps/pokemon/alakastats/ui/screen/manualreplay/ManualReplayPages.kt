@@ -11,7 +11,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -143,18 +142,7 @@ private fun OpponentPokemonCard(
                 Text("×", style = MaterialTheme.typography.titleLarge)
             }
         }
-    ) {
-        Spacer(Modifier.height(8.dp))
-        OutlinedTextField(
-            value = pokemonState.item,
-            onValueChange = pokemonState::updateItem,
-            label = { Text("Item") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            // the item is the mega stone it mega evolved with
-            readOnly = pokemonState.megaSelected,
-        )
-    }
+    )
 }
 
 // both players tell which pokemons they brought the same way
@@ -163,8 +151,7 @@ private fun SelectableManualPokemonCard(
     viewModel: ManualReplayViewModel,
     pokemonState: ManualPokemonState,
     modifier: Modifier = Modifier,
-    trailingContent: @Composable () -> Unit = {},
-    content: @Composable ColumnScope.() -> Unit = {}
+    trailingContent: @Composable () -> Unit = {}
 ) {
     val selectionIndex = viewModel.selectionIndexOf(pokemonState)
     val selected = selectionIndex >= 0
@@ -192,8 +179,6 @@ private fun SelectableManualPokemonCard(
                     if (selected) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            content()
         }
     }
 }

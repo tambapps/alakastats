@@ -324,19 +324,5 @@ class YouPokemonState(val pokemon: Pokemon) : ManualPokemonState(pokemon.name.ba
     override val canMega get() = heldMegaStone != null
 }
 
-// a pokemon of the opponent's team, everything about it has to be entered
-class OpponentPokemonState(name: PokemonName) : ManualPokemonState(name) {
-    var item by mutableStateOf("")
-        private set
-
-    fun updateItem(item: String) {
-        this.item = item
-    }
-
-    override fun updateMega(megaStone: ItemName?) {
-        super.updateMega(megaStone)
-        if (megaStone != null) {
-            item = megaStone.pretty
-        }
-    }
-}
+// a pokemon of the opponent's team, only known from the team preview
+class OpponentPokemonState(name: PokemonName) : ManualPokemonState(name)
