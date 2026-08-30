@@ -2,26 +2,13 @@ package com.tambapps.pokemon.alakastats.infrastructure.repository
 
 import alakastats.composeapp.generated.resources.Res
 import arrow.core.Either
-import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.error.LoadFormatDataError
-import com.tambapps.pokemon.alakastats.domain.model.CommonFilters
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
-import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-@Serializable
-data class CommonFiltersEntity(
-    val opponentTeam: List<List<String>> = emptyList()
-)
-
-@Serializable
-data class FormatDataEntity(
-    val popularPokemons: List<String>,
-    val commonFilters: CommonFiltersEntity = CommonFiltersEntity()
-)
+// reads the format data bundled with the app
 class LocalFormatDataRepository(
     private val json: Json
 ): FormatDataRepository {
@@ -33,10 +20,3 @@ class LocalFormatDataRepository(
             .mapLeft { LoadFormatDataError("Couldn't load format data: ${it.message}") }
     }
 }
-
-private fun FormatDataEntity.toDomain() = FormatData(
-    popularPokemons = popularPokemons.map { PokemonName(it) },
-    commonFilters = CommonFilters(
-        opponentTeamFilters = commonFilters.opponentTeam.map { team -> team.map { PokemonFilter(PokemonName(it), asLead = false) } }
-    )
-)

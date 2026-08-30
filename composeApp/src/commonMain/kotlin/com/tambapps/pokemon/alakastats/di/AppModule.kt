@@ -36,6 +36,8 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupPlansUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.HttpFormatDataRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.HybridFormatDataRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalFormatDataRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalPokemonBaseStatsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonMovesRepository
@@ -83,7 +85,12 @@ val appModules = listOf(module {
     single { PokeApiGqlClient(get()) }
     singleOf(::LocalPokemonBaseStatsRepository).bind(PokemonBaseStatsRepository::class)
     singleOf(::PokeApiPokemonMovesRepository).bind(PokemonMovesRepository::class)
-    singleOf(::LocalFormatDataRepository).bind(FormatDataRepository::class)
+    single<FormatDataRepository> {
+        HybridFormatDataRepository(
+            httpRepository = HttpFormatDataRepository(get(), get()),
+            localRepository = LocalFormatDataRepository(get())
+        )
+    }
 
     // need to name them as they have both the same signature after generic type erasure
     single<KStorage<Uuid, TeamlyticsEntity>>(named("teamsStorage")) { createTeamlyticsKStorage() }
