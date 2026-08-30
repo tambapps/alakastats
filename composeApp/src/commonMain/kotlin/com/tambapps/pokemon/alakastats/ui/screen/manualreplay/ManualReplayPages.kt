@@ -9,6 +9,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -27,9 +30,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
 import com.tambapps.pokemon.alakastats.ui.composables.MegaSwitch
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
+import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
@@ -42,9 +48,13 @@ internal fun YouPage(viewModel: ManualReplayViewModel) {
     ManualPokemonGrid(
         pokemonStates = viewModel.youPokemonStates,
         header = {
-            PageHeader(
-                "Select the ${MAX_SELECTION} pokemons you brought. The first ${LEAD_SIZE} selected ones are your lead."
-            )
+            Column {
+                GameOutcomeChoice(viewModel)
+                Spacer(Modifier.height(16.dp))
+                PageHeader(
+                    "Select the ${MAX_SELECTION} pokemons you brought. The first ${LEAD_SIZE} selected ones are your lead."
+                )
+            }
         }
     ) { pokemonState, modifier ->
         // the user's pokemons are already known, they only have to be selected
@@ -79,6 +89,33 @@ internal fun NotesPage(viewModel: ManualReplayViewModel) {
             label = { Text("Notes") },
         )
     }
+}
+
+@Composable
+private fun GameOutcomeChoice(viewModel: ManualReplayViewModel) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("Did you win?", style = MaterialTheme.typography.titleMedium)
+        GameOutcomeChip(viewModel, "Won", won = true, color = WIN_COLOR)
+        GameOutcomeChip(viewModel, "Lost", won = false, color = LOOSE_COLOR)
+    }
+}
+
+@Composable
+private fun GameOutcomeChip(
+    viewModel: ManualReplayViewModel,
+    label: String,
+    won: Boolean,
+    color: Color
+) {
+    FilterChip(
+        selected = viewModel.won == won,
+        onClick = { viewModel.updateWon(won) },
+        label = { Text(label) },
+        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = color)
+    )
 }
 
 @Composable

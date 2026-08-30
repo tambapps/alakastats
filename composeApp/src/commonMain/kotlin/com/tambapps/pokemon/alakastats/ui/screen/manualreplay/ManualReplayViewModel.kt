@@ -46,8 +46,14 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
 
     val opponentSelection = mutableStateListOf<ManualPokemonState>()
 
+    // null until the user tells the outcome of the game
+    var won by mutableStateOf<Boolean?>(null)
+        private set
+
     var notes by mutableStateOf("")
         private set
+
+    private val youName = team.sdNames.firstOrNull() ?: UserName("you")
 
     var showSelectPokemonDialog by mutableStateOf(false)
         private set
@@ -60,6 +66,11 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
 
     // only the first missing thing, as there is no point overwhelming the user with all of them
     val validationError get() = when {
+        // without it the replay has no known outcome, and doesn't count in any stat
+        won == null -> ManualReplayValidationError(
+            ManualReplayPage.YOU,
+            "Tell whether you won or lost this game"
+        )
         youSelection.size < MAX_SELECTION -> ManualReplayValidationError(
             ManualReplayPage.YOU,
             "Select the $MAX_SELECTION pokemons you brought"
@@ -77,6 +88,10 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
     }
 
     val canBuildReplayAnalytics get() = validationError == null
+
+    fun updateWon(won: Boolean) {
+        this.won = won
+    }
 
     fun updateNotes(notes: String) {
         this.notes = notes
@@ -177,7 +192,11 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
         format = team.format.name,
         rating = null,
         version = VERSION,
-        winner = null,
+        winner = when (won) {
+            true -> youName
+            false -> OPPONENT_NAME
+            null -> null
+        },
         url = null,
         // manual replays have no showdown replay to refer to
         reference = "manual_" + Uuid.random(),
@@ -186,7 +205,7 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
     )
 
     private fun youPlayer() = emptyPlayer(
-        name = team.sdNames.firstOrNull() ?: UserName("you"),
+        name = youName,
         teamPreviewPokemons = youPokemonStates.map { TeamPreviewPokemon(it.name, it.pokemon.level) },
         selection = youSelection.map { it.name },
         megaEvolution = megaEvolutionOf(youPokemonStates)

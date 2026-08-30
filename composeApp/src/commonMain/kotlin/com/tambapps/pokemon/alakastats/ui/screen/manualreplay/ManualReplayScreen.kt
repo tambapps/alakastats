@@ -106,10 +106,13 @@ data class ManualReplayScreen(
                             }
                         }
                         HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
-                            when (pages[page]) {
-                                ManualReplayPage.YOU -> YouPage(viewModel)
-                                ManualReplayPage.OPPONENT -> OpponentPage(viewModel)
-                                ManualReplayPage.NOTES -> NotesPage(viewModel)
+                            // so that no page starts stuck to the tabs
+                            Box(Modifier.fillMaxSize().padding(top = 16.dp)) {
+                                when (pages[page]) {
+                                    ManualReplayPage.YOU -> YouPage(viewModel)
+                                    ManualReplayPage.OPPONENT -> OpponentPage(viewModel)
+                                    ManualReplayPage.NOTES -> NotesPage(viewModel)
+                                }
                             }
                         }
                     }
