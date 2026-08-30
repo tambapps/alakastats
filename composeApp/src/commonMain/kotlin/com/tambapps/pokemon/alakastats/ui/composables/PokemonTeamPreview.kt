@@ -10,6 +10,7 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
+import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
 @Composable
 fun PokemonTeamPreview(
@@ -28,13 +29,14 @@ fun PokemonTeamPreview(
     fillWidth: Boolean = false,
     facingDirection: FacingDirection = FacingDirection.LEFT) {
     Row(
-        modifier = modifier.heightIn(max = 100.dp),
+        modifier = modifier.heightIn(max = if (LocalIsCompact.current) 60.dp else 80.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         for (pokemon in pokemons) {
             PokemonSprite(
                 name = pokemon,
                 modifier = if (fillWidth) Modifier.weight(1f) else Modifier,
+                facingDirection = facingDirection,
             )
         }
     }
