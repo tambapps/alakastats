@@ -31,6 +31,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,7 +61,8 @@ import org.koin.core.parameter.parametersOf
 
 data class ManualReplayScreen(
     val team: Teamlytics,
-    val onReplayAdded: (ReplayAnalytics) -> Unit
+    val replayToEdit: ReplayAnalytics? = null,
+    val onReplaySaved: (ReplayAnalytics) -> Unit
 ) : Screen {
     @Composable
     override fun Content() {
@@ -70,11 +72,16 @@ data class ManualReplayScreen(
         val scope = rememberCoroutineScope()
         val pages = ManualReplayPage.entries
         val pagerState = rememberPagerState(pageCount = { pages.size })
+        LaunchedEffect(Unit) {
+            if (replayToEdit != null) {
+                viewModel.prepareEdition(replayToEdit)
+            }
+        }
 
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Add Replay Manually") },
+                    title = { Text(if (replayToEdit != null) "Edit Replay" else "Add Replay Manually") },
                     navigationIcon = { BackIconButton(navigator) }
                 )
             }
@@ -85,7 +92,7 @@ data class ManualReplayScreen(
                         DoneButton(enabled = viewModel.canBuildReplayAnalytics) {
                             val error = viewModel.validationError
                             if (error == null) {
-                                onReplayAdded(viewModel.buildReplayAnalytics())
+                                onReplaySaved(viewModel.buildReplayAnalytics())
                                 navigator.pop()
                             } else {
                                 // bring the user where the missing information is asked

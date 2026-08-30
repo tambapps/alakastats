@@ -55,6 +55,9 @@ inline fun <R> Teamlytics.withContext(block: TeamlyticsContext.() -> R): R {
 enum class GameOutcome {
     WIN, LOOSE, UNKNOWN
 }
+
+// manually entered replays have no showdown replay to refer to, so their reference is generated
+const val MANUAL_REFERENCE_PREFIX = "manual_"
 data class ReplayAnalytics(
     val players: List<Player>,
     val uploadTime: Long,
@@ -75,6 +78,8 @@ data class ReplayAnalytics(
 
     val player1 get() = players[0]
     val player2 get() = players[1]
+
+    val isManual get() = reference.startsWith(MANUAL_REFERENCE_PREFIX)
 
     fun hasWon(player: Player) = winner == player.name
 

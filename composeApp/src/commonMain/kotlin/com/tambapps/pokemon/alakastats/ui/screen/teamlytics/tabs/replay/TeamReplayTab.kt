@@ -165,7 +165,7 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
                     viewModel.hideAddReplayDialog()
                     navigator.push(
                         ManualReplayScreen(viewModel.team) { replay ->
-                            viewModel.addReplay(snackBar, replay)
+                            viewModel.saveManualReplay(snackBar, replay)
                         }
                     )
                 },
@@ -449,6 +449,23 @@ internal fun ReplayDropDownMenu(
     ) {
         val snackBar = LocalSnackBar.current
         val alreadyHasNotes = !replay.notes.isNullOrBlank()
+
+        // only manual replays can be edited, the others are what showdown says they are
+        if (replay.isManual) {
+            val navigator = LocalNavigator.currentOrThrow
+            DropdownMenuItem(
+                text = { Text("Edit") },
+                onClick = {
+                    isMenuExpandedState.value = false
+                    navigator.push(
+                        ManualReplayScreen(viewModel.team, replayToEdit = replay) { editedReplay ->
+                            viewModel.saveManualReplay(snackBar, editedReplay, replacing = replay)
+                        }
+                    )
+                }
+            )
+        }
+
         DropdownMenuItem(
             text = {
                 Text(

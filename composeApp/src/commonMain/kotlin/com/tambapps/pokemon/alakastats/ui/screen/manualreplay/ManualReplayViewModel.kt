@@ -8,9 +8,13 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
+import com.tambapps.pokemon.alakastats.domain.model.MANUAL_REFERENCE_PREFIX
 import com.tambapps.pokemon.alakastats.domain.model.MegaEvolution
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.getGameOutcome
+import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.domain.model.TeamPreview
 import com.tambapps.pokemon.alakastats.domain.model.TeamPreviewPokemon
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
@@ -53,7 +57,48 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
     var notes by mutableStateOf("")
         private set
 
+    val isEditing get() = editedReplay != null
+
     private val youName = team.sdNames.firstOrNull() ?: UserName("you")
+
+    // the replay being edited, if we're not creating a new one
+    private var editedReplay: ReplayAnalytics? = null
+
+    // restores the state of an already entered replay, so that it can be edited
+    fun prepareEdition(replay: ReplayAnalytics) {
+        if (editedReplay != null) {
+            return
+        }
+        editedReplay = replay
+        val (youPlayer, opponentPlayer) = team.getPlayers(replay)
+        won = team.getGameOutcome(replay) == GameOutcome.WIN
+        notes = replay.notes.orEmpty()
+
+        opponentPokemonStates.addAll(
+            opponentPlayer.teamPreview.pokemons.map { OpponentPokemonState(it.name) }
+        )
+        restoreSelection(youPlayer, youPokemonStates, youSelection)
+        restoreSelection(opponentPlayer, opponentPokemonStates, opponentSelection)
+        restoreMega(youPlayer, youPokemonStates)
+        restoreMega(opponentPlayer, opponentPokemonStates)
+    }
+
+    private fun restoreSelection(
+        player: Player,
+        pokemonStates: List<ManualPokemonState>,
+        selection: MutableList<ManualPokemonState>
+    ) {
+        player.selection.forEach { selected ->
+            pokemonStates.find { it.name.baseMatches(selected) && it !in selection }
+                ?.let(selection::add)
+        }
+    }
+
+    private fun restoreMega(player: Player, pokemonStates: List<ManualPokemonState>) {
+        val megaEvolution = player.megaEvolution ?: return
+        pokemonStates.find { it.name.baseMatches(megaEvolution.pokemon) }
+            ?.let { applyMega(it, megaEvolution.item) }
+    }
 
     var showSelectPokemonDialog by mutableStateOf(false)
         private set
@@ -188,7 +233,8 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
 
     fun buildReplayAnalytics() = ReplayAnalytics(
         players = listOf(youPlayer(), opponentPlayer()),
-        uploadTime = Clock.System.now().epochSeconds,
+        // an edited replay keeps identifying with what it was created with
+        uploadTime = editedReplay?.uploadTime ?: Clock.System.now().epochSeconds,
         format = team.format.name,
         rating = null,
         version = VERSION,
@@ -198,8 +244,7 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
             null -> null
         },
         url = null,
-        // manual replays have no showdown replay to refer to
-        reference = "manual_" + Uuid.random(),
+        reference = editedReplay?.reference ?: (MANUAL_REFERENCE_PREFIX + Uuid.random()),
         nextBattleRef = null,
         notes = notes.takeIf { it.isNotBlank() },
     )
