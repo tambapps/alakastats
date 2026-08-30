@@ -113,7 +113,9 @@ data class OtsPokemonEntity(
     val ability: String,
     val moves: List<String>,
     val level: Int,
-    val teraType: String?
+    val teraType: String?,
+    // defaults to null, as replays stored before it was handled don't have it
+    val nature: String? = null
 )
 
 @Serializable

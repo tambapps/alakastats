@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.domain.transformer
 import com.tambapps.pokemon.AbilityName
 import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.MoveName
+import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
@@ -112,7 +113,8 @@ fun OtsPokemon.toEntity() = OtsPokemonEntity(
     ability = ability.value,
     moves = moves.map { it.value },
     level = level,
-    teraType = teraType?.name
+    teraType = teraType?.name,
+    nature = nature?.name
 )
 
 fun SdOtsPokemon.toEntity() = OtsPokemonEntity(
@@ -121,7 +123,8 @@ fun SdOtsPokemon.toEntity() = OtsPokemonEntity(
     ability = ability,
     moves = moves,
     level = level,
-    teraType = teraType?.name
+    teraType = teraType?.name,
+    nature = nature?.name
 )
 
 fun OtsPokemonEntity.toDomain() = OtsPokemon(
@@ -130,7 +133,8 @@ fun OtsPokemonEntity.toDomain() = OtsPokemon(
     ability = AbilityName(ability),
     moves = moves.map(::MoveName),
     level = level,
-    teraType = teraType?.let(TeraType::valueOf)
+    teraType = teraType?.let(TeraType::valueOf),
+    nature = nature?.let(Nature::valueOf)
 )
 
 fun Terastallization.toEntity() = TerastallizationEntity(

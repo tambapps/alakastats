@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.domain.model
 import com.tambapps.pokemon.AbilityName
 import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.MoveName
+import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
@@ -138,7 +139,7 @@ data class OpenTeamSheet(
                 name = p.name,
                 surname = null,
                 gender = null,
-                nature = null,
+                nature = p.nature,
                 item = p.item,
                 shiny = false,
                 happiness = 0,
@@ -160,7 +161,8 @@ data class OtsPokemon(
     val ability: AbilityName,
     val moves: List<MoveName>,
     val level: Int,
-    val teraType: TeraType?
+    val teraType: TeraType?,
+    val nature: Nature?
 )
 
 data class TeamPreview(

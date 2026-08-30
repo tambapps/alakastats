@@ -62,6 +62,7 @@ import com.tambapps.pokemon.alakastats.ui.service.TeraTypeImage
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
+import com.tambapps.pokemon.alakastats.util.titlecase
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import com.tambapps.pokemon.util.MegaUtils
 import org.jetbrains.compose.resources.painterResource
@@ -338,6 +339,10 @@ private fun PokepastePokemonCard(
             Spacer(Modifier.height(16.dp))
             PokepastePokemonItemAndAbility(pokemon)
             Spacer(Modifier.height(16.dp))
+            pokemon.nature?.takeIf { isOts }?.let { nature ->
+                Text(nature.name.titlecase(), style = MaterialTheme.typography.bodyLarge)
+                Spacer(Modifier.height(16.dp))
+            }
 
             if (notes != null) {
                 notesComposer.invoke(this)
