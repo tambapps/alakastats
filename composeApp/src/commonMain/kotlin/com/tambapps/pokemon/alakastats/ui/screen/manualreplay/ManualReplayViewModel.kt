@@ -252,8 +252,11 @@ sealed class ManualPokemonState(val name: PokemonName) {
 
     open val canMega get() = name.canMega
 
+    // can differ from name as name is the base form, because it's simpler to handle megas
+    protected open val actualName get() = name
+
     // the mega stone tells which mega form it evolved into (charizard-mega-x vs charizard-mega-y)
-    val displayedName get() = megaStone?.let { name.toMega(it) } ?: name
+    val displayedName get() = megaStone?.let { name.toMega(it) } ?: actualName
 
     // the mega stone we already know it holds, if any
     open val heldMegaStone: ItemName? get() = null
@@ -266,6 +269,9 @@ sealed class ManualPokemonState(val name: PokemonName) {
 // a pokemon of the user's team, it is already known, it just has to be selected.
 // pokepastes sometimes reference the mega form itself, we always start from the base one
 class YouPokemonState(val pokemon: Pokemon) : ManualPokemonState(pokemon.name.baseNormalized) {
+
+    // the team's pokemon form (ogerpon-hearthflame, landorus-therian...), unless it is the mega one
+    override val actualName = if (pokemon.name.isMega) name else pokemon.name
 
     override val heldMegaStone = pokemon.item?.takeIf { pokemon.name.baseNormalized.toMega(it) != null }
 

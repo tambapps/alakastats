@@ -91,7 +91,7 @@ fun PokemonUsagesCard(
     replays: List<ReplayAnalytics>,
     name: PokemonName,
     usages: PokemonUsages,
-    title: String = name.pretty,
+    title: String? = null,
     gradientBackgroundColors: List<Color>? = cardGradientColors,
     modifier: Modifier = Modifier,
     ) {
@@ -99,8 +99,11 @@ fun PokemonUsagesCard(
         modifier = modifier.padding(horizontal = 8.dp),
         gradientBackgroundColors = gradientBackgroundColors
     ) {
+        // can differ from name as name is the base form, because it's more reliable to compute stats across many replays
+        val displayedPokemonName = team.pokePaste.pokemons
+            .find { it.name.baseMatches(name) }?.name ?: name
         Spacer(Modifier.height(4.dp))
-        Text(title, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(horizontal = 8.dp))
+        Text(title ?: displayedPokemonName.pretty, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(horizontal = 8.dp))
         Spacer(Modifier.height(8.dp))
         if (replays.isNotEmpty()) {
             val winRate = if (usages.usageCount > 0) usages.winCount * 100 / usages.usageCount else 0
@@ -116,7 +119,7 @@ fun PokemonUsagesCard(
             }
             Spacer(Modifier.height(8.dp))
         }
-        PokemonUsagesDonut(name, usages, Modifier.fillMaxWidth())
+        PokemonUsagesDonut(displayedPokemonName, usages, Modifier.fillMaxWidth())
         Spacer(Modifier.height(8.dp))
         HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
         Spacer(Modifier.height(8.dp))
@@ -169,7 +172,7 @@ private val MOVE_STRUGGLE = MoveName("struggle")
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 private fun PokemonUsagesDonut(
-    name: PokemonName,
+    displayedName: PokemonName,
     usages: PokemonUsages,
     modifier: Modifier = Modifier,
 ) {
@@ -197,8 +200,8 @@ private fun PokemonUsagesDonut(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Tooltip(name.pretty) {
-                    PokemonSprite(name)
+                Tooltip(displayedName.pretty) {
+                    PokemonSprite(displayedName)
                 }
             }
         }
