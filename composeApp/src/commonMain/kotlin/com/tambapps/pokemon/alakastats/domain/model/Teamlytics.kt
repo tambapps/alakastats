@@ -41,9 +41,15 @@ data class CommonFilters(
     val isNotEmpty get() = opponentTeamFilters.isNotEmpty()
 }
 
+data class PopularTeam(
+    val name: String,
+    val pokemons: List<PokemonName>
+)
+
 data class FormatData(
     val popularPokemons: List<PokemonName>,
-    val commonFilters: CommonFilters
+    val commonFilters: CommonFilters,
+    val popularTeams: List<PopularTeam>
 )
 
 data class Teamlytics(

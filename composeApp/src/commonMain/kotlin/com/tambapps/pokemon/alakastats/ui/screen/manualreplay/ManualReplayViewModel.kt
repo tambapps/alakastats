@@ -8,10 +8,12 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.MANUAL_REFERENCE_PREFIX
 import com.tambapps.pokemon.alakastats.domain.model.MegaEvolution
 import com.tambapps.pokemon.alakastats.domain.model.Player
+import com.tambapps.pokemon.alakastats.domain.model.PopularTeam
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.getGameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
@@ -39,7 +41,12 @@ enum class ManualReplayPage(val title: String) {
 
 data class ManualReplayValidationError(val page: ManualReplayPage, val message: String)
 
-class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
+class ManualReplayViewModel(
+    private val team: Teamlytics,
+    formatData: FormatData?
+) : ScreenModel {
+
+    val popularTeams = formatData?.popularTeams.orEmpty()
 
     val youPokemonStates = team.pokePaste.pokemons.map(::YouPokemonState)
 
@@ -103,6 +110,9 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
     var showSelectPokemonDialog by mutableStateOf(false)
         private set
 
+    var showPopularTeamsDialog by mutableStateOf(false)
+        private set
+
     // the pokemon we're asking the mega stone of, when it has several ones
     var megaStoneSelectionFor by mutableStateOf<ManualPokemonState?>(null)
         private set
@@ -150,19 +160,39 @@ class ManualReplayViewModel(private val team: Teamlytics) : ScreenModel {
         showSelectPokemonDialog = false
     }
 
+    fun showPopularTeamsDialog() {
+        showPopularTeamsDialog = true
+    }
+
+    fun hidePopularTeamsDialog() {
+        showPopularTeamsDialog = false
+    }
+
+    // replaces whatever was entered, a popular team is a starting point
+    fun selectPopularTeam(popularTeam: PopularTeam) {
+        opponentPokemonStates.clear()
+        opponentSelection.clear()
+        // the team only tells a pokemon can mega evolve, whether it did in this game is up to the user
+        popularTeam.pokemons.forEach { addOpponentBaseForm(it) }
+        hidePopularTeamsDialog()
+    }
+
     fun containsOpponentPokemon(pokemonName: PokemonName) =
         opponentPokemonStates.any { it.name == pokemonName.baseForm }
 
     fun addOpponentPokemon(pokemonName: PokemonName) {
-        if (!canAddOpponentPokemon || containsOpponentPokemon(pokemonName)) {
-            return
-        }
-        val pokemonState = OpponentPokemonState(pokemonName.baseForm)
-        opponentPokemonStates.add(pokemonState)
+        val pokemonState = addOpponentBaseForm(pokemonName) ?: return
         if (pokemonName.isMega) {
             megaStoneOf(pokemonName)?.let { applyMega(pokemonState, it) }
         }
         hideSelectPokemonDialog()
+    }
+
+    private fun addOpponentBaseForm(pokemonName: PokemonName): OpponentPokemonState? {
+        if (!canAddOpponentPokemon || containsOpponentPokemon(pokemonName)) {
+            return null
+        }
+        return OpponentPokemonState(pokemonName.baseForm).also(opponentPokemonStates::add)
     }
 
     // mega forms are stored as their base form, with the mega switch turned on

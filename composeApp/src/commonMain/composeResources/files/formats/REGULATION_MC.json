@@ -3,6 +3,10 @@
     "opponentTeam": [
     ]
   },
+  "popularTeams": [{
+    "name": "",
+    "pokemons": ["raichu-mega-y", "staraptor-mega", "rillaboom", "arcanine-hisui", "sylveon", "gholdengo"]
+  }],
   "popularPokemons": [
     "indeedee",
     "indeedee-f",

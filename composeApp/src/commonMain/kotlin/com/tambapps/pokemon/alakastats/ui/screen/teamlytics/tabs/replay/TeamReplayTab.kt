@@ -164,7 +164,7 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
                 onClick = {
                     viewModel.hideAddReplayDialog()
                     navigator.push(
-                        ManualReplayScreen(viewModel.team) { replay ->
+                        ManualReplayScreen(viewModel.team, viewModel.formatData) { replay ->
                             viewModel.saveManualReplay(snackBar, replay)
                         }
                     )
@@ -458,7 +458,7 @@ internal fun ReplayDropDownMenu(
                 onClick = {
                     isMenuExpandedState.value = false
                     navigator.push(
-                        ManualReplayScreen(viewModel.team, replayToEdit = replay) { editedReplay ->
+                        ManualReplayScreen(viewModel.team, viewModel.formatData, replayToEdit = replay) { editedReplay ->
                             viewModel.saveManualReplay(snackBar, editedReplay, replacing = replay)
                         }
                     )

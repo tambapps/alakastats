@@ -140,8 +140,8 @@ val appModules = listOf(module {
     factory { (teamId: Uuid) ->
         TeamlyticsViewModel(teamId, get(), get())
     }
-    factory { (team: Teamlytics) ->
-        ManualReplayViewModel(team)
+    factory { (team: Teamlytics, formatData: FormatData?) ->
+        ManualReplayViewModel(team, formatData)
     }
     factory { (teamId: Uuid, pokemonName: PokemonName) ->
         PokemonDetailViewModel(teamId, pokemonName, get())

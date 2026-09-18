@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
 package com.tambapps.pokemon.alakastats.ui.screen.manualreplay
 
@@ -6,22 +6,29 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
@@ -39,11 +46,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
@@ -61,12 +70,13 @@ import org.koin.core.parameter.parametersOf
 
 data class ManualReplayScreen(
     val team: Teamlytics,
+    val formatData: FormatData?,
     val replayToEdit: ReplayAnalytics? = null,
     val onReplaySaved: (ReplayAnalytics) -> Unit
 ) : Screen {
     @Composable
     override fun Content() {
-        val viewModel = koinScreenModel<ManualReplayViewModel> { parametersOf(team) }
+        val viewModel = koinScreenModel<ManualReplayViewModel> { parametersOf(team, formatData) }
         val navigator = LocalNavigator.currentOrThrow
         val snackBar = LocalSnackBar.current
         val scope = rememberCoroutineScope()
@@ -130,6 +140,9 @@ data class ManualReplayScreen(
         if (viewModel.showSelectPokemonDialog) {
             SelectPokemonDialog(viewModel)
         }
+        if (viewModel.showPopularTeamsDialog) {
+            SelectPopularTeamDialog(viewModel)
+        }
         viewModel.megaStoneSelectionFor?.let {
             SelectMegaStoneDialog(viewModel, it)
         }
@@ -168,6 +181,61 @@ internal fun <T> ManualPokemonGrid(
     } else {
         ManualPokemonGridDesktop(pokemonStates, modifier, header, addCard, card)
     }
+}
+
+private const val MOBILE_POKEMONS_PER_LINE = 3
+
+// same display as the common filters of the filters bar, a team is recognized by its sprites
+@Composable
+private fun SelectPopularTeamDialog(viewModel: ManualReplayViewModel) {
+    val isCompact = LocalIsCompact.current
+    val iconSize = if (isCompact) 56.dp else 64.dp
+    val offset = iconSize * -0.1f
+
+    AlertDialog(
+        onDismissRequest = { viewModel.hidePopularTeamsDialog() },
+        title = { Text("Popular Teams") },
+        text = {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                viewModel.popularTeams.forEach { popularTeam ->
+                    // a phone is too narrow for a whole team on a single line
+                    val lines =
+                        if (isCompact) popularTeam.pokemons.chunked(MOBILE_POKEMONS_PER_LINE)
+                        else listOf(popularTeam.pokemons)
+                    OutlinedButton(
+                        onClick = { viewModel.selectPopularTeam(popularTeam) },
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.padding(all = 8.dp)
+                    ) {
+                        Column {
+                            lines.forEach { line ->
+                                Row {
+                                    line.forEach {
+                                        PokemonSprite(
+                                            it,
+                                            Modifier.size(iconSize)
+                                                .scale(1.5f)
+                                                .padding(all = 4.dp)
+                                                .offset(y = offset)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = { viewModel.hidePopularTeamsDialog() }) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable

@@ -23,6 +23,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -65,6 +66,16 @@ internal fun YouPage(viewModel: ManualReplayViewModel) {
 internal fun OpponentPage(viewModel: ManualReplayViewModel) {
     ManualPokemonGrid(
         pokemonStates = viewModel.opponentPokemonStates,
+        header = {
+            if (viewModel.popularTeams.isNotEmpty()) {
+                OutlinedButton(
+                    onClick = { viewModel.showPopularTeamsDialog() },
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    Text("Popular teams")
+                }
+            }
+        },
         addCard = if (viewModel.canAddOpponentPokemon) ({ modifier ->
             AddPokemonCard(viewModel, modifier)
         }) else null
