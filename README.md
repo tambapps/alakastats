@@ -80,3 +80,12 @@ Built entirely with **Kotlin Multiplatform**, Alakastats delivers a native-feeli
   <img src="./screenshots/mobile/usages.jpg" alt="Usages page" width="25%" style="margin: 0 10%;" />
   <img src="./screenshots/mobile/lead.jpg" alt="Lead page" width="25%" />
 </p>
+
+### Note to self
+
+Sprites can be found with the following URLs patterns
+
+```text
+https://s3.pokeos.com/pokeos-uploads/assets/pokemon/home/768.png?v=3
+https://s3.pokeos.com/pokeos-uploads/assets/pokemon/fallback/768-mega.png?v=3
+```
