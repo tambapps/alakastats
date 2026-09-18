@@ -10819,7 +10819,7 @@
       "speed": 50
     }
   },
-  "sirfetchd": {
+  "sirfetch-d": {
     "baseStats": {
       "hp": 62,
       "attack": 135,
@@ -12389,7 +12389,7 @@
       "speed": 85
     }
   },
-  "toxtricity-amped": {
+  "toxtricity": {
     "baseStats": {
       "hp": 75,
       "attack": 98,
@@ -12399,7 +12399,7 @@
       "speed": 75
     }
   },
-  "toxtricity-amped-gmax": {
+  "toxtricity-amped": {
     "baseStats": {
       "hp": 75,
       "attack": 98,
