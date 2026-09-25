@@ -205,14 +205,14 @@ internal fun NotedPokepastePokemon(
     modifier: Modifier = Modifier,
 ) {
     val team = viewModel.team
-    val notes = viewModel.pokemonNotes[pokemon]
+    val notes = viewModel.pokemonNotes[pokemon.name]
     if (viewModel.isEditingNotes) {
         PokepastePokemon(
             team = team,
             pokemon = pokemon,
-            pokemonData = team.data.pokemonData[pokemon.name],
+            pokemonData = team.data.pokemonData[pokemon.name.normalized],
             modifier = modifier,
-            onNotesChanged = { viewModel.pokemonNotes[pokemon] = it },
+            onNotesChanged = { viewModel.pokemonNotes[pokemon.name] = it },
             notes = notes
         )
     } else {

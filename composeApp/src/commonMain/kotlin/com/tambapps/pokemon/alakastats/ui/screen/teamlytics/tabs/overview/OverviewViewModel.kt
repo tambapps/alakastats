@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import arrow.core.mapValuesNotNull
 import arrow.core.raise.either
-import com.tambapps.pokemon.Pokemon
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsData
@@ -32,7 +32,7 @@ class OverviewViewModel(
     val team get() = useCase.originalTeam
     var isEditingNotes by mutableStateOf(false)
     var teamNotes by mutableStateOf("")
-    val pokemonNotes = mutableStateMapOf<Pokemon, String>()
+    val pokemonNotes = mutableStateMapOf<PokemonName, String>()
     val leveledPokemons = when(val formatPokemonLevel = team.format.pokemonLevel) {
         null -> team.pokePaste.pokemons
         else -> team.pokePaste.pokemons.map { it.copy(level = formatPokemonLevel) }
@@ -75,15 +75,15 @@ class OverviewViewModel(
         if (notes != null) {
             teamNotes = notes.teamNotes
             for ((pokemonName, pNotes) in notes.pokemonNotes) {
-                val pokemon = team.pokePaste.pokemons.find { it.name == pokemonName } ?: continue
-                pokemonNotes[pokemon] = pNotes
+                if (team.pokePaste.pokemons.none { it.name == pokemonName }) continue
+                pokemonNotes[pokemonName] = pNotes
             }
         } else {
             teamNotes = ""
         }
         for (pokemon in team.pokePaste.pokemons) {
-            if (!pokemonNotes.containsKey(pokemon)) {
-                pokemonNotes[pokemon] = ""
+            if (!pokemonNotes.containsKey(pokemon.name)) {
+                pokemonNotes[pokemon.name] = ""
             }
         }
     }
@@ -94,7 +94,7 @@ class OverviewViewModel(
         }
         isTabLoading = true
         scope.launch {
-            val either = useCase.setNotes(team, TeamlyticsNotes(teamNotes, pokemonNotes.mapKeys { (key, _) -> key.name }))
+            val either = useCase.setNotes(team, TeamlyticsNotes(teamNotes, pokemonNotes.toMap()))
             withContext(Dispatchers.Main) {
                 either.onLeft { error -> snackBar.show("Couldn't save notes: ${error.message}", SnackBar.Severity.ERROR) }
                 isTabLoading = false
