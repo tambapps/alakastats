@@ -6,12 +6,14 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.Nature
+import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
 
 const val MAX_STAT_POINTS_PER_STAT = 32
 const val MAX_TOTAL_STAT_POINTS = 66
 const val MAX_BOOST_STAGE = 6
+const val MAX_MOVES = 4
 
 // neutral natures all have the same effect, only keep one
 val NATURES = Nature.entries.filter { !it.isNeutral || it == Nature.SERIOUS }
@@ -77,6 +79,21 @@ class DamageCalcPokemonState(
     // can be negative, the max total is not enforced
     val remainingStatPoints get() = MAX_TOTAL_STAT_POINTS - totalStatPoints
     val exceedsMaxTotalStatPoints get() = remainingStatPoints < 0
+
+    /**
+     * Fill this state with the set of a pokemon (e.g. from a team)
+     */
+    fun fillFrom(pokemon: Pokemon) {
+        name = pokemon.name
+        ability = pokemon.ability?.pretty ?: ""
+        item = pokemon.item?.pretty ?: ""
+        // only one neutral nature is proposed
+        nature = pokemon.nature?.takeUnless { it.isNeutral } ?: Nature.SERIOUS
+        STATS.forEach { setStatPoints(it, pokemon.evs.get(it)) }
+        // always keep MAX_MOVES slots so that missing moves can be filled
+        val teamMoves = pokemon.moves.take(MAX_MOVES).map { it.pretty }
+        moves = teamMoves + List(MAX_MOVES - teamMoves.size) { "" }
+    }
 
     fun setMove(index: Int, move: String) {
         moves = moves.toMutableList().also { it[index] = move }

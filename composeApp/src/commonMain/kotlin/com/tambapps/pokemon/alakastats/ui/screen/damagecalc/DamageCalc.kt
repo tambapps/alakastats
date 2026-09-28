@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
@@ -40,6 +41,7 @@ import org.jetbrains.compose.resources.painterResource
 /**
  * Reusable damage calculator component, used both in the teamlytics tab and in the standalone screen
  *
+ * @param team if provided, allows to fill the attacker/defender with a pokemon of this team
  * @param pagerSwipeEnabled whether the mobile pager can be swiped. Should be disabled when the component
  * is itself displayed inside a horizontal pager
  */
@@ -47,13 +49,14 @@ import org.jetbrains.compose.resources.painterResource
 fun DamageCalc(
     viewModel: DamageCalcViewModel,
     modifier: Modifier = Modifier,
+    team: Teamlytics? = null,
     pagerSwipeEnabled: Boolean = true,
 ) {
     val isCompact = LocalIsCompact.current
     if (isCompact) {
-        DamageCalcMobile(viewModel, modifier, pagerSwipeEnabled)
+        DamageCalcMobile(viewModel, modifier, team, pagerSwipeEnabled)
     } else {
-        DamageCalcDesktop(viewModel, modifier)
+        DamageCalcDesktop(viewModel, modifier, team)
     }
 }
 
@@ -153,6 +156,8 @@ internal fun MoveChips(viewModel: DamageCalcViewModel, modifier: Modifier = Modi
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         viewModel.attacker.moves.forEachIndexed { index, move ->
+            // empty move slots are not selectable
+            if (move.isBlank()) return@forEachIndexed
             FilterChip(
                 selected = viewModel.selectedMoveIndex == index,
                 onClick = { viewModel.selectedMoveIndex = index },

@@ -6,5 +6,5 @@ import com.tambapps.pokemon.alakastats.ui.screen.damagecalc.DamageCalc
 @Composable
 fun DamageCalcTab(viewModel: DamageCalcTabViewModel) {
     // the tab is already in the teamlytics pager, swiping would conflict
-    DamageCalc(viewModel.damageCalcViewModel, pagerSwipeEnabled = false)
+    DamageCalc(viewModel.damageCalcViewModel, team = viewModel.team, pagerSwipeEnabled = false)
 }

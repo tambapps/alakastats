@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -46,6 +47,7 @@ private const val SCROLL_TO_TOP_DURATION_MILLIS = 300
 internal fun DamageCalcMobile(
     viewModel: DamageCalcViewModel,
     modifier: Modifier = Modifier,
+    team: Teamlytics? = null,
     pagerSwipeEnabled: Boolean = true,
 ) {
     val pagerState = rememberPagerState(pageCount = { PAGES.size })
@@ -107,14 +109,14 @@ internal fun DamageCalcMobile(
             ) { page ->
                 val pageModifier = Modifier.fillMaxWidth().padding(8.dp)
                 when (page) {
-                    0 -> DamageCalcPokemonPanel(viewModel.attacker, DamageCalcSide.ATTACKER, pageModifier)
+                    0 -> DamageCalcPokemonPanel(viewModel.attacker, DamageCalcSide.ATTACKER, team, pageModifier)
                     FIELD_PAGE -> DamageCalcFieldPanel(
                         field = viewModel.field,
                         attackerSideConditions = viewModel.attacker.sideConditions,
                         defenderSideConditions = viewModel.defender.sideConditions,
                         modifier = pageModifier
                     )
-                    2 -> DamageCalcPokemonPanel(viewModel.defender, DamageCalcSide.DEFENDER, pageModifier)
+                    2 -> DamageCalcPokemonPanel(viewModel.defender, DamageCalcSide.DEFENDER, team, pageModifier)
                 }
             }
         }

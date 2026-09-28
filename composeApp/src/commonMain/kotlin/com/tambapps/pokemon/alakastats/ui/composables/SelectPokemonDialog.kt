@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,6 +50,8 @@ fun SelectPokemonDialog(
     title: String,
     confirmButtonText: String,
     containsValidator: (PokemonName) -> Boolean = { false },
+    // optional extra button, displayed before the cancel button
+    extraButton: (@Composable () -> Unit)? = null,
 ) {
     val allPokemons = availablePokemonNames()
     var text by remember { mutableStateOf("") }
@@ -115,8 +118,11 @@ fun SelectPokemonDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("Cancel")
+            Row {
+                extraButton?.invoke()
+                TextButton(onClick = onDismissRequest) {
+                    Text("Cancel")
+                }
             }
         }
     )

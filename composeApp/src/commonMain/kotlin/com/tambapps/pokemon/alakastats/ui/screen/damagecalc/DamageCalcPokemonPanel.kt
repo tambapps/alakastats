@@ -31,10 +31,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.swmansion.kmpwheelpicker.rememberWheelPickerState
 import com.tambapps.pokemon.Nature
+import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.Stat
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonWheelPicker
 import com.tambapps.pokemon.alakastats.ui.composables.SelectPokemonDialog
 import com.tambapps.pokemon.alakastats.ui.composables.StatBoostStageChip
 import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
@@ -53,9 +57,11 @@ private val hpColor = Color(0xFF4CAF50)
 internal fun DamageCalcPokemonPanel(
     state: DamageCalcPokemonState,
     side: DamageCalcSide,
+    team: Teamlytics?,
     modifier: Modifier = Modifier
 ) {
     var showPokemonDialog by remember { mutableStateOf(false) }
+    var showTeamPokemonDialog by remember { mutableStateOf(false) }
     var showNatureDialog by remember { mutableStateOf(false) }
     var showStatusDialog by remember { mutableStateOf(false) }
     var editedMoveIndex by remember { mutableStateOf<Int?>(null) }
@@ -73,7 +79,7 @@ internal fun DamageCalcPokemonPanel(
         CurrentHpSlider(state)
         if (side == DamageCalcSide.ATTACKER) {
             state.moves.forEachIndexed { index, move ->
-                PropertyRow("Move ${index + 1}", move, onClick = { editedMoveIndex = index })
+                PropertyRow("Move ${index + 1}", move.ifBlank { "-" }, onClick = { editedMoveIndex = index })
             }
         }
     }
@@ -84,6 +90,23 @@ internal fun DamageCalcPokemonPanel(
             onDismissRequest = { showPokemonDialog = false },
             title = "Select ${side.displayName}",
             confirmButtonText = "Select",
+            extraButton = if (team != null) {
+                {
+                    TextButton(onClick = {
+                        showPokemonDialog = false
+                        showTeamPokemonDialog = true
+                    }) {
+                        Text("From Team")
+                    }
+                }
+            } else null,
+        )
+    }
+    if (showTeamPokemonDialog && team != null) {
+        SelectTeamPokemonDialog(
+            team = team,
+            onSelect = { state.fillFrom(it) },
+            onDismissRequest = { showTeamPokemonDialog = false },
         )
     }
     if (showNatureDialog) {
@@ -114,6 +137,39 @@ internal fun DamageCalcPokemonPanel(
             onDismissRequest = { editedMoveIndex = null },
         )
     }
+}
+
+@Composable
+private fun SelectTeamPokemonDialog(
+    team: Teamlytics,
+    onSelect: (Pokemon) -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    val pokemons = team.pokePaste.pokemons
+    val wheelState = rememberWheelPickerState(itemCount = pokemons.size, initialIndex = 0)
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Select From ${team.name}") },
+        text = {
+            PokemonWheelPicker(
+                pokemons = pokemons.map { it.name },
+                state = wheelState,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                pokemons.getOrNull(wheelState.index)?.let(onSelect)
+                onDismissRequest.invoke()
+            }) {
+                Text("Select")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
