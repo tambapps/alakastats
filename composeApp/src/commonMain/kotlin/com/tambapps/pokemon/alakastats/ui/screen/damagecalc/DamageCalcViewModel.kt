@@ -60,7 +60,7 @@ class DamageCalcViewModel : ScreenModel {
             val damage = DamageCalculator.calculateMove(
                 attacker = attackerPokemon,
                 defender = defenderPokemon,
-                moveUse = MoveUse(move),
+                moveUse = MoveUse(move, isCritical = attacker.isCritical(selectedMoveIndex)),
                 field = field,
                 hits = attacker.hitCount(selectedMoveIndex),
             )

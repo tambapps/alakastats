@@ -93,15 +93,24 @@ internal fun DamageCalcPokemonPanel(
                     label = "Move ${index + 1}",
                     value = move.ifBlank { "-" },
                     onClick = { editedMoveIndex = index },
-                    trailingContent = selectableHitCounts?.let {
+                    trailingContent = if (move.isNotBlank()) {
                         {
-                            HitCountChip(
-                                hits = state.hitCount(index),
-                                selectableHitCounts = it,
-                                onHitCountSelected = { hits -> state.selectHitCount(index, hits) },
-                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                CritChip(
+                                    isCritical = state.isCritical(index),
+                                    alwaysCrits = state.alwaysCrits(index),
+                                    onCriticalChange = { state.setCritical(index, it) },
+                                )
+                                selectableHitCounts?.let {
+                                    HitCountChip(
+                                        hits = state.hitCount(index),
+                                        selectableHitCounts = it,
+                                        onHitCountSelected = { hits -> state.selectHitCount(index, hits) },
+                                    )
+                                }
+                            }
                         }
-                    },
+                    } else null,
                 )
             }
         }
@@ -381,6 +390,20 @@ private fun HitCountChip(hits: Int, selectableHitCounts: IntRange, onHitCountSel
 }
 
 private val HIT_COUNT_CHIP_WIDTH = 60.dp
+
+/**
+ * Chip toggling whether a move is calculated as a critical hit. Moves that always crit have it
+ * selected and disabled.
+ */
+@Composable
+private fun CritChip(isCritical: Boolean, alwaysCrits: Boolean, onCriticalChange: (Boolean) -> Unit) {
+    FilterChip(
+        selected = isCritical,
+        enabled = !alwaysCrits,
+        onClick = { onCriticalChange(!isCritical) },
+        label = { Text("Crit", maxLines = 1, softWrap = false) },
+    )
+}
 
 @Composable
 private fun StatPointsTile(state: DamageCalcPokemonState, side: DamageCalcSide) {

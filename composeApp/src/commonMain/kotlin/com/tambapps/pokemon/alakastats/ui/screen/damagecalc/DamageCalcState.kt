@@ -124,6 +124,8 @@ class DamageCalcPokemonState(
     private val boosts = mutableStateMapOf<Stat, Int>()
     // hit counts explicitly selected, by move index. Moves without one use the engine's default
     private val selectedHitCounts = mutableStateMapOf<Int, Int>()
+    // indexes of the moves calculated as critical hits
+    private val criticalMoveIndexes = mutableStateMapOf<Int, Boolean>()
 
     val totalStatPoints get() = statPoints.values.sum()
     // can be negative, the max total is not enforced
@@ -167,6 +169,7 @@ class DamageCalcPokemonState(
         val teamMoves = pokemon.moves.take(MAX_MOVES).map { it.pretty }
         moves = teamMoves + List(MAX_MOVES - teamMoves.size) { "" }
         selectedHitCounts.clear()
+        criticalMoveIndexes.clear()
     }
 
     fun setMove(index: Int, move: String) {
@@ -198,6 +201,20 @@ class DamageCalcPokemonState(
 
     fun selectHitCount(index: Int, hits: Int) {
         selectedHitCounts[index] = hits
+    }
+
+    /**
+     * Whether the move at [index] always lands a critical hit (e.g. Wicked Blow), whatever the crit toggle
+     */
+    fun alwaysCrits(index: Int) = championsMove(index)?.alwaysCrits == true
+
+    /**
+     * Whether the move at [index] is calculated as a critical hit
+     */
+    fun isCritical(index: Int) = alwaysCrits(index) || criticalMoveIndexes[index] == true
+
+    fun setCritical(index: Int, isCritical: Boolean) {
+        criticalMoveIndexes[index] = isCritical
     }
 
     fun getBoost(stat: Stat) = boosts[stat] ?: 0
