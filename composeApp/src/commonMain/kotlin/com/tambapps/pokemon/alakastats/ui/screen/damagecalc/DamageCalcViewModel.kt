@@ -13,6 +13,10 @@ import com.tambapps.pokemon.champions.data.MoveCategory
 import com.tambapps.pokemon.champions.engine.Battlefield
 import com.tambapps.pokemon.champions.engine.DamageCalculator
 import com.tambapps.pokemon.champions.engine.MoveUse
+import com.tambapps.pokemon.champions.engine.Terrain
+import com.tambapps.pokemon.champions.engine.Weather
+import com.tambapps.pokemon.champions.engine.terrainSetOnField
+import com.tambapps.pokemon.champions.engine.weatherSetOnField
 
 class DamageCalcViewModel : ScreenModel {
 
@@ -39,6 +43,26 @@ class DamageCalcViewModel : ScreenModel {
     var field by mutableStateOf(Battlefield())
     var selectedMoveIndex by mutableIntStateOf(0)
     val scrollToTopSignal = VoidSignal()
+    // abilities setting the weather/terrain on the field, like the source calculator (e.g. Drought -> Sun)
+    private val weatherSync = AbilityFieldSync(Weather.NONE)
+    private val terrainSync = AbilityFieldSync(Terrain.NONE)
+
+    init {
+        attacker.onAbilityChange = ::onAbilityChange
+        defender.onAbilityChange = ::onAbilityChange
+        // like the source calculator when loading the pokemons
+        onAbilityChange(attacker)
+        onAbilityChange(defender)
+    }
+
+    private fun onAbilityChange(pokemon: DamageCalcPokemonState) {
+        val side = if (pokemon === attacker) 0 else 1
+        val ability = pokemon.resolvedAbility
+        field = field.copy(
+            weather = weatherSync.onAbilityChange(field.weather, side, ability.weatherSetOnField(pokemon.isAbilityActive)),
+            terrain = terrainSync.onAbilityChange(field.terrain, side, ability.terrainSetOnField(pokemon.isAbilityActive)),
+        )
+    }
 
     // recomputed whenever an input of the calc changes
     val result: DamageCalcResult by derivedStateOf { computeResult() }
@@ -83,8 +107,10 @@ class DamageCalcViewModel : ScreenModel {
         val previousAttacker = attacker
         attacker = defender
         defender = previousAttacker
-        // side conditions follow the pokemon
+        // side conditions follow the pokemon, as does what their ability set on the field
         field = field.copy(attackerSide = field.defenderSide, defenderSide = field.attackerSide)
+        weatherSync.swapSides()
+        terrainSync.swapSides()
         selectedMoveIndex = 0
     }
 }

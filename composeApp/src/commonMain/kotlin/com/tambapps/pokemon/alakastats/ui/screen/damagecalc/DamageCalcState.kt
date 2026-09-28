@@ -12,10 +12,13 @@ import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
+import com.tambapps.pokemon.champions.data.Ability
 import com.tambapps.pokemon.champions.data.ChampionsDex
 import com.tambapps.pokemon.champions.data.Move
 import com.tambapps.pokemon.champions.engine.defaultHitCount
+import com.tambapps.pokemon.champions.engine.hasActiveToggle
 import com.tambapps.pokemon.champions.engine.hitCountRange
+import com.tambapps.pokemon.champions.engine.isActiveByDefault
 import com.tambapps.pokemon.champions.engine.BattleFormat
 import com.tambapps.pokemon.champions.engine.BattlePokemon
 import com.tambapps.pokemon.champions.engine.Battlefield
@@ -117,7 +120,34 @@ class DamageCalcPokemonState(
     var form by mutableStateOf(formsOf(name).first())
         private set
     var nature by mutableStateOf(Nature.SERIOUS)
-    var ability by mutableStateOf(ability)
+    private var abilityState by mutableStateOf(ability)
+    private var isAbilityActiveState by mutableStateOf(Ability.from(AbilityName(ability)).isActiveByDefault)
+    // notified when the ability or its toggle changes, e.g. to sync the weather/terrain it sets on the field
+    internal var onAbilityChange: ((DamageCalcPokemonState) -> Unit)? = null
+
+    /**
+     * Changing the ability resets its "active" toggle to the source calculator's default (e.g. on for Intimidate)
+     */
+    var ability: String
+        get() = abilityState
+        set(value) {
+            abilityState = value
+            isAbilityActiveState = resolvedAbility.isActiveByDefault
+            onAbilityChange?.invoke(this)
+        }
+
+    /**
+     * The source calculator's "ability on" toggle, only relevant for abilities that have one (see [hasAbilityToggle])
+     */
+    var isAbilityActive: Boolean
+        get() = isAbilityActiveState
+        set(value) {
+            isAbilityActiveState = value
+            onAbilityChange?.invoke(this)
+        }
+
+    val resolvedAbility: Ability get() = Ability.from(AbilityName(abilityState))
+    val hasAbilityToggle get() = resolvedAbility.hasActiveToggle
     var item by mutableStateOf(item)
     var status by mutableStateOf(Status.HEALTHY)
     // the toxic damage of the next end of turn in 16ths of the max HP, only used when badly poisoned
@@ -260,6 +290,7 @@ class DamageCalcPokemonState(
             ),
             status = status,
             toxicCounter = toxicCounter,
+            abilityIsActive = isAbilityActive,
         )
         if (currentHpPercent >= 100) return battlePokemon
         // the engine wants HP points, which depend on the stats computed from the species
