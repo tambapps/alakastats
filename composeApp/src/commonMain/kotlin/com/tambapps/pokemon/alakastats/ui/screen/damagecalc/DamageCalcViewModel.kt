@@ -16,6 +16,7 @@ import com.tambapps.pokemon.champions.engine.Battlefield
 import com.tambapps.pokemon.champions.engine.DamageCalculator
 import com.tambapps.pokemon.champions.engine.Terrain
 import com.tambapps.pokemon.champions.engine.Weather
+import com.tambapps.pokemon.champions.engine.effectiveTypeOf
 import com.tambapps.pokemon.champions.engine.terrainSetOnField
 import com.tambapps.pokemon.champions.engine.weatherSetOnField
 
@@ -142,6 +143,7 @@ class DamageCalcViewModel : ScreenModel {
                 attacker = userPokemon,
                 defender = targetPokemon,
                 move = move,
+                moveType = effectiveTypeOf(move, userPokemon, calcField),
                 damage = damage,
             )
         } catch (e: ChampionsCalcException) {

@@ -6,10 +6,16 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -26,7 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.ui.service.MoveTypeImage
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
@@ -132,14 +140,16 @@ private fun DesktopResultCard(viewModel: DamageCalcViewModel) {
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // cards of equal height, even for a move without result (shorter)
+                Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     moveResults[side].orEmpty().forEachIndexed { index, moveResult ->
                         MoveResultCard(
                             moveName = pokemon.moves.getOrNull(index).orEmpty(),
+                            moveType = viewModel.moveTypeOf(side, index),
                             result = moveResult,
                             isSelected = viewModel.selectedMoveSide == side && viewModel.selectedMoveIndex == index,
                             onClick = { viewModel.selectMove(side, index) },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
                         )
                     }
                 }
@@ -151,6 +161,7 @@ private fun DesktopResultCard(viewModel: DamageCalcViewModel) {
 @Composable
 private fun MoveResultCard(
     moveName: String,
+    moveType: PokeType?,
     result: DamageCalcResult,
     isSelected: Boolean,
     onClick: () -> Unit,
@@ -163,13 +174,19 @@ private fun MoveResultCard(
         else CardDefaults.outlinedCardBorder(),
     ) {
         Column(Modifier.padding(8.dp)) {
-            Text(
-                moveName.ifBlank { "-" },
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (moveType != null) {
+                    MoveTypeImage(moveType, Modifier.size(MOVE_TYPE_ICON_SIZE))
+                    Spacer(Modifier.width(6.dp))
+                }
+                Text(
+                    moveName.ifBlank { "-" },
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             when (result) {
                 is DamageCalcResult.Success -> {
                     Text(result.damagePercentText, style = MaterialTheme.typography.bodyMedium)

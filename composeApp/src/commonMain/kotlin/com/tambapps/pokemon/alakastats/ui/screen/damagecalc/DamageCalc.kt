@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,8 +34,10 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.service.MoveTypeImage
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
@@ -193,6 +197,16 @@ private fun damageBarColors() = if (isDarkThemeEnabled()) {
     DamageBarColors(alwaysLeft = Color(0xFF4CAF50), dependsOnRoll = Color(0xFFFFA726), surelyLost = Color(0xFFC62828))
 }
 
+internal val MOVE_TYPE_ICON_SIZE = 24.dp
+
+/**
+ * The type of the move at [index] of the [side] pokemon: the one it has in the calc when there's one (e.g. Weather Ball
+ * in Rain), else its own
+ */
+internal fun DamageCalcViewModel.moveTypeOf(side: DamageCalcSide, index: Int): PokeType? =
+    (moveResults[side]?.getOrNull(index) as? DamageCalcResult.Success)?.moveType
+        ?: pokemonState(side).championsMove(index)?.type
+
 @Composable
 internal fun MoveChips(viewModel: DamageCalcViewModel, modifier: Modifier = Modifier) {
     Row(
@@ -204,10 +218,12 @@ internal fun MoveChips(viewModel: DamageCalcViewModel, modifier: Modifier = Modi
             // empty move slots are not selectable
             if (move.isBlank()) return@forEachIndexed
             val hits = attacker.hitCount(index)
+            val moveType = viewModel.moveTypeOf(DamageCalcSide.ATTACKER, index)
             FilterChip(
                 selected = viewModel.selectedMoveSide == DamageCalcSide.ATTACKER && viewModel.selectedMoveIndex == index,
                 onClick = { viewModel.selectMove(DamageCalcSide.ATTACKER, index) },
-                label = { Text(if (hits > 1) "$move ×$hits" else move) }
+                label = { Text(if (hits > 1) "$move ×$hits" else move) },
+                leadingIcon = moveType?.let { { MoveTypeImage(it, Modifier.size(FilterChipDefaults.IconSize)) } },
             )
         }
     }

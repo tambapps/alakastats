@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -25,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.DropdownField
@@ -32,6 +34,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.SuggestionTextField
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
+import com.tambapps.pokemon.alakastats.ui.service.MoveTypeImage
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.champions.data.Ability
 import com.tambapps.pokemon.champions.data.ChampionsDex
@@ -110,6 +113,11 @@ internal fun DamageCalcPokemonColumn(
                         selected = state.isAbilityActive,
                         onClick = { state.isAbilityActive = !state.isAbilityActive },
                         label = { Text("Active", maxLines = 1, softWrap = false) },
+                        // the default selected color barely stands out on the card
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
                     )
                 }
             }
@@ -233,6 +241,10 @@ private fun MoveRow(state: DamageCalcPokemonState, index: Int, move: String) {
             catalog = MOVE_NAMES,
             onValueSelected = { state.setMove(index, it) },
             allowBlank = true,
+            suggestionLeadingContent = { name ->
+                ChampionsDex.moveOrNull(MoveName(name))?.let { MoveTypeImage(it.type, Modifier.size(MOVE_TYPE_ICON_SIZE)) }
+            },
+            leadingIcon = championsMove?.let { { MoveTypeImage(it.type, Modifier.size(MOVE_TYPE_ICON_SIZE)) } },
             modifier = Modifier.weight(1f),
         )
         if (move.isNotBlank()) {
@@ -303,6 +315,7 @@ private fun CatalogTextField(
     modifier: Modifier = Modifier,
     allowBlank: Boolean = false,
     suggestionLeadingContent: (@Composable (String) -> Unit)? = null,
+    leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     var text by remember(value) { mutableStateOf(value) }
     fun matchOf(input: String): String? =
@@ -320,5 +333,6 @@ private fun CatalogTextField(
         modifier = modifier,
         isError = matchOf(text) == null,
         suggestionLeadingContent = suggestionLeadingContent,
+        leadingIcon = leadingIcon,
     )
 }

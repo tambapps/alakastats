@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
+import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.champions.data.Move
 import com.tambapps.pokemon.champions.engine.BattlePokemon
 import com.tambapps.pokemon.champions.engine.MoveDamageResult
@@ -13,6 +14,8 @@ sealed interface DamageCalcResult {
         val attacker: BattlePokemon,
         val defender: BattlePokemon,
         val move: Move,
+        /** The type the move has in this calc, which can differ from [Move.type] (e.g. Weather Ball in Rain, Pixilate) */
+        val moveType: PokeType,
         val damage: MoveDamageResult,
     ) : DamageCalcResult {
         val hits get() = damage.hits.size

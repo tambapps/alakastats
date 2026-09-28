@@ -41,6 +41,7 @@ fun <T> SuggestionTextField(
     supportingText: (@Composable () -> Unit)? = null,
     maxSuggestions: Int = DEFAULT_MAX_SUGGESTIONS,
     suggestionLeadingContent: (@Composable (T) -> Unit)? = null,
+    leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
     var textFieldValue by remember(value) {
@@ -71,6 +72,7 @@ fun <T> SuggestionTextField(
             supportingText = supportingText,
             singleLine = true,
             label = { Text(label) },
+            leadingIcon = leadingIcon,
             modifier = textFieldModifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
         )
 
