@@ -51,6 +51,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.quizzes.decreasedStatColor
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.displayName
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.increasedStatColor
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.shortLabel
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.champions.engine.Status
 import com.tambapps.pokemon.champions.engine.returnsDefenderMove
@@ -81,7 +82,7 @@ internal fun DamageCalcPokemonPanel(
     var counteredMoveDialogIndex by remember { mutableStateOf<Int?>(null) }
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        PokemonButton(state, onClick = { showPokemonDialog = true })
+        PokemonButton(state, side, onClick = { showPokemonDialog = true })
         if (state.availableForms.size > 1) {
             PropertyRow("Form", state.form.pretty, onClick = { showFormDialog = true })
         }
@@ -405,14 +406,19 @@ private fun Nature.effectDisplayName(separator: String = " ") =
     else "$displayName$separator+${bonusStat?.abbreviation}/-${malusStat?.abbreviation}"
 
 @Composable
-private fun PokemonButton(state: DamageCalcPokemonState, onClick: () -> Unit) {
+private fun PokemonButton(state: DamageCalcPokemonState, side: DamageCalcSide, onClick: () -> Unit) {
     MyCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         gradientBackgroundColors = elevatedCardGradientColors
     ) {
         Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            PokemonSprite(state.form, Modifier.size(64.dp))
+            // the attacker faces right, towards its target
+            PokemonSprite(
+                state.form,
+                Modifier.size(64.dp),
+                facingDirection = if (side == DamageCalcSide.ATTACKER) FacingDirection.RIGHT else FacingDirection.LEFT,
+            )
             Spacer(Modifier.width(8.dp))
             Text(state.name.pretty, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         }
