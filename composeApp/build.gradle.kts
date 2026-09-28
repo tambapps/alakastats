@@ -102,6 +102,7 @@ kotlin {
             implementation(libs.pokemon.sdReplayLogVisitor)
             implementation(libs.pokemon.pokepasteParser)
             implementation(libs.pokemon.pokeApi.client)
+            implementation(libs.pokemon.championsEngine)
             implementation(libs.serialization.json)
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.screenmodel)

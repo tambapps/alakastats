@@ -220,7 +220,6 @@ abstract class AbstractPokemonImageService(
             TeraType.ELECTRIC -> Res.drawable.tera_type_electric
             TeraType.FAIRY -> Res.drawable.tera_type_fairy
             TeraType.POISON -> Res.drawable.tera_type_poison
-            TeraType.PSY -> Res.drawable.tera_type_psychic
             TeraType.ROCK -> Res.drawable.tera_type_rock
             TeraType.GHOST -> Res.drawable.tera_type_ghost
             TeraType.DARK -> Res.drawable.tera_type_dark
@@ -252,7 +251,6 @@ abstract class AbstractPokemonImageService(
             PokeType.ELECTRIC -> Res.drawable.move_electric
             PokeType.FAIRY -> Res.drawable.move_fairy
             PokeType.POISON -> Res.drawable.move_poison
-            PokeType.PSY -> Res.drawable.move_psychic
             PokeType.ROCK -> Res.drawable.move_rock
             PokeType.GHOST -> Res.drawable.move_ghost
             PokeType.DARK -> Res.drawable.move_dark

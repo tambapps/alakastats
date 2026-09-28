@@ -19,7 +19,7 @@ kotlin = "2.3.21"
 kotlinxBrowser = "0.5.0"
 kotlinxCoroutines = "1.11.0"
 kotlinxDatetime = "0.8.0"
-tambappsPokemon = "1.0-SNAPSHOT"
+tambappsPokemon = "1.1-SNAPSHOT"
 voyager = "1.1.0-beta03"
 serialization = "1.11.0"
 coil = "3.4.0"
@@ -55,6 +55,7 @@ kstore-storage = { module = "io.github.xxfast:kstore-storage", version.ref = "ks
 pokemon-sdReplayLogVisitor = { module = "com.tambapps.pokemon:pokemon-sd-replay-log-visitor", version.ref = "tambappsPokemon" }
 pokemon-pokepasteParser = { module = "com.tambapps.pokemon:pokepaste-parser", version.ref = "tambappsPokemon" }
 pokemon-pokeApi-client = { module = "com.tambapps.pokemon:pokeapi-client", version.ref = "tambappsPokemon" }
+pokemon-championsEngine = { module = "com.tambapps.pokemon:champions-engine", version.ref = "tambappsPokemon" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
