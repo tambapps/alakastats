@@ -344,7 +344,7 @@ class PokemonLocalUrlImageService(
         facingDirection: FacingDirection
     ) {
         val displayedName = name.pretty
-        MyImage(url = "$baseUrl/images/pokemons/${type.name.lowercase()}/${name.normalized.value}.png",
+        MyImage(url = "$baseUrl/images/pokemons/${type.name.lowercase()}/${name.imageName}.png",
             contentDescription = displayedName,
             modifier = modifier.flipXIfNecessary(facingDirection),
         )
@@ -377,7 +377,7 @@ class GhPagesImageService(
         facingDirection: FacingDirection
     ) {
         val prettyName = name.pretty
-        MyImage(url = "$baseUrl/pokemons/${type.name.lowercase()}/${name.normalized.value}.png?raw=true",
+        MyImage(url = "$baseUrl/pokemons/${type.name.lowercase()}/${name.imageName}.png?raw=true",
             contentDescription = prettyName,
             modifier = modifier.flipXIfNecessary(facingDirection),
         )
@@ -423,8 +423,8 @@ class PokemonUrlMappingImageService(json: Json) : AbstractPokemonImageService(js
     // needs to be @Composable to listen to the map changes
     @Composable
     protected fun getPokemonImageData(name: PokemonName, type: ImageType) = when (type) {
-        ImageType.SPRITE -> pokemonImages[name.normalized.value]?.sprite
-        ImageType.ARTWORK -> pokemonImages[name.normalized.value]?.artwork
+        ImageType.SPRITE -> pokemonImages[name.imageName]?.sprite
+        ImageType.ARTWORK -> pokemonImages[name.imageName]?.artwork
     }
 
     @Composable

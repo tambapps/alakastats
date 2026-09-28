@@ -73,7 +73,7 @@ internal fun DamageResultHeader(
         Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "${viewModel.attacker.name.pretty} → ${viewModel.defender.name.pretty}",
+                    "${viewModel.attacker.form.pretty} → ${viewModel.defender.form.pretty}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,

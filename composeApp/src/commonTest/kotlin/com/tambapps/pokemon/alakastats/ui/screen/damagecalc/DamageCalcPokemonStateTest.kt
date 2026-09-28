@@ -67,6 +67,49 @@ class DamageCalcPokemonStateTest {
     }
 
     @Test
+    fun selectingAPokemonSelectsItsFirstForm() {
+        val state = state().apply { selectSpecies(PokemonName("Aegislash")) }
+        assertEquals(listOf(PokemonName("Aegislash-Shield"), PokemonName("Aegislash-Blade")), state.availableForms)
+        assertEquals(PokemonName("Aegislash-Shield"), state.form)
+    }
+
+    @Test
+    fun aSingleFormPokemonIsItsOwnForm() {
+        // the form has the dex's spelling, whatever the picked name's
+        val state = state(name = "incineroar")
+        assertEquals(listOf(PokemonName("Incineroar")), state.availableForms)
+        assertEquals(PokemonName("Incineroar"), state.form)
+    }
+
+    @Test
+    fun selectingAMegaFormUsesItsAbilityAndHoldsItsStone() {
+        val state = state().apply {
+            selectSpecies(PokemonName("Charizard"))
+            selectForm(PokemonName("Mega Charizard X"))
+        }
+        assertEquals("Tough Claws", state.ability)
+        assertEquals("Charizardite X", state.item)
+    }
+
+    @Test
+    fun selectingANonMegaFormKeepsTheItem() {
+        val state = state().apply {
+            selectSpecies(PokemonName("Aegislash"))
+            selectForm(PokemonName("Aegislash-Blade"))
+        }
+        assertEquals("Sitrus Berry", state.item)
+    }
+
+    @Test
+    fun convertsTheSelectedForm() {
+        val state = state().apply {
+            selectSpecies(PokemonName("Charizard"))
+            selectForm(PokemonName("Mega Charizard Y"))
+        }
+        assertEquals(PokemonName("Mega Charizard Y"), state.toBattlePokemon()!!.species.name)
+    }
+
+    @Test
     fun selectingAnUnknownSpeciesKeepsTheAbility() {
         val state = state().apply { selectSpecies(PokemonName("not-a-real-pokemon")) }
         assertEquals("Intimidate", state.ability)

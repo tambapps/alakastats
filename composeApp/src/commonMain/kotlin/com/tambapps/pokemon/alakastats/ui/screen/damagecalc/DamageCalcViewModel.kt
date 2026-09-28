@@ -14,7 +14,7 @@ class DamageCalcViewModel : ScreenModel {
     // TODO dummy values, will be fetched later
     var attacker by mutableStateOf(
         DamageCalcPokemonState(
-            name = PokemonName("aegislash-shield"),
+            name = PokemonName("Aegislash"),
             ability = "Stance Change",
             item = "Spell Tag",
             moves = listOf("Poltergeist", "Shadow Sneak", "Iron Head", "Sacred Sword"),

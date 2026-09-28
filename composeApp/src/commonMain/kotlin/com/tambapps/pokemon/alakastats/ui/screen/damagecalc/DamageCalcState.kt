@@ -70,6 +70,19 @@ val Terrain.displayName get() = when (this) {
     Terrain.PSYCHIC -> "Psychic"
 }
 
+// what the pokemon picker offers: every Champions pokemon, its forms being picked separately
+val PICKABLE_POKEMON_NAMES: List<PokemonName> by lazy {
+    ChampionsDex.pickableSpecies.map { it.name }.sortedBy { it.value }
+}
+
+/**
+ * The forms a pokemon can be in (e.g. Charizard, Mega Charizard X, Mega Charizard Y), or just itself if it
+ * has a single form or isn't known to Champions
+ */
+fun formsOf(pokemonName: PokemonName): List<PokemonName> =
+    ChampionsDex.speciesOrNull(pokemonName)?.let { species -> ChampionsDex.formsOf(species).map { it.name } }
+        ?: listOf(pokemonName)
+
 val Battlefield.summary get() = listOfNotNull(
     format.displayName,
     if (weather == Weather.NONE) "No weather" else weather.displayName,
@@ -91,7 +104,12 @@ class DamageCalcPokemonState(
     item: String,
     moves: List<String>,
 ) {
+    // the pokemon picked, e.g. Charizard
     var name by mutableStateOf(name)
+        private set
+    // the form of the pokemon used for the calc, e.g. Mega Charizard X. Same as name for single-form pokemons
+    var form by mutableStateOf(formsOf(name).first())
+        private set
     var nature by mutableStateOf(Nature.SERIOUS)
     var ability by mutableStateOf(ability)
     var item by mutableStateOf(item)
@@ -106,12 +124,26 @@ class DamageCalcPokemonState(
     val remainingStatPoints get() = MAX_TOTAL_STAT_POINTS - totalStatPoints
     val exceedsMaxTotalStatPoints get() = remainingStatPoints < 0
 
+    // the forms the picked pokemon can be in
+    val availableForms get() = formsOf(name)
+
     /**
-     * Select a species, using its default ability if it is known to Champions
+     * Select a pokemon, in its first form (e.g. Charizard, Aegislash-Shield)
      */
     fun selectSpecies(pokemonName: PokemonName) {
         name = pokemonName
-        ChampionsDex.speciesOrNull(pokemonName)?.let { ability = it.defaultAbility.pretty }
+        selectForm(availableForms.first())
+    }
+
+    /**
+     * Select a form of the picked pokemon, using its default ability. Selecting a mega also makes the
+     * pokemon hold the mega stone needed to mega evolve.
+     */
+    fun selectForm(formName: PokemonName) {
+        form = formName
+        val species = ChampionsDex.speciesOrNull(formName) ?: return
+        ability = species.defaultAbility.pretty
+        species.megaStone?.let { item = it.pretty }
     }
 
     /**
@@ -119,6 +151,7 @@ class DamageCalcPokemonState(
      */
     fun fillFrom(pokemon: Pokemon) {
         name = pokemon.name
+        form = availableForms.first()
         ability = pokemon.ability?.pretty ?: ""
         item = pokemon.item?.pretty ?: ""
         // only one neutral nature is proposed
@@ -149,7 +182,7 @@ class DamageCalcPokemonState(
      * Convert this state to the damage engine's representation, or null if the species isn't known to Champions
      */
     fun toBattlePokemon(): BattlePokemon? {
-        val species = ChampionsDex.speciesOrNull(name) ?: return null
+        val species = ChampionsDex.speciesOrNull(form) ?: return null
         val battlePokemon = BattlePokemon(
             species = species,
             ability = AbilityName(ability),

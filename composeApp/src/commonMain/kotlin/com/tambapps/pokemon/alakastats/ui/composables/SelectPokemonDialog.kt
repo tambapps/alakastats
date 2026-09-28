@@ -52,10 +52,11 @@ fun SelectPokemonDialog(
     containsValidator: (PokemonName) -> Boolean = { false },
     // optional extra button, displayed before the cancel button
     extraButton: (@Composable () -> Unit)? = null,
+    // the pokemons that can be selected
+    allPokemons: List<PokemonName> = availablePokemonNames(),
 ) {
-    val allPokemons = availablePokemonNames()
     var text by remember { mutableStateOf("") }
-    val pokemons = remember(text) {
+    val pokemons = remember(text, allPokemons) {
         if (text.isBlank()) allPokemons
         else allPokemons.filter { it.value.contains(text, ignoreCase = true) }
     }

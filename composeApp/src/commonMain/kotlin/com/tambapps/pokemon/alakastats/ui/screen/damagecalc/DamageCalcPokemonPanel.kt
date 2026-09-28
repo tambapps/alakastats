@@ -66,6 +66,7 @@ internal fun DamageCalcPokemonPanel(
 ) {
     var showPokemonDialog by remember { mutableStateOf(false) }
     var showTeamPokemonDialog by remember { mutableStateOf(false) }
+    var showFormDialog by remember { mutableStateOf(false) }
     var showNatureDialog by remember { mutableStateOf(false) }
     var showStatusDialog by remember { mutableStateOf(false) }
     var showAbilityDialog by remember { mutableStateOf(false) }
@@ -74,6 +75,9 @@ internal fun DamageCalcPokemonPanel(
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         PokemonButton(state, onClick = { showPokemonDialog = true })
+        if (state.availableForms.size > 1) {
+            PropertyRow("Form", state.form.pretty, onClick = { showFormDialog = true })
+        }
         PropertyRow("Ability", state.ability, onClick = { showAbilityDialog = true })
         PropertyRow("Item", state.item.ifBlank { "None" }, onClick = { showItemDialog = true })
         PropertyRow("Nature", state.nature.effectDisplayName(), onClick = { showNatureDialog = true })
@@ -104,6 +108,20 @@ internal fun DamageCalcPokemonPanel(
                     }
                 }
             } else null,
+            // forms are selected separately
+            allPokemons = PICKABLE_POKEMON_NAMES,
+        )
+    }
+    if (showFormDialog) {
+        val forms = state.availableForms
+        WheelPickerDialog(
+            title = "Select Form",
+            items = forms,
+            initialIndex = forms.indexOf(state.form).coerceAtLeast(0),
+            itemToText = { it.pretty },
+            textAlign = TextAlign.Center,
+            onPicked = { state.selectForm(it) },
+            onDismissRequest = { showFormDialog = false },
         )
     }
     if (showTeamPokemonDialog && team != null) {
@@ -290,7 +308,7 @@ private fun PokemonButton(state: DamageCalcPokemonState, onClick: () -> Unit) {
         gradientBackgroundColors = elevatedCardGradientColors
     ) {
         Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            PokemonSprite(state.name, Modifier.size(64.dp))
+            PokemonSprite(state.form, Modifier.size(64.dp))
             Spacer(Modifier.width(8.dp))
             Text(state.name.pretty, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         }
