@@ -80,7 +80,21 @@ internal fun DamageCalcPokemonPanel(
         if (state.availableForms.size > 1) {
             PropertyRow("Form", state.form.pretty, onClick = { showFormDialog = true })
         }
-        PropertyRow("Ability", state.ability, onClick = { showAbilityDialog = true })
+        PropertyRow(
+            label = "Ability",
+            value = state.ability,
+            onClick = { showAbilityDialog = true },
+            // only for the abilities the source calculator has an "ability on" toggle for
+            trailingContent = if (state.hasAbilityToggle) {
+                {
+                    FilterChip(
+                        selected = state.isAbilityActive,
+                        onClick = { state.isAbilityActive = !state.isAbilityActive },
+                        label = { Text("Active", maxLines = 1, softWrap = false) },
+                    )
+                }
+            } else null,
+        )
         PropertyRow("Item", state.item.ifBlank { "None" }, onClick = { showItemDialog = true })
         PropertyRow("Nature", state.nature.effectDisplayName(), onClick = { showNatureDialog = true })
         StatPointsTile(state, side)
