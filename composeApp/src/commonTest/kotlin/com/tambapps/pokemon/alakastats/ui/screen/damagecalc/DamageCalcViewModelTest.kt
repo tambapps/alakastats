@@ -89,11 +89,18 @@ class DamageCalcViewModelTest {
             defender.setStatPoints(Stat.HP, 32)
         }
         val result = assertIs<DamageCalcResult.Success>(viewModel.result)
+        // everything before " -- " is the source calculator's output for the same calc (tools/oracle.js in the pokemon repo)
         assertEquals(
-            "+1 32+ Atk Life Orb Rough Skin Garchomp Earthquake vs. 32 HP / 0 Def Toxapex: " +
-                "${result.damage.minDamage}-${result.damage.maxDamage} (${result.damagePercentText}) -- ${result.koChanceText}",
+            "+1 32+ Atk Life Orb Garchomp Earthquake vs. 32 HP  / 0 Def Toxapex: 190-226 (121 - 143.9%) -- guaranteed OHKO",
             result.description
         )
+    }
+
+    @Test
+    fun describesAnImmunityWithASinglePercentage() {
+        val viewModel = viewModel().apply { defender.selectSpecies(PokemonName("Corviknight")) }
+        val result = assertIs<DamageCalcResult.Success>(viewModel.result)
+        assertEquals("Garchomp Earthquake vs. Corviknight: 0 (0%) -- doesn't affect Corviknight", result.description)
     }
 
     @Test
