@@ -121,55 +121,54 @@ internal fun DamageCalcPokemonPanel(
         }
         // needed on both sides, as some moves depend on the attacker's current HP
         CurrentHpSlider(state)
-        if (side == DamageCalcSide.ATTACKER) {
-            state.moves.forEachIndexed { index, move ->
-                val selectableHitCounts = state.selectableHitCounts(index)
-                val championsMove = state.championsMove(index)
-                PropertyRow(
-                    label = "Move ${index + 1}",
-                    value = move.ifBlank { "-" },
-                    onClick = { editedMoveIndex = index },
-                    trailingContent = if (move.isNotBlank()) {
-                        {
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                CritChip(
-                                    isCritical = state.isCritical(index),
-                                    alwaysCrits = state.alwaysCrits(index),
-                                    onCriticalChange = { state.setCritical(index, it) },
+        // on both sides for symmetry: the defender's moves are the ones calculated after a swap
+        state.moves.forEachIndexed { index, move ->
+            val selectableHitCounts = state.selectableHitCounts(index)
+            val championsMove = state.championsMove(index)
+            PropertyRow(
+                label = "Move ${index + 1}",
+                value = move.ifBlank { "-" },
+                onClick = { editedMoveIndex = index },
+                trailingContent = if (move.isNotBlank()) {
+                    {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            CritChip(
+                                isCritical = state.isCritical(index),
+                                alwaysCrits = state.alwaysCrits(index),
+                                onCriticalChange = { state.setCritical(index, it) },
+                            )
+                            if (championsMove?.canBePowerDoubled == true) {
+                                FilterChip(
+                                    selected = state.isPowerDoubled(index),
+                                    onClick = { state.setPowerDoubled(index, !state.isPowerDoubled(index)) },
+                                    label = { Text("2x BP", maxLines = 1, softWrap = false) },
                                 )
-                                if (championsMove?.canBePowerDoubled == true) {
-                                    FilterChip(
-                                        selected = state.isPowerDoubled(index),
-                                        onClick = { state.setPowerDoubled(index, !state.isPowerDoubled(index)) },
-                                        label = { Text("2x BP", maxLines = 1, softWrap = false) },
-                                    )
-                                }
-                                if (championsMove?.hasStackingPower == true) {
-                                    StackCountChip(
-                                        moveName = championsMove.name.value,
-                                        count = state.stackCount(index),
-                                        onCountSelected = { state.setStackCount(index, it) },
-                                    )
-                                }
-                                selectableHitCounts?.let {
-                                    HitCountChip(
-                                        hits = state.hitCount(index),
-                                        selectableHitCounts = it,
-                                        onHitCountSelected = { hits -> state.selectHitCount(index, hits) },
-                                    )
-                                }
+                            }
+                            if (championsMove?.hasStackingPower == true) {
+                                StackCountChip(
+                                    moveName = championsMove.name.value,
+                                    count = state.stackCount(index),
+                                    onCountSelected = { state.setStackCount(index, it) },
+                                )
+                            }
+                            selectableHitCounts?.let {
+                                HitCountChip(
+                                    hits = state.hitCount(index),
+                                    selectableHitCounts = it,
+                                    onHitCountSelected = { hits -> state.selectHitCount(index, hits) },
+                                )
                             }
                         }
-                    } else null,
+                    }
+                } else null,
+            )
+            // Counter-like moves return one of the opponent's moves, picked like in the source calculator
+            if (championsMove?.returnsDefenderMove == true) {
+                PropertyRow(
+                    label = "Returns",
+                    value = opponent.moves.getOrNull(state.counteredMoveIndex(index))?.ifBlank { null } ?: "-",
+                    onClick = { counteredMoveDialogIndex = index },
                 )
-                // Counter-like moves return one of the opponent's moves, picked like in the source calculator
-                if (championsMove?.returnsDefenderMove == true) {
-                    PropertyRow(
-                        label = "Returns",
-                        value = opponent.moves.getOrNull(state.counteredMoveIndex(index))?.ifBlank { null } ?: "-",
-                        onClick = { counteredMoveDialogIndex = index },
-                    )
-                }
             }
         }
     }
