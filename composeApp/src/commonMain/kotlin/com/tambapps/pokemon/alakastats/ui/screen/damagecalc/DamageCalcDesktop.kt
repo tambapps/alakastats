@@ -27,6 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.ui.composables.MyCard
+import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import org.jetbrains.compose.resources.painterResource
 
@@ -64,7 +66,8 @@ internal fun DamageCalcDesktop(
                 opponent = viewModel.defender,
                 modifier = Modifier.weight(1.15f),
             )
-            OutlinedCard(Modifier.weight(0.9f)) {
+            // no type tint on the field, between the two pokemon
+            MyCard(modifier = Modifier.weight(0.9f), gradientBackgroundColors = cardGradientColors) {
                 DamageCalcFieldPanel(
                     field = viewModel.field,
                     onFieldChange = { viewModel.updateField(it) },

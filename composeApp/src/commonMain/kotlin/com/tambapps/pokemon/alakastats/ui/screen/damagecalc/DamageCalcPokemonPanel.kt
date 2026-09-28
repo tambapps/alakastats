@@ -412,7 +412,10 @@ private fun PokemonButton(state: DamageCalcPokemonState, side: DamageCalcSide, o
         onClick = onClick,
         gradientBackgroundColors = elevatedCardGradientColors
     ) {
-        Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.fillMaxWidth().typeTint(state, side).padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             // the attacker faces right, towards its target
             PokemonSprite(
                 state.form,

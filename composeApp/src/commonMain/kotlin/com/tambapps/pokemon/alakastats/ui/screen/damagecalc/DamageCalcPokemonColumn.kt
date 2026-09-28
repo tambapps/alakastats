@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,7 +28,9 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.DropdownField
+import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.SuggestionTextField
+import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.champions.data.Ability
@@ -38,6 +39,8 @@ import com.tambapps.pokemon.champions.engine.Status
 import com.tambapps.pokemon.champions.engine.returnsDefenderMove
 
 private val PICKABLE_POKEMON_NAME_VALUES: List<String> by lazy { PICKABLE_POKEMON_NAMES.map { it.value } }
+
+private val TYPE_TINT_LENGTH = 320.dp
 
 /**
  * A pokemon of the desktop layout's damage calc, with text fields suggesting values instead of dialogs
@@ -53,8 +56,11 @@ internal fun DamageCalcPokemonColumn(
     modifier: Modifier = Modifier,
 ) {
     var showTeamPokemonDialog by remember { mutableStateOf(false) }
-    OutlinedCard(modifier) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    MyCard(modifier = modifier, gradientBackgroundColors = cardGradientColors) {
+        Column(
+            Modifier.typeTint(state, side, diagonalLength = TYPE_TINT_LENGTH).padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // the attacker faces right, towards its target
                 PokemonSprite(
