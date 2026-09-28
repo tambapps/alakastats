@@ -58,9 +58,14 @@ fun <T> SuggestionTextField(
         OutlinedTextField(
             value = textFieldValue,
             onValueChange = { newValue ->
+                // the Android keyboard also calls this when only the selection/composition changes (e.g. right after a
+                // suggestion was picked), which mustn't reopen the menu: only a text change does
+                val isTextChange = newValue.text != textFieldValue.text
                 textFieldValue = newValue
-                expanded = newValue.text.trim().length >= MIN_CHARS_TO_SUGGEST
-                onValueChange(newValue.text)
+                if (isTextChange) {
+                    expanded = newValue.text.trim().length >= MIN_CHARS_TO_SUGGEST
+                    onValueChange(newValue.text)
+                }
             },
             isError = isError,
             supportingText = supportingText,
