@@ -42,27 +42,46 @@ class DamageCalcViewModel : ScreenModel {
         private set
     // the engine's model is used directly, as every UI state of the field is a valid Battlefield
     var field by mutableStateOf(Battlefield())
+        private set
     var selectedMoveIndex by mutableIntStateOf(0)
     val scrollToTopSignal = VoidSignal()
     // abilities setting the weather/terrain on the field, like the source calculator (e.g. Drought -> Sun)
     private val weatherSync = AbilityFieldSync(Weather.NONE)
     private val terrainSync = AbilityFieldSync(Terrain.NONE)
+    // the Fairy Aura value last set manually, restored when no pokemon has Fairy Aura anymore (the source's lastManualField)
+    private var manualFairyAura = false
 
     init {
         attacker.onAbilityChange = ::onAbilityChange
         defender.onAbilityChange = ::onAbilityChange
         // like the source calculator when loading the pokemons
-        onAbilityChange(attacker)
-        onAbilityChange(defender)
+        onAbilityChange(attacker, isAbilityChange = true)
+        onAbilityChange(defender, isAbilityChange = true)
     }
 
-    private fun onAbilityChange(pokemon: DamageCalcPokemonState) {
+    /**
+     * Change the field, as the user did on the Field page
+     */
+    fun updateField(newField: Battlefield) {
+        if (newField.isFairyAura != field.isFairyAura) {
+            manualFairyAura = newField.isFairyAura
+        }
+        field = newField
+    }
+
+    private fun onAbilityChange(pokemon: DamageCalcPokemonState, isAbilityChange: Boolean) {
         val side = if (pokemon === attacker) 0 else 1
         val ability = pokemon.resolvedAbility
         field = field.copy(
             weather = weatherSync.onAbilityChange(field.weather, side, ability.weatherSetOnField(pokemon.isAbilityActive)),
             terrain = terrainSync.onAbilityChange(field.terrain, side, ability.terrainSetOnField(pokemon.isAbilityActive)),
         )
+        if (isAbilityChange) {
+            // like the source calculator's setIndependentField: Fairy Aura affects the whole field, so a pokemon
+            // having it turns it on, and it's back to its manual value once no pokemon has it
+            val hasFairyAura = attacker.resolvedAbility == Ability.FAIRY_AURA || defender.resolvedAbility == Ability.FAIRY_AURA
+            field = field.copy(isFairyAura = hasFairyAura || manualFairyAura)
+        }
     }
 
     // recomputed whenever an input of the calc changes

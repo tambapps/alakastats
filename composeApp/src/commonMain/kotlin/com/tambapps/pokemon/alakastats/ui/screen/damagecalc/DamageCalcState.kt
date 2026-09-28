@@ -114,7 +114,6 @@ val Battlefield.summary get() = listOfNotNull(
     if (terrain == Terrain.NONE) null else "${terrain.displayName} Terrain",
     if (isGravity) "Gravity" else null,
     if (isFairyAura) "Fairy Aura" else null,
-    if (isCharge) "Charge" else null,
 ).joinToString(" · ")
 
 /**
@@ -138,8 +137,8 @@ class DamageCalcPokemonState(
     var nature by mutableStateOf(Nature.SERIOUS)
     private var abilityState by mutableStateOf(ability)
     private var isAbilityActiveState by mutableStateOf(Ability.from(AbilityName(ability)).isActiveByDefault)
-    // notified when the ability or its toggle changes, e.g. to sync the weather/terrain it sets on the field
-    internal var onAbilityChange: ((DamageCalcPokemonState) -> Unit)? = null
+    // notified when the ability (true) or only its toggle (false) changes, e.g. to sync what it sets on the field
+    internal var onAbilityChange: ((pokemon: DamageCalcPokemonState, isAbilityChange: Boolean) -> Unit)? = null
 
     /**
      * Changing the ability resets its "active" toggle to the source calculator's default (e.g. on for Intimidate)
@@ -152,7 +151,7 @@ class DamageCalcPokemonState(
             isAbilityActiveState = resolvedAbility.isActiveByDefault
             rivalry = RivalryRelation.OFF
             faintedAllyCount = 0
-            onAbilityChange?.invoke(this)
+            onAbilityChange?.invoke(this, true)
         }
 
     /**
@@ -162,7 +161,7 @@ class DamageCalcPokemonState(
         get() = isAbilityActiveState
         set(value) {
             isAbilityActiveState = value
-            onAbilityChange?.invoke(this)
+            onAbilityChange?.invoke(this, false)
         }
 
     val resolvedAbility: Ability get() = Ability.from(AbilityName(abilityState))

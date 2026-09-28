@@ -82,6 +82,22 @@ class DamageCalcMoveInputsTest {
     }
 
     @Test
+    fun chargeOnlyBoostsTheChargedSideAndFollowsItsPokemon() {
+        val viewModel = viewModel("Thunderbolt")
+        val normalDamage = viewModel.maxDamage
+        viewModel.updateField(viewModel.field.copy(defenderSide = viewModel.field.defenderSide.copy(isCharged = true)))
+        assertEquals(normalDamage, viewModel.maxDamage)
+        viewModel.updateField(viewModel.field.copy(attackerSide = viewModel.field.attackerSide.copy(isCharged = true)))
+        val chargedDamage = viewModel.maxDamage
+        assertTrue(chargedDamage > normalDamage)
+        // swapping twice brings the charged attacker back, with its Charge
+        viewModel.swap()
+        viewModel.swap()
+        viewModel.selectedMoveIndex = 0
+        assertEquals(chargedDamage, viewModel.maxDamage)
+    }
+
+    @Test
     fun counterReturnsTheSelectedDefenderMove() {
         val viewModel = viewModel("Counter").apply {
             defender.setMove(0, "Protect")

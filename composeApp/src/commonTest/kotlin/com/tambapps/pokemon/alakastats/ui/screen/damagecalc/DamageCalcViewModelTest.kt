@@ -60,7 +60,7 @@ class DamageCalcViewModelTest {
     @Test
     fun koChanceCountsTheDefenderSideHazardsAndEndOfTurnEffects() {
         val viewModel = viewModel().apply {
-            field = field.copy(defenderSide = SideConditions(hasStealthRock = true, isLeechSeeded = true))
+            updateField(field.copy(defenderSide = SideConditions(hasStealthRock = true, isLeechSeeded = true)))
         }
         val result = assertIs<DamageCalcResult.Success>(viewModel.result)
         assertEquals("guaranteed 2HKO after Stealth Rock, Leech Seed damage, and Sitrus Berry recovery", result.koChanceText)
@@ -69,7 +69,7 @@ class DamageCalcViewModelTest {
     @Test
     fun koChanceIgnoresTheAttackerSideHazards() {
         val viewModel = viewModel().apply {
-            field = field.copy(attackerSide = SideConditions(hasStealthRock = true, isLeechSeeded = true))
+            updateField(field.copy(attackerSide = SideConditions(hasStealthRock = true, isLeechSeeded = true)))
         }
         val result = assertIs<DamageCalcResult.Success>(viewModel.result)
         assertEquals("87.5% chance to 2HKO after Sitrus Berry recovery", result.koChanceText)
@@ -78,7 +78,7 @@ class DamageCalcViewModelTest {
     @Test
     fun koChanceCountsSpikesLayers() {
         val viewModel = viewModel().apply {
-            field = field.copy(defenderSide = field.defenderSide.withNextSpikesLayer().withNextSpikesLayer())
+            updateField(field.copy(defenderSide = field.defenderSide.withNextSpikesLayer().withNextSpikesLayer()))
         }
         assertEquals(2, viewModel.field.defenderSide.spikesLayers)
         val result = assertIs<DamageCalcResult.Success>(viewModel.result)

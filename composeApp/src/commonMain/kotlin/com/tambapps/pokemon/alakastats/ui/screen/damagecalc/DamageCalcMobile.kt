@@ -113,7 +113,7 @@ internal fun DamageCalcMobile(
                     0 -> DamageCalcPokemonPanel(viewModel.attacker, DamageCalcSide.ATTACKER, team, viewModel.defender, pageModifier)
                     FIELD_PAGE -> DamageCalcFieldPanel(
                         field = viewModel.field,
-                        onFieldChange = { viewModel.field = it },
+                        onFieldChange = { viewModel.updateField(it) },
                         modifier = pageModifier
                     )
                     2 -> DamageCalcPokemonPanel(viewModel.defender, DamageCalcSide.DEFENDER, team, viewModel.attacker, pageModifier)

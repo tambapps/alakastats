@@ -46,6 +46,8 @@ private val SIDE_CONDITION_TOGGLES = listOf(
     SideConditionToggle("Salt Cure", { it.isSaltCured }) { it.copy(isSaltCured = !it.isSaltCured) },
     SideConditionToggle("Curse", { it.isCursed }) { it.copy(isCursed = !it.isCursed) },
     SideConditionToggle("Binding", { it.isBound }) { it.copy(isBound = !it.isBound) },
+    // this side's pokemon used Charge, like in the source calculator it only boosts that side's Electric moves
+    SideConditionToggle("Charge", { it.isCharged }) { it.copy(isCharged = !it.isCharged) },
     SideConditionToggle("Aqua Ring", { it.hasAquaRing }) { it.copy(hasAquaRing = !it.hasAquaRing) },
     SideConditionToggle("Ingrain", { it.isIngrained }) { it.copy(isIngrained = !it.isIngrained) },
 )
@@ -77,11 +79,6 @@ internal fun DamageCalcFieldPanel(
                 selected = field.isFairyAura,
                 onClick = { onFieldChange(field.copy(isFairyAura = !field.isFairyAura)) },
                 label = { Text("Fairy Aura") }
-            )
-            FilterChip(
-                selected = field.isCharge,
-                onClick = { onFieldChange(field.copy(isCharge = !field.isCharge)) },
-                label = { Text("Charge") }
             )
         }
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {

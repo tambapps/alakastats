@@ -68,7 +68,7 @@ class DamageCalcAbilityToggleTest {
     @Test
     fun weatherAbilitySetsTheWeatherAndRestoresTheManualOne() {
         val viewModel = viewModel()
-        viewModel.field = viewModel.field.copy(weather = Weather.RAIN)
+        viewModel.updateField(viewModel.field.copy(weather = Weather.RAIN))
         viewModel.attacker.ability = "Drought"
         assertEquals(Weather.SUN, viewModel.field.weather)
         viewModel.attacker.ability = "Rough Skin"
@@ -114,6 +114,57 @@ class DamageCalcAbilityToggleTest {
         // the Drought pokemon is now the defender
         viewModel.defender.ability = "Rough Skin"
         assertEquals(Weather.NONE, viewModel.field.weather)
+    }
+
+    @Test
+    fun fairyAuraPokemonTurnsFairyAuraOnForTheWholeField() {
+        val viewModel = viewModel()
+        assertFalse(viewModel.field.isFairyAura)
+        // on either side, as it affects every pokemon's Fairy moves
+        viewModel.defender.ability = "Fairy Aura"
+        assertTrue(viewModel.field.isFairyAura)
+        viewModel.defender.ability = "Regenerator"
+        assertFalse(viewModel.field.isFairyAura)
+        viewModel.attacker.ability = "Fairy Aura"
+        assertTrue(viewModel.field.isFairyAura)
+    }
+
+    @Test
+    fun fairyAuraPokemonBoostsFairyMovesWithoutTouchingTheField() {
+        val viewModel = viewModel().apply {
+            attacker.selectSpecies(PokemonName("Floette-Eternal"))
+            attacker.selectForm(PokemonName("Mega Floette"))
+            attacker.setMove(0, "Moonblast")
+        }
+        assertEquals("Fairy Aura", viewModel.attacker.ability)
+        assertTrue(viewModel.field.isFairyAura)
+        val boostedDamage = assertIs<DamageCalcResult.Success>(viewModel.result).damage.maxDamage
+        viewModel.updateField(viewModel.field.copy(isFairyAura = false))
+        assertTrue(assertIs<DamageCalcResult.Success>(viewModel.result).damage.maxDamage < boostedDamage)
+    }
+
+    @Test
+    fun manualFairyAuraIsRestoredWhenNoPokemonHasItAnymore() {
+        val viewModel = viewModel()
+        viewModel.updateField(viewModel.field.copy(isFairyAura = true))
+        viewModel.attacker.ability = "Fairy Aura"
+        viewModel.attacker.ability = "Rough Skin"
+        assertTrue(viewModel.field.isFairyAura)
+    }
+
+    @Test
+    fun manuallyTurningFairyAuraOffLastsUntilTheNextAbilityChange() {
+        val viewModel = viewModel().apply {
+            attacker.ability = "Fairy Aura"
+            defender.ability = "Intimidate"
+        }
+        viewModel.updateField(viewModel.field.copy(isFairyAura = false))
+        // an ability toggle isn't an ability change, like in the source calculator
+        viewModel.defender.isAbilityActive = false
+        assertFalse(viewModel.field.isFairyAura)
+        // the next ability change turns it back on, as a pokemon still has Fairy Aura
+        viewModel.defender.ability = "Regenerator"
+        assertTrue(viewModel.field.isFairyAura)
     }
 
     @Test
