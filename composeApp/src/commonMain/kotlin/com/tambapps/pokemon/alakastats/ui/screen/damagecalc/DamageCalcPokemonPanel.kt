@@ -309,7 +309,7 @@ internal fun DamageCalcPokemonPanel(
 }
 
 @Composable
-private fun SelectTeamPokemonDialog(
+internal fun SelectTeamPokemonDialog(
     team: Teamlytics,
     onSelect: (Pokemon) -> Unit,
     onDismissRequest: () -> Unit,
@@ -323,11 +323,11 @@ private fun SelectTeamPokemonDialog(
     )
 }
 
-private val MOVE_NAMES: List<String> by lazy { ChampionsDex.allMoves.map { it.name.value }.sorted() }
-private val ABILITY_NAMES: List<String> by lazy {
+internal val MOVE_NAMES: List<String> by lazy { ChampionsDex.allMoves.map { it.name.value }.sorted() }
+internal val ABILITY_NAMES: List<String> by lazy {
     Ability.entries.filter { it != Ability.NO_ABILITY }.map { it.displayName }
 }
-private val ITEM_NAMES: List<String> by lazy { Item.entries.map { it.displayName } }
+internal val ITEM_NAMES: List<String> by lazy { Item.entries.map { it.displayName } }
 
 /**
  * Dialog to edit a value with a text field suggesting the values of [suggestions]. Only a value of
@@ -401,7 +401,7 @@ private fun EditWithSuggestionsDialog(
     )
 }
 
-private fun Nature.effectDisplayName(separator: String = " ") =
+internal fun Nature.effectDisplayName(separator: String = " ") =
     if (isNeutral) "$displayName$separator(Neutral)"
     else "$displayName$separator+${bonusStat?.abbreviation}/-${malusStat?.abbreviation}"
 
@@ -454,7 +454,7 @@ private fun PropertyRow(
  * Chip displaying the number of hits considered for a multi-hit move, opening a wheel picker to select another one
  */
 @Composable
-private fun HitCountChip(hits: Int, selectableHitCounts: IntRange, onHitCountSelected: (Int) -> Unit) {
+internal fun HitCountChip(hits: Int, selectableHitCounts: IntRange, onHitCountSelected: (Int) -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
     FilterChip(
         selected = true,
@@ -478,14 +478,14 @@ private fun HitCountChip(hits: Int, selectableHitCounts: IntRange, onHitCountSel
 private val HIT_COUNT_CHIP_WIDTH = 60.dp
 
 // like the source calculator, e.g. "2 down"
-private fun faintedAlliesText(count: Int) = "$count down"
+internal fun faintedAlliesText(count: Int) = "$count down"
 
 /**
  * Chip displaying how many times Last Respects/Rage Fist's effect already stacked (e.g. "3 KOs", "2 hits"),
  * opening a wheel picker to select another count
  */
 @Composable
-private fun StackCountChip(moveName: String, count: Int, onCountSelected: (Int) -> Unit) {
+internal fun StackCountChip(moveName: String, count: Int, onCountSelected: (Int) -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
     FilterChip(
         selected = count > 0,
@@ -523,7 +523,7 @@ private fun stackCountTitle(moveName: String) = when (moveName) {
  * selected and disabled.
  */
 @Composable
-private fun CritChip(isCritical: Boolean, alwaysCrits: Boolean, onCriticalChange: (Boolean) -> Unit) {
+internal fun CritChip(isCritical: Boolean, alwaysCrits: Boolean, onCriticalChange: (Boolean) -> Unit) {
     FilterChip(
         selected = isCritical,
         enabled = !alwaysCrits,
@@ -574,7 +574,7 @@ private fun StatPointsTile(state: DamageCalcPokemonState, side: DamageCalcSide) 
 private fun boostText(boost: Int) = if (boost > 0) "+$boost" else boost.toString()
 
 @Composable
-private fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat) {
+internal fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat) {
     val statPoints = state.getStatPoints(stat)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(stat.abbreviation, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.width(48.dp))
@@ -628,10 +628,10 @@ private val BOOST_CHIP_WIDTH = 60.dp
 private val FINAL_STAT_WIDTH = 44.dp
 
 // like the source calculator, e.g. "3/16"
-private fun toxicCounterText(counter: Int) = "$counter/16"
+internal fun toxicCounterText(counter: Int) = "$counter/16"
 
 @Composable
-private fun CurrentHpSlider(state: DamageCalcPokemonState) {
+internal fun CurrentHpSlider(state: DamageCalcPokemonState) {
     val maxHp = state.maxHp
     val currentHp = state.currentHp
     Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {

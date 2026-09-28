@@ -43,6 +43,9 @@ class DamageCalcViewModel : ScreenModel {
     // the engine's model is used directly, as every UI state of the field is a valid Battlefield
     var field by mutableStateOf(Battlefield())
         private set
+    // the move whose result is displayed and copied: the attacker's on mobile, either pokemon's on desktop
+    var selectedMoveSide by mutableStateOf(DamageCalcSide.ATTACKER)
+        private set
     var selectedMoveIndex by mutableIntStateOf(0)
     val scrollToTopSignal = VoidSignal()
     // abilities setting the weather/terrain on the field, like the source calculator (e.g. Drought -> Sun)
@@ -85,36 +88,59 @@ class DamageCalcViewModel : ScreenModel {
     }
 
     // recomputed whenever an input of the calc changes
-    val result: DamageCalcResult by derivedStateOf { computeResult() }
+    val result: DamageCalcResult by derivedStateOf { resultOf(selectedMoveSide, selectedMoveIndex) }
 
-    private fun computeResult(): DamageCalcResult {
-        val (attackerGender, defenderGender) = rivalryGenders()
-        val attackerPokemon = attacker.toBattlePokemon()?.copy(gender = attackerGender)
-            ?: return DamageCalcResult.Error("${attacker.form.pretty} isn't a Champions Pokemon")
-        val defenderPokemon = defender.toBattlePokemon()?.copy(gender = defenderGender)
-            ?: return DamageCalcResult.Error("${defender.form.pretty} isn't a Champions Pokemon")
-        val moveName = attacker.moves.getOrNull(selectedMoveIndex)?.takeIf { it.isNotBlank() }
+    // every move of both pokemon, for the desktop layout. Only computed when read
+    val moveResults: Map<DamageCalcSide, List<DamageCalcResult>> by derivedStateOf {
+        DamageCalcSide.entries.associateWith { side ->
+            pokemonState(side).moves.indices.map { index -> resultOf(side, index) }
+        }
+    }
+
+    /**
+     * Select the move whose result is displayed and copied
+     */
+    fun selectMove(side: DamageCalcSide, index: Int) {
+        selectedMoveSide = side
+        selectedMoveIndex = index
+    }
+
+    /**
+     * The result of the move at [moveIndex] of the pokemon on [side], against the other pokemon
+     */
+    fun resultOf(side: DamageCalcSide, moveIndex: Int): DamageCalcResult {
+        val user = pokemonState(side)
+        val target = pokemonState(side.opponent)
+        // the field as seen by the pokemon using the move: its own side is the attacker side
+        val calcField = if (side == DamageCalcSide.ATTACKER) field
+        else field.copy(attackerSide = field.defenderSide, defenderSide = field.attackerSide)
+        val (userGender, targetGender) = rivalryGenders(user, target)
+        val userPokemon = user.toBattlePokemon()?.copy(gender = userGender)
+            ?: return DamageCalcResult.Error("${user.form.pretty} isn't a Champions Pokemon")
+        val targetPokemon = target.toBattlePokemon()?.copy(gender = targetGender)
+            ?: return DamageCalcResult.Error("${target.form.pretty} isn't a Champions Pokemon")
+        val moveName = user.moves.getOrNull(moveIndex)?.takeIf { it.isNotBlank() }
             ?: return DamageCalcResult.Error("Select a move")
-        val move = attacker.championsMove(selectedMoveIndex)
+        val move = user.championsMove(moveIndex)
             ?: return DamageCalcResult.Error("$moveName isn't a Champions move")
         if (move.category == MoveCategory.STATUS) {
             return DamageCalcResult.Error("${move.name.value} is a status move")
         }
         return try {
             val damage = DamageCalculator.calculateMove(
-                attacker = attackerPokemon,
-                defender = defenderPokemon,
-                moveUse = attacker.moveUse(
-                    index = selectedMoveIndex,
-                    // Counter-like moves return the defender's move, with the defender's settings for it
-                    counteredMove = defender.moveUse(attacker.counteredMoveIndex(selectedMoveIndex)),
+                attacker = userPokemon,
+                defender = targetPokemon,
+                moveUse = user.moveUse(
+                    index = moveIndex,
+                    // Counter-like moves return the target's move, with the target's settings for it
+                    counteredMove = target.moveUse(user.counteredMoveIndex(moveIndex)),
                 )!!,
-                field = field,
-                hits = attacker.hitCount(selectedMoveIndex),
+                field = calcField,
+                hits = user.hitCount(moveIndex),
             )
             DamageCalcResult.Success(
-                attacker = attackerPokemon,
-                defender = defenderPokemon,
+                attacker = userPokemon,
+                defender = targetPokemon,
                 move = move,
                 damage = damage,
             )
@@ -124,12 +150,12 @@ class DamageCalcViewModel : ScreenModel {
     }
 
     /**
-     * The genders of the attacker and defender. The source calculator's Rivalry setting relates the Rivalry pokemon's
-     * gender to its target's, while the engine takes genders: genderless unless a Rivalry setting is on (the attacker's
-     * one first, as only the attacker's Rivalry affects its damage)
+     * The genders of the pokemon using the move and its target. The source calculator's Rivalry setting relates the
+     * Rivalry pokemon's gender to its target's, while the engine takes genders: genderless unless a Rivalry setting is
+     * on (the user's one first, as only the user's Rivalry affects its damage)
      */
-    private fun rivalryGenders(): Pair<Gender, Gender> {
-        val relation = listOf(attacker, defender)
+    private fun rivalryGenders(user: DamageCalcPokemonState, target: DamageCalcPokemonState): Pair<Gender, Gender> {
+        val relation = listOf(user, target)
             .firstOrNull { it.resolvedAbility == Ability.RIVALRY && it.rivalry != RivalryRelation.OFF }
             ?.rivalry
         return when (relation) {
@@ -152,6 +178,6 @@ class DamageCalcViewModel : ScreenModel {
         field = field.copy(attackerSide = field.defenderSide, defenderSide = field.attackerSide)
         weatherSync.swapSides()
         terrainSync.swapSides()
-        selectedMoveIndex = 0
+        selectMove(DamageCalcSide.ATTACKER, 0)
     }
 }

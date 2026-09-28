@@ -60,7 +60,9 @@ val WEATHERS = listOf(Weather.NONE, Weather.SUN, Weather.RAIN, Weather.SAND, Wea
 
 enum class DamageCalcSide(val displayName: String, val keyStats: List<Stat>) {
     ATTACKER("Attacker", listOf(Stat.ATTACK, Stat.SPECIAL_ATTACK)),
-    DEFENDER("Defender", listOf(Stat.HP, Stat.DEFENSE, Stat.SPECIAL_DEFENSE)),
+    DEFENDER("Defender", listOf(Stat.HP, Stat.DEFENSE, Stat.SPECIAL_DEFENSE));
+
+    val opponent get() = if (this == ATTACKER) DEFENDER else ATTACKER
 }
 
 val Status.displayName get() = when (this) {

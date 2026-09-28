@@ -75,7 +75,7 @@ internal fun DamageResultHeader(
         Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "${viewModel.attacker.form.pretty} → ${viewModel.defender.form.pretty}",
+                    calcTitle(viewModel, viewModel.selectedMoveSide),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -125,8 +125,12 @@ internal fun DamageResultHeader(
     }
 }
 
+// e.g. "Mega Charizard X → Incineroar", from the pokemon using the move on [side] to its target
+internal fun calcTitle(viewModel: DamageCalcViewModel, side: DamageCalcSide) =
+    "${viewModel.pokemonState(side).form.pretty} → ${viewModel.pokemonState(side.opponent).form.pretty}"
+
 @Composable
-private fun CopyCalcButton(result: DamageCalcResult.Success) {
+internal fun CopyCalcButton(result: DamageCalcResult.Success) {
     val snackbar = LocalSnackBar.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
@@ -157,7 +161,7 @@ private fun CopyCalcButton(result: DamageCalcResult.Success) {
  * @param damageFractionRange the damage of one use of the move, as fractions of the defender's max HP
  */
 @Composable
-private fun DamageRangeBar(
+internal fun DamageRangeBar(
     currentHpFraction: Float,
     damageFractionRange: ClosedFloatingPointRange<Float>,
     modifier: Modifier = Modifier
@@ -201,8 +205,8 @@ internal fun MoveChips(viewModel: DamageCalcViewModel, modifier: Modifier = Modi
             if (move.isBlank()) return@forEachIndexed
             val hits = attacker.hitCount(index)
             FilterChip(
-                selected = viewModel.selectedMoveIndex == index,
-                onClick = { viewModel.selectedMoveIndex = index },
+                selected = viewModel.selectedMoveSide == DamageCalcSide.ATTACKER && viewModel.selectedMoveIndex == index,
+                onClick = { viewModel.selectMove(DamageCalcSide.ATTACKER, index) },
                 label = { Text(if (hits > 1) "$move ×$hits" else move) }
             )
         }
