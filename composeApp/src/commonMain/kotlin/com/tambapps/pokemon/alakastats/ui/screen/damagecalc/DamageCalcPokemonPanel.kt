@@ -70,6 +70,7 @@ internal fun DamageCalcPokemonPanel(
     var showFormDialog by remember { mutableStateOf(false) }
     var showNatureDialog by remember { mutableStateOf(false) }
     var showStatusDialog by remember { mutableStateOf(false) }
+    var showToxicCounterDialog by remember { mutableStateOf(false) }
     var showAbilityDialog by remember { mutableStateOf(false) }
     var showItemDialog by remember { mutableStateOf(false) }
     var editedMoveIndex by remember { mutableStateOf<Int?>(null) }
@@ -84,6 +85,9 @@ internal fun DamageCalcPokemonPanel(
         PropertyRow("Nature", state.nature.effectDisplayName(), onClick = { showNatureDialog = true })
         StatPointsTile(state, side)
         PropertyRow("Status", state.status.displayName, onClick = { showStatusDialog = true })
+        if (state.status == Status.BADLY_POISONED) {
+            PropertyRow("Toxic Damage", toxicCounterText(state.toxicCounter), onClick = { showToxicCounterDialog = true })
+        }
         // needed on both sides, as some moves depend on the attacker's current HP
         CurrentHpSlider(state)
         if (side == DamageCalcSide.ATTACKER) {
@@ -174,6 +178,17 @@ internal fun DamageCalcPokemonPanel(
             itemToText = { it.displayName },
             onPicked = { state.status = it },
             onDismissRequest = { showStatusDialog = false },
+        )
+    }
+    if (showToxicCounterDialog) {
+        val counters = TOXIC_COUNTERS.toList()
+        WheelPickerDialog(
+            title = "Select Toxic Damage",
+            items = counters,
+            initialIndex = counters.indexOf(state.toxicCounter).coerceAtLeast(0),
+            itemToText = ::toxicCounterText,
+            onPicked = { state.toxicCounter = it },
+            onDismissRequest = { showToxicCounterDialog = false },
         )
     }
     if (showAbilityDialog) {
@@ -485,6 +500,9 @@ private fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat) {
 }
 
 private val BOOST_CHIP_WIDTH = 60.dp
+
+// like the source calculator, e.g. "3/16"
+private fun toxicCounterText(counter: Int) = "$counter/16"
 
 @Composable
 private fun CurrentHpSlider(state: DamageCalcPokemonState) {

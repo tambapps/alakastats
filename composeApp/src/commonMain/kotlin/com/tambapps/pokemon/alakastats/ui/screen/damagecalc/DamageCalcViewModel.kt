@@ -12,7 +12,6 @@ import com.tambapps.pokemon.champions.data.ChampionsCalcException
 import com.tambapps.pokemon.champions.data.MoveCategory
 import com.tambapps.pokemon.champions.engine.Battlefield
 import com.tambapps.pokemon.champions.engine.DamageCalculator
-import com.tambapps.pokemon.champions.engine.KoChanceCalculator
 import com.tambapps.pokemon.champions.engine.MoveUse
 
 class DamageCalcViewModel : ScreenModel {
@@ -69,9 +68,6 @@ class DamageCalcViewModel : ScreenModel {
                 defender = defenderPokemon,
                 move = move,
                 damage = damage,
-                koChance = if (damage.maxDamage > 0) {
-                    KoChanceCalculator.minimumUsesToKo(damage, targetHp = defenderPokemon.hp, maxUses = MAX_USES_TO_KO)
-                } else null,
             )
         } catch (e: ChampionsCalcException) {
             DamageCalcResult.Error(e.message ?: "Couldn't run the calc")
