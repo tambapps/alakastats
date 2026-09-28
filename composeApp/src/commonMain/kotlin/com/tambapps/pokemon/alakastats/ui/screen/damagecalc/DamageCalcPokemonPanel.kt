@@ -412,18 +412,30 @@ private fun PokemonButton(state: DamageCalcPokemonState, side: DamageCalcSide, o
         onClick = onClick,
         gradientBackgroundColors = elevatedCardGradientColors
     ) {
+        // the defender's mirrors the attacker's, the sprite on the right
+        val isAttacker = side == DamageCalcSide.ATTACKER
         Row(
             Modifier.fillMaxWidth().typeTint(state, side).padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = if (isAttacker) Arrangement.Start else Arrangement.End,
         ) {
-            // the attacker faces right, towards its target
-            PokemonSprite(
-                state.form,
-                Modifier.size(64.dp),
-                facingDirection = if (side == DamageCalcSide.ATTACKER) FacingDirection.RIGHT else FacingDirection.LEFT,
-            )
-            Spacer(Modifier.width(8.dp))
+            val sprite = @Composable {
+                // the attacker faces right, towards its target
+                PokemonSprite(
+                    state.form,
+                    Modifier.size(64.dp),
+                    facingDirection = if (isAttacker) FacingDirection.RIGHT else FacingDirection.LEFT,
+                )
+            }
+            if (isAttacker) {
+                sprite()
+                Spacer(Modifier.width(8.dp))
+            }
             Text(state.name.pretty, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            if (!isAttacker) {
+                Spacer(Modifier.width(8.dp))
+                sprite()
+            }
         }
     }
 }

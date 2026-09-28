@@ -64,15 +64,30 @@ internal fun DamageCalcPokemonColumn(
             Modifier.typeTint(state, side, diagonalLength = TYPE_TINT_LENGTH).padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // the attacker faces right, towards its target
-                PokemonSprite(
-                    state.form,
-                    Modifier.size(48.dp),
-                    facingDirection = if (side == DamageCalcSide.ATTACKER) FacingDirection.RIGHT else FacingDirection.LEFT,
-                )
-                Spacer(Modifier.width(8.dp))
+            // the defender's mirrors the attacker's, the sprite on the right
+            val isAttacker = side == DamageCalcSide.ATTACKER
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = if (isAttacker) Arrangement.Start else Arrangement.End,
+            ) {
+                val sprite = @Composable {
+                    // the attacker faces right, towards its target
+                    PokemonSprite(
+                        state.form,
+                        Modifier.size(80.dp),
+                        facingDirection = if (isAttacker) FacingDirection.RIGHT else FacingDirection.LEFT,
+                    )
+                }
+                if (isAttacker) {
+                    sprite()
+                    Spacer(Modifier.width(8.dp))
+                }
                 Text(side.displayName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                if (!isAttacker) {
+                    Spacer(Modifier.width(8.dp))
+                    sprite()
+                }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CatalogTextField(
