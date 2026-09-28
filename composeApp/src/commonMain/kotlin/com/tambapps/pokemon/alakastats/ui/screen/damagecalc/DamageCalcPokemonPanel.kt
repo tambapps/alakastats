@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -87,7 +88,21 @@ internal fun DamageCalcPokemonPanel(
         CurrentHpSlider(state)
         if (side == DamageCalcSide.ATTACKER) {
             state.moves.forEachIndexed { index, move ->
-                PropertyRow("Move ${index + 1}", move.ifBlank { "-" }, onClick = { editedMoveIndex = index })
+                val selectableHitCounts = state.selectableHitCounts(index)
+                PropertyRow(
+                    label = "Move ${index + 1}",
+                    value = move.ifBlank { "-" },
+                    onClick = { editedMoveIndex = index },
+                    trailingContent = selectableHitCounts?.let {
+                        {
+                            HitCountChip(
+                                hits = state.hitCount(index),
+                                selectableHitCounts = it,
+                                onHitCountSelected = { hits -> state.selectHitCount(index, hits) },
+                            )
+                        }
+                    },
+                )
             }
         }
     }
@@ -316,7 +331,13 @@ private fun PokemonButton(state: DamageCalcPokemonState, onClick: () -> Unit) {
 }
 
 @Composable
-private fun PropertyRow(label: String, value: String, onClick: () -> Unit) {
+private fun PropertyRow(
+    label: String,
+    value: String,
+    onClick: () -> Unit,
+    // optional content displayed after the button, e.g. a move's hit count
+    trailingContent: (@Composable () -> Unit)? = null,
+) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(
             label,
@@ -327,8 +348,39 @@ private fun PropertyRow(label: String, value: String, onClick: () -> Unit) {
         OutlinedButton(onClick = onClick, modifier = Modifier.weight(1f)) {
             Text(value)
         }
+        if (trailingContent != null) {
+            Spacer(Modifier.width(8.dp))
+            trailingContent()
+        }
     }
 }
+
+/**
+ * Chip displaying the number of hits considered for a multi-hit move, opening a wheel picker to select another one
+ */
+@Composable
+private fun HitCountChip(hits: Int, selectableHitCounts: IntRange, onHitCountSelected: (Int) -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+    FilterChip(
+        selected = true,
+        onClick = { showDialog = true },
+        label = { Text("×$hits", maxLines = 1, softWrap = false) },
+        modifier = Modifier.width(HIT_COUNT_CHIP_WIDTH),
+    )
+    if (showDialog) {
+        val hitCounts = selectableHitCounts.toList()
+        WheelPickerDialog(
+            title = "Number of Hits",
+            items = hitCounts,
+            initialIndex = hitCounts.indexOf(hits).coerceAtLeast(0),
+            itemToText = { if (it == 1) "1 hit" else "$it hits" },
+            onPicked = onHitCountSelected,
+            onDismissRequest = { showDialog = false },
+        )
+    }
+}
+
+private val HIT_COUNT_CHIP_WIDTH = 60.dp
 
 @Composable
 private fun StatPointsTile(state: DamageCalcPokemonState, side: DamageCalcSide) {

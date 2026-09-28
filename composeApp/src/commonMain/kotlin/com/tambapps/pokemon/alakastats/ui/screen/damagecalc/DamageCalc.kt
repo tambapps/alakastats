@@ -87,9 +87,27 @@ internal fun DamageResultHeader(
                     )
                 }
             }
-            Text("${viewModel.damageRangeText} (${viewModel.damagePercentText})", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            DamageRangeBar(viewModel.damagePercentRange, Modifier.fillMaxWidth().padding(vertical = 4.dp))
-            Text(viewModel.koChanceText, style = MaterialTheme.typography.bodyMedium)
+            when (val result = viewModel.result) {
+                is DamageCalcResult.Success -> {
+                    Text(
+                        "${result.damageRangeText} (${result.damagePercentText})",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    DamageRangeBar(
+                        currentHpFraction = result.currentHpFraction,
+                        damageFractionRange = result.damageFractionRange,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    )
+                    Text(result.koChanceText, style = MaterialTheme.typography.bodyMedium)
+                }
+                is DamageCalcResult.Error -> Text(
+                    result.message,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f)) {
                     Text(
@@ -99,20 +117,20 @@ internal fun DamageResultHeader(
                         modifier = Modifier.clickable(onClick = onFieldSummaryClick)
                     )
                 }
-                CopyCalcButton(viewModel)
+                (viewModel.result as? DamageCalcResult.Success)?.let { CopyCalcButton(it) }
             }
         }
     }
 }
 
 @Composable
-private fun CopyCalcButton(viewModel: DamageCalcViewModel) {
+private fun CopyCalcButton(result: DamageCalcResult.Success) {
     val snackbar = LocalSnackBar.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
     IconButton(onClick = {
         scope.launch {
-            if (copyToClipboard(clipboard, label = "Damage calc", text = viewModel.calcDescription)) {
+            if (copyToClipboard(clipboard, label = "Damage calc", text = result.description)) {
                 snackbar.show("Copied to clipboard")
             } else {
                 snackbar.show("Copy to clipboard not supported")
@@ -126,8 +144,18 @@ private fun CopyCalcButton(viewModel: DamageCalcViewModel) {
     }
 }
 
+/**
+ * The defender's HP bar, starting from its current HP
+ *
+ * @param currentHpFraction the defender's current HP, as a fraction of its max HP
+ * @param damageFractionRange the damage of one use of the move, as fractions of the defender's max HP
+ */
 @Composable
-private fun DamageRangeBar(damagePercentRange: ClosedFloatingPointRange<Float>, modifier: Modifier = Modifier) {
+private fun DamageRangeBar(
+    currentHpFraction: Float,
+    damageFractionRange: ClosedFloatingPointRange<Float>,
+    modifier: Modifier = Modifier
+) {
     val trackColor = MaterialTheme.colorScheme.surfaceVariant
     val damageRangeColor = MaterialTheme.colorScheme.error
     val remainingHpColor = MaterialTheme.colorScheme.primary
@@ -137,13 +165,13 @@ private fun DamageRangeBar(damagePercentRange: ClosedFloatingPointRange<Float>, 
         // HP left after the lowest roll, which includes the damage range
         drawRoundRect(
             damageRangeColor,
-            size = Size(size.width * (1f - damagePercentRange.start).coerceIn(0f, 1f), size.height),
+            size = Size(size.width * (currentHpFraction - damageFractionRange.start).coerceIn(0f, 1f), size.height),
             cornerRadius = cornerRadius
         )
         // HP left after the highest roll
         drawRoundRect(
             remainingHpColor,
-            size = Size(size.width * (1f - damagePercentRange.endInclusive).coerceIn(0f, 1f), size.height),
+            size = Size(size.width * (currentHpFraction - damageFractionRange.endInclusive).coerceIn(0f, 1f), size.height),
             cornerRadius = cornerRadius
         )
     }
@@ -155,13 +183,15 @@ internal fun MoveChips(viewModel: DamageCalcViewModel, modifier: Modifier = Modi
         modifier = modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        viewModel.attacker.moves.forEachIndexed { index, move ->
+        val attacker = viewModel.attacker
+        attacker.moves.forEachIndexed { index, move ->
             // empty move slots are not selectable
             if (move.isBlank()) return@forEachIndexed
+            val hits = attacker.hitCount(index)
             FilterChip(
                 selected = viewModel.selectedMoveIndex == index,
                 onClick = { viewModel.selectedMoveIndex = index },
-                label = { Text(move) }
+                label = { Text(if (hits > 1) "$move ×$hits" else move) }
             )
         }
     }

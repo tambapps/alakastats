@@ -6,12 +6,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tambapps.pokemon.AbilityName
 import com.tambapps.pokemon.ItemName
+import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.champions.data.ChampionsDex
+import com.tambapps.pokemon.champions.data.Move
+import com.tambapps.pokemon.champions.engine.defaultHitCount
+import com.tambapps.pokemon.champions.engine.hitCountRange
 import com.tambapps.pokemon.champions.engine.BattleFormat
 import com.tambapps.pokemon.champions.engine.BattlePokemon
 import com.tambapps.pokemon.champions.engine.Battlefield
@@ -118,6 +122,8 @@ class DamageCalcPokemonState(
     var currentHpPercent by mutableStateOf(100)
     private val statPoints = mutableStateMapOf<Stat, Int>().apply { STATS.forEach { put(it, 0) } }
     private val boosts = mutableStateMapOf<Stat, Int>()
+    // hit counts explicitly selected, by move index. Moves without one use the engine's default
+    private val selectedHitCounts = mutableStateMapOf<Int, Int>()
 
     val totalStatPoints get() = statPoints.values.sum()
     // can be negative, the max total is not enforced
@@ -160,10 +166,38 @@ class DamageCalcPokemonState(
         // always keep MAX_MOVES slots so that missing moves can be filled
         val teamMoves = pokemon.moves.take(MAX_MOVES).map { it.pretty }
         moves = teamMoves + List(MAX_MOVES - teamMoves.size) { "" }
+        selectedHitCounts.clear()
     }
 
     fun setMove(index: Int, move: String) {
         moves = moves.toMutableList().also { it[index] = move }
+        selectedHitCounts.remove(index)
+    }
+
+    /**
+     * The Champions move at [index], or null if the slot is empty or the move unknown to Champions
+     */
+    fun championsMove(index: Int): Move? =
+        moves.getOrNull(index)?.takeIf { it.isNotBlank() }?.let { ChampionsDex.moveOrNull(MoveName(it)) }
+
+    /**
+     * The hit counts that can be selected for the move at [index], or null if it can't vary (e.g. a single hit move)
+     */
+    fun selectableHitCounts(index: Int): IntRange? =
+        championsMove(index)?.hitCountRange?.takeIf { it.first != it.last }
+
+    /**
+     * The number of hits considered for the move at [index]: the one selected, or else the default one
+     * (e.g. 3 for a 2-5 hit move, 5 with Skill Link)
+     */
+    fun hitCount(index: Int): Int {
+        val move = championsMove(index) ?: return 1
+        selectedHitCounts[index]?.let { return it }
+        return toBattlePokemon()?.let { defaultHitCount(move, it) } ?: move.hitCountRange.first
+    }
+
+    fun selectHitCount(index: Int, hits: Int) {
+        selectedHitCounts[index] = hits
     }
 
     fun getBoost(stat: Stat) = boosts[stat] ?: 0

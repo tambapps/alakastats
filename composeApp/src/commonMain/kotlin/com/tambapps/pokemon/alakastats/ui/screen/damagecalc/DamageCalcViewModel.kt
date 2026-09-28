@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -7,7 +8,12 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.util.VoidSignal
+import com.tambapps.pokemon.champions.data.ChampionsCalcException
+import com.tambapps.pokemon.champions.data.MoveCategory
 import com.tambapps.pokemon.champions.engine.Battlefield
+import com.tambapps.pokemon.champions.engine.DamageCalculator
+import com.tambapps.pokemon.champions.engine.KoChanceCalculator
+import com.tambapps.pokemon.champions.engine.MoveUse
 
 class DamageCalcViewModel : ScreenModel {
 
@@ -35,13 +41,42 @@ class DamageCalcViewModel : ScreenModel {
     var selectedMoveIndex by mutableIntStateOf(0)
     val scrollToTopSignal = VoidSignal()
 
-    // TODO dummy result, will be computed later
-    val damageRangeText get() = "104 - 126"
-    val damagePercentText get() = "62.2 - 75.4%"
-    val koChanceText get() = "guaranteed 2HKO"
-    val damagePercentRange get() = 0.622f..0.754f
-    val calcDescription get() = "+1 32+ Atk Spell Tag Aegislash-Shield Poltergeist vs. 32 HP  / 0 Def Aegislash-Shield: " +
-            "156-186 (93.4 - 111.3%) -- 62.5% chance to OHKO"
+    // recomputed whenever an input of the calc changes
+    val result: DamageCalcResult by derivedStateOf { computeResult() }
+
+    private fun computeResult(): DamageCalcResult {
+        val attackerPokemon = attacker.toBattlePokemon()
+            ?: return DamageCalcResult.Error("${attacker.form.pretty} isn't a Champions Pokemon")
+        val defenderPokemon = defender.toBattlePokemon()
+            ?: return DamageCalcResult.Error("${defender.form.pretty} isn't a Champions Pokemon")
+        val moveName = attacker.moves.getOrNull(selectedMoveIndex)?.takeIf { it.isNotBlank() }
+            ?: return DamageCalcResult.Error("Select a move")
+        val move = attacker.championsMove(selectedMoveIndex)
+            ?: return DamageCalcResult.Error("$moveName isn't a Champions move")
+        if (move.category == MoveCategory.STATUS) {
+            return DamageCalcResult.Error("${move.name.value} is a status move")
+        }
+        return try {
+            val damage = DamageCalculator.calculateMove(
+                attacker = attackerPokemon,
+                defender = defenderPokemon,
+                moveUse = MoveUse(move),
+                field = field,
+                hits = attacker.hitCount(selectedMoveIndex),
+            )
+            DamageCalcResult.Success(
+                attacker = attackerPokemon,
+                defender = defenderPokemon,
+                move = move,
+                damage = damage,
+                koChance = if (damage.maxDamage > 0) {
+                    KoChanceCalculator.minimumUsesToKo(damage, targetHp = defenderPokemon.hp, maxUses = MAX_USES_TO_KO)
+                } else null,
+            )
+        } catch (e: ChampionsCalcException) {
+            DamageCalcResult.Error(e.message ?: "Couldn't run the calc")
+        }
+    }
 
     fun pokemonState(side: DamageCalcSide) = when (side) {
         DamageCalcSide.ATTACKER -> attacker

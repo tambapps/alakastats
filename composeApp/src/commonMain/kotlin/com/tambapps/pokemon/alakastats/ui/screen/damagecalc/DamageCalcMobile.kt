@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
@@ -124,8 +125,14 @@ internal fun DamageCalcMobile(
 
 @Composable
 private fun CompactDamageResult(viewModel: DamageCalcViewModel) {
+    val text = when (val result = viewModel.result) {
+        is DamageCalcResult.Success -> "${result.damagePercentText} · ${result.koChanceText}"
+        is DamageCalcResult.Error -> result.message
+    }
     Text(
-        "${viewModel.damagePercentText} · ${viewModel.koChanceText}",
+        text,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onPrimaryContainer,
