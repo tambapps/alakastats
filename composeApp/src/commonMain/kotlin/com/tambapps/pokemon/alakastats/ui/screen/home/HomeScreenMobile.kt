@@ -3,11 +3,8 @@ package com.tambapps.pokemon.alakastats.ui.screen.home
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.alakastats
 import alakastats.composeapp.generated.resources.alakastats_dark
-import alakastats.composeapp.generated.resources.download_on_android
-import alakastats.composeapp.generated.resources.download_on_ios
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,7 +21,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -58,10 +54,6 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
                     modifier = Modifier.size(80.dp).align(Alignment.Center),
                     contentScale = ContentScale.Fit
                 )
-                Column(Modifier.align(Alignment.TopStart).padding(start = 8.dp)) {
-                    QuizzesButton()
-                    DamageCalcButton()
-                }
                 AboutButton(Modifier.align(Alignment.TopEnd))
             }
             Text("Alakastats", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
@@ -70,6 +62,13 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
             if (platform.type == PlatformType.Web && platform.deviceType.let { it == DeviceType.Android || it == DeviceType.Ios }) {
                 Spacer(Modifier.height(16.dp))
                 GetAppButton(platform.deviceType)
+            }
+            Spacer(Modifier.height(16.dp))
+
+            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+                QuizzesButton(Modifier.weight(1f))
+                Spacer(Modifier.width(8.dp))
+                DamageCalcButton(Modifier.weight(1f))
             }
             Spacer(Modifier.height(16.dp))
 
