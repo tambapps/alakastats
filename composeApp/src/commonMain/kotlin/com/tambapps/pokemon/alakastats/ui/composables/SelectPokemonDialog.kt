@@ -34,6 +34,21 @@ fun SelectPokemonDialog(
     onDismissRequest: () -> Unit,
     title: String,
     confirmButtonText: String,
+) = SelectPokemonDialog(
+    onSelect = { onAdd.invoke(PokemonFilter(it, asLead)) },
+    onDismissRequest = onDismissRequest,
+    title = title,
+    confirmButtonText = confirmButtonText,
+    containsValidator = containsValidator,
+)
+
+@Composable
+fun SelectPokemonDialog(
+    onSelect: (PokemonName) -> Unit,
+    onDismissRequest: () -> Unit,
+    title: String,
+    confirmButtonText: String,
+    containsValidator: (PokemonName) -> Boolean = { false },
 ) {
     val allPokemons = availablePokemonNames()
     var text by remember { mutableStateOf("") }
@@ -92,7 +107,7 @@ fun SelectPokemonDialog(
                         error = "${pokemonName.pretty} was already selected"
                         return@TextButton
                     }
-                    onAdd.invoke(PokemonFilter(pokemonName, asLead))
+                    onSelect.invoke(pokemonName)
                     onDismissRequest.invoke()
                 },
             ) {

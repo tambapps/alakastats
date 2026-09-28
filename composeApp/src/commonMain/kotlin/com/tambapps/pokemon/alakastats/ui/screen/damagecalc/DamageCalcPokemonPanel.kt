@@ -1,0 +1,299 @@
+package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.Nature
+import com.tambapps.pokemon.Stat
+import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
+import com.tambapps.pokemon.alakastats.ui.composables.MyCard
+import com.tambapps.pokemon.alakastats.ui.composables.SelectPokemonDialog
+import com.tambapps.pokemon.alakastats.ui.composables.StatBoostStageChip
+import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
+import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.abbreviation
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.decreasedStatColor
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.displayName
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.increasedStatColor
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.shortLabel
+import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
+import kotlin.math.roundToInt
+
+private val hpColor = Color(0xFF4CAF50)
+
+@Composable
+internal fun DamageCalcPokemonPanel(
+    state: DamageCalcPokemonState,
+    side: DamageCalcSide,
+    modifier: Modifier = Modifier
+) {
+    var showPokemonDialog by remember { mutableStateOf(false) }
+    var showNatureDialog by remember { mutableStateOf(false) }
+    var showStatusDialog by remember { mutableStateOf(false) }
+    var editedMoveIndex by remember { mutableStateOf<Int?>(null) }
+
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        PokemonButton(state, onClick = { showPokemonDialog = true })
+        // TODO open ability selection dialog
+        PropertyRow("Ability", state.ability, onClick = {})
+        // TODO open item selection dialog
+        PropertyRow("Item", state.item, onClick = {})
+        PropertyRow("Nature", state.nature.effectDisplayName(), onClick = { showNatureDialog = true })
+        StatPointsTile(state, side)
+        PropertyRow("Status", state.status.displayName, onClick = { showStatusDialog = true })
+        // needed on both sides, as some moves depend on the attacker's current HP
+        CurrentHpSlider(state)
+        if (side == DamageCalcSide.ATTACKER) {
+            state.moves.forEachIndexed { index, move ->
+                PropertyRow("Move ${index + 1}", move, onClick = { editedMoveIndex = index })
+            }
+        }
+    }
+
+    if (showPokemonDialog) {
+        SelectPokemonDialog(
+            onSelect = { state.name = it },
+            onDismissRequest = { showPokemonDialog = false },
+            title = "Select ${side.displayName}",
+            confirmButtonText = "Select",
+        )
+    }
+    if (showNatureDialog) {
+        WheelPickerDialog(
+            title = "Select Nature",
+            items = NATURES,
+            initialIndex = NATURES.indexOf(state.nature).coerceAtLeast(0),
+            itemToText = { it.effectDisplayName(separator = "\n") },
+            textAlign = TextAlign.Center,
+            onPicked = { state.nature = it },
+            onDismissRequest = { showNatureDialog = false },
+        )
+    }
+    if (showStatusDialog) {
+        WheelPickerDialog(
+            title = "Select Status",
+            items = StatusCondition.entries,
+            initialIndex = state.status.ordinal,
+            itemToText = { it.displayName },
+            onPicked = { state.status = it },
+            onDismissRequest = { showStatusDialog = false },
+        )
+    }
+    editedMoveIndex?.let { index ->
+        EditMoveDialog(
+            initialMove = state.moves[index],
+            onSave = { state.setMove(index, it) },
+            onDismissRequest = { editedMoveIndex = null },
+        )
+    }
+}
+
+@Composable
+private fun EditMoveDialog(
+    initialMove: String,
+    onSave: (String) -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    var text by remember { mutableStateOf(initialMove) }
+    var error: String? by remember { mutableStateOf(null) }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Edit Move") },
+        text = {
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                value = text,
+                onValueChange = {
+                    text = it
+                    error = null
+                },
+                isError = error != null,
+                singleLine = true,
+                supportingText = error?.let { ({ Text(it) }) },
+                label = { Text("Move Name") },
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (text.isBlank()) {
+                        error = "Move name cannot be empty"
+                        return@TextButton
+                    }
+                    onSave.invoke(text.trim())
+                    onDismissRequest.invoke()
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+private fun Nature.effectDisplayName(separator: String = " ") =
+    if (isNeutral) "$displayName$separator(Neutral)"
+    else "$displayName$separator+${bonusStat?.abbreviation}/-${malusStat?.abbreviation}"
+
+@Composable
+private fun PokemonButton(state: DamageCalcPokemonState, onClick: () -> Unit) {
+    MyCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        gradientBackgroundColors = elevatedCardGradientColors
+    ) {
+        Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            PokemonSprite(state.name, Modifier.size(64.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(state.name.pretty, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+private fun PropertyRow(label: String, value: String, onClick: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(72.dp)
+        )
+        OutlinedButton(onClick = onClick, modifier = Modifier.weight(1f)) {
+            Text(value)
+        }
+    }
+}
+
+@Composable
+private fun StatPointsTile(state: DamageCalcPokemonState, side: DamageCalcSide) {
+    val hiddenStats = STATS.filter { it !in side.keyStats }
+    ExpansionTile(
+        title = { isExpanded ->
+            Column(Modifier.weight(1f)) {
+                Text("Stat Points", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                // so that boosts on hidden stats are not forgotten
+                val hiddenBoosts = hiddenStats.filter { state.getBoost(it) != 0 }
+                if (!isExpanded && hiddenBoosts.isNotEmpty()) {
+                    Text(
+                        hiddenBoosts.joinToString { "${boostText(state.getBoost(it))} ${it.abbreviation}" },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            if (state.exceedsMaxTotalStatPoints) {
+                Text(
+                    "${-state.remainingStatPoints} over",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
+            } else {
+                Text("${state.remainingStatPoints} left", style = MaterialTheme.typography.bodyMedium)
+            }
+        },
+        subtitle = {
+            Column {
+                side.keyStats.forEach { StatPointsSlider(state, it) }
+            }
+        },
+    ) {
+        Column {
+            hiddenStats.forEach { StatPointsSlider(state, it) }
+        }
+    }
+}
+
+private fun boostText(boost: Int) = if (boost > 0) "+$boost" else boost.toString()
+
+@Composable
+private fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat) {
+    val statPoints = state.getStatPoints(stat)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stat.abbreviation, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.width(56.dp))
+        Slider(
+            value = statPoints.toFloat(),
+            onValueChange = { state.setStatPoints(stat, it.roundToInt()) },
+            valueRange = 0f..MAX_STAT_POINTS_PER_STAT.toFloat(),
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            statPoints.toString(),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.End,
+            modifier = Modifier.width(32.dp)
+        )
+        Spacer(Modifier.width(8.dp))
+        val boostModifier = Modifier.width(BOOST_CHIP_WIDTH)
+        if (stat == Stat.HP) {
+            // HP cannot be boosted, but keep the space to align the sliders
+            Spacer(boostModifier)
+        } else {
+            val boost = state.getBoost(stat)
+            StatBoostStageChip(
+                stage = boost,
+                onValueChange = { state.setBoost(stat, it) },
+                dialogTitle = "${stat.shortLabel} Stage",
+                compact = true,
+                modifier = boostModifier,
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedLabelColor = if (boost > 0) increasedStatColor else decreasedStatColor
+                ),
+            )
+        }
+    }
+}
+
+private val BOOST_CHIP_WIDTH = 60.dp
+
+@Composable
+private fun CurrentHpSlider(state: DamageCalcPokemonState) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+        Row {
+            Text("Current HP", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.weight(1f))
+            Text("${state.currentHpPercent}%", style = MaterialTheme.typography.bodyLarge)
+        }
+        Slider(
+            value = state.currentHpPercent.toFloat(),
+            onValueChange = { state.currentHpPercent = it.roundToInt() },
+            valueRange = 0f..100f,
+            colors = SliderDefaults.colors(activeTrackColor = hpColor),
+        )
+    }
+}

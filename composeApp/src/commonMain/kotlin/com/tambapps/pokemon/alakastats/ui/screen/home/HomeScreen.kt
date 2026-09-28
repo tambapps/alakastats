@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.home
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
+import alakastats.composeapp.generated.resources.calculate
 import alakastats.composeapp.generated.resources.more_horiz
 import alakastats.composeapp.generated.resources.quiz
 import androidx.compose.foundation.clickable
@@ -52,6 +53,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.about.AboutScreen
+import com.tambapps.pokemon.alakastats.ui.screen.damagecalc.DamageCalcScreen
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizzesHomeScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -253,6 +255,20 @@ internal fun QuizzesButton(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.width(8.dp))
         Text("Quizzes", style = buttonTextStyle)
+    }
+}
+
+@Composable
+internal fun DamageCalcButton(modifier: Modifier = Modifier) {
+    val navigator = LocalNavigator.currentOrThrow
+    FilledTonalButton(onClick = { navigator.push(DamageCalcScreen) }, modifier = modifier) {
+        Icon(
+            painter = painterResource(Res.drawable.calculate),
+            contentDescription = null,
+            modifier = Modifier.size(ButtonDefaults.IconSize)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text("Damage Calc", style = buttonTextStyle)
     }
 }
 

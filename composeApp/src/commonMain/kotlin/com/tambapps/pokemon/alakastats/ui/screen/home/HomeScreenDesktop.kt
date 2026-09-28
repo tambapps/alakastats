@@ -50,6 +50,7 @@ internal fun HomeScreenDesktop(viewModel: HomeViewModel) {
     ) {
         Row(Modifier.fillMaxWidth()) {
             QuizzesButton(Modifier.padding(start = 8.dp))
+            DamageCalcButton(Modifier.padding(start = 8.dp))
             Spacer(Modifier.weight(1f))
             AlakastatsLabel()
             Spacer(Modifier.weight(1f))

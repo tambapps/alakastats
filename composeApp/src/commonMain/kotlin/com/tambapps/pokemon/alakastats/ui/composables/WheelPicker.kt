@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.swmansion.kmpwheelpicker.WheelPicker
 import com.swmansion.kmpwheelpicker.WheelPickerState
@@ -82,6 +83,7 @@ fun <T> WheelPickerDialog(
     onDismissRequest: () -> Unit,
     initialIndex: Int = 0,
     itemToText: (T) -> String = { it.toString() },
+    textAlign: TextAlign = TextAlign.Unspecified,
 ) {
     val state = rememberWheelPickerState(itemCount = items.size, initialIndex = initialIndex)
     AlertDialog(
@@ -105,6 +107,7 @@ fun <T> WheelPickerDialog(
                     Text(
                         text = itemToText.invoke(items[index]),
                         style = MaterialTheme.typography.headlineMedium,
+                        textAlign = textAlign,
                         modifier =
                             Modifier.padding(32.dp, 8.dp).graphicsLayer {
                                 alpha = (BUFFER_SIZE - abs(state.value - index)).coerceIn(0f, 1f)

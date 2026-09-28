@@ -13,6 +13,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizzesViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.damagecalc.DamageCalcViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizSetupViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizDirection
@@ -26,6 +27,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.quizzes.QuizzesTabViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.damagecalc.DamageCalcTabViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsViewModel
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
@@ -113,6 +115,7 @@ val appModules = listOf(module {
     factoryOf(::EditTeamViewModel)
     factoryOf(::MatchupPlanEditViewModel)
     factoryOf(::QuizzesViewModel)
+    factoryOf(::DamageCalcViewModel)
     factoryOf(::NatureQuizSetupViewModel)
     factoryOf(::SpeedStatQuizSetupViewModel)
     factoryOf(::SpeedInteractionsHomeSetupViewModel)
@@ -135,6 +138,10 @@ val appModules = listOf(module {
 
     factory { (useCase: ConsultTeamlyticsUseCase) ->
         QuizzesTabViewModel(useCase)
+    }
+
+    factory { (useCase: ConsultTeamlyticsUseCase) ->
+        DamageCalcTabViewModel(useCase, get())
     }
 
     factory { (teamId: Uuid) ->

@@ -58,7 +58,10 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
                     modifier = Modifier.size(80.dp).align(Alignment.Center),
                     contentScale = ContentScale.Fit
                 )
-                QuizzesButton(Modifier.align(Alignment.TopStart).padding(start = 8.dp))
+                Column(Modifier.align(Alignment.TopStart).padding(start = 8.dp)) {
+                    QuizzesButton()
+                    DamageCalcButton()
+                }
                 AboutButton(Modifier.align(Alignment.TopEnd))
             }
             Text("Alakastats", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
