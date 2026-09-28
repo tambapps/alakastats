@@ -2,9 +2,15 @@ package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.swap_horiz
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -27,8 +33,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -41,6 +54,7 @@ import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import org.jetbrains.compose.resources.painterResource
 
 private const val SCROLL_TO_TOP_DURATION_MILLIS = 300
+private val PADDING = 12.dp
 
 /**
  * The damage calc on wide screens: the results of every move of both pokemon on top, then the attacker, the field and
@@ -58,37 +72,117 @@ internal fun DamageCalcDesktop(
             scrollState.animateScrollTo(0, tween(SCROLL_TO_TOP_DURATION_MILLIS))
         }
     }
-    Column(
-        modifier.fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(12.dp)
-            .padding(bottom = teamlyticsTabPaddingBottom),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        DesktopResultCard(viewModel)
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
-            DamageCalcPokemonColumn(
-                state = viewModel.attacker,
-                side = DamageCalcSide.ATTACKER,
-                team = team,
-                opponent = viewModel.defender,
-                modifier = Modifier.weight(1.15f),
+    // the bottom of the result card in the scrolled column, to show the compact result once it's scrolled away
+    val paddingPx = with(LocalDensity.current) { PADDING.roundToPx() }
+    var resultCardHeight by remember { mutableIntStateOf(0) }
+    val isResultCardScrolledAway by remember {
+        derivedStateOf { resultCardHeight > 0 && scrollState.value > paddingPx + resultCardHeight }
+    }
+    Box(modifier.fillMaxSize()) {
+        Column(
+            Modifier.fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(PADDING)
+                .padding(bottom = teamlyticsTabPaddingBottom),
+            verticalArrangement = Arrangement.spacedBy(PADDING)
+        ) {
+            DesktopResultCard(viewModel, Modifier.onSizeChanged { resultCardHeight = it.height })
+            DesktopEditors(viewModel, team)
+        }
+        // pinned while editing what's under the result card, to see the result change
+        AnimatedVisibility(
+            visible = isResultCardScrolledAway,
+            enter = slideInVertically { -it } + fadeIn(),
+            exit = slideOutVertically { -it } + fadeOut(),
+            modifier = Modifier.align(Alignment.TopCenter),
+        ) {
+            DesktopCompactResult(viewModel)
+        }
+    }
+}
+
+@Composable
+private fun DesktopEditors(viewModel: DamageCalcViewModel, team: Teamlytics?) {
+    Row(horizontalArrangement = Arrangement.spacedBy(PADDING), verticalAlignment = Alignment.Top) {
+        DamageCalcPokemonColumn(
+            state = viewModel.attacker,
+            side = DamageCalcSide.ATTACKER,
+            team = team,
+            opponent = viewModel.defender,
+            modifier = Modifier.weight(1.15f),
+        )
+        // no type tint on the field, between the two pokemon
+        MyCard(modifier = Modifier.weight(0.9f), gradientBackgroundColors = cardGradientColors) {
+            DamageCalcFieldPanel(
+                field = viewModel.field,
+                onFieldChange = { viewModel.updateField(it) },
+                modifier = Modifier.padding(12.dp),
             )
-            // no type tint on the field, between the two pokemon
-            MyCard(modifier = Modifier.weight(0.9f), gradientBackgroundColors = cardGradientColors) {
-                DamageCalcFieldPanel(
-                    field = viewModel.field,
-                    onFieldChange = { viewModel.updateField(it) },
-                    modifier = Modifier.padding(12.dp),
+        }
+        DamageCalcPokemonColumn(
+            state = viewModel.defender,
+            side = DamageCalcSide.DEFENDER,
+            team = team,
+            opponent = viewModel.attacker,
+            modifier = Modifier.weight(1.15f),
+        )
+    }
+}
+
+/**
+ * The selected move's result in one line, with its damage bar, pinned on top once the result card is scrolled away
+ */
+@Composable
+private fun DesktopCompactResult(viewModel: DamageCalcViewModel) {
+    val result = viewModel.result
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = PADDING, vertical = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+    ) {
+        Row(
+            Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            viewModel.moveTypeOf(viewModel.selectedMoveSide, viewModel.selectedMoveIndex)?.let {
+                MoveTypeImage(it, Modifier.size(MOVE_TYPE_ICON_SIZE))
+            }
+            val moveName = viewModel.pokemonState(viewModel.selectedMoveSide).moves
+                .getOrNull(viewModel.selectedMoveIndex).orEmpty()
+            Text(
+                "${calcTitle(viewModel, viewModel.selectedMoveSide)} · $moveName",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            when (result) {
+                is DamageCalcResult.Success -> {
+                    Text(result.damagePercentText, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                    DamageRangeBar(
+                        currentHpFraction = result.currentHpFraction,
+                        damageFractionRange = result.damageFractionRange,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        result.koChanceText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    CopyCalcButton(result)
+                }
+                is DamageCalcResult.Error -> Text(
+                    result.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f),
                 )
             }
-            DamageCalcPokemonColumn(
-                state = viewModel.defender,
-                side = DamageCalcSide.DEFENDER,
-                team = team,
-                opponent = viewModel.attacker,
-                modifier = Modifier.weight(1.15f),
-            )
         }
     }
 }
@@ -97,9 +191,9 @@ internal fun DamageCalcDesktop(
  * The result of the selected move (its description, copied), and the results of every move of both pokemon to select one
  */
 @Composable
-private fun DesktopResultCard(viewModel: DamageCalcViewModel) {
+private fun DesktopResultCard(viewModel: DamageCalcViewModel, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
