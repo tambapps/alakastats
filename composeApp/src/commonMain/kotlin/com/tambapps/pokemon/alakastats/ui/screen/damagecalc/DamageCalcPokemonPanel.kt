@@ -12,7 +12,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -41,6 +40,10 @@ import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonWheelPicker
 import com.tambapps.pokemon.alakastats.ui.composables.SelectPokemonDialog
 import com.tambapps.pokemon.alakastats.ui.composables.StatBoostStageChip
+import com.tambapps.pokemon.alakastats.ui.composables.SuggestionTextField
+import com.tambapps.pokemon.champions.data.Ability
+import com.tambapps.pokemon.champions.data.ChampionsDex
+import com.tambapps.pokemon.champions.data.Item
 import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.abbreviation
@@ -65,14 +68,14 @@ internal fun DamageCalcPokemonPanel(
     var showTeamPokemonDialog by remember { mutableStateOf(false) }
     var showNatureDialog by remember { mutableStateOf(false) }
     var showStatusDialog by remember { mutableStateOf(false) }
+    var showAbilityDialog by remember { mutableStateOf(false) }
+    var showItemDialog by remember { mutableStateOf(false) }
     var editedMoveIndex by remember { mutableStateOf<Int?>(null) }
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         PokemonButton(state, onClick = { showPokemonDialog = true })
-        // TODO open ability selection dialog
-        PropertyRow("Ability", state.ability, onClick = {})
-        // TODO open item selection dialog
-        PropertyRow("Item", state.item, onClick = {})
+        PropertyRow("Ability", state.ability, onClick = { showAbilityDialog = true })
+        PropertyRow("Item", state.item.ifBlank { "None" }, onClick = { showItemDialog = true })
         PropertyRow("Nature", state.nature.effectDisplayName(), onClick = { showNatureDialog = true })
         StatPointsTile(state, side)
         PropertyRow("Status", state.status.displayName, onClick = { showStatusDialog = true })
@@ -131,9 +134,33 @@ internal fun DamageCalcPokemonPanel(
             onDismissRequest = { showStatusDialog = false },
         )
     }
+    if (showAbilityDialog) {
+        EditWithSuggestionsDialog(
+            title = "Edit Ability",
+            label = "Ability",
+            initialValue = state.ability,
+            suggestions = ABILITY_NAMES,
+            onSave = { state.ability = it },
+            onDismissRequest = { showAbilityDialog = false },
+        )
+    }
+    if (showItemDialog) {
+        EditWithSuggestionsDialog(
+            title = "Edit Item",
+            label = "Item",
+            initialValue = state.item,
+            suggestions = ITEM_NAMES,
+            onSave = { state.item = it },
+            onDismissRequest = { showItemDialog = false },
+            allowEmpty = true,
+        )
+    }
     editedMoveIndex?.let { index ->
-        EditMoveDialog(
-            initialMove = state.moves[index],
+        EditWithSuggestionsDialog(
+            title = "Edit Move",
+            label = "Move",
+            initialValue = state.moves[index],
+            suggestions = MOVE_NAMES,
             onSave = { state.setMove(index, it) },
             onDismissRequest = { editedMoveIndex = null },
         )
@@ -173,42 +200,70 @@ private fun SelectTeamPokemonDialog(
     )
 }
 
+private val MOVE_NAMES: List<String> by lazy { ChampionsDex.allMoves.map { it.name.value }.sorted() }
+private val ABILITY_NAMES: List<String> by lazy {
+    Ability.entries.filter { it != Ability.NO_ABILITY }.map { it.displayName }
+}
+private val ITEM_NAMES: List<String> by lazy { Item.entries.map { it.displayName } }
+
+/**
+ * Dialog to edit a value with a text field suggesting the values of [suggestions]. Only a value of
+ * [suggestions] can be saved, with the catalog's spelling (e.g. "moonblast" is saved as "Moonblast").
+ *
+ * @param allowEmpty whether an empty value can be saved (e.g. no item)
+ */
 @Composable
-private fun EditMoveDialog(
-    initialMove: String,
+private fun EditWithSuggestionsDialog(
+    title: String,
+    label: String,
+    initialValue: String,
+    suggestions: List<String>,
     onSave: (String) -> Unit,
     onDismissRequest: () -> Unit,
+    allowEmpty: Boolean = false,
 ) {
-    var text by remember { mutableStateOf(initialMove) }
+    var text by remember { mutableStateOf(initialValue) }
     var error: String? by remember { mutableStateOf(null) }
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text("Edit Move") },
+        title = { Text(title) },
         text = {
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+            SuggestionTextField(
                 value = text,
                 onValueChange = {
                     text = it
                     error = null
                 },
+                suggestions = suggestions,
+                suggestionText = { it },
+                label = label,
+                textFieldModifier = Modifier.focusRequester(focusRequester),
                 isError = error != null,
-                singleLine = true,
                 supportingText = error?.let { ({ Text(it) }) },
-                label = { Text("Move Name") },
             )
         },
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (text.isBlank()) {
-                        error = "Move name cannot be empty"
+                    val input = text.trim()
+                    if (input.isEmpty()) {
+                        if (allowEmpty) {
+                            onSave.invoke("")
+                            onDismissRequest.invoke()
+                        } else {
+                            error = "$label cannot be empty"
+                        }
                         return@TextButton
                     }
-                    onSave.invoke(text.trim())
+                    val value = suggestions.firstOrNull { it.equals(input, ignoreCase = true) }
+                    if (value == null) {
+                        error = "Unknown ${label.lowercase()}"
+                        return@TextButton
+                    }
+                    onSave.invoke(value)
                     onDismissRequest.invoke()
                 }
             ) {
