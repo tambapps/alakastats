@@ -28,6 +28,8 @@ const val MAX_STAT_POINTS_PER_STAT = 32
 const val MAX_TOTAL_STAT_POINTS = 66
 const val MAX_BOOST_STAGE = 6
 const val MAX_MOVES = 4
+// the toxic counters the source calculator offers for a badly poisoned pokemon, 1/16 to 15/16
+val TOXIC_COUNTERS = 1..15
 
 // neutral natures all have the same effect, only keep one
 val NATURES = Nature.entries.filter { !it.isNeutral || it == Nature.SERIOUS }
@@ -118,6 +120,8 @@ class DamageCalcPokemonState(
     var ability by mutableStateOf(ability)
     var item by mutableStateOf(item)
     var status by mutableStateOf(Status.HEALTHY)
+    // the toxic damage of the next end of turn in 16ths of the max HP, only used when badly poisoned
+    var toxicCounter by mutableStateOf(1)
     var moves by mutableStateOf(moves)
     var currentHpPercent by mutableStateOf(100)
     private val statPoints = mutableStateMapOf<Stat, Int>().apply { STATS.forEach { put(it, 0) } }
@@ -255,6 +259,7 @@ class DamageCalcPokemonState(
                 speed = getBoost(Stat.SPEED),
             ),
             status = status,
+            toxicCounter = toxicCounter,
         )
         if (currentHpPercent >= 100) return battlePokemon
         // the engine wants HP points, which depend on the stats computed from the species

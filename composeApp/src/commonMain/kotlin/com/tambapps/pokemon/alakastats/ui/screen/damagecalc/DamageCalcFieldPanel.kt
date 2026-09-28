@@ -29,7 +29,7 @@ private class SideConditionToggle(
     val toggle: (SideConditions) -> SideConditions,
 )
 
-// only the conditions the damage engine takes into account (e.g. hazards are ignored by the KO chance)
+// only the conditions the damage engine takes into account. Hazards and end-of-turn effects count in the KO chance
 private val SIDE_CONDITION_TOGGLES = listOf(
     SideConditionToggle("Protect", { it.isProtected }) { it.copy(isProtected = !it.isProtected) },
     SideConditionToggle("Helping Hand", { it.hasHelpingHand }) { it.copy(hasHelpingHand = !it.hasHelpingHand) },
@@ -41,7 +41,21 @@ private val SIDE_CONDITION_TOGGLES = listOf(
     SideConditionToggle("Steely Spirit", { it.hasAllySteelySpirit }) { it.copy(hasAllySteelySpirit = !it.hasAllySteelySpirit) },
     SideConditionToggle("Battery", { it.hasBattery }) { it.copy(hasBattery = !it.hasBattery) },
     SideConditionToggle("Power Spot", { it.hasPowerSpot }) { it.copy(hasPowerSpot = !it.hasPowerSpot) },
+    SideConditionToggle("Stealth Rock", { it.hasStealthRock }) { it.copy(hasStealthRock = !it.hasStealthRock) },
+    SideConditionToggle("Leech Seed", { it.isLeechSeeded }) { it.copy(isLeechSeeded = !it.isLeechSeeded) },
+    SideConditionToggle("Salt Cure", { it.isSaltCured }) { it.copy(isSaltCured = !it.isSaltCured) },
+    SideConditionToggle("Curse", { it.isCursed }) { it.copy(isCursed = !it.isCursed) },
+    SideConditionToggle("Binding", { it.isBound }) { it.copy(isBound = !it.isBound) },
+    SideConditionToggle("Aqua Ring", { it.hasAquaRing }) { it.copy(hasAquaRing = !it.hasAquaRing) },
+    SideConditionToggle("Ingrain", { it.isIngrained }) { it.copy(isIngrained = !it.isIngrained) },
 )
+
+// Spikes stack up to 3 layers: its chip cycles through 0 to 3
+private const val MAX_SPIKES_LAYERS = 3
+
+internal fun spikesChipText(layers: Int) = if (layers == 0) "Spikes" else "Spikes ×$layers"
+
+internal fun SideConditions.withNextSpikesLayer() = copy(spikesLayers = (spikesLayers + 1) % (MAX_SPIKES_LAYERS + 1))
 
 @Composable
 internal fun DamageCalcFieldPanel(
@@ -107,6 +121,11 @@ private fun SideConditionsColumn(
                 label = { Text(toggle.displayName) }
             )
         }
+        FilterChip(
+            selected = conditions.spikesLayers > 0,
+            onClick = { onConditionsChange(conditions.withNextSpikesLayer()) },
+            label = { Text(spikesChipText(conditions.spikesLayers)) }
+        )
     }
 }
 

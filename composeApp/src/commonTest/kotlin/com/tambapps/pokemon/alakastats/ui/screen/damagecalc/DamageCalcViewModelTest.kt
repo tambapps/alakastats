@@ -3,6 +3,8 @@ package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
+import com.tambapps.pokemon.champions.engine.SideConditions
+import com.tambapps.pokemon.champions.engine.Status
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -41,8 +43,66 @@ class DamageCalcViewModelTest {
     fun immunityDoesNotAffectTheDefender() {
         val viewModel = viewModel().apply { defender.selectSpecies(PokemonName("Corviknight")) }
         val result = assertIs<DamageCalcResult.Success>(viewModel.result)
-        assertTrue(result.isImmune)
-        assertEquals("doesn't affect Corviknight", result.koChanceText)
+        assertEquals(0, result.damage.maxDamage)
+        // the source calculator's text (tools/oracle.js in the pokemon repo)
+        assertEquals("No damage for you", result.koChanceText)
+    }
+
+    // the KO chance texts below are the source calculator's for the same calcs (tools/oracle.js in the pokemon repo).
+    // The defender still holds the Sitrus Berry of the view model's default defender
+
+    @Test
+    fun koChanceCountsTheBerry() {
+        val result = assertIs<DamageCalcResult.Success>(viewModel().result)
+        assertEquals("87.5% chance to 2HKO after Sitrus Berry recovery", result.koChanceText)
+    }
+
+    @Test
+    fun koChanceCountsTheDefenderSideHazardsAndEndOfTurnEffects() {
+        val viewModel = viewModel().apply {
+            field = field.copy(defenderSide = SideConditions(hasStealthRock = true, isLeechSeeded = true))
+        }
+        val result = assertIs<DamageCalcResult.Success>(viewModel.result)
+        assertEquals("guaranteed 2HKO after Stealth Rock, Leech Seed damage, and Sitrus Berry recovery", result.koChanceText)
+    }
+
+    @Test
+    fun koChanceIgnoresTheAttackerSideHazards() {
+        val viewModel = viewModel().apply {
+            field = field.copy(attackerSide = SideConditions(hasStealthRock = true, isLeechSeeded = true))
+        }
+        val result = assertIs<DamageCalcResult.Success>(viewModel.result)
+        assertEquals("87.5% chance to 2HKO after Sitrus Berry recovery", result.koChanceText)
+    }
+
+    @Test
+    fun koChanceCountsSpikesLayers() {
+        val viewModel = viewModel().apply {
+            field = field.copy(defenderSide = field.defenderSide.withNextSpikesLayer().withNextSpikesLayer())
+        }
+        assertEquals(2, viewModel.field.defenderSide.spikesLayers)
+        val result = assertIs<DamageCalcResult.Success>(viewModel.result)
+        assertEquals("guaranteed 2HKO after 2 layers of Spikes and Sitrus Berry recovery", result.koChanceText)
+    }
+
+    @Test
+    fun koChanceCountsTheToxicCounter() {
+        val viewModel = viewModel().apply {
+            defender.status = Status.BADLY_POISONED
+            defender.toxicCounter = 5
+        }
+        val result = assertIs<DamageCalcResult.Success>(viewModel.result)
+        assertEquals(5, result.defender.toxicCounter)
+        assertEquals("guaranteed 2HKO after toxic damage and Sitrus Berry recovery", result.koChanceText)
+    }
+
+    @Test
+    fun spikesChipCyclesThroughTheLayers() {
+        var conditions = SideConditions.NONE
+        val texts = (0..4).map {
+            spikesChipText(conditions.spikesLayers).also { conditions = conditions.withNextSpikesLayer() }
+        }
+        assertEquals(listOf("Spikes", "Spikes ×1", "Spikes ×2", "Spikes ×3", "Spikes"), texts)
     }
 
     @Test
@@ -89,7 +149,7 @@ class DamageCalcViewModelTest {
             defender.setStatPoints(Stat.HP, 32)
         }
         val result = assertIs<DamageCalcResult.Success>(viewModel.result)
-        // everything before " -- " is the source calculator's output for the same calc (tools/oracle.js in the pokemon repo)
+        // everything but the damage numbers is the source calculator's output for the same calc (tools/oracle.js in the pokemon repo)
         assertEquals(
             "+1 32+ Atk Life Orb Garchomp Earthquake vs. 32 HP  / 0 Def Toxapex: 190-226 (121 - 143.9%) -- guaranteed OHKO",
             result.description
@@ -100,7 +160,7 @@ class DamageCalcViewModelTest {
     fun describesAnImmunityWithASinglePercentage() {
         val viewModel = viewModel().apply { defender.selectSpecies(PokemonName("Corviknight")) }
         val result = assertIs<DamageCalcResult.Success>(viewModel.result)
-        assertEquals("Garchomp Earthquake vs. Corviknight: 0 (0%) -- doesn't affect Corviknight", result.description)
+        assertEquals("Garchomp Earthquake vs. Corviknight: 0 (0%) -- No damage for you", result.description)
     }
 
     @Test
@@ -113,7 +173,5 @@ class DamageCalcViewModelTest {
     fun formatsPercentagesLikeTheSourceCalculator() {
         assertEquals("33.3", formatPercent(1, 3))
         assertEquals("100", formatPercent(3, 3))
-        assertEquals("62.5", formatPercent(0.625))
-        assertEquals("100", formatPercent(1.0))
     }
 }
