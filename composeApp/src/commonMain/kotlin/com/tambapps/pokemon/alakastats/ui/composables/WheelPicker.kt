@@ -75,6 +75,38 @@ fun PokemonWheelPicker(
     }
 }
 
+/**
+ * Dialog to pick one of [pokemons] with a [PokemonWheelPicker], displaying each pokemon's sprite next to its name
+ */
+@Composable
+fun PokemonWheelPickerDialog(
+    title: String,
+    pokemons: List<PokemonName>,
+    onPicked: (index: Int) -> Unit,
+    onDismissRequest: () -> Unit,
+    initialIndex: Int = 0,
+) {
+    val state = rememberWheelPickerState(itemCount = pokemons.size, initialIndex = initialIndex)
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(title) },
+        text = { PokemonWheelPicker(pokemons = pokemons, state = state) },
+        confirmButton = {
+            TextButton(onClick = {
+                if (state.index in pokemons.indices) onPicked.invoke(state.index)
+                onDismissRequest.invoke()
+            }) {
+                Text("Select")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
 @Composable
 fun <T> WheelPickerDialog(
     title: String,

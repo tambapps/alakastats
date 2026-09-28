@@ -31,14 +31,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.swmansion.kmpwheelpicker.rememberWheelPickerState
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
-import com.tambapps.pokemon.alakastats.ui.composables.PokemonWheelPicker
+import com.tambapps.pokemon.alakastats.ui.composables.PokemonWheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.composables.SelectPokemonDialog
 import com.tambapps.pokemon.alakastats.ui.composables.StatBoostStageChip
 import com.tambapps.pokemon.alakastats.ui.composables.SuggestionTextField
@@ -228,13 +227,11 @@ internal fun DamageCalcPokemonPanel(
     }
     if (showFormDialog) {
         val forms = state.availableForms
-        WheelPickerDialog(
+        PokemonWheelPickerDialog(
             title = "Select Form",
-            items = forms,
+            pokemons = forms,
             initialIndex = forms.indexOf(state.form).coerceAtLeast(0),
-            itemToText = { it.pretty },
-            textAlign = TextAlign.Center,
-            onPicked = { state.selectForm(it) },
+            onPicked = { state.selectForm(forms[it]) },
             onDismissRequest = { showFormDialog = false },
         )
     }
@@ -317,29 +314,11 @@ private fun SelectTeamPokemonDialog(
     onDismissRequest: () -> Unit,
 ) {
     val pokemons = team.pokePaste.pokemons
-    val wheelState = rememberWheelPickerState(itemCount = pokemons.size, initialIndex = 0)
-    AlertDialog(
+    PokemonWheelPickerDialog(
+        title = "Select From ${team.name}",
+        pokemons = pokemons.map { it.name },
+        onPicked = { onSelect(pokemons[it]) },
         onDismissRequest = onDismissRequest,
-        title = { Text("Select From ${team.name}") },
-        text = {
-            PokemonWheelPicker(
-                pokemons = pokemons.map { it.name },
-                state = wheelState,
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                pokemons.getOrNull(wheelState.index)?.let(onSelect)
-                onDismissRequest.invoke()
-            }) {
-                Text("Select")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("Cancel")
-            }
-        }
     )
 }
 
