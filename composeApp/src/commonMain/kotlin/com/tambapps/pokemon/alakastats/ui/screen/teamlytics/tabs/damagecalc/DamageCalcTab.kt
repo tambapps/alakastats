@@ -10,5 +10,5 @@ fun DamageCalcTab(viewModel: DamageCalcTabViewModel) {
         viewModel.damageCalcViewModel.scrollToTopSignal.emit()
     }
     // the tab is already in the teamlytics pager, swiping would conflict
-    DamageCalc(viewModel.damageCalcViewModel, team = viewModel.team, pagerSwipeEnabled = false)
+    DamageCalc(viewModel.damageCalcViewModel, team = viewModel.team)
 }
