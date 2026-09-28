@@ -11,6 +11,7 @@ import com.tambapps.pokemon.champions.engine.Status
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class DamageCalcPokemonStateTest {
 
@@ -36,6 +37,26 @@ class DamageCalcPokemonStateTest {
         assertEquals(PokeStats(hp = 32, speed = 0, attack = 20, specialAttack = 0, defense = 0, specialDefense = 0), battlePokemon.statPoints)
         assertEquals(StatBoosts(attack = 2, speed = -1), battlePokemon.boosts)
         assertNull(battlePokemon.currentHp)
+    }
+
+    @Test
+    fun finalStatsAreTheEnginesComputedStats() {
+        val state = state().apply {
+            nature = Nature.ADAMANT
+            setStatPoints(Stat.ATTACK, 32)
+            // boosts don't change the displayed stat
+            setBoost(Stat.ATTACK, 2)
+        }
+        val stats = state.stats!!
+        assertEquals(state.toBattlePokemon()!!.stats, stats)
+        val neutral = state().apply { setStatPoints(Stat.ATTACK, 32) }.stats!!
+        // Adamant boosts Attack
+        assertTrue(stats.attack > neutral.attack)
+    }
+
+    @Test
+    fun noFinalStatsForSpeciesUnknownToChampions() {
+        assertNull(state(name = "not-a-real-pokemon").stats)
     }
 
     @Test

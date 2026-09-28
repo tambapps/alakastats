@@ -479,7 +479,7 @@ private fun boostText(boost: Int) = if (boost > 0) "+$boost" else boost.toString
 private fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat) {
     val statPoints = state.getStatPoints(stat)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(stat.abbreviation, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.width(56.dp))
+        Text(stat.abbreviation, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.width(48.dp))
         Slider(
             value = statPoints.toFloat(),
             onValueChange = { state.setStatPoints(stat, it.roundToInt()) },
@@ -491,6 +491,19 @@ private fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat) {
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.End,
             modifier = Modifier.width(32.dp)
+        )
+        // the final stat, colored when the nature changes it, "-" if the species isn't known to Champions
+        Text(
+            state.stats?.get(stat)?.toString() ?: "-",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.End,
+            color = when (stat) {
+                state.nature.bonusStat -> increasedStatColor
+                state.nature.malusStat -> decreasedStatColor
+                else -> MaterialTheme.colorScheme.onSurface
+            },
+            modifier = Modifier.width(FINAL_STAT_WIDTH)
         )
         Spacer(Modifier.width(8.dp))
         val boostModifier = Modifier.width(BOOST_CHIP_WIDTH)
@@ -514,6 +527,7 @@ private fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat) {
 }
 
 private val BOOST_CHIP_WIDTH = 60.dp
+private val FINAL_STAT_WIDTH = 44.dp
 
 // like the source calculator, e.g. "3/16"
 private fun toxicCounterText(counter: Int) = "$counter/16"

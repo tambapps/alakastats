@@ -257,6 +257,12 @@ class DamageCalcPokemonState(
         boosts[stat] = value.coerceIn(-MAX_BOOST_STAGE, MAX_BOOST_STAGE)
     }
 
+    /**
+     * The final stats (base stats, stat points and nature, before boosts) computed by the engine,
+     * or null if the species isn't known to Champions
+     */
+    val stats: PokeStats? get() = toBattlePokemon()?.stats
+
     fun getStatPoints(stat: Stat) = statPoints[stat] ?: 0
 
     fun setStatPoints(stat: Stat, value: Int) {
