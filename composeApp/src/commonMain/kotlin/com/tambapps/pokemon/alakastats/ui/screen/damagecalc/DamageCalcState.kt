@@ -19,6 +19,8 @@ import com.tambapps.pokemon.champions.engine.defaultHitCount
 import com.tambapps.pokemon.champions.engine.hasActiveToggle
 import com.tambapps.pokemon.champions.engine.hitCountRange
 import com.tambapps.pokemon.champions.engine.isActiveByDefault
+import com.tambapps.pokemon.champions.engine.MoveUse
+import com.tambapps.pokemon.champions.engine.returnsDefenderMove
 import com.tambapps.pokemon.champions.engine.BattleFormat
 import com.tambapps.pokemon.champions.engine.BattlePokemon
 import com.tambapps.pokemon.champions.engine.Battlefield
@@ -38,6 +40,20 @@ val TOXIC_COUNTERS = 1..15
 val NATURES = Nature.entries.filter { !it.isNeutral || it == Nature.SERIOUS }
 
 val STATS = listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)
+
+// how many times Last Respects/Rage Fist's effect can have stacked, like the source calculator's "0x effect" to "6x effect"
+val STACK_COUNTS = 0..6
+// Supreme Overlord's fainted allies, like the source calculator's "0 down" to "5 down"
+val FAINTED_ALLY_COUNTS = 0..5
+
+/**
+ * The source calculator's Rivalry setting, relating the Rivalry pokemon's gender to its target's
+ */
+enum class RivalryRelation(val displayName: String) {
+    OFF("Off"),
+    SAME("Same Gender"),
+    OPPOSITE("Opposite Genders"),
+}
 
 // Hail doesn't exist in Champions, it was replaced by Snow
 val WEATHERS = listOf(Weather.NONE, Weather.SUN, Weather.RAIN, Weather.SAND, Weather.SNOW)
@@ -132,7 +148,10 @@ class DamageCalcPokemonState(
         get() = abilityState
         set(value) {
             abilityState = value
+            // like the source calculator, the ability's settings are reset when it changes
             isAbilityActiveState = resolvedAbility.isActiveByDefault
+            rivalry = RivalryRelation.OFF
+            faintedAllyCount = 0
             onAbilityChange?.invoke(this)
         }
 
@@ -160,6 +179,17 @@ class DamageCalcPokemonState(
     private val selectedHitCounts = mutableStateMapOf<Int, Int>()
     // indexes of the moves calculated as critical hits
     private val criticalMoveIndexes = mutableStateMapOf<Int, Boolean>()
+    // indexes of the moves whose power doubling condition is met (the source's "2x BP"), for Payback-like moves
+    private val powerDoubledMoveIndexes = mutableStateMapOf<Int, Boolean>()
+    // how many times Last Respects/Rage Fist's effect already stacked, by move index
+    private val stackCounts = mutableStateMapOf<Int, Int>()
+    // the index of the defender's move returned by Counter-like moves, by move index
+    private val counteredMoveIndexes = mutableStateMapOf<Int, Int>()
+
+    // the source's Rivalry setting, only relevant with the Rivalry ability
+    var rivalry by mutableStateOf(RivalryRelation.OFF)
+    // Supreme Overlord: how many allies already fainted, only relevant with the Supreme Overlord ability
+    var faintedAllyCount by mutableStateOf(0)
 
     val totalStatPoints get() = statPoints.values.sum()
     // can be negative, the max total is not enforced
@@ -204,11 +234,68 @@ class DamageCalcPokemonState(
         moves = teamMoves + List(MAX_MOVES - teamMoves.size) { "" }
         selectedHitCounts.clear()
         criticalMoveIndexes.clear()
+        powerDoubledMoveIndexes.clear()
+        stackCounts.clear()
+        counteredMoveIndexes.clear()
     }
 
+    /**
+     * Change the move at [index]. Like the source calculator, its crit toggle, stack count and returned move are reset
+     * (the "2x BP" toggle is kept, it only applies to moves that can double)
+     */
     fun setMove(index: Int, move: String) {
         moves = moves.toMutableList().also { it[index] = move }
         selectedHitCounts.remove(index)
+        criticalMoveIndexes.remove(index)
+        stackCounts.remove(index)
+        counteredMoveIndexes.remove(index)
+    }
+
+    /**
+     * Whether the power doubling condition of the move at [index] is met (Payback, Avalanche...), false for a move
+     * that can't double
+     */
+    fun isPowerDoubled(index: Int) =
+        championsMove(index)?.canBePowerDoubled == true && powerDoubledMoveIndexes[index] == true
+
+    fun setPowerDoubled(index: Int, isPowerDoubled: Boolean) {
+        powerDoubledMoveIndexes[index] = isPowerDoubled
+    }
+
+    /**
+     * How many times the effect of the move at [index] already stacked (Last Respects, Rage Fist), 0 for other moves
+     */
+    fun stackCount(index: Int) = if (championsMove(index)?.hasStackingPower == true) stackCounts[index] ?: 0 else 0
+
+    fun setStackCount(index: Int, count: Int) {
+        stackCounts[index] = count.coerceIn(STACK_COUNTS.first, STACK_COUNTS.last)
+    }
+
+    /**
+     * The index of the defender's move returned by the Counter-like move at [index] (the first one by default)
+     */
+    fun counteredMoveIndex(index: Int) = counteredMoveIndexes[index] ?: 0
+
+    fun setCounteredMoveIndex(index: Int, defenderMoveIndex: Int) {
+        counteredMoveIndexes[index] = defenderMoveIndex
+    }
+
+    /**
+     * The engine's use of the move at [index], with this pokemon's settings for it, or null if the slot is empty or
+     * the move unknown to Champions
+     *
+     * @param counteredMove the defender's move, returned if this move is a Counter-like one
+     */
+    fun moveUse(index: Int, counteredMove: MoveUse? = null): MoveUse? {
+        val move = championsMove(index) ?: return null
+        return MoveUse(
+            move = move,
+            isCritical = isCritical(index),
+            isPowerDoubled = isPowerDoubled(index),
+            priorPowerBoosts = stackCount(index),
+            faintedAllyCount = if (resolvedAbility == Ability.SUPREME_OVERLORD) faintedAllyCount else 0,
+            counteredMove = if (move.returnsDefenderMove) counteredMove else null,
+        )
     }
 
     /**

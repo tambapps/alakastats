@@ -6,13 +6,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
+import com.tambapps.pokemon.Gender
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.champions.data.Ability
 import com.tambapps.pokemon.alakastats.ui.util.VoidSignal
 import com.tambapps.pokemon.champions.data.ChampionsCalcException
 import com.tambapps.pokemon.champions.data.MoveCategory
 import com.tambapps.pokemon.champions.engine.Battlefield
 import com.tambapps.pokemon.champions.engine.DamageCalculator
-import com.tambapps.pokemon.champions.engine.MoveUse
 import com.tambapps.pokemon.champions.engine.Terrain
 import com.tambapps.pokemon.champions.engine.Weather
 import com.tambapps.pokemon.champions.engine.terrainSetOnField
@@ -68,9 +69,10 @@ class DamageCalcViewModel : ScreenModel {
     val result: DamageCalcResult by derivedStateOf { computeResult() }
 
     private fun computeResult(): DamageCalcResult {
-        val attackerPokemon = attacker.toBattlePokemon()
+        val (attackerGender, defenderGender) = rivalryGenders()
+        val attackerPokemon = attacker.toBattlePokemon()?.copy(gender = attackerGender)
             ?: return DamageCalcResult.Error("${attacker.form.pretty} isn't a Champions Pokemon")
-        val defenderPokemon = defender.toBattlePokemon()
+        val defenderPokemon = defender.toBattlePokemon()?.copy(gender = defenderGender)
             ?: return DamageCalcResult.Error("${defender.form.pretty} isn't a Champions Pokemon")
         val moveName = attacker.moves.getOrNull(selectedMoveIndex)?.takeIf { it.isNotBlank() }
             ?: return DamageCalcResult.Error("Select a move")
@@ -83,7 +85,11 @@ class DamageCalcViewModel : ScreenModel {
             val damage = DamageCalculator.calculateMove(
                 attacker = attackerPokemon,
                 defender = defenderPokemon,
-                moveUse = MoveUse(move, isCritical = attacker.isCritical(selectedMoveIndex)),
+                moveUse = attacker.moveUse(
+                    index = selectedMoveIndex,
+                    // Counter-like moves return the defender's move, with the defender's settings for it
+                    counteredMove = defender.moveUse(attacker.counteredMoveIndex(selectedMoveIndex)),
+                )!!,
                 field = field,
                 hits = attacker.hitCount(selectedMoveIndex),
             )
@@ -95,6 +101,22 @@ class DamageCalcViewModel : ScreenModel {
             )
         } catch (e: ChampionsCalcException) {
             DamageCalcResult.Error(e.message ?: "Couldn't run the calc")
+        }
+    }
+
+    /**
+     * The genders of the attacker and defender. The source calculator's Rivalry setting relates the Rivalry pokemon's
+     * gender to its target's, while the engine takes genders: genderless unless a Rivalry setting is on (the attacker's
+     * one first, as only the attacker's Rivalry affects its damage)
+     */
+    private fun rivalryGenders(): Pair<Gender, Gender> {
+        val relation = listOf(attacker, defender)
+            .firstOrNull { it.resolvedAbility == Ability.RIVALRY && it.rivalry != RivalryRelation.OFF }
+            ?.rivalry
+        return when (relation) {
+            RivalryRelation.SAME -> Gender.MALE to Gender.MALE
+            RivalryRelation.OPPOSITE -> Gender.MALE to Gender.FEMALE
+            RivalryRelation.OFF, null -> Gender.ASEXUAL to Gender.ASEXUAL
         }
     }
 

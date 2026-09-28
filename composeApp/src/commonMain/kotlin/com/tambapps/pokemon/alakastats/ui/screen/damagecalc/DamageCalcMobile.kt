@@ -110,13 +110,13 @@ internal fun DamageCalcMobile(
             ) { page ->
                 val pageModifier = Modifier.fillMaxWidth().padding(8.dp)
                 when (page) {
-                    0 -> DamageCalcPokemonPanel(viewModel.attacker, DamageCalcSide.ATTACKER, team, pageModifier)
+                    0 -> DamageCalcPokemonPanel(viewModel.attacker, DamageCalcSide.ATTACKER, team, viewModel.defender, pageModifier)
                     FIELD_PAGE -> DamageCalcFieldPanel(
                         field = viewModel.field,
                         onFieldChange = { viewModel.field = it },
                         modifier = pageModifier
                     )
-                    2 -> DamageCalcPokemonPanel(viewModel.defender, DamageCalcSide.DEFENDER, team, pageModifier)
+                    2 -> DamageCalcPokemonPanel(viewModel.defender, DamageCalcSide.DEFENDER, team, viewModel.attacker, pageModifier)
                 }
             }
         }

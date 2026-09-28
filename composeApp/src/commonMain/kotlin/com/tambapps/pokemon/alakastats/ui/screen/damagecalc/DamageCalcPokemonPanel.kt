@@ -54,6 +54,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.quizzes.increasedStatColor
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.shortLabel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.champions.engine.Status
+import com.tambapps.pokemon.champions.engine.returnsDefenderMove
 import kotlin.math.roundToInt
 
 private val hpColor = Color(0xFF4CAF50)
@@ -63,6 +64,8 @@ internal fun DamageCalcPokemonPanel(
     state: DamageCalcPokemonState,
     side: DamageCalcSide,
     team: Teamlytics?,
+    // the other pokemon of the calc, whose moves Counter-like moves return
+    opponent: DamageCalcPokemonState,
     modifier: Modifier = Modifier
 ) {
     var showPokemonDialog by remember { mutableStateOf(false) }
@@ -74,6 +77,9 @@ internal fun DamageCalcPokemonPanel(
     var showAbilityDialog by remember { mutableStateOf(false) }
     var showItemDialog by remember { mutableStateOf(false) }
     var editedMoveIndex by remember { mutableStateOf<Int?>(null) }
+    var showRivalryDialog by remember { mutableStateOf(false) }
+    var showFaintedAlliesDialog by remember { mutableStateOf(false) }
+    var counteredMoveDialogIndex by remember { mutableStateOf<Int?>(null) }
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         PokemonButton(state, onClick = { showPokemonDialog = true })
@@ -95,6 +101,16 @@ internal fun DamageCalcPokemonPanel(
                 }
             } else null,
         )
+        // the ability settings the source calculator shows for these abilities only
+        when (state.resolvedAbility) {
+            Ability.RIVALRY -> PropertyRow("Rivalry", state.rivalry.displayName, onClick = { showRivalryDialog = true })
+            Ability.SUPREME_OVERLORD -> PropertyRow(
+                "Fainted Allies",
+                faintedAlliesText(state.faintedAllyCount),
+                onClick = { showFaintedAlliesDialog = true }
+            )
+            else -> {}
+        }
         PropertyRow("Item", state.item.ifBlank { "None" }, onClick = { showItemDialog = true })
         PropertyRow("Nature", state.nature.effectDisplayName(), onClick = { showNatureDialog = true })
         StatPointsTile(state, side)
@@ -107,6 +123,7 @@ internal fun DamageCalcPokemonPanel(
         if (side == DamageCalcSide.ATTACKER) {
             state.moves.forEachIndexed { index, move ->
                 val selectableHitCounts = state.selectableHitCounts(index)
+                val championsMove = state.championsMove(index)
                 PropertyRow(
                     label = "Move ${index + 1}",
                     value = move.ifBlank { "-" },
@@ -119,6 +136,20 @@ internal fun DamageCalcPokemonPanel(
                                     alwaysCrits = state.alwaysCrits(index),
                                     onCriticalChange = { state.setCritical(index, it) },
                                 )
+                                if (championsMove?.canBePowerDoubled == true) {
+                                    FilterChip(
+                                        selected = state.isPowerDoubled(index),
+                                        onClick = { state.setPowerDoubled(index, !state.isPowerDoubled(index)) },
+                                        label = { Text("2x BP", maxLines = 1, softWrap = false) },
+                                    )
+                                }
+                                if (championsMove?.hasStackingPower == true) {
+                                    StackCountChip(
+                                        moveName = championsMove.name.value,
+                                        count = state.stackCount(index),
+                                        onCountSelected = { state.setStackCount(index, it) },
+                                    )
+                                }
                                 selectableHitCounts?.let {
                                     HitCountChip(
                                         hits = state.hitCount(index),
@@ -130,8 +161,49 @@ internal fun DamageCalcPokemonPanel(
                         }
                     } else null,
                 )
+                // Counter-like moves return one of the opponent's moves, picked like in the source calculator
+                if (championsMove?.returnsDefenderMove == true) {
+                    PropertyRow(
+                        label = "Returns",
+                        value = opponent.moves.getOrNull(state.counteredMoveIndex(index))?.ifBlank { null } ?: "-",
+                        onClick = { counteredMoveDialogIndex = index },
+                    )
+                }
             }
         }
+    }
+
+    if (showRivalryDialog) {
+        WheelPickerDialog(
+            title = "Rivalry",
+            items = RivalryRelation.entries,
+            initialIndex = state.rivalry.ordinal,
+            itemToText = { it.displayName },
+            onPicked = { state.rivalry = it },
+            onDismissRequest = { showRivalryDialog = false },
+        )
+    }
+    if (showFaintedAlliesDialog) {
+        val counts = FAINTED_ALLY_COUNTS.toList()
+        WheelPickerDialog(
+            title = "Fainted Allies",
+            items = counts,
+            initialIndex = counts.indexOf(state.faintedAllyCount).coerceAtLeast(0),
+            itemToText = ::faintedAlliesText,
+            onPicked = { state.faintedAllyCount = it },
+            onDismissRequest = { showFaintedAlliesDialog = false },
+        )
+    }
+    counteredMoveDialogIndex?.let { index ->
+        val opponentMoveIndexes = opponent.moves.indices.toList()
+        WheelPickerDialog(
+            title = "Returned Move",
+            items = opponentMoveIndexes,
+            initialIndex = state.counteredMoveIndex(index).coerceIn(0, (opponentMoveIndexes.size - 1).coerceAtLeast(0)),
+            itemToText = { opponent.moves[it].ifBlank { "-" } },
+            onPicked = { state.setCounteredMoveIndex(index, it) },
+            onDismissRequest = { counteredMoveDialogIndex = null },
+        )
     }
 
     if (showPokemonDialog) {
@@ -419,6 +491,47 @@ private fun HitCountChip(hits: Int, selectableHitCounts: IntRange, onHitCountSel
 }
 
 private val HIT_COUNT_CHIP_WIDTH = 60.dp
+
+// like the source calculator, e.g. "2 down"
+private fun faintedAlliesText(count: Int) = "$count down"
+
+/**
+ * Chip displaying how many times Last Respects/Rage Fist's effect already stacked (e.g. "3 KOs", "2 hits"),
+ * opening a wheel picker to select another count
+ */
+@Composable
+private fun StackCountChip(moveName: String, count: Int, onCountSelected: (Int) -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+    FilterChip(
+        selected = count > 0,
+        onClick = { showDialog = true },
+        label = { Text(stackCountText(moveName, count), maxLines = 1, softWrap = false) },
+    )
+    if (showDialog) {
+        val counts = STACK_COUNTS.toList()
+        WheelPickerDialog(
+            title = stackCountTitle(moveName),
+            items = counts,
+            initialIndex = counts.indexOf(count).coerceAtLeast(0),
+            itemToText = { stackCountText(moveName, it) },
+            onPicked = onCountSelected,
+            onDismissRequest = { showDialog = false },
+        )
+    }
+}
+
+// what stacks the effect: Rage Fist's power grows with the hits its user took, Last Respects' with its fainted allies
+private fun stackCountText(moveName: String, count: Int) = when (moveName) {
+    "Rage Fist" -> if (count == 1) "1 hit" else "$count hits"
+    "Last Respects" -> if (count == 1) "1 KO" else "$count KOs"
+    else -> "${count}x effect"
+}
+
+private fun stackCountTitle(moveName: String) = when (moveName) {
+    "Rage Fist" -> "Times Hit"
+    "Last Respects" -> "Fainted Allies"
+    else -> "Effect Stacks"
+}
 
 /**
  * Chip toggling whether a move is calculated as a critical hit. Moves that always crit have it
