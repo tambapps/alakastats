@@ -43,9 +43,9 @@ class DamageCalcViewModelTest {
     fun immunityDoesNotAffectTheDefender() {
         val viewModel = viewModel().apply { defender.selectSpecies(PokemonName("Corviknight")) }
         val result = assertIs<DamageCalcResult.Success>(viewModel.result)
-        assertEquals(0, result.damage.maxDamage)
-        // the source calculator's text (tools/oracle.js in the pokemon repo)
-        assertEquals("No damage for you", result.koChanceText)
+        assertTrue(result.isImmune)
+        // clearer than the source calculator's "No damage for you", which the description keeps
+        assertEquals("doesn't affect Corviknight", result.koChanceText)
     }
 
     // the KO chance texts below are the source calculator's for the same calcs (tools/oracle.js in the pokemon repo).

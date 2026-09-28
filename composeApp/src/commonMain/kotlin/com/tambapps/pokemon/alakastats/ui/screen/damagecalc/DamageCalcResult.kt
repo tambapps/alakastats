@@ -16,16 +16,18 @@ sealed interface DamageCalcResult {
         val damage: MoveDamageResult,
     ) : DamageCalcResult {
         val hits get() = damage.hits.size
+        val isImmune get() = damage.hits.all { it.typeEffectiveness == 0.0 }
 
         val damageRangeText get() = "${damage.minDamage} - ${damage.maxDamage}"
         val damagePercentText get() =
             "${formatPercent(damage.minDamage, defender.maxHp)} - ${formatPercent(damage.maxDamage, defender.maxHp)}%"
 
         /**
-         * The source calculator's KO chance text, counting the hazards and end-of-turn effects of the defender's side,
-         * e.g. "guaranteed 3HKO after Sitrus Berry recovery", see [MoveDamageResult.koChance]
+         * The KO chance shown on the result: the source calculator's text, counting the hazards and end-of-turn effects
+         * of the defender's side (e.g. "guaranteed 3HKO after Sitrus Berry recovery", see [MoveDamageResult.koChance]),
+         * except for an immunity, where the source's "No damage for you" is replaced by a clearer text
          */
-        val koChanceText get() = damage.koChance.text
+        val koChanceText get() = if (isImmune) "doesn't affect ${defender.species.name.value}" else damage.koChance.text
 
         // fractions of the defender's max HP, for the HP bar
         val currentHpFraction get() = defender.hp.toFloat() / defender.maxHp
@@ -45,10 +47,11 @@ sealed interface DamageCalcResult {
 
         /**
          * The source calculator's description of the calc, e.g. "+1 32+ Atk Life Orb Tough Claws Mega Charizard X Flare Blitz
-         * vs. 32 HP  / 0 Def Incineroar in Sun through Reflect: [damageText] -- [koChanceText]".
-         * Everything but [damageText] is exactly the source's, see [MoveDamageResult.description] and [MoveDamageResult.koChance].
+         * vs. 32 HP  / 0 Def Incineroar in Sun through Reflect: [damageText] -- guaranteed OHKO".
+         * Everything but [damageText] is exactly the source's, KO chance text included even for an immunity, see
+         * [MoveDamageResult.description] and [MoveDamageResult.koChance].
          */
-        val description: String get() = "${damage.description}: $damageText -- $koChanceText"
+        val description: String get() = "${damage.description}: $damageText -- ${damage.koChance.text}"
     }
 
     data class Error(val message: String) : DamageCalcResult
