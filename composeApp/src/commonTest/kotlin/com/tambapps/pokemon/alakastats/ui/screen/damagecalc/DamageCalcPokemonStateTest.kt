@@ -36,7 +36,8 @@ class DamageCalcPokemonStateTest {
         assertEquals(Status.BURNED, battlePokemon.status)
         assertEquals(PokeStats(hp = 32, speed = 0, attack = 20, specialAttack = 0, defense = 0, specialDefense = 0), battlePokemon.statPoints)
         assertEquals(StatBoosts(attack = 2, speed = -1), battlePokemon.boosts)
-        assertNull(battlePokemon.currentHp)
+        // full HP by default
+        assertEquals(battlePokemon.maxHp, battlePokemon.currentHp)
     }
 
     @Test
@@ -70,15 +71,71 @@ class DamageCalcPokemonStateTest {
     }
 
     @Test
-    fun convertsCurrentHpPercentToHpPoints() {
-        val state = state().apply { currentHpPercent = 50 }
-        val battlePokemon = state.toBattlePokemon()!!
-        assertEquals(battlePokemon.maxHp * 50 / 100, battlePokemon.currentHp)
+    fun fullHpByDefault() {
+        val state = state()
+        assertEquals(100, state.currentHpPercent)
+        assertEquals(state.maxHp, state.currentHp)
+        assertEquals(state.maxHp, state.toBattlePokemon()!!.currentHp)
     }
 
     @Test
-    fun zeroPercentHpKeepsOneHpPoint() {
-        assertEquals(1, state().apply { currentHpPercent = 0 }.toBattlePokemon()!!.currentHp)
+    fun percentageIsConvertedToHpPointsRoundedUpLikeTheSource() {
+        // with an odd max HP, 50% isn't a whole number of HP points
+        val state = state()
+        val oddMaxHpStatPoints = (0..MAX_STAT_POINTS_PER_STAT).first { statPoints ->
+            state.setStatPoints(Stat.HP, statPoints)
+            state.maxHp!! % 2 == 1
+        }
+        state.setStatPoints(Stat.HP, oddMaxHpStatPoints)
+        state.setCurrentHpPercent(50)
+        val maxHp = state.maxHp!!
+        assertEquals(maxHp / 2 + 1, state.currentHp)
+        assertEquals(state.currentHp, state.toBattlePokemon()!!.currentHp)
+    }
+
+    @Test
+    fun exactHpPointsAreKeptAndThePercentageRoundedDown() {
+        val state = state()
+        val maxHp = state.maxHp!!
+        state.setCurrentHp(101)
+        assertEquals(101, state.currentHp)
+        assertEquals(101, state.toBattlePokemon()!!.currentHp)
+        assertEquals(100 * 101 / maxHp, state.currentHpPercent)
+    }
+
+    @Test
+    fun hpPointsAreClampedBetweenZeroAndTheMaxHp() {
+        val state = state()
+        state.setCurrentHp(-5)
+        assertEquals(0, state.currentHp)
+        state.setCurrentHp(10_000)
+        assertEquals(state.maxHp, state.currentHp)
+    }
+
+    @Test
+    fun changingTheMaxHpRecomputesTheHpFromThePercentageLikeTheSource() {
+        val state = state().apply { setCurrentHp(101) }
+        val percent = state.currentHpPercent
+        state.setStatPoints(Stat.HP, 32)
+        val maxHp = state.maxHp!!
+        assertEquals((percent * maxHp + 99) / 100, state.currentHp)
+    }
+
+    @Test
+    fun changingTheFormKeepsTheMissingHpLikeTheSource() {
+        val state = state(name = "Charizard").apply { selectSpecies(PokemonName("Charizard")) }
+        val missingHp = 20
+        state.setCurrentHp(state.maxHp!! - missingHp)
+        state.selectForm(PokemonName("Mega Charizard X"))
+        assertEquals(state.maxHp!! - missingHp, state.currentHp)
+    }
+
+    @Test
+    fun selectingAnotherPokemonResetsToFullHp() {
+        val state = state().apply { setCurrentHpPercent(30) }
+        state.selectSpecies(PokemonName("Sylveon"))
+        assertEquals(100, state.currentHpPercent)
+        assertEquals(state.maxHp, state.currentHp)
     }
 
     @Test

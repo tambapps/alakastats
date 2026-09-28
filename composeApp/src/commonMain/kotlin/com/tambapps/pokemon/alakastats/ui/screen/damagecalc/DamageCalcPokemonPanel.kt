@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -632,17 +633,44 @@ private fun toxicCounterText(counter: Int) = "$counter/16"
 
 @Composable
 private fun CurrentHpSlider(state: DamageCalcPokemonState) {
+    val maxHp = state.maxHp
+    val currentHp = state.currentHp
     Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
         Row {
             Text("Current HP", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(Modifier.weight(1f))
-            Text("${state.currentHpPercent}%", style = MaterialTheme.typography.bodyLarge)
+            // both the HP points and the percentage, like the source calculator's two fields
+            Text(
+                if (maxHp != null && currentHp != null) "$currentHp/$maxHp (${state.currentHpPercent}%)"
+                else "${state.currentHpPercent}%",
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
-        Slider(
-            value = state.currentHpPercent.toFloat(),
-            onValueChange = { state.currentHpPercent = it.roundToInt() },
-            valueRange = 0f..100f,
-            colors = SliderDefaults.colors(activeTrackColor = hpColor),
-        )
+        if (maxHp == null || currentHp == null) {
+            // a pokemon unknown to Champions has no max HP to set exact HP points for
+            Slider(
+                value = state.currentHpPercent.toFloat(),
+                onValueChange = { state.setCurrentHpPercent(it.roundToInt()) },
+                valueRange = 0f..100f,
+                colors = SliderDefaults.colors(activeTrackColor = hpColor),
+            )
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                // to reach an exact HP point, hard to hit on the slider
+                IconButton(onClick = { state.setCurrentHp(currentHp - 1) }, enabled = currentHp > 0) {
+                    Text("−", style = MaterialTheme.typography.titleLarge)
+                }
+                Slider(
+                    value = currentHp.toFloat(),
+                    onValueChange = { state.setCurrentHp(it.roundToInt()) },
+                    valueRange = 0f..maxHp.toFloat(),
+                    colors = SliderDefaults.colors(activeTrackColor = hpColor),
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { state.setCurrentHp(currentHp + 1) }, enabled = currentHp < maxHp) {
+                    Text("+", style = MaterialTheme.typography.titleLarge)
+                }
+            }
+        }
     }
 }

@@ -171,7 +171,15 @@ class DamageCalcPokemonState(
     // the toxic damage of the next end of turn in 16ths of the max HP, only used when badly poisoned
     var toxicCounter by mutableStateOf(1)
     var moves by mutableStateOf(moves)
-    var currentHpPercent by mutableStateOf(100)
+    /**
+     * Like the source calculator, the current HP is both a percentage (100 by default) and HP points. HP points set
+     * exactly stay as long as the max HP doesn't change, otherwise they're recomputed from the percentage
+     */
+    val currentHpPercent: Int get() = currentHpPercentState
+    // not a private setter of currentHpPercent, whose JVM name would clash with setCurrentHpPercent()
+    private var currentHpPercentState by mutableStateOf(100)
+    // the HP points set exactly, and the max HP they were set for
+    private var exactCurrentHp by mutableStateOf<ExactHp?>(null)
     private val statPoints = mutableStateMapOf<Stat, Int>().apply { STATS.forEach { put(it, 0) } }
     private val boosts = mutableStateMapOf<Stat, Int>()
     // hit counts explicitly selected, by move index. Moves without one use the engine's default
@@ -204,6 +212,8 @@ class DamageCalcPokemonState(
     fun selectSpecies(pokemonName: PokemonName) {
         name = pokemonName
         selectForm(availableForms.first())
+        // like the source calculator, a new pokemon is at full HP
+        resetCurrentHp()
     }
 
     /**
@@ -211,11 +221,54 @@ class DamageCalcPokemonState(
      * pokemon hold the mega stone needed to mega evolve.
      */
     fun selectForm(formName: PokemonName) {
+        val previousCurrentHp = currentHp
+        val previousMaxHp = maxHp
         form = formName
+        // like the source calculator, a form change keeps the HP missing from the max HP
+        val newMaxHp = maxHp
+        if (previousCurrentHp != null && previousMaxHp != null && newMaxHp != null && newMaxHp != previousMaxHp) {
+            setCurrentHp(maxOf(0, previousCurrentHp + newMaxHp - previousMaxHp))
+        }
         val species = ChampionsDex.speciesOrNull(formName) ?: return
         ability = species.defaultAbility.pretty
         species.megaStone?.let { item = it.pretty }
     }
+
+    /**
+     * The max HP, or null if the species isn't known to Champions
+     */
+    val maxHp: Int? get() = toFullHpBattlePokemon()?.maxHp
+
+    /**
+     * The current HP points, or null if the species isn't known to Champions: the ones set exactly if the max HP
+     * didn't change since, else computed from the percentage like the source calculator (rounded up)
+     */
+    val currentHp: Int?
+        get() {
+            val max = maxHp ?: return null
+            exactCurrentHp?.takeIf { it.maxHp == max }?.let { return it.hp }
+            return (currentHpPercent * max + 99) / 100
+        }
+
+    /**
+     * Set the current HP points exactly (0 to the max HP). The percentage follows, rounded down like the source calculator
+     */
+    fun setCurrentHp(hp: Int) {
+        val max = maxHp ?: return
+        val value = hp.coerceIn(0, max)
+        exactCurrentHp = ExactHp(value, max)
+        currentHpPercentState = 100 * value / max
+    }
+
+    /**
+     * Set the current HP as a percentage (0 to 100), the HP points being computed from it
+     */
+    fun setCurrentHpPercent(percent: Int) {
+        currentHpPercentState = percent.coerceIn(0, 100)
+        exactCurrentHp = null
+    }
+
+    private fun resetCurrentHp() = setCurrentHpPercent(100)
 
     /**
      * Fill this state with the set of a pokemon (e.g. from a team)
@@ -236,6 +289,7 @@ class DamageCalcPokemonState(
         powerDoubledMoveIndexes.clear()
         stackCounts.clear()
         counteredMoveIndexes.clear()
+        resetCurrentHp()
     }
 
     /**
@@ -359,8 +413,14 @@ class DamageCalcPokemonState(
      * Convert this state to the damage engine's representation, or null if the species isn't known to Champions
      */
     fun toBattlePokemon(): BattlePokemon? {
+        val battlePokemon = toFullHpBattlePokemon() ?: return null
+        return battlePokemon.copy(currentHp = currentHp)
+    }
+
+    // the engine's representation at full HP, from which the max HP is computed
+    private fun toFullHpBattlePokemon(): BattlePokemon? {
         val species = ChampionsDex.speciesOrNull(form) ?: return null
-        val battlePokemon = BattlePokemon(
+        return BattlePokemon(
             species = species,
             ability = AbilityName(ability),
             nature = nature,
@@ -384,8 +444,7 @@ class DamageCalcPokemonState(
             toxicCounter = toxicCounter,
             abilityIsActive = isAbilityActive,
         )
-        if (currentHpPercent >= 100) return battlePokemon
-        // the engine wants HP points, which depend on the stats computed from the species
-        return battlePokemon.copy(currentHp = (battlePokemon.maxHp * currentHpPercent / 100).coerceAtLeast(1))
     }
 }
+
+private data class ExactHp(val hp: Int, val maxHp: Int)
