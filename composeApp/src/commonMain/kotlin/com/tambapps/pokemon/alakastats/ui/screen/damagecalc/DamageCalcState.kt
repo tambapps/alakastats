@@ -1,14 +1,24 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.tambapps.pokemon.AbilityName
+import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.Nature
+import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
+import com.tambapps.pokemon.champions.data.ChampionsDex
+import com.tambapps.pokemon.champions.engine.BattleFormat
+import com.tambapps.pokemon.champions.engine.BattlePokemon
+import com.tambapps.pokemon.champions.engine.Battlefield
+import com.tambapps.pokemon.champions.engine.StatBoosts
+import com.tambapps.pokemon.champions.engine.Status
+import com.tambapps.pokemon.champions.engine.Terrain
+import com.tambapps.pokemon.champions.engine.Weather
 
 const val MAX_STAT_POINTS_PER_STAT = 32
 const val MAX_TOTAL_STAT_POINTS = 66
@@ -20,42 +30,60 @@ val NATURES = Nature.entries.filter { !it.isNeutral || it == Nature.SERIOUS }
 
 val STATS = listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)
 
+// Hail doesn't exist in Champions, it was replaced by Snow
+val WEATHERS = listOf(Weather.NONE, Weather.SUN, Weather.RAIN, Weather.SAND, Weather.SNOW)
+
 enum class DamageCalcSide(val displayName: String, val keyStats: List<Stat>) {
     ATTACKER("Attacker", listOf(Stat.ATTACK, Stat.SPECIAL_ATTACK)),
     DEFENDER("Defender", listOf(Stat.HP, Stat.DEFENSE, Stat.SPECIAL_DEFENSE)),
 }
 
-enum class StatusCondition(val displayName: String) {
-    HEALTHY("Healthy"),
-    BURNED("Burned"),
-    POISONED("Poisoned"),
-    BADLY_POISONED("Badly Poisoned"),
-    PARALYZED("Paralyzed"),
-    ASLEEP("Asleep"),
-    FROZEN("Frozen"),
+val Status.displayName get() = when (this) {
+    Status.HEALTHY -> "Healthy"
+    Status.BURNED -> "Burned"
+    Status.PARALYZED -> "Paralyzed"
+    Status.POISONED -> "Poisoned"
+    Status.BADLY_POISONED -> "Badly Poisoned"
+    Status.ASLEEP -> "Asleep"
+    Status.FROZEN -> "Frozen"
 }
 
-enum class BattleFormat(val displayName: String) {
-    SINGLES("Singles"),
-    DOUBLES("Doubles"),
+val BattleFormat.displayName get() = when (this) {
+    BattleFormat.SINGLES -> "Singles"
+    BattleFormat.DOUBLES -> "Doubles"
 }
 
-enum class Weather(val displayName: String) {
-    NONE("None"),
-    SUN("Sun"),
-    RAIN("Rain"),
-    SAND("Sand"),
-    SNOW("Snow"),
+val Weather.displayName get() = when (this) {
+    Weather.NONE -> "None"
+    Weather.SUN -> "Sun"
+    Weather.RAIN -> "Rain"
+    Weather.SAND -> "Sand"
+    Weather.HAIL -> "Hail"
+    Weather.SNOW -> "Snow"
 }
 
-enum class Terrain(val displayName: String) {
-    NONE("None"),
-    ELECTRIC("Electric"),
-    GRASSY("Grassy"),
-    MISTY("Misty"),
-    PSYCHIC("Psychic"),
+val Terrain.displayName get() = when (this) {
+    Terrain.NONE -> "None"
+    Terrain.ELECTRIC -> "Electric"
+    Terrain.GRASSY -> "Grassy"
+    Terrain.MISTY -> "Misty"
+    Terrain.PSYCHIC -> "Psychic"
 }
 
+val Battlefield.summary get() = listOfNotNull(
+    format.displayName,
+    if (weather == Weather.NONE) "No weather" else weather.displayName,
+    if (terrain == Terrain.NONE) null else "${terrain.displayName} Terrain",
+    if (isGravity) "Gravity" else null,
+    if (isFairyAura) "Fairy Aura" else null,
+    if (isCharge) "Charge" else null,
+).joinToString(" · ")
+
+/**
+ * The editable state of a pokemon in the damage calc. Kept separate from the engine's [BattlePokemon]
+ * as it can be in states the engine can't represent (e.g. a species unknown to Champions), and holds
+ * UI-only data (moves, HP as a percentage). See [toBattlePokemon].
+ */
 class DamageCalcPokemonState(
     name: PokemonName,
     // TODO dummy values, will be fetched later
@@ -67,11 +95,9 @@ class DamageCalcPokemonState(
     var nature by mutableStateOf(Nature.SERIOUS)
     var ability by mutableStateOf(ability)
     var item by mutableStateOf(item)
-    var status by mutableStateOf(StatusCondition.HEALTHY)
+    var status by mutableStateOf(Status.HEALTHY)
     var moves by mutableStateOf(moves)
     var currentHpPercent by mutableStateOf(100)
-    // conditions of the side of the field this pokemon is on, so that they follow the pokemon on swap
-    val sideConditions = SideConditionsState()
     private val statPoints = mutableStateMapOf<Stat, Int>().apply { STATS.forEach { put(it, 0) } }
     private val boosts = mutableStateMapOf<Stat, Int>()
 
@@ -79,6 +105,14 @@ class DamageCalcPokemonState(
     // can be negative, the max total is not enforced
     val remainingStatPoints get() = MAX_TOTAL_STAT_POINTS - totalStatPoints
     val exceedsMaxTotalStatPoints get() = remainingStatPoints < 0
+
+    /**
+     * Select a species, using its default ability if it is known to Champions
+     */
+    fun selectSpecies(pokemonName: PokemonName) {
+        name = pokemonName
+        ChampionsDex.speciesOrNull(pokemonName)?.let { ability = it.defaultAbility.pretty }
+    }
 
     /**
      * Fill this state with the set of a pokemon (e.g. from a team)
@@ -110,56 +144,36 @@ class DamageCalcPokemonState(
     fun setStatPoints(stat: Stat, value: Int) {
         statPoints[stat] = value.coerceIn(0, MAX_STAT_POINTS_PER_STAT)
     }
-}
 
-const val MAX_SPIKES = 3
-
-enum class SideCondition(val displayName: String) {
-    PROTECT("Protect"),
-    HELPING_HAND("Helping Hand"),
-    AURORA_VEIL("Aurora Veil"),
-    REFLECT("Reflect"),
-    LIGHT_SCREEN("Light Screen"),
-    TAILWIND("Tailwind"),
-    LEECH_SEED("Leech Seed"),
-    FRIEND_GUARD("Friend Guard"),
-    STEALTH_ROCK("Stealth Rock"),
-    STEELY_SPIRIT("Steely Spirit"),
-    SALT_CURE("Salt Cure"),
-    INGRAIN("Ingrain"),
-    CURSE("Curse"),
-    BINDING("Binding"),
-    CHARGE("Charge"),
-    AQUA_RING("Aqua Ring"),
-}
-
-class SideConditionsState {
-    private val activeConditions = mutableStateMapOf<SideCondition, Boolean>()
-    var spikes by mutableIntStateOf(0)
-
-    fun isActive(condition: SideCondition) = activeConditions[condition] == true
-
-    fun toggle(condition: SideCondition) {
-        activeConditions[condition] = !isActive(condition)
+    /**
+     * Convert this state to the damage engine's representation, or null if the species isn't known to Champions
+     */
+    fun toBattlePokemon(): BattlePokemon? {
+        val species = ChampionsDex.speciesOrNull(name) ?: return null
+        val battlePokemon = BattlePokemon(
+            species = species,
+            ability = AbilityName(ability),
+            nature = nature,
+            statPoints = PokeStats(
+                hp = getStatPoints(Stat.HP),
+                speed = getStatPoints(Stat.SPEED),
+                attack = getStatPoints(Stat.ATTACK),
+                specialAttack = getStatPoints(Stat.SPECIAL_ATTACK),
+                defense = getStatPoints(Stat.DEFENSE),
+                specialDefense = getStatPoints(Stat.SPECIAL_DEFENSE),
+            ),
+            item = item.takeIf { it.isNotBlank() }?.let(::ItemName),
+            boosts = StatBoosts(
+                attack = getBoost(Stat.ATTACK),
+                defense = getBoost(Stat.DEFENSE),
+                specialAttack = getBoost(Stat.SPECIAL_ATTACK),
+                specialDefense = getBoost(Stat.SPECIAL_DEFENSE),
+                speed = getBoost(Stat.SPEED),
+            ),
+            status = status,
+        )
+        if (currentHpPercent >= 100) return battlePokemon
+        // the engine wants HP points, which depend on the stats computed from the species
+        return battlePokemon.copy(currentHp = (battlePokemon.maxHp * currentHpPercent / 100).coerceAtLeast(1))
     }
-
-    fun cycleSpikes() {
-        spikes = (spikes + 1) % (MAX_SPIKES + 1)
-    }
-}
-
-class FieldState {
-    var format by mutableStateOf(BattleFormat.DOUBLES)
-    var weather by mutableStateOf(Weather.NONE)
-    var terrain by mutableStateOf(Terrain.NONE)
-    var gravity by mutableStateOf(false)
-    var fairyAura by mutableStateOf(false)
-
-    val summary get() = listOfNotNull(
-        format.displayName,
-        if (weather == Weather.NONE) "No weather" else weather.displayName,
-        if (terrain == Terrain.NONE) null else "${terrain.displayName} Terrain",
-        if (gravity) "Gravity" else null,
-        if (fairyAura) "Fairy Aura" else null,
-    ).joinToString(" · ")
 }

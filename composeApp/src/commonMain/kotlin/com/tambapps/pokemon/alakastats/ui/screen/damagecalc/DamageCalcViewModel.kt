@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.util.VoidSignal
+import com.tambapps.pokemon.champions.engine.Battlefield
 
 class DamageCalcViewModel : ScreenModel {
 
@@ -29,7 +30,8 @@ class DamageCalcViewModel : ScreenModel {
         )
     )
         private set
-    val field = FieldState()
+    // the engine's model is used directly, as every UI state of the field is a valid Battlefield
+    var field by mutableStateOf(Battlefield())
     var selectedMoveIndex by mutableIntStateOf(0)
     val scrollToTopSignal = VoidSignal()
 
@@ -50,6 +52,8 @@ class DamageCalcViewModel : ScreenModel {
         val previousAttacker = attacker
         attacker = defender
         defender = previousAttacker
+        // side conditions follow the pokemon
+        field = field.copy(attackerSide = field.defenderSide, defenderSide = field.attackerSide)
         selectedMoveIndex = 0
     }
 }

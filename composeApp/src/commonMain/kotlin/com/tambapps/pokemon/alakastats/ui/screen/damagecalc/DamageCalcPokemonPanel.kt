@@ -49,6 +49,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.quizzes.displayName
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.increasedStatColor
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.shortLabel
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
+import com.tambapps.pokemon.champions.engine.Status
 import kotlin.math.roundToInt
 
 private val hpColor = Color(0xFF4CAF50)
@@ -86,7 +87,7 @@ internal fun DamageCalcPokemonPanel(
 
     if (showPokemonDialog) {
         SelectPokemonDialog(
-            onSelect = { state.name = it },
+            onSelect = { state.selectSpecies(it) },
             onDismissRequest = { showPokemonDialog = false },
             title = "Select ${side.displayName}",
             confirmButtonText = "Select",
@@ -123,7 +124,7 @@ internal fun DamageCalcPokemonPanel(
     if (showStatusDialog) {
         WheelPickerDialog(
             title = "Select Status",
-            items = StatusCondition.entries,
+            items = Status.entries,
             initialIndex = state.status.ordinal,
             itemToText = { it.displayName },
             onPicked = { state.status = it },

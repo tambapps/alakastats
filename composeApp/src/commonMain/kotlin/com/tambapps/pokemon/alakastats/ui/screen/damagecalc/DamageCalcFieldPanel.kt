@@ -18,33 +18,71 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.champions.engine.BattleFormat
+import com.tambapps.pokemon.champions.engine.Battlefield
+import com.tambapps.pokemon.champions.engine.SideConditions
+import com.tambapps.pokemon.champions.engine.Terrain
+
+private class SideConditionToggle(
+    val displayName: String,
+    val isActive: (SideConditions) -> Boolean,
+    val toggle: (SideConditions) -> SideConditions,
+)
+
+// only the conditions the damage engine takes into account (e.g. hazards are ignored by the KO chance)
+private val SIDE_CONDITION_TOGGLES = listOf(
+    SideConditionToggle("Protect", { it.isProtected }) { it.copy(isProtected = !it.isProtected) },
+    SideConditionToggle("Helping Hand", { it.hasHelpingHand }) { it.copy(hasHelpingHand = !it.hasHelpingHand) },
+    SideConditionToggle("Aurora Veil", { it.hasAuroraVeil }) { it.copy(hasAuroraVeil = !it.hasAuroraVeil) },
+    SideConditionToggle("Reflect", { it.hasReflect }) { it.copy(hasReflect = !it.hasReflect) },
+    SideConditionToggle("Light Screen", { it.hasLightScreen }) { it.copy(hasLightScreen = !it.hasLightScreen) },
+    SideConditionToggle("Tailwind", { it.hasTailwind }) { it.copy(hasTailwind = !it.hasTailwind) },
+    SideConditionToggle("Friend Guard", { it.hasFriendGuard }) { it.copy(hasFriendGuard = !it.hasFriendGuard) },
+    SideConditionToggle("Steely Spirit", { it.hasAllySteelySpirit }) { it.copy(hasAllySteelySpirit = !it.hasAllySteelySpirit) },
+    SideConditionToggle("Battery", { it.hasBattery }) { it.copy(hasBattery = !it.hasBattery) },
+    SideConditionToggle("Power Spot", { it.hasPowerSpot }) { it.copy(hasPowerSpot = !it.hasPowerSpot) },
+)
 
 @Composable
 internal fun DamageCalcFieldPanel(
-    field: FieldState,
-    attackerSideConditions: SideConditionsState,
-    defenderSideConditions: SideConditionsState,
+    field: Battlefield,
+    onFieldChange: (Battlefield) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        ChoiceSection("Format", BattleFormat.entries, field.format, { it.displayName }) { field.format = it }
-        ChoiceSection("Weather", Weather.entries, field.weather, { it.displayName }) { field.weather = it }
-        ChoiceSection("Terrain", Terrain.entries, field.terrain, { it.displayName }) { field.terrain = it }
+        ChoiceSection("Format", BattleFormat.entries, field.format, { it.displayName }) { onFieldChange(field.copy(format = it)) }
+        ChoiceSection("Weather", WEATHERS, field.weather, { it.displayName }) { onFieldChange(field.copy(weather = it)) }
+        ChoiceSection("Terrain", Terrain.entries, field.terrain, { it.displayName }) { onFieldChange(field.copy(terrain = it)) }
         FieldSection("Global") {
-            FilterChip(selected = field.gravity, onClick = { field.gravity = !field.gravity }, label = { Text("Gravity") })
-            FilterChip(selected = field.fairyAura, onClick = { field.fairyAura = !field.fairyAura }, label = { Text("Fairy Aura") })
+            FilterChip(
+                selected = field.isGravity,
+                onClick = { onFieldChange(field.copy(isGravity = !field.isGravity)) },
+                label = { Text("Gravity") }
+            )
+            FilterChip(
+                selected = field.isFairyAura,
+                onClick = { onFieldChange(field.copy(isFairyAura = !field.isFairyAura)) },
+                label = { Text("Fairy Aura") }
+            )
+            FilterChip(
+                selected = field.isCharge,
+                onClick = { onFieldChange(field.copy(isCharge = !field.isCharge)) },
+                label = { Text("Charge") }
+            )
         }
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
             SideConditionsColumn(
                 title = "Attacker Side",
-                state = attackerSideConditions,
+                conditions = field.attackerSide,
+                onConditionsChange = { onFieldChange(field.copy(attackerSide = it)) },
                 alignment = Alignment.Start,
                 modifier = Modifier.weight(1f)
             )
             VerticalDivider(Modifier.padding(horizontal = 8.dp))
             SideConditionsColumn(
                 title = "Defender Side",
-                state = defenderSideConditions,
+                conditions = field.defenderSide,
+                onConditionsChange = { onFieldChange(field.copy(defenderSide = it)) },
                 alignment = Alignment.End,
                 modifier = Modifier.weight(1f)
             )
@@ -55,25 +93,20 @@ internal fun DamageCalcFieldPanel(
 @Composable
 private fun SideConditionsColumn(
     title: String,
-    state: SideConditionsState,
+    conditions: SideConditions,
+    onConditionsChange: (SideConditions) -> Unit,
     alignment: Alignment.Horizontal,
     modifier: Modifier = Modifier
 ) {
     Column(modifier, horizontalAlignment = alignment) {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        SideCondition.entries.forEach { condition ->
+        SIDE_CONDITION_TOGGLES.forEach { toggle ->
             FilterChip(
-                selected = state.isActive(condition),
-                onClick = { state.toggle(condition) },
-                label = { Text(condition.displayName) }
+                selected = toggle.isActive(conditions),
+                onClick = { onConditionsChange(toggle.toggle(conditions)) },
+                label = { Text(toggle.displayName) }
             )
         }
-        // tapping cycles through 0 to MAX_SPIKES layers
-        FilterChip(
-            selected = state.spikes > 0,
-            onClick = { state.cycleSpikes() },
-            label = { Text("Spikes: ${state.spikes}") }
-        )
     }
 }
 
