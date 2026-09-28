@@ -6,7 +6,6 @@ import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -72,7 +71,6 @@ internal fun DamageCalcMobile(
     LazyColumn(
         modifier.fillMaxSize(),
         state = listState,
-        contentPadding = PaddingValues(bottom = teamlyticsTabPaddingBottom)
     ) {
         item {
             DamageResultHeader(
@@ -108,7 +106,10 @@ internal fun DamageCalcMobile(
                 userScrollEnabled = pagerSwipeEnabled,
                 verticalAlignment = Alignment.Top,
             ) { page ->
-                val pageModifier = Modifier.fillMaxWidth().padding(8.dp)
+                // the bottom padding is part of the pages (not of the list), so that swiping there switches pages
+                val pageModifier = Modifier.fillMaxWidth()
+                    .padding(8.dp)
+                    .padding(bottom = teamlyticsTabPaddingBottom)
                 when (page) {
                     0 -> DamageCalcPokemonPanel(viewModel.attacker, DamageCalcSide.ATTACKER, team, viewModel.defender, pageModifier)
                     FIELD_PAGE -> DamageCalcFieldPanel(
