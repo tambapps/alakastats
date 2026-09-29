@@ -38,6 +38,7 @@ import com.tambapps.pokemon.alakastats.ui.service.MoveTypeImage
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.champions.data.Ability
 import com.tambapps.pokemon.champions.data.ChampionsDex
+import com.tambapps.pokemon.champions.engine.Battlefield
 import com.tambapps.pokemon.champions.engine.Status
 import com.tambapps.pokemon.champions.engine.returnsDefenderMove
 
@@ -49,6 +50,7 @@ private val TYPE_TINT_LENGTH = 320.dp
  * A pokemon of the desktop layout's damage calc, with text fields suggesting values instead of dialogs
  *
  * @param opponent the other pokemon of the calc, whose moves Counter-like moves return
+ * @param field the field of the calc, for the final speed
  */
 @Composable
 internal fun DamageCalcPokemonColumn(
@@ -56,6 +58,7 @@ internal fun DamageCalcPokemonColumn(
     side: DamageCalcSide,
     team: Teamlytics?,
     opponent: DamageCalcPokemonState,
+    field: Battlefield,
     modifier: Modifier = Modifier,
 ) {
     var showTeamPokemonDialog by remember { mutableStateOf(false) }
@@ -193,7 +196,8 @@ internal fun DamageCalcPokemonColumn(
                 )
             }
             StatPointsHeader(state)
-            STATS.forEach { StatPointsSlider(state, it) }
+            val finalSpeed = state.finalSpeed(field, side)
+            STATS.forEach { StatPointsSlider(state, it, finalSpeed) }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f)) {
                     CurrentHpSlider(state)

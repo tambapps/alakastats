@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
@@ -48,12 +47,11 @@ import com.tambapps.pokemon.champions.data.Item
 import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.abbreviation
-import com.tambapps.pokemon.alakastats.ui.screen.quizzes.decreasedStatColor
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.displayName
-import com.tambapps.pokemon.alakastats.ui.screen.quizzes.increasedStatColor
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.shortLabel
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
+import com.tambapps.pokemon.champions.engine.Battlefield
 import com.tambapps.pokemon.champions.engine.Status
 import com.tambapps.pokemon.champions.engine.returnsDefenderMove
 import kotlin.math.roundToInt
@@ -67,6 +65,8 @@ internal fun DamageCalcPokemonPanel(
     team: Teamlytics?,
     // the other pokemon of the calc, whose moves Counter-like moves return
     opponent: DamageCalcPokemonState,
+    // the field of the calc, for the final speed
+    field: Battlefield,
     modifier: Modifier = Modifier
 ) {
     var showPokemonDialog by remember { mutableStateOf(false) }
@@ -114,7 +114,7 @@ internal fun DamageCalcPokemonPanel(
         }
         PropertyRow("Item", state.item.ifBlank { "None" }, onClick = { showItemDialog = true })
         PropertyRow("Nature", state.nature.effectDisplayName(), onClick = { showNatureDialog = true })
-        StatPointsTile(state, side)
+        StatPointsTile(state, side, finalSpeed = state.finalSpeed(field, side))
         PropertyRow("Status", state.status.displayName, onClick = { showStatusDialog = true })
         if (state.status == Status.BADLY_POISONED) {
             PropertyRow("Toxic Damage", toxicCounterText(state.toxicCounter), onClick = { showToxicCounterDialog = true })
@@ -548,7 +548,7 @@ internal fun CritChip(isCritical: Boolean, alwaysCrits: Boolean, onCriticalChang
 }
 
 @Composable
-private fun StatPointsTile(state: DamageCalcPokemonState, side: DamageCalcSide) {
+private fun StatPointsTile(state: DamageCalcPokemonState, side: DamageCalcSide, finalSpeed: Int?) {
     val hiddenStats = STATS.filter { it !in side.keyStats }
     ExpansionTile(
         title = { isExpanded ->
@@ -576,20 +576,23 @@ private fun StatPointsTile(state: DamageCalcPokemonState, side: DamageCalcSide) 
         },
         subtitle = {
             Column {
-                side.keyStats.forEach { StatPointsSlider(state, it) }
+                side.keyStats.forEach { StatPointsSlider(state, it, finalSpeed) }
             }
         },
     ) {
         Column {
-            hiddenStats.forEach { StatPointsSlider(state, it) }
+            hiddenStats.forEach { StatPointsSlider(state, it, finalSpeed) }
         }
     }
 }
 
 private fun boostText(boost: Int) = if (boost > 0) "+$boost" else boost.toString()
 
+/**
+ * @param finalSpeed the speed the calc uses (see [DamageCalcPokemonState.finalSpeed]), shown instead of the speed stat
+ */
 @Composable
-internal fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat) {
+internal fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat, finalSpeed: Int?) {
     val statPoints = state.getStatPoints(stat)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(stat.abbreviation, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.width(48.dp))
@@ -605,17 +608,16 @@ internal fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat) {
             textAlign = TextAlign.End,
             modifier = Modifier.width(32.dp)
         )
-        // the final stat, colored when the nature changes it, "-" if the species isn't known to Champions
+        // the final stat, "-" if the species isn't known to Champions. For the speed, the one the calc uses, colored when
+        // something changes it (boosts, Choice Scarf, Tailwind...)
+        val statValue = state.stats?.get(stat)
+        val shownValue = if (stat == Stat.SPEED) finalSpeed ?: statValue else statValue
         Text(
-            state.stats?.get(stat)?.toString() ?: "-",
+            shownValue?.toString() ?: "-",
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.End,
-            color = when (stat) {
-                state.nature.bonusStat -> increasedStatColor
-                state.nature.malusStat -> decreasedStatColor
-                else -> MaterialTheme.colorScheme.onSurface
-            },
+            color = if (shownValue != statValue) MaterialTheme.colorScheme.primary else Color.Unspecified,
             modifier = Modifier.width(FINAL_STAT_WIDTH)
         )
         Spacer(Modifier.width(8.dp))
@@ -624,16 +626,12 @@ internal fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat) {
             // HP cannot be boosted, but keep the space to align the sliders
             Spacer(boostModifier)
         } else {
-            val boost = state.getBoost(stat)
             StatBoostStageChip(
-                stage = boost,
+                stage = state.getBoost(stat),
                 onValueChange = { state.setBoost(stat, it) },
                 dialogTitle = "${stat.shortLabel} Stage",
                 compact = true,
                 modifier = boostModifier,
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedLabelColor = if (boost > 0) increasedStatColor else decreasedStatColor
-                ),
             )
         }
     }

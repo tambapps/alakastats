@@ -111,13 +111,17 @@ internal fun DamageCalcMobile(
                     .padding(8.dp)
                     .padding(bottom = teamlyticsTabPaddingBottom)
                 when (page) {
-                    0 -> DamageCalcPokemonPanel(viewModel.attacker, DamageCalcSide.ATTACKER, team, viewModel.defender, pageModifier)
+                    0 -> DamageCalcPokemonPanel(
+                        viewModel.attacker, DamageCalcSide.ATTACKER, team, viewModel.defender, viewModel.field, pageModifier
+                    )
                     FIELD_PAGE -> DamageCalcFieldPanel(
                         field = viewModel.field,
                         onFieldChange = { viewModel.updateField(it) },
                         modifier = pageModifier
                     )
-                    2 -> DamageCalcPokemonPanel(viewModel.defender, DamageCalcSide.DEFENDER, team, viewModel.attacker, pageModifier)
+                    2 -> DamageCalcPokemonPanel(
+                        viewModel.defender, DamageCalcSide.DEFENDER, team, viewModel.attacker, viewModel.field, pageModifier
+                    )
                 }
             }
         }

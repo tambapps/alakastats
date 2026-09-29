@@ -24,6 +24,7 @@ import com.tambapps.pokemon.champions.engine.returnsDefenderMove
 import com.tambapps.pokemon.champions.engine.BattleFormat
 import com.tambapps.pokemon.champions.engine.BattlePokemon
 import com.tambapps.pokemon.champions.engine.Battlefield
+import com.tambapps.pokemon.champions.engine.SpeedCalculator
 import com.tambapps.pokemon.champions.engine.StatBoosts
 import com.tambapps.pokemon.champions.engine.Status
 import com.tambapps.pokemon.champions.engine.Terrain
@@ -403,6 +404,13 @@ class DamageCalcPokemonState(
      * or null if the species isn't known to Champions
      */
     val stats: PokeStats? get() = toBattlePokemon()?.stats
+
+    /**
+     * The speed the calc uses for this pokemon on [side] of [field] (boosts, Choice Scarf, Tailwind, paralysis, weather
+     * abilities...), or null if the species isn't known to Champions
+     */
+    fun finalSpeed(field: Battlefield, side: DamageCalcSide): Int? =
+        toBattlePokemon()?.let { SpeedCalculator.effectiveSpeed(it, field, isAttackerSide = side == DamageCalcSide.ATTACKER) }
 
     fun getStatPoints(stat: Stat) = statPoints[stat] ?: 0
 
