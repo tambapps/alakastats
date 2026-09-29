@@ -50,15 +50,7 @@ fun MyCard(
     }
 
     val cardColors = if (gradientBackgroundColors != null) colors.copy(containerColor = Color.Transparent) else colors
-    ElevatedCard(
-        modifier = cardModifier,
-        onClick = onClick ?: {},
-        enabled = enabled,
-        shape = shape,
-        colors = cardColors,
-        elevation = elevation,
-        interactionSource = interactionSource,
-    ) {
+    val cardContent: @Composable ColumnScope.() -> Unit = {
         if (gradientBackgroundColors != null) {
             Column(
                 modifier = Modifier
@@ -70,5 +62,26 @@ fun MyCard(
         } else {
             content()
         }
+    }
+    if (onClick != null) {
+        ElevatedCard(
+            modifier = cardModifier,
+            onClick = onClick,
+            enabled = enabled,
+            shape = shape,
+            colors = cardColors,
+            elevation = elevation,
+            interactionSource = interactionSource,
+            content = cardContent,
+        )
+    } else {
+        // not a disabled clickable card, whose content would have the faded disabled color
+        ElevatedCard(
+            modifier = cardModifier,
+            shape = shape,
+            colors = cardColors,
+            elevation = elevation,
+            content = cardContent,
+        )
     }
 }
