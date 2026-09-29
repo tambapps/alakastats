@@ -150,7 +150,6 @@ abstract class AbstractPokemonImageService(
 
     init {
         coroutineScope.launch {
-            // TODO there may be a better way to get all pokemon names?
             val map: Map<String, PokemonImages> = readMappingFile(json, "pokemon-sprites.json")
             withContext(Dispatchers.Main) {
                 availableNames.addAll(

@@ -125,7 +125,6 @@ val Battlefield.summary get() = listOfNotNull(
  */
 class DamageCalcPokemonState(
     name: PokemonName,
-    // TODO dummy values, will be fetched later
     ability: String,
     item: String,
     moves: List<String>,

@@ -22,7 +22,6 @@ import com.tambapps.pokemon.champions.engine.weatherSetOnField
 
 class DamageCalcViewModel : ScreenModel {
 
-    // TODO dummy values, will be fetched later
     var attacker by mutableStateOf(
         DamageCalcPokemonState(
             name = PokemonName("Aegislash"),

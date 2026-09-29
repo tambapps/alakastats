@@ -10,7 +10,7 @@ import com.tambapps.pokemon.pokeapi.client.GqlBatchResult
 import com.tambapps.pokemon.pokeapi.client.GqlPokemon
 import com.tambapps.pokemon.pokeapi.client.PokeApiGqlClient
 
-// TODO replace this with an inmemory base stats repository (store all of them in a json)
+@Deprecated("Use LocalPokemonBaseStatsRepository instead")
 class PokeApiPokemonBaseStatsRepository(
     private val pokeapiClient: PokeApiGqlClient
 ): PokemonBaseStatsRepository {
