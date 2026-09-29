@@ -28,6 +28,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -37,6 +38,10 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
 
+/**
+ * @param saveExpandedState whether being expanded is saved (rememberSaveable), e.g. to still be expanded when coming back
+ * to a pager page providing saved states
+ */
 @Composable
 fun ExpansionTile(
     title: @Composable RowScope.(Boolean) -> Unit,
@@ -44,6 +49,7 @@ fun ExpansionTile(
     disableWhenOpened: Boolean = false,
     modifier: Modifier = Modifier,
     initiallyExpanded: Boolean = false,
+    saveExpandedState: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     AbstractExpansionTile(
@@ -56,7 +62,8 @@ fun ExpansionTile(
         },
         disableWhenOpened=disableWhenOpened,
         shrinkTitleWeightOnExpanded=false,
-        initiallyExpanded=initiallyExpanded
+        initiallyExpanded=initiallyExpanded,
+        saveExpandedState=saveExpandedState,
     )
 }
 
@@ -121,8 +128,11 @@ private fun AbstractExpansionTile(
     onClick: (() -> Unit)? = null,
     borderColor: Color? = null,
     initiallyExpanded: Boolean = false,
+    saveExpandedState: Boolean = false,
 ) {
-    val isCardExpandedState = remember { mutableStateOf(initiallyExpanded) }
+    val isCardExpandedState =
+        if (saveExpandedState) rememberSaveable { mutableStateOf(initiallyExpanded) }
+        else remember { mutableStateOf(initiallyExpanded) }
 
     MyCard(
         enabled = !disableWhenOpened || !isCardExpandedState.value,

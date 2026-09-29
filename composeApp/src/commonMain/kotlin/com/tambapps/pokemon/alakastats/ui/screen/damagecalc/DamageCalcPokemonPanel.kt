@@ -551,6 +551,8 @@ internal fun CritChip(isCritical: Boolean, alwaysCrits: Boolean, onCriticalChang
 private fun StatPointsTile(state: DamageCalcPokemonState, side: DamageCalcSide, finalSpeed: Int?) {
     val hiddenStats = STATS.filter { it !in side.keyStats }
     ExpansionTile(
+        // still expanded when coming back to its page
+        saveExpandedState = true,
         title = { isExpanded ->
             Column(Modifier.weight(1f)) {
                 Text("Stat Points", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
