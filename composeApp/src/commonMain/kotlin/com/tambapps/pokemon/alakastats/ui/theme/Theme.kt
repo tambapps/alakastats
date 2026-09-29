@@ -2,10 +2,12 @@ package com.tambapps.pokemon.alakastats.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
@@ -263,9 +265,12 @@ fun AppTheme(
 
   MaterialTheme(
     colorScheme = colorScheme,
-    typography = appTypography(colorScheme),
-    content = content
-  )
+    typography = appTypography(),
+  ) {
+    // the default text color outside of components setting their own (e.g. screens without Scaffold or Surface), as
+    // the text styles have no color
+    CompositionLocalProvider(LocalContentColor provides colorScheme.onSurface, content = content)
+  }
 }
 
 /**
@@ -274,5 +279,5 @@ fun AppTheme(
  * to ensure proper contrast with the current theme.
  */
 val ColorScheme.defaultIconColor: Color
-  @Composable get() = MaterialTheme.typography.labelMedium.color
+  get() = onSurface
 

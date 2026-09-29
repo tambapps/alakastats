@@ -21,7 +21,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -117,9 +116,7 @@ fun NoNotes(viewModel: MatchupPlansViewModel) {
                     modifier = Modifier.size(ButtonDefaults.IconSize)
                 )
                 Spacer(Modifier.width(8.dp))
-                Text("Create Matchup", style = buttonTextStyle.copy(
-                    color = LocalContentColor.current
-                ))
+                Text("Create Matchup", style = buttonTextStyle)
             }
         }
     }

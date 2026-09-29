@@ -18,7 +18,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButton
@@ -220,7 +219,7 @@ internal fun StartQuizButton(viewModel: NatureQuizSetupViewModel, modifier: Modi
         ),
         modifier = modifier
     ) {
-        Text("Start", style = buttonTextStyle.copy(color = LocalContentColor.current))
+        Text("Start", style = buttonTextStyle)
     }
 }
 

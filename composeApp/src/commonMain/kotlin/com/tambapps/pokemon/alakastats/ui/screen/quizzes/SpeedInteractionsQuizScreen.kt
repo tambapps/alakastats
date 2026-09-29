@@ -18,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -125,7 +124,7 @@ private fun MessageContent(message: String, navigator: Navigator, modifier: Modi
         Text(message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
         Spacer(Modifier.height(16.dp))
         Button(onClick = { navigator.pop() }) {
-            Text("Back", color = LocalContentColor.current)
+            Text("Back")
         }
     }
 }
@@ -213,7 +212,7 @@ private fun SpeedInteractionsQuestionContent(viewModel: SpeedInteractionsViewMod
             SpeedInteractionsAnswerFeedback(question, outcome, viewModel.isTeamMode)
             Spacer(Modifier.height(24.dp))
             Button(onClick = { viewModel.nextQuestion() }, modifier = Modifier.fillMaxWidth()) {
-                Text(if (viewModel.isLastQuestion) "See results" else "Continue", color = LocalContentColor.current)
+                Text(if (viewModel.isLastQuestion) "See results" else "Continue")
             }
         }
     }
@@ -393,7 +392,7 @@ private fun SpeedInteractionsResultsContent(viewModel: SpeedInteractionsViewMode
                 Text("Retry")
             }
             Button(onClick = { navigator.pop() }, modifier = Modifier.weight(1f)) {
-                Text("Done", color = LocalContentColor.current)
+                Text("Done")
             }
         }
     }

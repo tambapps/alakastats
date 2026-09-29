@@ -14,7 +14,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
@@ -117,11 +116,7 @@ internal fun NoteEditingButtons(viewModel: OverviewViewModel) {
     Button(
         onClick = { viewModel.saveNotes(snackBar) }
     ) {
-        Text(
-            "Save Notes", style = buttonTextStyle.copy(
-                color = LocalContentColor.current
-            )
-        )
+        Text("Save Notes", style = buttonTextStyle)
     }
     Spacer(Modifier.width(8.dp))
     OutlinedButton(onClick = { viewModel.cancelEditingNotes() }) {

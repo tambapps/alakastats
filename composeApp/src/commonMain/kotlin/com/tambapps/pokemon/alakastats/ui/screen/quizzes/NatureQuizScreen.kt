@@ -20,7 +20,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -221,14 +220,14 @@ private fun QuizQuestionContent(viewModel: NatureQuizViewModel, modifier: Modifi
                     enabled = viewModel.canSubmit,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Submit", color = LocalContentColor.current)
+                    Text("Submit")
                 }
             }
         } else {
             AnswerFeedback(nature, outcome, viewModel.direction)
             Spacer(Modifier.height(24.dp))
             Button(onClick = { viewModel.nextQuestion() }, modifier = Modifier.fillMaxWidth()) {
-                Text(if (viewModel.isLastQuestion) "See results" else "Continue", color = LocalContentColor.current)
+                Text(if (viewModel.isLastQuestion) "See results" else "Continue")
             }
         }
     }
@@ -301,7 +300,7 @@ private fun QuizResultsContent(viewModel: NatureQuizViewModel, navigator: Naviga
                 Text("Retry")
             }
             Button(onClick = { navigator.pop() }, modifier = Modifier.weight(1f)) {
-                Text("Done", color = LocalContentColor.current)
+                Text("Done")
             }
         }
     }

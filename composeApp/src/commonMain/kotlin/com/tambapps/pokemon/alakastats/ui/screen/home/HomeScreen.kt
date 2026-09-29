@@ -28,7 +28,6 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -210,9 +209,7 @@ internal fun NewTeamButton(modifier: Modifier = Modifier) {
             modifier = Modifier.size(ButtonDefaults.IconSize)
         )
         Spacer(Modifier.width(8.dp))
-        Text("New Team", style = buttonTextStyle.copy(
-            color = LocalContentColor.current
-        ))
+        Text("New Team", style = buttonTextStyle)
     }
 }
 

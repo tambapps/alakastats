@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,6 +70,6 @@ internal fun StartSpeedStatQuizButton(viewModel: SpeedStatQuizSetupViewModel, mo
         ),
         modifier = modifier
     ) {
-        Text("Start", style = buttonTextStyle.copy(color = LocalContentColor.current))
+        Text("Start", style = buttonTextStyle)
     }
 }
