@@ -456,7 +456,8 @@ private fun PropertyRow(
             modifier = Modifier.width(72.dp)
         )
         OutlinedButton(onClick = onClick, modifier = Modifier.weight(1f)) {
-            Text(value)
+            // centered also when too long for one line (e.g. a move next to its chips)
+            Text(value, textAlign = TextAlign.Center)
         }
         if (trailingContent != null) {
             Spacer(Modifier.width(8.dp))
