@@ -118,10 +118,14 @@ internal fun DamageCalcPokemonColumn(
                     megaSwitch()
                 }
             }
-            // the team on the right of the set's fields, to switch between its pokemon in one click
+            // the team next to the set's fields, to switch between its pokemon in one click. On the side of the field
+            // (right of the attacker, left of the defender), mirrored like the header
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (team != null && !isAttacker) {
+                    TeamPokemonButtons(team, state, side)
+                }
                 SetFields(state, onPasteClick = { showPasteDialog = true }, Modifier.weight(1f))
-                if (team != null) {
+                if (team != null && isAttacker) {
                     TeamPokemonButtons(team, state, side)
                 }
             }
