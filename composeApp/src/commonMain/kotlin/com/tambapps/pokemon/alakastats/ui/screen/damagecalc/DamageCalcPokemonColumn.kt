@@ -33,8 +33,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.MoveName
+import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.DropdownField
@@ -283,28 +285,41 @@ private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, m
 }
 
 /**
- * One button per pokemon of the team, filling this pokemon with its set. The one whose set this pokemon still has is
- * highlighted
+ * One button per pokemon of the team, filling this pokemon with its set
  */
 @Composable
 private fun TeamPokemonButtons(team: Teamlytics, state: DamageCalcPokemonState, side: DamageCalcSide) {
     Column(verticalArrangement = Arrangement.spacedBy(TEAM_BUTTONS_SPACING)) {
         team.pokePaste.pokemons.forEach { pokemon ->
-            OutlinedCard(
-                onClick = { state.fillFrom(pokemon) },
-                border = if (state.hasSetOf(pokemon)) BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-                else CardDefaults.outlinedCardBorder(),
-                modifier = Modifier.size(TEAM_SPRITE_SIZE + 8.dp),
-            ) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    // like the header's sprite, the attacker faces right, towards its target
-                    PokemonSprite(
-                        pokemon.name,
-                        Modifier.size(TEAM_SPRITE_SIZE),
-                        facingDirection = if (side == DamageCalcSide.ATTACKER) FacingDirection.RIGHT else FacingDirection.LEFT,
-                    )
-                }
-            }
+            TeamPokemonButton(pokemon, state, side, TEAM_SPRITE_SIZE, Modifier.size(TEAM_SPRITE_SIZE + 8.dp))
+        }
+    }
+}
+
+/**
+ * A button filling [state] with the set of [pokemon], a pokemon of the team. Highlighted while [state] still has its set
+ */
+@Composable
+internal fun TeamPokemonButton(
+    pokemon: Pokemon,
+    state: DamageCalcPokemonState,
+    side: DamageCalcSide,
+    spriteSize: Dp,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedCard(
+        onClick = { state.fillFrom(pokemon) },
+        border = if (state.hasSetOf(pokemon)) BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+        else CardDefaults.outlinedCardBorder(),
+        modifier = modifier,
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            // like the header's sprite, the attacker faces right, towards its target
+            PokemonSprite(
+                pokemon.name,
+                Modifier.size(spriteSize),
+                facingDirection = if (side == DamageCalcSide.ATTACKER) FacingDirection.RIGHT else FacingDirection.LEFT,
+            )
         }
     }
 }

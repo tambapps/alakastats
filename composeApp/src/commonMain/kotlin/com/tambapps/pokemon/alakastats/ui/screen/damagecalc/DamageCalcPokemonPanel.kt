@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.Nature
-import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
@@ -60,6 +60,11 @@ import kotlin.math.roundToInt
 
 private val hpColor = Color(0xFF4CAF50)
 
+// the team's buttons, under the pokemon button
+private val TEAM_BUTTON_HEIGHT = 52.dp
+private val TEAM_SPRITE_SIZE = 44.dp
+private val TEAM_BUTTONS_SPACING = 6.dp
+
 @Composable
 internal fun DamageCalcPokemonPanel(
     state: DamageCalcPokemonState,
@@ -72,7 +77,6 @@ internal fun DamageCalcPokemonPanel(
     modifier: Modifier = Modifier
 ) {
     var showPokemonDialog by remember { mutableStateOf(false) }
-    var showTeamPokemonDialog by remember { mutableStateOf(false) }
     var showFormDialog by remember { mutableStateOf(false) }
     var showNatureDialog by remember { mutableStateOf(false) }
     var showStatusDialog by remember { mutableStateOf(false) }
@@ -97,6 +101,18 @@ internal fun DamageCalcPokemonPanel(
             }
             if (showsMegaSwitch && side == DamageCalcSide.ATTACKER) {
                 MegaSwitch(state.isMegaEvolved, onCheckedChange = { state.setMegaEvolved(it) })
+            }
+        }
+        // the team's pokemon, to fill one in a single tap, sharing the width equally
+        if (team != null) {
+            Row(horizontalArrangement = Arrangement.spacedBy(TEAM_BUTTONS_SPACING)) {
+                team.pokePaste.pokemons.forEach { pokemon ->
+                    TeamPokemonButton(
+                        pokemon, state, side,
+                        spriteSize = TEAM_SPRITE_SIZE,
+                        modifier = Modifier.weight(1f).height(TEAM_BUTTON_HEIGHT),
+                    )
+                }
             }
         }
         if (state.availableForms.size > 1 && state.megaFormOfItem == null) {
@@ -227,16 +243,6 @@ internal fun DamageCalcPokemonPanel(
             onDismissRequest = { showPokemonDialog = false },
             title = "Select ${side.displayName}",
             confirmButtonText = "Select",
-            extraButton = if (team != null) {
-                {
-                    TextButton(onClick = {
-                        showPokemonDialog = false
-                        showTeamPokemonDialog = true
-                    }) {
-                        Text("From Team")
-                    }
-                }
-            } else null,
             // forms are selected separately
             allPokemons = PICKABLE_POKEMON_NAMES,
             onPokepasteSelect = { state.fillFrom(it) },
@@ -250,13 +256,6 @@ internal fun DamageCalcPokemonPanel(
             initialIndex = forms.indexOf(state.form).coerceAtLeast(0),
             onPicked = { state.selectForm(forms[it]) },
             onDismissRequest = { showFormDialog = false },
-        )
-    }
-    if (showTeamPokemonDialog && team != null) {
-        SelectTeamPokemonDialog(
-            team = team,
-            onSelect = { state.fillFrom(it) },
-            onDismissRequest = { showTeamPokemonDialog = false },
         )
     }
     if (showNatureDialog) {
@@ -322,21 +321,6 @@ internal fun DamageCalcPokemonPanel(
             onDismissRequest = { editedMoveIndex = null },
         )
     }
-}
-
-@Composable
-internal fun SelectTeamPokemonDialog(
-    team: Teamlytics,
-    onSelect: (Pokemon) -> Unit,
-    onDismissRequest: () -> Unit,
-) {
-    val pokemons = team.pokePaste.pokemons
-    PokemonWheelPickerDialog(
-        title = "Select From ${team.name}",
-        pokemons = pokemons.map { it.name },
-        onPicked = { onSelect(pokemons[it]) },
-        onDismissRequest = onDismissRequest,
-    )
 }
 
 internal val MOVE_NAMES: List<String> by lazy { ChampionsDex.allMoves.map { it.name.value }.sorted() }
