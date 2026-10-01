@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,6 +37,7 @@ import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
+import com.tambapps.pokemon.alakastats.ui.composables.MegaSwitch
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonWheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.composables.SelectPokemonDialog
@@ -83,8 +85,21 @@ internal fun DamageCalcPokemonPanel(
     var counteredMoveDialogIndex by remember { mutableStateOf<Int?>(null) }
 
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        PokemonButton(state, side, onClick = { showPokemonDialog = true })
-        if (state.availableForms.size > 1) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // a pokemon holding its mega stone has a mega switch instead of a form selection: right of the attacker,
+            // left of the defender
+            val showsMegaSwitch = state.megaFormOfItem != null
+            if (showsMegaSwitch && side == DamageCalcSide.DEFENDER) {
+                MegaSwitch(state.isMegaEvolved, onCheckedChange = { state.setMegaEvolved(it) })
+            }
+            Box(Modifier.weight(1f)) {
+                PokemonButton(state, side, onClick = { showPokemonDialog = true })
+            }
+            if (showsMegaSwitch && side == DamageCalcSide.ATTACKER) {
+                MegaSwitch(state.isMegaEvolved, onCheckedChange = { state.setMegaEvolved(it) })
+            }
+        }
+        if (state.availableForms.size > 1 && state.megaFormOfItem == null) {
             PropertyRow("Form", state.form.pretty, onClick = { showFormDialog = true })
         }
         PropertyRow(

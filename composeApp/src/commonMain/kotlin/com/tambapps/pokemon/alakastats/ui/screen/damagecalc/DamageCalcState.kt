@@ -219,6 +219,7 @@ class DamageCalcPokemonState(
      */
     fun selectSpecies(pokemonName: PokemonName) {
         name = pokemonName
+        abilityBeforeMega = null
         selectForm(availableForms.first())
         // like the source calculator, a new pokemon is at full HP
         resetCurrentHp()
@@ -240,6 +241,39 @@ class DamageCalcPokemonState(
         val species = ChampionsDex.speciesOrNull(formName) ?: return
         ability = species.defaultAbility.pretty
         species.megaStone?.let { item = it.pretty }
+    }
+
+    /**
+     * The mega form the held item makes this pokemon mega evolve into, if its only other forms are megas (e.g. not
+     * Rotom), null otherwise. Its form is then a mega switch, not a form selection
+     */
+    val megaFormOfItem: PokemonName?
+        get() {
+            // the megas are the forms with a mega stone (named like "Mega Charizard X", which PokemonName.isMega misses)
+            val otherFormStones = availableForms.drop(1).map { it to ChampionsDex.speciesOrNull(it)?.megaStone }
+            if (otherFormStones.isEmpty() || otherFormStones.any { it.second == null } || item.isBlank()) return null
+            return otherFormStones.firstOrNull { (_, stone) -> stone?.matches(ItemName(item)) == true }?.first
+        }
+
+    val isMegaEvolved: Boolean get() = megaFormOfItem?.let { form == it } == true
+
+    // the ability before mega evolving, given back when going back to the base form (e.g. the team's one)
+    private var abilityBeforeMega: String? = null
+
+    /**
+     * Mega evolve into [megaFormOfItem], or go back to the base form with the ability it had before
+     */
+    fun setMegaEvolved(megaEvolved: Boolean) {
+        val megaForm = megaFormOfItem ?: return
+        if (megaEvolved == isMegaEvolved) return
+        if (megaEvolved) {
+            abilityBeforeMega = ability
+            selectForm(megaForm)
+        } else {
+            selectForm(availableForms.first())
+            abilityBeforeMega?.let { ability = it }
+            abilityBeforeMega = null
+        }
     }
 
     /**
@@ -284,6 +318,7 @@ class DamageCalcPokemonState(
      */
     fun fillFrom(pokemon: Pokemon) {
         name = pokemon.name
+        abilityBeforeMega = null
         form = availableForms.first()
         ability = pokemon.ability?.pretty ?: ""
         item = pokemon.item?.pretty ?: ""

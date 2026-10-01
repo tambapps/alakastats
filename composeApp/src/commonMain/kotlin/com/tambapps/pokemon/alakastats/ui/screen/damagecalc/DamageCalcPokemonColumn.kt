@@ -38,6 +38,7 @@ import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.DropdownField
+import com.tambapps.pokemon.alakastats.ui.composables.MegaSwitch
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.SelectPokemonDialog
 import com.tambapps.pokemon.alakastats.ui.composables.SuggestionTextField
@@ -92,14 +93,29 @@ internal fun DamageCalcPokemonColumn(
                         facingDirection = if (isAttacker) FacingDirection.RIGHT else FacingDirection.LEFT,
                     )
                 }
+                // a pokemon holding its mega stone has a mega switch instead of a form selection, in the top corner:
+                // right for the attacker, left for the defender
+                val megaSwitch = @Composable {
+                    if (state.megaFormOfItem != null) {
+                        Box(Modifier.align(Alignment.Top)) {
+                            MegaSwitch(state.isMegaEvolved, onCheckedChange = { state.setMegaEvolved(it) })
+                        }
+                    }
+                }
                 if (isAttacker) {
                     sprite()
                     Spacer(Modifier.width(8.dp))
+                } else {
+                    megaSwitch()
+                    Spacer(Modifier.weight(1f))
                 }
                 Text(side.displayName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 if (!isAttacker) {
                     Spacer(Modifier.width(8.dp))
                     sprite()
+                } else {
+                    Spacer(Modifier.weight(1f))
+                    megaSwitch()
                 }
             }
             // the team on the right of the set's fields, to switch between its pokemon in one click
@@ -171,7 +187,7 @@ private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, m
                 Text("From Paste", maxLines = 1, softWrap = false)
             }
         }
-        if (state.availableForms.size > 1) {
+        if (state.availableForms.size > 1 && state.megaFormOfItem == null) {
             DropdownField(
                 label = "Form",
                 selected = state.form,
