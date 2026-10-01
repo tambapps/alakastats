@@ -224,6 +224,7 @@ internal fun DamageCalcPokemonPanel(
             } else null,
             // forms are selected separately
             allPokemons = PICKABLE_POKEMON_NAMES,
+            onPokepasteSelect = { state.fillFrom(it) },
         )
     }
     if (showFormDialog) {

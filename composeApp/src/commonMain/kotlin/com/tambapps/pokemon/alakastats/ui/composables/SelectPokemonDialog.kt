@@ -22,10 +22,16 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import com.swmansion.kmpwheelpicker.rememberWheelPickerState
+import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.service.availablePokemonNames
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import com.tambapps.pokemon.pokepaste.parser.PokePasteParseException
+import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
+import org.koin.compose.koinInject
+
+private const val POKEPASTE_MAX_LINES = 10
 
 @Composable
 fun SelectPokemonDialog(
@@ -54,12 +60,20 @@ fun SelectPokemonDialog(
     extraButton: (@Composable () -> Unit)? = null,
     // the pokemons that can be selected
     allPokemons: List<PokemonName> = availablePokemonNames(),
+    // if set, the text field is multiline and also accepts a pokepaste, whose first pokemon is selected
+    onPokepasteSelect: ((Pokemon) -> Unit)? = null,
+    // to replace the text field's default label
+    label: String? = null,
 ) {
     var text by remember { mutableStateOf("") }
+    // more than one line: a pokepaste
+    val isPokepaste = onPokepasteSelect != null && text.trim().contains('\n')
     val pokemons = remember(text, allPokemons) {
-        if (text.isBlank()) allPokemons
-        else allPokemons.filter { it.value.contains(text, ignoreCase = true) }
+        if (isPokepaste) emptyList()
+        else if (text.isBlank()) allPokemons
+        else allPokemons.filter { it.value.contains(text.trim(), ignoreCase = true) }
     }
+    val pokepasteParser = koinInject<PokepasteParser>()
     var error: String? by remember { mutableStateOf(null) }
     val wheelState = rememberWheelPickerState(itemCount = pokemons.size, initialIndex = 0)
     val limit = if (LocalIsCompact.current) 3 else 10
@@ -77,12 +91,15 @@ fun SelectPokemonDialog(
                     value = text,
                     onValueChange = {
                         text = it
-                        if (showWheel) error = null
+                        if (showWheel || isPokepaste) error = null
                     },
                     isError = error != null,
-                    singleLine = true,
+                    singleLine = onPokepasteSelect == null,
+                    maxLines = if (onPokepasteSelect == null) 1 else POKEPASTE_MAX_LINES,
                     supportingText = error?.let { ({ Text(it) }) },
-                    label = { Text("Pokemon Name") },
+                    label = {
+                        Text(label ?: if (onPokepasteSelect == null) "Pokemon Name" else "Pokemon Name or Pokepaste")
+                    },
                 )
                 if (showWheel) {
                     val keyboardController = LocalSoftwareKeyboardController.current
@@ -102,6 +119,15 @@ fun SelectPokemonDialog(
         confirmButton = {
             TextButton(
                 onClick = {
+                    if (isPokepaste) {
+                        try {
+                            onPokepasteSelect?.invoke(pokepasteParser.parse(text).pokemons.first())
+                            onDismissRequest.invoke()
+                        } catch (e: PokePasteParseException) {
+                            error = "Invalid pokepaste: ${e.message}"
+                        }
+                        return@TextButton
+                    }
                     val pokemonName = pokemons.getOrNull(wheelState.index)
                     if (!showWheel || pokemonName == null) {
                         error = "No Pokemon was selected"

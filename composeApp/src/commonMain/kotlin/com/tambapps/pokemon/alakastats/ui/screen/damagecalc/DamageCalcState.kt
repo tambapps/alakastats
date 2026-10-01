@@ -42,6 +42,12 @@ val NATURES = Nature.entries.filter { !it.isNeutral || it == Nature.SERIOUS }
 
 val STATS = listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)
 
+/**
+ * The stat points matching [evs], the inverse of the source calculator's display of stat points as EVs
+ * (max(0, 8 * stat points - 4)): 252 EVs are 32 stat points, 4 EVs are 1
+ */
+internal fun evsToStatPoints(evs: Int) = ((evs + 4) / 8).coerceIn(0, MAX_STAT_POINTS_PER_STAT)
+
 // how many times Last Respects/Rage Fist's effect can have stacked, like the source calculator's "0x effect" to "6x effect"
 val STACK_COUNTS = 0..6
 // Supreme Overlord's fainted allies, like the source calculator's "0 down" to "5 down"
@@ -273,16 +279,16 @@ class DamageCalcPokemonState(
     private fun resetCurrentHp() = setCurrentHpPercent(100)
 
     /**
-     * Fill this state with the set of a pokemon (e.g. from a team)
+     * Fill this state with the set of a pokemon (e.g. from a team or a pokepaste). A set with EVs (some above the max
+     * stat points) has them converted to stat points
      */
     fun fillFrom(pokemon: Pokemon) {
         name = pokemon.name
         form = availableForms.first()
         ability = pokemon.ability?.pretty ?: ""
         item = pokemon.item?.pretty ?: ""
-        // only one neutral nature is proposed
-        nature = pokemon.nature?.takeUnless { it.isNeutral } ?: Nature.SERIOUS
-        STATS.forEach { setStatPoints(it, pokemon.evs.get(it)) }
+        nature = natureOf(pokemon)
+        STATS.forEach { setStatPoints(it, statPointsOf(pokemon, it)) }
         // always keep MAX_MOVES slots so that missing moves can be filled
         val teamMoves = pokemon.moves.take(MAX_MOVES).map { it.pretty }
         moves = teamMoves + List(MAX_MOVES - teamMoves.size) { "" }
@@ -292,6 +298,28 @@ class DamageCalcPokemonState(
         stackCounts.clear()
         counteredMoveIndexes.clear()
         resetCurrentHp()
+    }
+
+    /**
+     * Whether this pokemon has the set [fillFrom] fills from [pokemon]: same species (not a mega form), ability, item,
+     * nature and stat points. Moves and battle settings (boosts, status, HP...) don't matter
+     */
+    fun hasSetOf(pokemon: Pokemon): Boolean =
+        name.normalized == pokemon.name.normalized &&
+            form == availableForms.first() &&
+            ability == (pokemon.ability?.pretty ?: "") &&
+            item == (pokemon.item?.pretty ?: "") &&
+            nature == natureOf(pokemon) &&
+            STATS.all { getStatPoints(it) == statPointsOf(pokemon, it) }
+
+    // only one neutral nature is proposed
+    private fun natureOf(pokemon: Pokemon) = pokemon.nature?.takeUnless { it.isNeutral } ?: Nature.SERIOUS
+
+    // a set with EVs (some above the max stat points) has them converted
+    private fun statPointsOf(pokemon: Pokemon, stat: Stat): Int {
+        val value = pokemon.evs.get(stat)
+        val hasEvs = pokemon.evs.any { it > MAX_STAT_POINTS_PER_STAT }
+        return (if (hasEvs) evsToStatPoints(value) else value).coerceIn(0, MAX_STAT_POINTS_PER_STAT)
     }
 
     /**

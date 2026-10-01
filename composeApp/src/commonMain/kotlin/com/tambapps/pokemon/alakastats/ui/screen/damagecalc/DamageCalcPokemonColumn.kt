@@ -1,21 +1,29 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.content_paste
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +39,7 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.DropdownField
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
+import com.tambapps.pokemon.alakastats.ui.composables.SelectPokemonDialog
 import com.tambapps.pokemon.alakastats.ui.composables.SuggestionTextField
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
@@ -41,6 +50,7 @@ import com.tambapps.pokemon.champions.data.ChampionsDex
 import com.tambapps.pokemon.champions.engine.Battlefield
 import com.tambapps.pokemon.champions.engine.Status
 import com.tambapps.pokemon.champions.engine.returnsDefenderMove
+import org.jetbrains.compose.resources.painterResource
 
 private val PICKABLE_POKEMON_NAME_VALUES: List<String> by lazy { PICKABLE_POKEMON_NAMES.map { it.value } }
 
@@ -61,7 +71,7 @@ internal fun DamageCalcPokemonColumn(
     field: Battlefield,
     modifier: Modifier = Modifier,
 ) {
-    var showTeamPokemonDialog by remember { mutableStateOf(false) }
+    var showPasteDialog by remember { mutableStateOf(false) }
     MyCard(modifier = modifier, gradientBackgroundColors = cardGradientColors) {
         Column(
             Modifier.typeTint(state, side, diagonalLength = TYPE_TINT_LENGTH).padding(12.dp),
@@ -92,108 +102,12 @@ internal fun DamageCalcPokemonColumn(
                     sprite()
                 }
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CatalogTextField(
-                    label = "Pokémon",
-                    value = ChampionsDex.speciesOrNull(state.name)?.name?.value ?: state.name.value,
-                    catalog = PICKABLE_POKEMON_NAME_VALUES,
-                    onValueSelected = { state.selectSpecies(PokemonName(it)) },
-                    suggestionLeadingContent = { PokemonSprite(PokemonName(it), Modifier.size(32.dp)) },
-                    modifier = Modifier.weight(1f),
-                )
+            // the team on the right of the set's fields, to switch between its pokemon in one click
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                SetFields(state, onPasteClick = { showPasteDialog = true }, Modifier.weight(1f))
                 if (team != null) {
-                    TextButton(onClick = { showTeamPokemonDialog = true }) {
-                        Text("From Team")
-                    }
+                    TeamPokemonButtons(team, state, side)
                 }
-            }
-            if (state.availableForms.size > 1) {
-                DropdownField(
-                    label = "Form",
-                    selected = state.form,
-                    options = state.availableForms,
-                    optionText = { it.pretty },
-                    onSelect = { state.selectForm(it) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                CatalogTextField(
-                    label = "Ability",
-                    value = state.ability,
-                    catalog = ABILITY_NAMES,
-                    onValueSelected = { state.ability = it },
-                    modifier = Modifier.weight(1f),
-                )
-                // only for the abilities the source calculator has an "ability on" toggle for
-                if (state.hasAbilityToggle) {
-                    FilterChip(
-                        selected = state.isAbilityActive,
-                        onClick = { state.isAbilityActive = !state.isAbilityActive },
-                        label = { Text("Active", maxLines = 1, softWrap = false) },
-                        // the default selected color barely stands out on the card
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primary,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                        ),
-                    )
-                }
-            }
-            // the ability settings the source calculator shows for these abilities only
-            when (state.resolvedAbility) {
-                Ability.RIVALRY -> DropdownField(
-                    label = "Rivalry",
-                    selected = state.rivalry,
-                    options = RivalryRelation.entries,
-                    optionText = { it.displayName },
-                    onSelect = { state.rivalry = it },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Ability.SUPREME_OVERLORD -> DropdownField(
-                    label = "Fainted Allies",
-                    selected = state.faintedAllyCount,
-                    options = FAINTED_ALLY_COUNTS.toList(),
-                    optionText = ::faintedAlliesText,
-                    onSelect = { state.faintedAllyCount = it },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                else -> {}
-            }
-            CatalogTextField(
-                label = "Item",
-                value = state.item,
-                catalog = ITEM_NAMES,
-                onValueSelected = { state.item = it },
-                allowBlank = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DropdownField(
-                    label = "Nature",
-                    selected = state.nature,
-                    options = NATURES,
-                    optionText = { it.effectDisplayName() },
-                    onSelect = { state.nature = it },
-                    modifier = Modifier.weight(1f),
-                )
-                DropdownField(
-                    label = "Status",
-                    selected = state.status,
-                    options = Status.entries,
-                    optionText = { it.displayName },
-                    onSelect = { state.status = it },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-            if (state.status == Status.BADLY_POISONED) {
-                DropdownField(
-                    label = "Toxic Damage",
-                    selected = state.toxicCounter,
-                    options = TOXIC_COUNTERS.toList(),
-                    optionText = ::toxicCounterText,
-                    onSelect = { state.toxicCounter = it },
-                    modifier = Modifier.fillMaxWidth(),
-                )
             }
             StatPointsHeader(state)
             val finalSpeed = state.finalSpeed(field, side)
@@ -221,14 +135,162 @@ internal fun DamageCalcPokemonColumn(
             }
         }
     }
-    if (showTeamPokemonDialog && team != null) {
-        SelectTeamPokemonDialog(
-            team = team,
-            onSelect = { state.fillFrom(it) },
-            onDismissRequest = { showTeamPokemonDialog = false },
+    if (showPasteDialog) {
+        // the same as the mobile layout's: a pokemon name or a pokepaste
+        SelectPokemonDialog(
+            onSelect = { state.selectSpecies(it) },
+            onDismissRequest = { showPasteDialog = false },
+            title = "Paste ${side.displayName}",
+            confirmButtonText = "Fill",
+            allPokemons = PICKABLE_POKEMON_NAMES,
+            onPokepasteSelect = { state.fillFrom(it) },
+            // the pokemon name is typed in the column's text field
+            label = "Pokepaste",
         )
     }
 }
+
+/**
+ * The fields of the pokemon's set: species (or a pokepaste), form, ability, item, nature, status
+ */
+@Composable
+private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, modifier: Modifier = Modifier) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            CatalogTextField(
+                label = "Pokémon",
+                value = ChampionsDex.speciesOrNull(state.name)?.name?.value ?: state.name.value,
+                catalog = PICKABLE_POKEMON_NAME_VALUES,
+                onValueSelected = { state.selectSpecies(PokemonName(it)) },
+                suggestionLeadingContent = { PokemonSprite(PokemonName(it), Modifier.size(32.dp)) },
+                modifier = Modifier.weight(1f),
+            )
+            OutlinedButton(onClick = onPasteClick, contentPadding = PaddingValues(horizontal = 12.dp)) {
+                Icon(painterResource(Res.drawable.content_paste), contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("From Paste", maxLines = 1, softWrap = false)
+            }
+        }
+        if (state.availableForms.size > 1) {
+            DropdownField(
+                label = "Form",
+                selected = state.form,
+                options = state.availableForms,
+                optionText = { it.pretty },
+                onSelect = { state.selectForm(it) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            CatalogTextField(
+                label = "Ability",
+                value = state.ability,
+                catalog = ABILITY_NAMES,
+                onValueSelected = { state.ability = it },
+                modifier = Modifier.weight(1f),
+            )
+            // only for the abilities the source calculator has an "ability on" toggle for
+            if (state.hasAbilityToggle) {
+                FilterChip(
+                    selected = state.isAbilityActive,
+                    onClick = { state.isAbilityActive = !state.isAbilityActive },
+                    label = { Text("Active", maxLines = 1, softWrap = false) },
+                    // the default selected color barely stands out on the card
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                )
+            }
+        }
+        // the ability settings the source calculator shows for these abilities only
+        when (state.resolvedAbility) {
+            Ability.RIVALRY -> DropdownField(
+                label = "Rivalry",
+                selected = state.rivalry,
+                options = RivalryRelation.entries,
+                optionText = { it.displayName },
+                onSelect = { state.rivalry = it },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Ability.SUPREME_OVERLORD -> DropdownField(
+                label = "Fainted Allies",
+                selected = state.faintedAllyCount,
+                options = FAINTED_ALLY_COUNTS.toList(),
+                optionText = ::faintedAlliesText,
+                onSelect = { state.faintedAllyCount = it },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            else -> {}
+        }
+        CatalogTextField(
+            label = "Item",
+            value = state.item,
+            catalog = ITEM_NAMES,
+            onValueSelected = { state.item = it },
+            allowBlank = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            DropdownField(
+                label = "Nature",
+                selected = state.nature,
+                options = NATURES,
+                optionText = { it.effectDisplayName() },
+                onSelect = { state.nature = it },
+                modifier = Modifier.weight(1f),
+            )
+            DropdownField(
+                label = "Status",
+                selected = state.status,
+                options = Status.entries,
+                optionText = { it.displayName },
+                onSelect = { state.status = it },
+                modifier = Modifier.weight(1f),
+            )
+        }
+        if (state.status == Status.BADLY_POISONED) {
+            DropdownField(
+                label = "Toxic Damage",
+                selected = state.toxicCounter,
+                options = TOXIC_COUNTERS.toList(),
+                optionText = ::toxicCounterText,
+                onSelect = { state.toxicCounter = it },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+/**
+ * One button per pokemon of the team, filling this pokemon with its set. The one whose set this pokemon still has is
+ * highlighted
+ */
+@Composable
+private fun TeamPokemonButtons(team: Teamlytics, state: DamageCalcPokemonState, side: DamageCalcSide) {
+    Column(verticalArrangement = Arrangement.spacedBy(TEAM_BUTTONS_SPACING)) {
+        team.pokePaste.pokemons.forEach { pokemon ->
+            OutlinedCard(
+                onClick = { state.fillFrom(pokemon) },
+                border = if (state.hasSetOf(pokemon)) BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                else CardDefaults.outlinedCardBorder(),
+                modifier = Modifier.size(TEAM_SPRITE_SIZE + 8.dp),
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    // like the header's sprite, the attacker faces right, towards its target
+                    PokemonSprite(
+                        pokemon.name,
+                        Modifier.size(TEAM_SPRITE_SIZE),
+                        facingDirection = if (side == DamageCalcSide.ATTACKER) FacingDirection.RIGHT else FacingDirection.LEFT,
+                    )
+                }
+            }
+        }
+    }
+}
+
+private val TEAM_SPRITE_SIZE = 64.dp
+private val TEAM_BUTTONS_SPACING = 8.dp
 
 @Composable
 private fun StatPointsHeader(state: DamageCalcPokemonState) {
