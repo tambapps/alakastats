@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,19 +27,20 @@ internal fun DamageCalcScreenMobile(viewModel: DamageCalcViewModel) {
     Column(
         Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .safeContentPadding()
+            .systemBarsPadding()
     ) {
+        // a compact top bar, to leave room for the calc
         Box(Modifier.fillMaxWidth()) {
-            BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
+            BackIconButton(navigator, Modifier.align(Alignment.CenterStart).size(40.dp))
             Text(
                 "Damage Calc",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.Center)
                     .clickable { viewModel.scrollToTopSignal.emit() }
             )
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(4.dp))
         DamageCalc(viewModel, Modifier.weight(1f))
     }
 }
