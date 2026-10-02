@@ -209,6 +209,34 @@ class DamageCalcPokemonState(
     // Supreme Overlord: how many allies already fainted, only relevant with the Supreme Overlord ability
     var faintedAllyCount by mutableStateOf(0)
 
+    /**
+     * Whether a battle setting was changed (see [resetBattleState])
+     */
+    val hasBattleState: Boolean
+        get() = boosts.values.any { it != 0 } || status != Status.HEALTHY || currentHp != maxHp ||
+            (maxHp == null && currentHpPercent != 100) ||
+            criticalMoveIndexes.values.any { it } || powerDoubledMoveIndexes.values.any { it } ||
+            stackCounts.values.any { it != 0 } || faintedAllyCount != 0 ||
+            isAbilityActive != resolvedAbility.isActiveByDefault
+
+    /**
+     * Reset what changes during a battle, keeping the set (species, form, ability, item, nature, stat points, moves):
+     * boosts, status, current HP, the moves' crit, 2x BP and stack settings, the ability's toggle and fainted allies
+     */
+    fun resetBattleState() {
+        boosts.clear()
+        status = Status.HEALTHY
+        toxicCounter = 1
+        resetCurrentHp()
+        criticalMoveIndexes.clear()
+        powerDoubledMoveIndexes.clear()
+        stackCounts.clear()
+        faintedAllyCount = 0
+        // only when changed, as it syncs what the ability sets on the field
+        val isActiveByDefault = resolvedAbility.isActiveByDefault
+        if (isAbilityActive != isActiveByDefault) isAbilityActive = isActiveByDefault
+    }
+
     val totalStatPoints get() = statPoints.values.sum()
     // can be negative, the max total is not enforced
     val remainingStatPoints get() = MAX_TOTAL_STAT_POINTS - totalStatPoints

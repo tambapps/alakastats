@@ -1,5 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.restart_alt
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -57,6 +60,7 @@ import com.tambapps.pokemon.champions.engine.Battlefield
 import com.tambapps.pokemon.champions.engine.Status
 import com.tambapps.pokemon.champions.engine.returnsDefenderMove
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.painterResource
 
 private val hpColor = Color(0xFF4CAF50)
 
@@ -151,6 +155,7 @@ internal fun DamageCalcPokemonPanel(
         }
         // needed on both sides, as some moves depend on the attacker's current HP
         CurrentHpSlider(state)
+        ResetBattleStateButton(state, Modifier.fillMaxWidth())
         // on both sides for symmetry: the defender's moves are the ones calculated after a swap
         state.moves.forEachIndexed { index, move ->
             val selectableHitCounts = state.selectableHitCounts(index)
@@ -641,6 +646,22 @@ internal fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat, finalSp
 
 private val BOOST_CHIP_WIDTH = 60.dp
 private val FINAL_STAT_WIDTH = 44.dp
+
+/**
+ * Button resetting the battle settings of [state] (boosts, status, HP...), enabled only when one was changed
+ */
+@Composable
+internal fun ResetBattleStateButton(state: DamageCalcPokemonState, modifier: Modifier = Modifier) {
+    OutlinedButton(
+        onClick = { state.resetBattleState() },
+        enabled = state.hasBattleState,
+        modifier = modifier,
+    ) {
+        Icon(painterResource(Res.drawable.restart_alt), contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(8.dp))
+        Text("Reset Battle State", maxLines = 1, softWrap = false)
+    }
+}
 
 // like the source calculator, e.g. "3/16"
 internal fun toxicCounterText(counter: Int) = "$counter/16"

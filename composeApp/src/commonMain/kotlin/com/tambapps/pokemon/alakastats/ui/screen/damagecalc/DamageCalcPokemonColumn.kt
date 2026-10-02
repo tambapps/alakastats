@@ -140,6 +140,7 @@ internal fun DamageCalcPokemonColumn(
                 }
                 CurrentHpField(state)
             }
+            ResetBattleStateButton(state, Modifier.align(Alignment.End))
             Text("Moves", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             state.moves.forEachIndexed { index, move ->
                 MoveRow(state, index, move)
