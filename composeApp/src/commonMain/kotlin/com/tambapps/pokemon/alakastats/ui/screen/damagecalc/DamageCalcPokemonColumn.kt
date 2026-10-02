@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -121,26 +122,31 @@ internal fun DamageCalcPokemonColumn(
                 }
             }
             // the team next to the set's fields, to switch between its pokemon in one click. On the side of the field
-            // (right of the attacker, left of the defender), mirrored like the header
+            // (right of the attacker, left of the defender), mirrored like the header. The stats and the HP are next to
+            // it too, the team being taller than the set's fields alone
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (team != null && !isAttacker) {
                     TeamPokemonButtons(team, state, side)
                 }
-                SetFields(state, onPasteClick = { showPasteDialog = true }, Modifier.weight(1f))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SetFields(state, onPasteClick = { showPasteDialog = true })
+                    // separating the stats from the set's fields
+                    Spacer(Modifier.height(8.dp))
+                    StatPointsHeader(state)
+                    val finalSpeed = state.finalSpeed(field, side)
+                    STATS.forEach { StatPointsSlider(state, it, finalSpeed) }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.weight(1f)) {
+                            CurrentHpSlider(state)
+                        }
+                        CurrentHpField(state)
+                    }
+                    ResetBattleStateButton(state, Modifier.align(Alignment.End))
+                }
                 if (team != null && isAttacker) {
                     TeamPokemonButtons(team, state, side)
                 }
             }
-            StatPointsHeader(state)
-            val finalSpeed = state.finalSpeed(field, side)
-            STATS.forEach { StatPointsSlider(state, it, finalSpeed) }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.weight(1f)) {
-                    CurrentHpSlider(state)
-                }
-                CurrentHpField(state)
-            }
-            ResetBattleStateButton(state, Modifier.align(Alignment.End))
             Text("Moves", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             state.moves.forEachIndexed { index, move ->
                 MoveRow(state, index, move)
