@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
+import com.tambapps.pokemon.alakastats.ui.theme.onSurfaceVariantDark
+import com.tambapps.pokemon.alakastats.ui.theme.onSurfaceVariantLight
 import com.tambapps.pokemon.alakastats.ui.theme.surfaceVariantDark
 import com.tambapps.pokemon.alakastats.ui.theme.surfaceVariantLight
 import kotlinx.coroutines.CoroutineScope
@@ -33,9 +35,15 @@ private val darkSuccessColor = Color(0xFF059600)
 private val darkWarningColor = Color(0xFFB86000)
 private val lightWarningColor = Color(0xFFFF9800)
 
+/**
+ * The colors of a snackbar. The text color must be set with the background: the default one (inverseOnSurface) is
+ * meant for the default background (inverseSurface)
+ */
+data class SnackBarColors(val container: Color, val content: Color)
+
 class SnackBar(
     private val state: SnackbarHostState,
-    private val backgroundColorState: MutableState<Color>,
+    private val colorsState: MutableState<SnackBarColors>,
     private val isDarkTheme: Boolean
 ) {
     enum class Severity {
@@ -55,23 +63,23 @@ class SnackBar(
 
     // not thread safe because it changes color
     suspend fun showNow(message: String, type: Severity = Severity.INFO) {
-        backgroundColorState.value = backgroundColor(type)
+        colorsState.value = colors(type)
         state.showSnackbar(message)
     }
 
 
-    private fun backgroundColor(type: Severity) = if(isDarkTheme)
+    private fun colors(type: Severity) = if(isDarkTheme)
         when(type) {
-            Severity.INFO -> surfaceVariantDark
-            Severity.WARNING -> darkWarningColor
-            Severity.ERROR -> darkErrorColor
-            Severity.SUCCESS -> darkSuccessColor
+            Severity.INFO -> SnackBarColors(surfaceVariantDark, onSurfaceVariantDark)
+            Severity.WARNING -> SnackBarColors(darkWarningColor, Color.White)
+            Severity.ERROR -> SnackBarColors(darkErrorColor, Color.White)
+            Severity.SUCCESS -> SnackBarColors(darkSuccessColor, Color.White)
         }
     else when(type) {
-        Severity.INFO -> surfaceVariantLight
-        Severity.WARNING -> lightWarningColor
-        Severity.ERROR -> Color.Red
-        Severity.SUCCESS -> Color.Green
+        Severity.INFO -> SnackBarColors(surfaceVariantLight, onSurfaceVariantLight)
+        Severity.WARNING -> SnackBarColors(lightWarningColor, Color.Black)
+        Severity.ERROR -> SnackBarColors(Color.Red, Color.White)
+        Severity.SUCCESS -> SnackBarColors(Color.Green, Color.Black)
     }
 }
 
@@ -80,9 +88,9 @@ fun SnackBarContext(
     content: @Composable () -> Unit
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
-    val backgroundColorState = remember { mutableStateOf(Color.Transparent) }
+    val colorsState = remember { mutableStateOf(SnackBarColors(Color.Transparent, Color.Unspecified)) }
     val isDarkTheme = isDarkThemeEnabled()
-    val snackBar = remember { SnackBar(snackBarHostState, backgroundColorState, isDarkTheme) }
+    val snackBar = remember { SnackBar(snackBarHostState, colorsState, isDarkTheme) }
     CompositionLocalProvider(LocalSnackBar provides snackBar) {
         Box(modifier = Modifier.fillMaxSize()) {
             content()
@@ -96,9 +104,9 @@ fun SnackBarContext(
                 snackbar = { data ->
                     Snackbar(
                         snackbarData = data,
-                        // apparently only containerColor works. I can't control the text color
-                        containerColor = backgroundColorState.value,
-                        )
+                        containerColor = colorsState.value.container,
+                        contentColor = colorsState.value.content,
+                    )
                 }
             )
         }

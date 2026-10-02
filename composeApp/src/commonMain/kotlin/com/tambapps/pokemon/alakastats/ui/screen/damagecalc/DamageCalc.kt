@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.service.MoveTypeImage
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
@@ -143,7 +144,7 @@ internal fun CopyCalcButton(result: DamageCalcResult.Success) {
             if (copyToClipboard(clipboard, label = "Damage calc", text = result.description)) {
                 snackbar.show("Copied to clipboard")
             } else {
-                snackbar.show("Copy to clipboard not supported")
+                snackbar.show("Copy to clipboard not supported", SnackBar.Severity.ERROR)
             }
         }
     }) {
