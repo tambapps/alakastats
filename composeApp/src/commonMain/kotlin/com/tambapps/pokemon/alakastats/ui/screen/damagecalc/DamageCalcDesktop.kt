@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +51,7 @@ import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 
 private const val SCROLL_TO_TOP_DURATION_MILLIS = 300
 private val PADDING = 12.dp
+private const val USELESS_MOVE_ALPHA = 0.5f
 
 /**
  * The damage calc on wide screens: the results of every move of both pokemon on top, then the attacker, the field and
@@ -160,12 +162,17 @@ private fun DesktopCompactResult(viewModel: DamageCalcViewModel) {
             )
             when (result) {
                 is DamageCalcResult.Success -> {
-                    Text(result.damagePercentText, style = MaterialTheme.typography.titleMedium, maxLines = 1)
-                    DamageRangeBar(
-                        currentHpFraction = result.currentHpFraction,
-                        damageFractionRange = result.damageFractionRange,
-                        modifier = Modifier.weight(1f),
-                    )
+                    Text(result.shownDamageText, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                    // no bar when there's no damage to show
+                    if (result.dealsNoDamage) {
+                        Spacer(Modifier.weight(1f))
+                    } else {
+                        DamageRangeBar(
+                            currentHpFraction = result.currentHpFraction,
+                            damageFractionRange = result.damageFractionRange,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                     Text(
                         result.koChanceText,
                         style = MaterialTheme.typography.bodyMedium,
@@ -262,7 +269,9 @@ private fun MoveResultCard(
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
         else CardDefaults.outlinedCardBorder(),
     ) {
-        Column(Modifier.padding(8.dp)) {
+        // dimmed when the move deals no damage (an immunity, a status move...), so that the moves that do stand out
+        val isUseless = result is DamageCalcResult.Error || (result as? DamageCalcResult.Success)?.dealsNoDamage == true
+        Column(Modifier.padding(8.dp).alpha(if (isUseless) USELESS_MOVE_ALPHA else 1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (moveType != null) {
                     MoveTypeImage(moveType, Modifier.size(MOVE_TYPE_ICON_SIZE))
@@ -278,12 +287,14 @@ private fun MoveResultCard(
             }
             when (result) {
                 is DamageCalcResult.Success -> {
-                    Text(result.damagePercentText, style = MaterialTheme.typography.bodyMedium)
-                    DamageRangeBar(
-                        currentHpFraction = result.currentHpFraction,
-                        damageFractionRange = result.damageFractionRange,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
-                    )
+                    Text(result.shownDamageText, style = MaterialTheme.typography.bodyMedium)
+                    if (!result.dealsNoDamage) {
+                        DamageRangeBar(
+                            currentHpFraction = result.currentHpFraction,
+                            damageFractionRange = result.damageFractionRange,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                        )
+                    }
                     Text(result.koChanceText, style = MaterialTheme.typography.bodySmall, maxLines = 2)
                 }
                 is DamageCalcResult.Error -> Text(

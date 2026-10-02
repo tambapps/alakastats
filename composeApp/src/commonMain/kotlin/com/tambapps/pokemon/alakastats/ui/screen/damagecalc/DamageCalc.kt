@@ -100,15 +100,19 @@ internal fun DamageResultHeader(
             when (val result = viewModel.result) {
                 is DamageCalcResult.Success -> {
                     Text(
-                        "${result.damageRangeText} (${result.damagePercentText})",
+                        if (result.dealsNoDamage) result.shownDamageText
+                        else "${result.damageRangeText} (${result.damagePercentText})",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
-                    DamageRangeBar(
-                        currentHpFraction = result.currentHpFraction,
-                        damageFractionRange = result.damageFractionRange,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
-                    )
+                    // no bar when there's no damage to show
+                    if (!result.dealsNoDamage) {
+                        DamageRangeBar(
+                            currentHpFraction = result.currentHpFraction,
+                            damageFractionRange = result.damageFractionRange,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                        )
+                    }
                     Text(result.koChanceText, style = MaterialTheme.typography.bodyMedium)
                 }
                 is DamageCalcResult.Error -> Text(

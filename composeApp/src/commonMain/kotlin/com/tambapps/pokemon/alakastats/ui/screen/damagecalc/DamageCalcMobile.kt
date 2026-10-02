@@ -146,7 +146,7 @@ private fun CompactDamageResult(viewModel: DamageCalcViewModel) {
             when (val result = viewModel.result) {
                 is DamageCalcResult.Success -> {
                     Text(
-                        result.damagePercentText,
+                        result.shownDamageText,
                         maxLines = 1,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,

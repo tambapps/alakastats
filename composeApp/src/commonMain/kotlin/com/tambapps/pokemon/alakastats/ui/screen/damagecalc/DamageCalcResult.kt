@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.champions.data.Move
 import com.tambapps.pokemon.champions.engine.BattlePokemon
+import com.tambapps.pokemon.champions.engine.KoChance
 import com.tambapps.pokemon.champions.engine.MoveDamageResult
 
 sealed interface DamageCalcResult {
@@ -20,17 +21,33 @@ sealed interface DamageCalcResult {
     ) : DamageCalcResult {
         val hits get() = damage.hits.size
         val isImmune get() = damage.hits.all { it.typeEffectiveness == 0.0 }
+        // an immunity, or a fixed damage of 0
+        val dealsNoDamage get() = damage.koChance.kind == KoChance.Kind.NO_DAMAGE
 
         val damageRangeText get() = "${damage.minDamage} - ${damage.maxDamage}"
         val damagePercentText get() =
             "${formatPercent(damage.minDamage, defender.maxHp)} - ${formatPercent(damage.maxDamage, defender.maxHp)}%"
 
         /**
+         * The damage shown on the result: the percentages, or what makes it deal none (clearer than "0 - 0%")
+         */
+        val shownDamageText get() = when {
+            isImmune -> "Immune"
+            dealsNoDamage -> "No damage"
+            else -> damagePercentText
+        }
+
+        /**
          * The KO chance shown on the result: the source calculator's text, counting the hazards and end-of-turn effects
          * of the defender's side (e.g. "guaranteed 3HKO after Sitrus Berry recovery", see [MoveDamageResult.koChance]),
-         * except for an immunity, where the source's "No damage for you" is replaced by a clearer text
+         * except where it's replaced by a clearer text: an immunity (the source's "No damage for you") and a move not
+         * KOing in the max uses looked at (the source's "possibly the worst move ever")
          */
-        val koChanceText get() = if (isImmune) "doesn't affect ${defender.species.name.value}" else damage.koChance.text
+        val koChanceText get() = when {
+            isImmune -> "doesn't affect ${defender.species.name.value}"
+            damage.koChance.kind == KoChance.Kind.NO_KO_IN_MAX_USES -> "${KoChance.MAX_KO_USES + 1}HKO or more"
+            else -> damage.koChance.text
+        }
 
         // fractions of the defender's max HP, for the HP bar
         val currentHpFraction get() = defender.hp.toFloat() / defender.maxHp
