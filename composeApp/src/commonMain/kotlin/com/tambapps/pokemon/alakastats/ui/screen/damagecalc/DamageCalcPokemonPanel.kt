@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
@@ -30,10 +33,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.Nature
@@ -599,7 +607,13 @@ private fun boostText(boost: Int) = if (boost > 0) "+$boost" else boost.toString
  * @param finalSpeed the speed the calc uses (see [DamageCalcPokemonState.finalSpeed]), shown instead of the speed stat
  */
 @Composable
-internal fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat, finalSpeed: Int?) {
+internal fun StatPointsSlider(
+    state: DamageCalcPokemonState,
+    stat: Stat,
+    finalSpeed: Int?,
+    // whether the stat points can also be typed (desktop)
+    editableStatPoints: Boolean = false,
+) {
     val statPoints = state.getStatPoints(stat)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(stat.abbreviation, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.width(48.dp))
@@ -609,12 +623,16 @@ internal fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat, finalSp
             valueRange = 0f..MAX_STAT_POINTS_PER_STAT.toFloat(),
             modifier = Modifier.weight(1f)
         )
-        Text(
-            statPoints.toString(),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.End,
-            modifier = Modifier.width(32.dp)
-        )
+        if (editableStatPoints) {
+            StatPointsField(statPoints, onStatPointsChange = { state.setStatPoints(stat, it) })
+        } else {
+            Text(
+                statPoints.toString(),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.End,
+                modifier = Modifier.width(32.dp)
+            )
+        }
         // the final stat, "-" if the species isn't known to Champions. For the speed, the one the calc uses, colored when
         // something changes it (boosts, Choice Scarf, Tailwind...)
         val statValue = state.stats?.get(stat)
@@ -642,6 +660,36 @@ internal fun StatPointsSlider(state: DamageCalcPokemonState, stat: Stat, finalSp
             )
         }
     }
+}
+
+/**
+ * Text field to type stat points, with the size of the text it replaces: no label, an underline showing it's editable.
+ * Only a value from 0 to the max stat points is applied, the field being in error until then (and back to the current
+ * value once left)
+ */
+@Composable
+private fun StatPointsField(statPoints: Int, onStatPointsChange: (Int) -> Unit) {
+    var text by remember(statPoints) { mutableStateOf(statPoints.toString()) }
+    val isValid = text.toIntOrNull()?.let { it in 0..MAX_STAT_POINTS_PER_STAT } == true
+    val color = if (isValid) LocalContentColor.current else MaterialTheme.colorScheme.error
+    val underlineColor = if (isValid) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.error
+    BasicTextField(
+        value = text,
+        onValueChange = { newText ->
+            text = newText.filter { it.isDigit() }.take(2)
+            text.toIntOrNull()?.takeIf { it in 0..MAX_STAT_POINTS_PER_STAT }?.let(onStatPointsChange)
+        },
+        singleLine = true,
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = color, textAlign = TextAlign.End),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier = Modifier.width(32.dp)
+            .onFocusChanged { if (!it.isFocused) text = statPoints.toString() }
+            .drawBehind {
+                val y = size.height
+                drawLine(underlineColor, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx())
+            },
+    )
 }
 
 private val BOOST_CHIP_WIDTH = 60.dp

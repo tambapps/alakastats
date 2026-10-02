@@ -134,7 +134,7 @@ internal fun DamageCalcPokemonColumn(
                     Spacer(Modifier.height(8.dp))
                     StatPointsHeader(state)
                     val finalSpeed = state.finalSpeed(field, side)
-                    STATS.forEach { StatPointsSlider(state, it, finalSpeed) }
+                    STATS.forEach { StatPointsSlider(state, it, finalSpeed, editableStatPoints = true) }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.weight(1f)) {
                             CurrentHpSlider(state)
