@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
 import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.arrow_forward
 import alakastats.composeapp.generated.resources.content_copy
 import alakastats.composeapp.generated.resources.swap_horiz
 import androidx.compose.foundation.Canvas
@@ -38,7 +39,9 @@ import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.MoveTypeImage
+import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
@@ -127,6 +130,26 @@ internal fun DamageResultHeader(
                 (viewModel.result as? DamageCalcResult.Success)?.let { CopyCalcButton(it) }
             }
         }
+    }
+}
+
+/**
+ * The sprites of the pokemon using the selected move and of its target, facing each other (the user on the left), for
+ * the compact results where no other part of the screen shows both
+ */
+@Composable
+internal fun CalcPokemonSprites(viewModel: DamageCalcViewModel) {
+    val user = viewModel.pokemonState(viewModel.selectedMoveSide)
+    val target = viewModel.pokemonState(viewModel.selectedMoveSide.opponent)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        PokemonSprite(user.form, Modifier.size(SMALL_SPRITE_SIZE), facingDirection = FacingDirection.RIGHT)
+        Icon(
+            painter = painterResource(Res.drawable.arrow_forward),
+            contentDescription = "attacks",
+            tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
+            modifier = Modifier.size(14.dp),
+        )
+        PokemonSprite(target.form, Modifier.size(SMALL_SPRITE_SIZE), facingDirection = FacingDirection.LEFT)
     }
 }
 

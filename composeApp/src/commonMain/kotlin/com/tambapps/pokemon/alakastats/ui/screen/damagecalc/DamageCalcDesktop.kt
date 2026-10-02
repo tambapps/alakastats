@@ -143,13 +143,15 @@ private fun DesktopCompactResult(viewModel: DamageCalcViewModel) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // the column headers showing the pokemon are scrolled away too
+            CalcPokemonSprites(viewModel)
             viewModel.moveTypeOf(viewModel.selectedMoveSide, viewModel.selectedMoveIndex)?.let {
                 MoveTypeImage(it, Modifier.size(MOVE_TYPE_ICON_SIZE))
             }
             val moveName = viewModel.pokemonState(viewModel.selectedMoveSide).moves
                 .getOrNull(viewModel.selectedMoveIndex).orEmpty()
             Text(
-                "${calcTitle(viewModel, viewModel.selectedMoveSide)} · $moveName",
+                moveName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,

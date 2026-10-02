@@ -1,7 +1,5 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
-import alakastats.composeapp.generated.resources.Res
-import alakastats.composeapp.generated.resources.arrow_forward
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -14,14 +12,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -39,12 +35,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
-import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
-import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
 
 private val PAGES = listOf("Attacker", "Field", "Defender")
 private const val FIELD_PAGE = 1
@@ -139,8 +132,6 @@ internal fun DamageCalcMobile(
  */
 @Composable
 private fun CompactDamageResult(viewModel: DamageCalcViewModel) {
-    val user = viewModel.pokemonState(viewModel.selectedMoveSide)
-    val target = viewModel.pokemonState(viewModel.selectedMoveSide.opponent)
     Row(
         Modifier.fillMaxWidth()
             // back to the full result, like clicking the screen's title
@@ -149,15 +140,7 @@ private fun CompactDamageResult(viewModel: DamageCalcViewModel) {
             .padding(horizontal = 12.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // facing each other, the user on the left
-        PokemonSprite(user.form, Modifier.size(MOBILE_SPRITE_SIZE), facingDirection = FacingDirection.RIGHT)
-        Icon(
-            painter = painterResource(Res.drawable.arrow_forward),
-            contentDescription = "attacks",
-            tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
-            modifier = Modifier.size(14.dp),
-        )
-        PokemonSprite(target.form, Modifier.size(MOBILE_SPRITE_SIZE), facingDirection = FacingDirection.LEFT)
+        CalcPokemonSprites(viewModel)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             when (val result = viewModel.result) {
