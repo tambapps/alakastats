@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -142,6 +143,8 @@ private fun CompactDamageResult(viewModel: DamageCalcViewModel) {
     val target = viewModel.pokemonState(viewModel.selectedMoveSide.opponent)
     Row(
         Modifier.fillMaxWidth()
+            // back to the full result, like clicking the screen's title
+            .clickable { viewModel.scrollToTopSignal.emit() }
             .background(MaterialTheme.colorScheme.primaryContainer)
             .padding(horizontal = 12.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
