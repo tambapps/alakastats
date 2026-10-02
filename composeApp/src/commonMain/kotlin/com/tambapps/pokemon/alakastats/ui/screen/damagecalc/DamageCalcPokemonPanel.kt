@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -482,23 +484,69 @@ private fun PropertyRow(
  * Chip displaying the number of hits considered for a multi-hit move, opening a wheel picker to select another one
  */
 @Composable
-internal fun HitCountChip(hits: Int, selectableHitCounts: IntRange, onHitCountSelected: (Int) -> Unit) {
-    var showDialog by remember { mutableStateOf(false) }
-    FilterChip(
-        selected = true,
-        onClick = { showDialog = true },
-        label = { Text("×$hits", maxLines = 1, softWrap = false) },
-        modifier = Modifier.width(HIT_COUNT_CHIP_WIDTH),
-    )
-    if (showDialog) {
-        val hitCounts = selectableHitCounts.toList()
+internal fun HitCountChip(
+    hits: Int,
+    selectableHitCounts: IntRange,
+    onHitCountSelected: (Int) -> Unit,
+    // a menu instead of a wheel picker, on desktop
+    useMenu: Boolean = false,
+) {
+    PickerChip(
+        title = "Number of Hits",
+        items = selectableHitCounts.toList(),
+        selected = hits,
+        itemToText = { if (it == 1) "1 hit" else "$it hits" },
+        onPicked = onHitCountSelected,
+        useMenu = useMenu,
+    ) { onClick ->
+        FilterChip(
+            selected = true,
+            onClick = onClick,
+            label = { Text("×$hits", maxLines = 1, softWrap = false) },
+            modifier = Modifier.width(HIT_COUNT_CHIP_WIDTH),
+        )
+    }
+}
+
+/**
+ * A chip ([chip], given what to do when clicked) to pick one of [items], in a menu under it or in a wheel picker dialog
+ */
+@Composable
+private fun <T> PickerChip(
+    title: String,
+    items: List<T>,
+    selected: T,
+    itemToText: (T) -> String,
+    onPicked: (T) -> Unit,
+    useMenu: Boolean,
+    chip: @Composable (onClick: () -> Unit) -> Unit,
+) {
+    var show by remember { mutableStateOf(false) }
+    // the box anchors the menu under the chip
+    Box {
+        chip { show = true }
+        if (useMenu) {
+            DropdownMenu(expanded = show, onDismissRequest = { show = false }) {
+                items.forEach { item ->
+                    DropdownMenuItem(
+                        text = { Text(itemToText(item), fontWeight = if (item == selected) FontWeight.Bold else null) },
+                        onClick = {
+                            onPicked(item)
+                            show = false
+                        },
+                    )
+                }
+            }
+        }
+    }
+    if (show && !useMenu) {
         WheelPickerDialog(
-            title = "Number of Hits",
-            items = hitCounts,
-            initialIndex = hitCounts.indexOf(hits).coerceAtLeast(0),
-            itemToText = { if (it == 1) "1 hit" else "$it hits" },
-            onPicked = onHitCountSelected,
-            onDismissRequest = { showDialog = false },
+            title = title,
+            items = items,
+            initialIndex = items.indexOf(selected).coerceAtLeast(0),
+            itemToText = itemToText,
+            onPicked = onPicked,
+            onDismissRequest = { show = false },
         )
     }
 }
@@ -513,22 +561,25 @@ internal fun faintedAlliesText(count: Int) = "$count down"
  * opening a wheel picker to select another count
  */
 @Composable
-internal fun StackCountChip(moveName: String, count: Int, onCountSelected: (Int) -> Unit) {
-    var showDialog by remember { mutableStateOf(false) }
-    FilterChip(
-        selected = count > 0,
-        onClick = { showDialog = true },
-        label = { Text(stackCountText(moveName, count), maxLines = 1, softWrap = false) },
-    )
-    if (showDialog) {
-        val counts = STACK_COUNTS.toList()
-        WheelPickerDialog(
-            title = stackCountTitle(moveName),
-            items = counts,
-            initialIndex = counts.indexOf(count).coerceAtLeast(0),
-            itemToText = { stackCountText(moveName, it) },
-            onPicked = onCountSelected,
-            onDismissRequest = { showDialog = false },
+internal fun StackCountChip(
+    moveName: String,
+    count: Int,
+    onCountSelected: (Int) -> Unit,
+    // a menu instead of a wheel picker, on desktop
+    useMenu: Boolean = false,
+) {
+    PickerChip(
+        title = stackCountTitle(moveName),
+        items = STACK_COUNTS.toList(),
+        selected = count,
+        itemToText = { stackCountText(moveName, it) },
+        onPicked = onCountSelected,
+        useMenu = useMenu,
+    ) { onClick ->
+        FilterChip(
+            selected = count > 0,
+            onClick = onClick,
+            label = { Text(stackCountText(moveName, count), maxLines = 1, softWrap = false) },
         )
     }
 }
@@ -611,8 +662,8 @@ internal fun StatPointsSlider(
     state: DamageCalcPokemonState,
     stat: Stat,
     finalSpeed: Int?,
-    // whether the stat points can also be typed (desktop)
-    editableStatPoints: Boolean = false,
+    // on desktop, the stat points can also be typed and the boost is picked in a menu (not a wheel picker)
+    isDesktop: Boolean = false,
 ) {
     val statPoints = state.getStatPoints(stat)
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -623,7 +674,7 @@ internal fun StatPointsSlider(
             valueRange = 0f..MAX_STAT_POINTS_PER_STAT.toFloat(),
             modifier = Modifier.weight(1f)
         )
-        if (editableStatPoints) {
+        if (isDesktop) {
             StatPointsField(statPoints, onStatPointsChange = { state.setStatPoints(stat, it) })
         } else {
             Text(
@@ -657,6 +708,7 @@ internal fun StatPointsSlider(
                 dialogTitle = "${stat.shortLabel} Stage",
                 compact = true,
                 modifier = boostModifier,
+                useMenu = isDesktop,
             )
         }
     }

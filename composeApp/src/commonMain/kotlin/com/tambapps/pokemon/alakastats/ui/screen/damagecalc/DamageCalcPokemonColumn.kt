@@ -134,7 +134,7 @@ internal fun DamageCalcPokemonColumn(
                     Spacer(Modifier.height(8.dp))
                     StatPointsHeader(state)
                     val finalSpeed = state.finalSpeed(field, side)
-                    STATS.forEach { StatPointsSlider(state, it, finalSpeed, editableStatPoints = true) }
+                    STATS.forEach { StatPointsSlider(state, it, finalSpeed, isDesktop = true) }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.weight(1f)) {
                             CurrentHpSlider(state)
@@ -388,6 +388,7 @@ private fun MoveRow(state: DamageCalcPokemonState, index: Int, move: String) {
                     moveName = championsMove.name.value,
                     count = state.stackCount(index),
                     onCountSelected = { state.setStackCount(index, it) },
+                    useMenu = true,
                 )
             }
             state.selectableHitCounts(index)?.let {
@@ -395,6 +396,7 @@ private fun MoveRow(state: DamageCalcPokemonState, index: Int, move: String) {
                     hits = state.hitCount(index),
                     selectableHitCounts = it,
                     onHitCountSelected = { hits -> state.selectHitCount(index, hits) },
+                    useMenu = true,
                 )
             }
         }
