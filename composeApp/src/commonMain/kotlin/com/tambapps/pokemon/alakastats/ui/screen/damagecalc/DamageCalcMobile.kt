@@ -1,19 +1,26 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.arrow_forward
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -31,9 +38,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
+import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 
 private val PAGES = listOf("Attacker", "Field", "Defender")
 private const val FIELD_PAGE = 1
@@ -122,23 +132,59 @@ internal fun DamageCalcMobile(
     }
 }
 
+/**
+ * The result of the selected move, pinned once the result header is scrolled away: the sprites of the pokemon using it
+ * and of its target (as no page shows both), the damage and the KO chance
+ */
 @Composable
 private fun CompactDamageResult(viewModel: DamageCalcViewModel) {
-    val text = when (val result = viewModel.result) {
-        is DamageCalcResult.Success -> "${result.damagePercentText} · ${result.koChanceText}"
-        is DamageCalcResult.Error -> result.message
-    }
-    Text(
-        text,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
-        modifier = Modifier.fillMaxWidth()
+    val user = viewModel.pokemonState(viewModel.selectedMoveSide)
+    val target = viewModel.pokemonState(viewModel.selectedMoveSide.opponent)
+    Row(
+        Modifier.fillMaxWidth()
             .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    )
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // facing each other, the user on the left
+        PokemonSprite(user.form, Modifier.size(MOBILE_SPRITE_SIZE), facingDirection = FacingDirection.RIGHT)
+        Icon(
+            painter = painterResource(Res.drawable.arrow_forward),
+            contentDescription = "attacks",
+            tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
+            modifier = Modifier.size(14.dp),
+        )
+        PokemonSprite(target.form, Modifier.size(MOBILE_SPRITE_SIZE), facingDirection = FacingDirection.LEFT)
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            when (val result = viewModel.result) {
+                is DamageCalcResult.Success -> {
+                    Text(
+                        result.damagePercentText,
+                        maxLines = 1,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                    Text(
+                        result.koChanceText,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+                is DamageCalcResult.Error -> Text(
+                    result.message,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
+        }
+    }
 }
 
 @Composable

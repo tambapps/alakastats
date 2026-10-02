@@ -60,9 +60,8 @@ import kotlin.math.roundToInt
 
 private val hpColor = Color(0xFF4CAF50)
 
-// the team's buttons, under the pokemon button
-private val TEAM_BUTTON_HEIGHT = 52.dp
-private val TEAM_SPRITE_SIZE = 44.dp
+// also the size of the sprites of the compact result
+internal val MOBILE_SPRITE_SIZE = 54.dp
 private val TEAM_BUTTONS_SPACING = 6.dp
 
 @Composable
@@ -109,8 +108,8 @@ internal fun DamageCalcPokemonPanel(
                 team.pokePaste.pokemons.forEach { pokemon ->
                     TeamPokemonButton(
                         pokemon, state, side,
-                        spriteSize = TEAM_SPRITE_SIZE,
-                        modifier = Modifier.weight(1f).height(TEAM_BUTTON_HEIGHT),
+                        spriteSize = MOBILE_SPRITE_SIZE,
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
