@@ -38,8 +38,7 @@ import kotlinx.coroutines.launch
 private val PAGES = listOf("Attacker", "Field", "Defender")
 private const val FIELD_PAGE = 1
 private const val RESULT_HEADER_ITEM_INDEX = 0
-private const val MOVES_ITEM_INDEX = 1
-private const val STICKY_HEADER_ITEM_INDEX = 2
+private const val STICKY_HEADER_ITEM_INDEX = 1
 private const val SCROLL_TO_TOP_DURATION_MILLIS = 300
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -81,13 +80,7 @@ internal fun DamageCalcMobile(
                     .padding(horizontal = 8.dp, vertical = 8.dp)
             )
         }
-        item {
-            MoveChips(
-                viewModel,
-                Modifier.onSizeChanged { itemHeights[MOVES_ITEM_INDEX] = it.height }
-                    .padding(horizontal = 8.dp)
-            )
-        }
+        // the moves are pinned with the compact result, to switch moves without scrolling back up
         stickyHeader {
             Column(
                 Modifier.fillMaxWidth()
@@ -97,6 +90,7 @@ internal fun DamageCalcMobile(
                 AnimatedVisibility(visible = isResultHeaderScrolledAway) {
                     CompactDamageResult(viewModel)
                 }
+                MoveChips(viewModel, Modifier.padding(horizontal = 8.dp))
                 PageTabRow(pagerState, scope)
             }
         }
