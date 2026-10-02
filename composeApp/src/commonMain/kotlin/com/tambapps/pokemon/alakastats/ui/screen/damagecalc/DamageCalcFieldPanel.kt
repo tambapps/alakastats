@@ -63,7 +63,9 @@ internal fun SideConditions.withNextSpikesLayer() = copy(spikesLayers = (spikesL
 internal fun DamageCalcFieldPanel(
     field: Battlefield,
     onFieldChange: (Battlefield) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // the names of the sides' pokemon, e.g. "Pokémon 1" on desktop where either can attack
+    sideName: (DamageCalcSide) -> String = { it.displayName },
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         ChoiceSection("Format", BattleFormat.entries, field.format, { it.displayName }) { onFieldChange(field.copy(format = it)) }
@@ -83,7 +85,7 @@ internal fun DamageCalcFieldPanel(
         }
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
             SideConditionsColumn(
-                title = "Attacker Side",
+                title = "${sideName(DamageCalcSide.ATTACKER)} Side",
                 conditions = field.attackerSide,
                 onConditionsChange = { onFieldChange(field.copy(attackerSide = it)) },
                 alignment = Alignment.Start,
@@ -91,7 +93,7 @@ internal fun DamageCalcFieldPanel(
             )
             VerticalDivider(Modifier.padding(horizontal = 8.dp))
             SideConditionsColumn(
-                title = "Defender Side",
+                title = "${sideName(DamageCalcSide.DEFENDER)} Side",
                 conditions = field.defenderSide,
                 onConditionsChange = { onFieldChange(field.copy(defenderSide = it)) },
                 alignment = Alignment.End,

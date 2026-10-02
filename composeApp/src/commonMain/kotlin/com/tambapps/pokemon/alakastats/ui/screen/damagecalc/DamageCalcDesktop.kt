@@ -1,7 +1,5 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
-import alakastats.composeapp.generated.resources.Res
-import alakastats.composeapp.generated.resources.swap_horiz
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -27,8 +25,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -51,7 +47,6 @@ import com.tambapps.pokemon.alakastats.ui.service.MoveTypeImage
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
-import org.jetbrains.compose.resources.painterResource
 
 private const val SCROLL_TO_TOP_DURATION_MILLIS = 300
 private val PADDING = 12.dp
@@ -118,6 +113,7 @@ private fun DesktopEditors(viewModel: DamageCalcViewModel, team: Teamlytics?) {
                 field = viewModel.field,
                 onFieldChange = { viewModel.updateField(it) },
                 modifier = Modifier.padding(12.dp),
+                sideName = { it.desktopName },
             )
         }
         DamageCalcPokemonColumn(
@@ -209,13 +205,8 @@ private fun DesktopResultCard(viewModel: DamageCalcViewModel, modifier: Modifier
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
+                // no swap button: the moves of both pokemon are already calculated
                 (result as? DamageCalcResult.Success)?.let { CopyCalcButton(it) }
-                IconButton(onClick = { viewModel.swap() }) {
-                    Icon(
-                        painter = painterResource(Res.drawable.swap_horiz),
-                        contentDescription = "Swap attacker and defender"
-                    )
-                }
             }
             when (result) {
                 // the text copied, selectable to copy only a part of it

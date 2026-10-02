@@ -111,7 +111,7 @@ internal fun DamageCalcPokemonColumn(
                     megaSwitch()
                     Spacer(Modifier.weight(1f))
                 }
-                Text(side.displayName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(side.desktopName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 if (!isAttacker) {
                     Spacer(Modifier.width(8.dp))
                     sprite()
@@ -162,7 +162,7 @@ internal fun DamageCalcPokemonColumn(
         SelectPokemonDialog(
             onSelect = { state.selectSpecies(it) },
             onDismissRequest = { showPasteDialog = false },
-            title = "Paste ${side.displayName}",
+            title = "Paste ${side.desktopName}",
             confirmButtonText = "Fill",
             allPokemons = PICKABLE_POKEMON_NAMES,
             onPokepasteSelect = { state.fillFrom(it) },

@@ -70,6 +70,9 @@ enum class DamageCalcSide(val displayName: String, val keyStats: List<Stat>) {
     DEFENDER("Defender", listOf(Stat.HP, Stat.DEFENSE, Stat.SPECIAL_DEFENSE));
 
     val opponent get() = if (this == ATTACKER) DEFENDER else ATTACKER
+
+    // on desktop, where the moves of both pokemon can be calculated, neither is only the attacker
+    val desktopName get() = if (this == ATTACKER) "Pokémon 1" else "Pokémon 2"
 }
 
 val Status.displayName get() = when (this) {
