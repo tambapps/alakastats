@@ -19,7 +19,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 
 @Composable
-internal fun DamageCalcScreenDesktop(viewModel: DamageCalcViewModel) {
+internal fun DamageCalcScreenDesktop(viewModel: DamageCalcViewModel, showBackButton: Boolean) {
     val navigator = LocalNavigator.currentOrThrow
     Column(
         modifier = Modifier
@@ -28,7 +28,9 @@ internal fun DamageCalcScreenDesktop(viewModel: DamageCalcViewModel) {
             .fillMaxSize(),
     ) {
         Box(Modifier.fillMaxWidth()) {
-            BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
+            if (showBackButton) {
+                BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
+            }
             Text(
                 "Damage Calc",
                 style = MaterialTheme.typography.headlineMedium,

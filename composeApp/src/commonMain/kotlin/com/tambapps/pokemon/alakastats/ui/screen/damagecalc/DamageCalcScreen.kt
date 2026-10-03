@@ -7,14 +7,24 @@ import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
 object DamageCalcScreen : Screen {
     @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<DamageCalcViewModel>()
-        val isCompact = LocalIsCompact.current
+    override fun Content() = DamageCalcScreenContent(koinScreenModel(), showBackButton = true)
+}
 
-        if (isCompact) {
-            DamageCalcScreenMobile(viewModel)
-        } else {
-            DamageCalcScreenDesktop(viewModel)
-        }
+/**
+ * The damage calc as the app's only screen (e.g. the web app's damage-calc page), so without a back button
+ */
+object StandaloneDamageCalcScreen : Screen {
+    @Composable
+    override fun Content() = DamageCalcScreenContent(koinScreenModel(), showBackButton = false)
+}
+
+@Composable
+private fun DamageCalcScreenContent(viewModel: DamageCalcViewModel, showBackButton: Boolean) {
+    val isCompact = LocalIsCompact.current
+
+    if (isCompact) {
+        DamageCalcScreenMobile(viewModel, showBackButton)
+    } else {
+        DamageCalcScreenDesktop(viewModel, showBackButton)
     }
 }
