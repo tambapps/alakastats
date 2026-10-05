@@ -28,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -52,6 +53,8 @@ import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
 private const val SCROLL_TO_TOP_DURATION_MILLIS = 300
 private val PADDING = 12.dp
 private const val USELESS_MOVE_ALPHA = 0.5f
+private const val MOVES_PER_ROW = 2
+private val MOVE_HALVES_SPACING = 40.dp
 
 /**
  * The damage calc on wide screens: the results of every move of both pokemon on top, then the attacker, the field and
@@ -228,27 +231,48 @@ private fun DesktopResultCard(viewModel: DamageCalcViewModel, modifier: Modifier
                     color = MaterialTheme.colorScheme.error
                 )
             }
-            val moveResults = viewModel.moveResults
-            DamageCalcSide.entries.forEach { side ->
-                val pokemon = viewModel.pokemonState(side)
-                Text(
-                    "${pokemon.form.pretty}'s moves",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+            // each pokemon's moves above its column: pokemon 1's on the left, pokemon 2's on the right
+            Row(Modifier.height(IntrinsicSize.Min)) {
+                SideMoveResults(viewModel, DamageCalcSide.ATTACKER, Modifier.weight(1f))
+                // separating the two pokemon, like the field's sides
+                VerticalDivider(
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f),
+                    modifier = Modifier.padding(horizontal = MOVE_HALVES_SPACING / 2),
                 )
-                // cards of equal height, even for a move without result (shorter)
-                Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    moveResults[side].orEmpty().forEachIndexed { index, moveResult ->
-                        MoveResultCard(
-                            moveName = pokemon.moves.getOrNull(index).orEmpty(),
-                            moveType = viewModel.moveTypeOf(side, index),
-                            result = moveResult,
-                            isSelected = viewModel.selectedMoveSide == side && viewModel.selectedMoveIndex == index,
-                            onClick = { viewModel.selectMove(side, index) },
-                            modifier = Modifier.weight(1f).fillMaxHeight(),
-                        )
-                    }
+                SideMoveResults(viewModel, DamageCalcSide.DEFENDER, Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+/**
+ * The results of the moves of the [side] pokemon, 2 per row in the order of its moves, to select one
+ */
+@Composable
+private fun SideMoveResults(viewModel: DamageCalcViewModel, side: DamageCalcSide, modifier: Modifier = Modifier) {
+    val pokemon = viewModel.pokemonState(side)
+    val moveResults = viewModel.moveResults[side].orEmpty()
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            "${pokemon.form.pretty}'s moves",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+        moveResults.indices.chunked(MOVES_PER_ROW).forEach { indexes ->
+            // cards of equal height, even for a move without result (shorter)
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                indexes.forEach { index ->
+                    MoveResultCard(
+                        moveName = pokemon.moves.getOrNull(index).orEmpty(),
+                        moveType = viewModel.moveTypeOf(side, index),
+                        result = moveResults[index],
+                        isSelected = viewModel.selectedMoveSide == side && viewModel.selectedMoveIndex == index,
+                        onClick = { viewModel.selectMove(side, index) },
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                    )
                 }
+                // a last row with a single move keeps the cards' width
+                repeat(MOVES_PER_ROW - indexes.size) { Spacer(Modifier.weight(1f)) }
             }
         }
     }
