@@ -26,6 +26,8 @@ private const val MIN_CHARS_TO_SUGGEST = 3
  *
  * @param suggestionText the text of a suggestion, used both to match the input and to fill the text field
  * @param suggestionLeadingContent optional content displayed before a suggestion's text (e.g. a sprite)
+ * @param onSuggestionPicked called when a suggestion is picked, after the text field is filled with it, e.g. for a
+ * dialog to save it right away instead of waiting for its confirm button
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +44,7 @@ fun <T> SuggestionTextField(
     maxSuggestions: Int = DEFAULT_MAX_SUGGESTIONS,
     suggestionLeadingContent: (@Composable (T) -> Unit)? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
+    onSuggestionPicked: ((T) -> Unit)? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
     var textFieldValue by remember(value) {
@@ -89,6 +92,7 @@ fun <T> SuggestionTextField(
                         textFieldValue = TextFieldValue(text = text, selection = TextRange(text.length))
                         onValueChange(text)
                         expanded = false
+                        onSuggestionPicked?.invoke(suggestion)
                     }
                 )
             }

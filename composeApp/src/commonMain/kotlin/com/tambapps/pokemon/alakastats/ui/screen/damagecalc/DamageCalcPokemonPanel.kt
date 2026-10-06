@@ -369,6 +369,11 @@ private fun EditWithSuggestionsDialog(
                 isError = error != null,
                 supportingText = error?.let { ({ Text(it) }) },
                 suggestionLeadingContent = catalog.suggestionLeadingContent,
+                // a picked suggestion is saved right away, it can only be valid
+                onSuggestionPicked = { suggestion ->
+                    onSave.invoke(suggestion)
+                    onDismissRequest.invoke()
+                },
             )
         },
         confirmButton = {
