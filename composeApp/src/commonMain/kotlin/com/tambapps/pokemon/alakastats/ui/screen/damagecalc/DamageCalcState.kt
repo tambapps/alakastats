@@ -120,14 +120,6 @@ fun formsOf(pokemonName: PokemonName): List<PokemonName> =
     ChampionsDex.speciesOrNull(pokemonName)?.let { species -> ChampionsDex.formsOf(species).map { it.name } }
         ?: listOf(pokemonName)
 
-val Battlefield.summary get() = listOfNotNull(
-    format.displayName,
-    if (weather == Weather.NONE) "No weather" else weather.displayName,
-    if (terrain == Terrain.NONE) null else "${terrain.displayName} Terrain",
-    if (isGravity) "Gravity" else null,
-    if (isFairyAura) "Fairy Aura" else null,
-).joinToString(" · ")
-
 /**
  * The editable state of a pokemon in the damage calc. Kept separate from the engine's [BattlePokemon]
  * as it can be in states the engine can't represent (e.g. a species unknown to Champions), and holds

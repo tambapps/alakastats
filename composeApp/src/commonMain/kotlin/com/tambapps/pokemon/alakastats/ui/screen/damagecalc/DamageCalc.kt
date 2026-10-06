@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
@@ -45,6 +46,7 @@ import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
+import com.tambapps.pokemon.champions.data.ChampionsDex
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
@@ -124,14 +126,15 @@ internal fun DamageResultHeader(
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f)) {
+                    // only what of the field changed the damage, also the link to the field page
                     Text(
-                        viewModel.field.summary,
+                        viewModel.result.asSuccess()?.fieldEffectsText.orEmpty(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable(onClick = onFieldSummaryClick)
                     )
                 }
-                (viewModel.result as? DamageCalcResult.Success)?.let { CopyCalcButton(it) }
+                viewModel.result.asSuccess()?.let { CopyCalcButton(it) }
             }
         }
     }
@@ -228,11 +231,19 @@ private fun damageBarColors() = if (isDarkThemeEnabled()) {
 internal val MOVE_TYPE_ICON_SIZE = 24.dp
 
 /**
+ * The type icon of a suggested move, nothing for a name that isn't a Champions move
+ */
+@Composable
+internal fun MoveSuggestionTypeIcon(moveName: String) {
+    ChampionsDex.moveOrNull(MoveName(moveName))?.let { MoveTypeImage(it.type, Modifier.size(MOVE_TYPE_ICON_SIZE)) }
+}
+
+/**
  * The type of the move at [index] of the [side] pokemon: the one it has in the calc when there's one (e.g. Weather Ball
  * in Rain), else its own
  */
 internal fun DamageCalcViewModel.moveTypeOf(side: DamageCalcSide, index: Int): PokeType? =
-    (moveResults[side]?.getOrNull(index) as? DamageCalcResult.Success)?.moveType
+    moveResults[side]?.getOrNull(index)?.asSuccess()?.moveType
         ?: pokemonState(side).championsMove(index)?.type
 
 @Composable

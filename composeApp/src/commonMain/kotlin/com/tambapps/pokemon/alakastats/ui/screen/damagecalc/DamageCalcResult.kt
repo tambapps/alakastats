@@ -5,8 +5,14 @@ import com.tambapps.pokemon.champions.data.Move
 import com.tambapps.pokemon.champions.engine.BattlePokemon
 import com.tambapps.pokemon.champions.engine.KoChance
 import com.tambapps.pokemon.champions.engine.MoveDamageResult
+import com.tambapps.pokemon.champions.engine.description.CalcFacts
 
 sealed interface DamageCalcResult {
+
+    /**
+     * This result if the calc could be run, null otherwise
+     */
+    fun asSuccess(): Success? = this as? Success
 
     /**
      * A calc that could be run
@@ -48,6 +54,33 @@ sealed interface DamageCalcResult {
             damage.koChance.kind == KoChance.Kind.NO_KO_IN_MAX_USES -> "${KoChance.MAX_KO_USES + 1}HKO or more"
             else -> damage.koChance.text
         }
+
+        /**
+         * The field conditions that changed the damage, e.g. "Sun" only for a move it boosts or weakens, "Light Screen"
+         * only for a special move: the ones the calc's description mentions (see [CalcFacts]), and the spread move
+         * reduction in doubles. Hazards and end-of-turn effects aren't, being in [koChanceText]
+         */
+        val fieldEffects: List<String> get() {
+            val facts = damage.facts
+            return listOfNotNull(
+                facts.weather?.displayName,
+                facts.terrain?.let { "${it.displayName} Terrain" },
+                facts.screen?.displayName,
+                "Spread (×0.75)".takeIf { facts.isSpread },
+                "Helping Hand".takeIf { facts.isHelpingHand },
+                "Power Spot".takeIf { facts.isPowerSpot },
+                "Battery".takeIf { facts.isBattery },
+                "Steely Spirit".takeIf { facts.isAllySteelySpirit },
+                "Charge".takeIf { facts.isCharged },
+                "Fairy Aura".takeIf { facts.isFairyAuraBoosted },
+                "Gravity".takeIf { facts.isGravity },
+                "Friend Guard".takeIf { facts.isFriendGuard },
+                "Protect".takeIf { facts.isQuarteredByProtect },
+            )
+        }
+
+        // empty when nothing of the field changed the damage
+        val fieldEffectsText get() = fieldEffects.joinToString(" · ")
 
         // fractions of the defender's max HP, for the HP bar
         val currentHpFraction get() = defender.hp.toFloat() / defender.maxHp

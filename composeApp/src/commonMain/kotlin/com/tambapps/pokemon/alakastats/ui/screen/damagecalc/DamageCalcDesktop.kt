@@ -218,7 +218,7 @@ private fun DesktopResultCard(viewModel: DamageCalcViewModel, modifier: Modifier
                     modifier = Modifier.weight(1f)
                 )
                 // no swap button: the moves of both pokemon are already calculated
-                (result as? DamageCalcResult.Success)?.let { CopyCalcButton(it) }
+                result.asSuccess()?.let { CopyCalcButton(it) }
             }
             when (result) {
                 // the text copied, selectable to copy only a part of it
@@ -294,7 +294,7 @@ private fun MoveResultCard(
         else CardDefaults.outlinedCardBorder(),
     ) {
         // dimmed when the move deals no damage (an immunity, a status move...), so that the moves that do stand out
-        val isUseless = result is DamageCalcResult.Error || (result as? DamageCalcResult.Success)?.dealsNoDamage == true
+        val isUseless = result.asSuccess()?.dealsNoDamage ?: true
         Column(Modifier.padding(8.dp).alpha(if (isUseless) USELESS_MOVE_ALPHA else 1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (moveType != null) {

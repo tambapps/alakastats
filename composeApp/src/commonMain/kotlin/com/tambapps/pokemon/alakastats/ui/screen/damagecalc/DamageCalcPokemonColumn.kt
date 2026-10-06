@@ -36,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
@@ -56,7 +55,6 @@ import com.tambapps.pokemon.champions.engine.Status
 import com.tambapps.pokemon.champions.engine.returnsDefenderMove
 import org.jetbrains.compose.resources.painterResource
 
-private val PICKABLE_POKEMON_NAME_VALUES: List<String> by lazy { PICKABLE_POKEMON_NAMES.map { it.value } }
 
 private val TYPE_TINT_LENGTH = 320.dp
 
@@ -189,9 +187,8 @@ private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, m
             CatalogTextField(
                 label = "Pokémon",
                 value = ChampionsDex.speciesOrNull(state.name)?.name?.value ?: state.name.value,
-                catalog = PICKABLE_POKEMON_NAME_VALUES,
+                catalog = POKEMON_CATALOG,
                 onValueSelected = { state.selectSpecies(PokemonName(it)) },
-                suggestionLeadingContent = { PokemonSprite(PokemonName(it), Modifier.size(32.dp)) },
                 modifier = Modifier.weight(1f),
             )
             OutlinedButton(onClick = onPasteClick, contentPadding = PaddingValues(horizontal = 12.dp)) {
@@ -214,7 +211,7 @@ private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, m
             CatalogTextField(
                 label = "Ability",
                 value = state.ability,
-                catalog = ABILITY_NAMES,
+                catalog = ABILITY_CATALOG,
                 onValueSelected = { state.ability = it },
                 modifier = Modifier.weight(1f),
             )
@@ -255,9 +252,8 @@ private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, m
         CatalogTextField(
             label = "Item",
             value = state.item,
-            catalog = ITEM_NAMES,
+            catalog = ITEM_CATALOG,
             onValueSelected = { state.item = it },
-            allowBlank = true,
             modifier = Modifier.fillMaxWidth(),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -361,12 +357,8 @@ private fun MoveRow(state: DamageCalcPokemonState, index: Int, move: String) {
         CatalogTextField(
             label = "Move ${index + 1}",
             value = move,
-            catalog = MOVE_NAMES,
+            catalog = MOVE_CATALOG,
             onValueSelected = { state.setMove(index, it) },
-            allowBlank = true,
-            suggestionLeadingContent = { name ->
-                ChampionsDex.moveOrNull(MoveName(name))?.let { MoveTypeImage(it.type, Modifier.size(MOVE_TYPE_ICON_SIZE)) }
-            },
             leadingIcon = championsMove?.let { { MoveTypeImage(it.type, Modifier.size(MOVE_TYPE_ICON_SIZE)) } },
             modifier = Modifier.weight(1f),
         )
@@ -427,37 +419,31 @@ private fun CurrentHpField(state: DamageCalcPokemonState) {
 
 /**
  * Text field suggesting the values of [catalog]. A value is only applied once it's one of [catalog] (with its
- * spelling), the field being in error until then
- *
- * @param allowBlank whether an empty value can be applied (e.g. no item)
+ * spelling, see [SuggestionCatalog.match]), the field being in error until then
  */
 @Composable
 private fun CatalogTextField(
     label: String,
     value: String,
-    catalog: List<String>,
+    catalog: SuggestionCatalog,
     onValueSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
-    allowBlank: Boolean = false,
-    suggestionLeadingContent: (@Composable (String) -> Unit)? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     var text by remember(value) { mutableStateOf(value) }
-    fun matchOf(input: String): String? =
-        if (allowBlank && input.isBlank()) "" else catalog.firstOrNull { it.equals(input.trim(), ignoreCase = true) }
     SuggestionTextField(
         value = text,
         onValueChange = { newText ->
             text = newText
-            val match = matchOf(newText)
+            val match = catalog.match(newText)
             if (match != null && match != value) onValueSelected(match)
         },
-        suggestions = catalog,
+        suggestions = catalog.values,
         suggestionText = { it },
         label = label,
         modifier = modifier,
-        isError = matchOf(text) == null,
-        suggestionLeadingContent = suggestionLeadingContent,
+        isError = catalog.match(text) == null,
+        suggestionLeadingContent = catalog.suggestionLeadingContent,
         leadingIcon = leadingIcon,
     )
 }

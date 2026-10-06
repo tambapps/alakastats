@@ -57,8 +57,6 @@ import com.tambapps.pokemon.alakastats.ui.composables.SelectPokemonDialog
 import com.tambapps.pokemon.alakastats.ui.composables.StatBoostStageChip
 import com.tambapps.pokemon.alakastats.ui.composables.SuggestionTextField
 import com.tambapps.pokemon.champions.data.Ability
-import com.tambapps.pokemon.champions.data.ChampionsDex
-import com.tambapps.pokemon.champions.data.Item
 import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.abbreviation
@@ -309,7 +307,7 @@ internal fun DamageCalcPokemonPanel(
             title = "Edit Ability",
             label = "Ability",
             initialValue = state.ability,
-            suggestions = ABILITY_NAMES,
+            catalog = ABILITY_CATALOG,
             onSave = { state.ability = it },
             onDismissRequest = { showAbilityDialog = false },
         )
@@ -319,10 +317,9 @@ internal fun DamageCalcPokemonPanel(
             title = "Edit Item",
             label = "Item",
             initialValue = state.item,
-            suggestions = ITEM_NAMES,
+            catalog = ITEM_CATALOG,
             onSave = { state.item = it },
             onDismissRequest = { showItemDialog = false },
-            allowEmpty = true,
         )
     }
     editedMoveIndex?.let { index ->
@@ -330,34 +327,25 @@ internal fun DamageCalcPokemonPanel(
             title = "Edit Move",
             label = "Move",
             initialValue = state.moves[index],
-            suggestions = MOVE_NAMES,
+            catalog = MOVE_CATALOG,
             onSave = { state.setMove(index, it) },
             onDismissRequest = { editedMoveIndex = null },
         )
     }
 }
 
-internal val MOVE_NAMES: List<String> by lazy { ChampionsDex.allMoves.map { it.name.value }.sorted() }
-internal val ABILITY_NAMES: List<String> by lazy {
-    Ability.entries.filter { it != Ability.NO_ABILITY }.map { it.displayName }
-}
-internal val ITEM_NAMES: List<String> by lazy { Item.entries.map { it.displayName } }
-
 /**
- * Dialog to edit a value with a text field suggesting the values of [suggestions]. Only a value of
- * [suggestions] can be saved, with the catalog's spelling (e.g. "moonblast" is saved as "Moonblast").
- *
- * @param allowEmpty whether an empty value can be saved (e.g. no item)
+ * Dialog to edit a value with a text field suggesting the values of [catalog]. Only a value of [catalog] can be saved,
+ * with the catalog's spelling (e.g. "moonblast" is saved as "Moonblast"), see [SuggestionCatalog.match]
  */
 @Composable
 private fun EditWithSuggestionsDialog(
     title: String,
     label: String,
     initialValue: String,
-    suggestions: List<String>,
+    catalog: SuggestionCatalog,
     onSave: (String) -> Unit,
     onDismissRequest: () -> Unit,
-    allowEmpty: Boolean = false,
 ) {
     var text by remember { mutableStateOf(initialValue) }
     var error: String? by remember { mutableStateOf(null) }
@@ -374,30 +362,21 @@ private fun EditWithSuggestionsDialog(
                     text = it
                     error = null
                 },
-                suggestions = suggestions,
+                suggestions = catalog.values,
                 suggestionText = { it },
                 label = label,
                 textFieldModifier = Modifier.focusRequester(focusRequester),
                 isError = error != null,
                 supportingText = error?.let { ({ Text(it) }) },
+                suggestionLeadingContent = catalog.suggestionLeadingContent,
             )
         },
         confirmButton = {
             TextButton(
                 onClick = {
-                    val input = text.trim()
-                    if (input.isEmpty()) {
-                        if (allowEmpty) {
-                            onSave.invoke("")
-                            onDismissRequest.invoke()
-                        } else {
-                            error = "$label cannot be empty"
-                        }
-                        return@TextButton
-                    }
-                    val value = suggestions.firstOrNull { it.equals(input, ignoreCase = true) }
+                    val value = catalog.match(text)
                     if (value == null) {
-                        error = "Unknown ${label.lowercase()}"
+                        error = if (text.isBlank()) "$label cannot be empty" else "Unknown ${label.lowercase()}"
                         return@TextButton
                     }
                     onSave.invoke(value)
