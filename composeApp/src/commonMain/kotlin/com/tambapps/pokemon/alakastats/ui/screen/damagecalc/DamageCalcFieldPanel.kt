@@ -1,16 +1,23 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.restart_alt
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -22,6 +29,7 @@ import com.tambapps.pokemon.champions.engine.BattleFormat
 import com.tambapps.pokemon.champions.engine.Battlefield
 import com.tambapps.pokemon.champions.engine.SideConditions
 import com.tambapps.pokemon.champions.engine.Terrain
+import org.jetbrains.compose.resources.painterResource
 
 private class SideConditionToggle(
     val displayName: String,
@@ -63,11 +71,20 @@ internal fun SideConditions.withNextSpikesLayer() = copy(spikesLayers = (spikesL
 internal fun DamageCalcFieldPanel(
     field: Battlefield,
     onFieldChange: (Battlefield) -> Unit,
+    // resets the field's conditions, enabled when canReset
+    onReset: () -> Unit,
+    canReset: Boolean,
     modifier: Modifier = Modifier,
     // the names of the sides' pokemon, e.g. "Pokémon 1" on desktop where either can attack
     sideName: (DamageCalcSide) -> String = { it.displayName },
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        // on top, as it resets almost the whole panel
+        OutlinedButton(onClick = onReset, enabled = canReset, modifier = Modifier.align(Alignment.End)) {
+            Icon(painterResource(Res.drawable.restart_alt), contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text("Reset Field", maxLines = 1, softWrap = false)
+        }
         ChoiceSection("Format", BattleFormat.entries, field.format, { it.displayName }) { onFieldChange(field.copy(format = it)) }
         ChoiceSection("Weather", WEATHERS, field.weather, { it.displayName }) { onFieldChange(field.copy(weather = it)) }
         ChoiceSection("Terrain", Terrain.entries, field.terrain, { it.displayName }) { onFieldChange(field.copy(terrain = it)) }

@@ -117,6 +117,8 @@ private fun DesktopEditors(viewModel: DamageCalcViewModel, team: Teamlytics?) {
             DamageCalcFieldPanel(
                 field = viewModel.field,
                 onFieldChange = { viewModel.updateField(it) },
+                onReset = { viewModel.resetField() },
+                canReset = viewModel.hasFieldState,
                 modifier = Modifier.padding(12.dp),
                 sideName = { it.desktopName },
             )

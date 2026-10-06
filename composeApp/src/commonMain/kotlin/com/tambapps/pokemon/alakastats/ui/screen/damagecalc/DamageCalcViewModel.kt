@@ -49,8 +49,9 @@ class DamageCalcViewModel : ScreenModel {
     var selectedMoveIndex by mutableIntStateOf(0)
     val scrollToTopSignal = VoidSignal()
     // abilities setting the weather/terrain on the field, like the source calculator (e.g. Drought -> Sun)
-    private val weatherSync = AbilityFieldSync(Weather.NONE)
-    private val terrainSync = AbilityFieldSync(Terrain.NONE)
+    // started over when the field is reset
+    private var weatherSync = AbilityFieldSync(Weather.NONE)
+    private var terrainSync = AbilityFieldSync(Terrain.NONE)
     // the Fairy Aura value last set manually, restored when no pokemon has Fairy Aura anymore (the source's lastManualField)
     private var manualFairyAura = false
 
@@ -70,6 +71,36 @@ class DamageCalcViewModel : ScreenModel {
             manualFairyAura = newField.isFairyAura
         }
         field = newField
+    }
+
+    /**
+     * Whether a field condition was changed (see [resetField])
+     */
+    // this.field: in a getter, field is the property's backing field
+    val hasFieldState: Boolean get() = this.field != resetFieldValue()
+
+    /**
+     * Reset the field's conditions (weather, terrain, Gravity, Fairy Aura and both sides' conditions), keeping the
+     * format. What the pokemon's abilities set is set again (e.g. Drought's Sun), like when the calc opens
+     */
+    fun resetField() {
+        weatherSync = AbilityFieldSync(Weather.NONE)
+        terrainSync = AbilityFieldSync(Terrain.NONE)
+        manualFairyAura = false
+        field = Battlefield(format = field.format)
+        onAbilityChange(attacker, isAbilityChange = true)
+        onAbilityChange(defender, isAbilityChange = true)
+    }
+
+    // the field after a reset: as resetField sets it, the defender's weather/terrain winning over the attacker's
+    private fun resetFieldValue(): Battlefield {
+        fun <T> setOnField(set: (DamageCalcPokemonState) -> T?) = set(defender) ?: set(attacker)
+        return Battlefield(
+            format = field.format,
+            weather = setOnField { it.resolvedAbility.weatherSetOnField(it.isAbilityActive) } ?: Weather.NONE,
+            terrain = setOnField { it.resolvedAbility.terrainSetOnField(it.isAbilityActive) } ?: Terrain.NONE,
+            isFairyAura = attacker.resolvedAbility == Ability.FAIRY_AURA || defender.resolvedAbility == Ability.FAIRY_AURA,
+        )
     }
 
     private fun onAbilityChange(pokemon: DamageCalcPokemonState, isAbilityChange: Boolean) {

@@ -115,6 +115,8 @@ internal fun DamageCalcMobile(
                     FIELD_PAGE -> DamageCalcFieldPanel(
                         field = viewModel.field,
                         onFieldChange = { viewModel.updateField(it) },
+                        onReset = { viewModel.resetField() },
+                        canReset = viewModel.hasFieldState,
                         modifier = pageModifier
                     )
                     2 -> DamageCalcPokemonPanel(
