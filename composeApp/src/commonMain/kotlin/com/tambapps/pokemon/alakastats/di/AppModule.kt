@@ -46,6 +46,14 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonM
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsPreviewKStorage
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createSyncStateKStore
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.GoogleOAuthClient
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.OAuthTokenProvider
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.drive.GoogleDriveCloudStorage
+import com.tambapps.pokemon.alakastats.infrastructure.sync.KStoreSyncStateStore
+import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncingTeamlyticsRepository
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
+import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.CloudSyncViewModel
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
@@ -97,11 +105,28 @@ val appModules = listOf(module {
     // need to name them as they have both the same signature after generic type erasure
     single<KStorage<Uuid, TeamlyticsEntity>>(named("teamsStorage")) { createTeamlyticsKStorage() }
     single<KStorage<Uuid, TeamlyticsPreviewEntity>>(named("previewsStorage")) { createTeamlyticsPreviewKStorage() }
-    single<TeamlyticsRepository> {
-        KStoreTeamlyticsRepository(
+    single { GoogleOAuthClient(get(), get()) }
+    single {
+        // only bound on the platforms supporting the cloud sync
+        val tokenProvider = getOrNull<OAuthTokenProvider>()
+        TeamSyncService(
+            cloudStorage = tokenProvider?.let { GoogleDriveCloudStorage(get(), it, get()) },
+            tokenProvider = tokenProvider,
             teamsStorage = get(named("teamsStorage")),
             previewsStorage = get(named("previewsStorage")),
+            stateStore = KStoreSyncStateStore(createSyncStateKStore()),
             pokepasteParser = get(),
+            json = get(),
+        )
+    }
+    single<TeamlyticsRepository> {
+        SyncingTeamlyticsRepository(
+            delegate = KStoreTeamlyticsRepository(
+                teamsStorage = get(named("teamsStorage")),
+                previewsStorage = get(named("previewsStorage")),
+                pokepasteParser = get(),
+            ),
+            syncService = get(),
         )
     }
 
@@ -112,6 +137,7 @@ val appModules = listOf(module {
     singleOf(::TeamlyticsSerializer)
 
     factoryOf(::HomeViewModel)
+    factoryOf(::CloudSyncViewModel)
     factoryOf(::EditTeamViewModel)
     factoryOf(::MatchupPlanEditViewModel)
     factoryOf(::QuizzesViewModel)

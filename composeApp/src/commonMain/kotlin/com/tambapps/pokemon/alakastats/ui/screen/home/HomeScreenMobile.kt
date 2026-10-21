@@ -54,6 +54,7 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
                     modifier = Modifier.size(80.dp).align(Alignment.Center),
                     contentScale = ContentScale.Fit
                 )
+                CloudSyncButton(Modifier.align(Alignment.TopStart))
                 AboutButton(Modifier.align(Alignment.TopEnd))
             }
             Text("Alakastats", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)

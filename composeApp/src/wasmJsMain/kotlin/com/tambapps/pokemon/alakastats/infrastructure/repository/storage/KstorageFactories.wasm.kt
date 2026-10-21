@@ -2,7 +2,9 @@ package com.tambapps.pokemon.alakastats.infrastructure.repository.storage
 
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
+import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncState
 import com.tambapps.pokemon.alakastats.util.Identifiable
+import io.github.xxfast.kstore.KStore
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.download
 import io.github.xxfast.kstore.storage.storeOf
@@ -12,6 +14,9 @@ import kotlin.uuid.Uuid
 actual fun createTeamlyticsKStorage() = createKStorage<Uuid, TeamlyticsEntity>("teamlytics")
 
 actual fun createTeamlyticsPreviewKStorage() = createKStorage<Uuid, TeamlyticsPreviewEntity>("teamlytics-preview")
+
+actual fun createSyncStateKStore(): KStore<SyncState> =
+    storeOf(key = "repositories/sync/state.kstore", enableCache = false)
 
 actual suspend fun downloadToFile(fileName: String, extension: String, bytes: ByteArray): Boolean {
     FileKit.download(bytes, "$fileName.$extension")

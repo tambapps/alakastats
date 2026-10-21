@@ -46,7 +46,9 @@ import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.screen.home.AlakastatsLabel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 
 
 object AboutScreen : Screen {
@@ -124,7 +126,11 @@ private fun AboutAlakastats() = Section(
         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
             append("does not collect any personal data")
         }
-        append(".\nEverything is stored locally on your device (in your browser or on your smartphone).\n\n")
+        append(".\nEverything is stored locally on your device (in your browser or on your smartphone).")
+        if (koinInject<TeamSyncService>().isAvailable) {
+            append(" If you connect your Google Drive, your teams are also saved in a hidden folder of your own Drive, that only Alakastats can access.")
+        }
+        append("\n\n")
 
         append("You can follow me on ")
         withLink(LinkAnnotation.Url("https://x.com/alakastats")) {

@@ -80,6 +80,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.kstore.file)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.playServices.auth)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -122,6 +123,7 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.ktor.client.mock)
         }
         wasmJsMain.dependencies {
             implementation(libs.kstore.storage)

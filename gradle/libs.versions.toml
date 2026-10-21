@@ -26,6 +26,7 @@ coil = "3.4.0"
 kstore = "1.0.0"
 ktor = "3.4.3"
 kmpWheelPicker = "0.3.0"
+playServicesAuth = "21.4.0"
 
 [libraries]
 filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
@@ -66,9 +67,11 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
-ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+ktor-client-contentNegotiation ={ module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinxJson = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
-swmansion-wheelPicker = { module = "com.swmansion.kmpwheelpicker:kmp-wheel-picker", version.ref = "kmpWheelPicker" }
+playServices-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+swmansion-wheelPicker ={ module = "com.swmansion.kmpwheelpicker:kmp-wheel-picker", version.ref = "kmpWheelPicker" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

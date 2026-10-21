@@ -4,5 +4,7 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>GoogleIosClientId</key>
+	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
 </dict>
 </plist>

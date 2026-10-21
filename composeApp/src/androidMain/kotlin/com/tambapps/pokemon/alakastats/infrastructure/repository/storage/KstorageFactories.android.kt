@@ -3,7 +3,9 @@ package com.tambapps.pokemon.alakastats.infrastructure.repository.storage
 import android.content.Context
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
+import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncState
 import com.tambapps.pokemon.alakastats.util.Identifiable
+import io.github.xxfast.kstore.KStore
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.openFileSaver
 import io.github.vinceglb.filekit.write
@@ -19,6 +21,12 @@ import java.io.File
 actual fun createTeamlyticsKStorage() = createKStorage<Uuid, TeamlyticsEntity>("teamlytics")
 
 actual fun createTeamlyticsPreviewKStorage() = createKStorage<Uuid, TeamlyticsPreviewEntity>("teamlytics-previews")
+
+actual fun createSyncStateKStore(): KStore<SyncState> = object : KoinComponent {
+    val context: Context by inject()
+}.let { koinComponent ->
+    storeOf(file = Path(getRepositoryDir(koinComponent.context, "sync").absolutePath, "state.kstore"), enableCache = false, version = 0)
+}
 
 actual suspend fun downloadToFile(fileName: String, extension: String, bytes: ByteArray): Boolean {
     val file = FileKit.openFileSaver(suggestedName = fileName, extension = extension) ?: return false

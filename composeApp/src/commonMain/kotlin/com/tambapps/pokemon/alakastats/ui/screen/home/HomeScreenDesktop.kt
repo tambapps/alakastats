@@ -54,6 +54,7 @@ internal fun HomeScreenDesktop(viewModel: HomeViewModel) {
             Spacer(Modifier.weight(1f))
             AlakastatsLabel()
             Spacer(Modifier.weight(1f))
+            CloudSyncButton()
             AboutButton()
         }
         CatchPhrase()

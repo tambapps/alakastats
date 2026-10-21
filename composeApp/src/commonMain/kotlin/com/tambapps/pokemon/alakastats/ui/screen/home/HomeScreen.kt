@@ -51,12 +51,15 @@ import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import com.tambapps.pokemon.alakastats.ui.screen.about.AboutScreen
+import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.CloudSyncScreen
 import com.tambapps.pokemon.alakastats.ui.screen.damagecalc.DamageCalcScreen
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizzesHomeScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 
 object HomeScreen : Screen {
     @Composable
@@ -64,6 +67,10 @@ object HomeScreen : Screen {
         val viewModel = koinScreenModel<HomeViewModel>()
         LaunchedEffect(Unit) {
             viewModel.loadTeams()
+        }
+        LaunchedEffect(Unit) {
+            // a sync can add, change or delete local teams
+            viewModel.teamsChangedBySync.collect { viewModel.loadTeams() }
         }
         val isCompact = LocalIsCompact.current
 
@@ -238,6 +245,19 @@ internal fun AboutButton(modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.currentOrThrow
     TextButton(onClick = { navigator.push(AboutScreen) }, modifier = modifier) {
         Text("About", style = buttonTextStyle)
+    }
+}
+
+/**
+ * Only shown on the platforms supporting the cloud sync
+ */
+@Composable
+internal fun CloudSyncButton(modifier: Modifier = Modifier) {
+    val syncService = koinInject<TeamSyncService>()
+    if (!syncService.isAvailable) return
+    val navigator = LocalNavigator.currentOrThrow
+    TextButton(onClick = { navigator.push(CloudSyncScreen) }, modifier = modifier) {
+        Text("Sync", style = buttonTextStyle)
     }
 }
 

@@ -2,6 +2,8 @@ package com.tambapps.pokemon.alakastats
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.ui.SnackBarContext
@@ -17,6 +19,11 @@ import org.koin.compose.koinInject
  */
 @Composable
 fun App(startScreen: Screen = HomeScreen) {
+    val syncService = koinInject<TeamSyncService>()
+    LaunchedEffect(Unit) {
+        // syncs only if the user connected a cloud storage
+        syncService.start()
+    }
     AppTheme {
         ProvideIsCompact {
             SnackBarContext {

@@ -19,6 +19,7 @@ import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.downloadToFile
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.getFilePickerSettings
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
@@ -38,9 +39,12 @@ import kotlin.uuid.Uuid
 
 class HomeViewModel(
     private val replayAnalyticsService: ReplayAnalyticsService,
-    private val useCase: ManageTeamlyticsListUseCase
+    private val useCase: ManageTeamlyticsListUseCase,
+    syncService: TeamSyncService,
 ): ScreenModel {
-    
+
+    val teamsChangedBySync = syncService.teamsChanged
+
     val teamlyticsList: SnapshotStateList<TeamlyticsPreview> = mutableStateListOf()
     private val scope = CoroutineScope(Dispatchers.Default)
     
