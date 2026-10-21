@@ -23,12 +23,16 @@ class EditTeamlyticsUseCase(
         pokePaste: PokePaste,
         sdNames: List<UserName>,
         format: Format,
-    ): Either<GetTeamlyticsError, Teamlytics> = teamlyticsRepository.save(team.copy(
-        name = name,
-        pokePaste = pokePaste,
-        sdNames = sdNames,
-        format = format
-    ))
+    ): Either<GetTeamlyticsError, Teamlytics> = teamlyticsRepository.save(
+        team.copy(
+            name = name,
+            pokePaste = pokePaste,
+            sdNames = sdNames,
+            format = format
+        ),
+        // the team as loaded by the edit screen: changes synced in the meantime are merged
+        base = team,
+    )
 
     suspend fun create(
         name: String,

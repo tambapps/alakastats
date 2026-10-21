@@ -14,6 +14,9 @@ import com.tambapps.pokemon.alakastats.domain.transformer.toPreview
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamFingerprint
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamMerger
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamWriteLock
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
@@ -22,6 +25,8 @@ class KStoreTeamlyticsRepository(
     private val teamsStorage: KStorage<Uuid, TeamlyticsEntity>,
     private val previewsStorage: KStorage<Uuid, TeamlyticsPreviewEntity>,
     private val pokepasteParser: PokepasteParser,
+    private val writeLock: TeamWriteLock,
+    private val clock: Clock = Clock.System,
 ): TeamlyticsRepository {
 
     override suspend fun listPreviews() = previewsStorage.listEntities().map { it.toDomain() }
@@ -38,30 +43,36 @@ class KStoreTeamlyticsRepository(
         }
     }
 
-    override suspend fun save(teamlytics: Teamlytics): Either<GetTeamlyticsError, Teamlytics> = either {
-        val savedTeam = teamsStorage.save(teamlytics.copy(lastUpdatedAt = Clock.System.now()).toEntity())
-            .mapLeft { error ->
-                StorageError("Failed to save team. No more space left?", error.throwable)
-            }.bind()
-
-        val winrate = computeWinRatePercentage(teamlytics.sdNames, teamlytics.replays)
-        previewsStorage.save(savedTeam.toPreview(pokepasteParser, winrate))
-            .mapLeft { error ->
-                StorageError("Failed to save team. No more space left?", error.throwable)
+    override suspend fun save(teamlytics: Teamlytics, base: Teamlytics?): Either<GetTeamlyticsError, Teamlytics> = writeLock.withLock {
+        either {
+            val now = clock.now()
+            var entity = teamlytics.copy(lastUpdatedAt = now).toEntity()
+            val stored = base?.let { teamsStorage.get(teamlytics.id) }
+            if (base != null && stored != null && stored.lastUpdatedAt != base.lastUpdatedAt) {
+                // the team changed since the version this one comes from (e.g. a sync brought changes): merged,
+                // so that what was saved in between isn't lost
+                entity = TeamMerger.merge(TeamFingerprint.of(base.toEntity()), entity, stored, localIsNewer = true, now).team
             }
-            .bind()
+            val savedTeam = teamsStorage.save(entity)
+                .mapLeft { error ->
+                    StorageError("Failed to save team. No more space left?", error.throwable)
+                }.bind()
 
-        savedTeam.toDomain(pokepasteParser)
+            val team = savedTeam.toDomain(pokepasteParser)
+            val winrate = computeWinRatePercentage(team.sdNames, team.replays)
+            previewsStorage.save(savedTeam.toPreview(pokepasteParser, winrate))
+                .mapLeft { error ->
+                    StorageError("Failed to save team. No more space left?", error.throwable)
+                }
+                .bind()
+
+            team
+        }
     }
 
-    override suspend fun delete(teamlytics: Teamlytics) {
-        val entity = teamlytics.toEntity()
-        teamsStorage.delete(entity)
-        val winrate = computeWinRatePercentage(teamlytics.sdNames, teamlytics.replays)
-        previewsStorage.delete(entity.toPreview(pokepasteParser, winrate))
-    }
+    override suspend fun delete(teamlytics: Teamlytics) = delete(teamlytics.id)
 
-    override suspend fun delete(id: Uuid) {
+    override suspend fun delete(id: Uuid) = writeLock.withLock {
         teamsStorage.delete(id)
         previewsStorage.delete(id)
     }

@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.infrastructure.sync
 
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.CloudError
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsNotesEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +42,7 @@ class TeamSyncServiceTest {
             stateStore = stateStore,
             pokepasteParser = PokepasteParser(),
             json = json,
+            writeLock = TeamWriteLock(),
             scope = scope,
             clock = clock,
         )
@@ -394,5 +396,120 @@ class TeamSyncServiceTest {
         runCurrent()
 
         assertEquals(1, emissions)
+    }
+
+    /** two devices synced on the same team */
+    private suspend fun TestScope.syncedDevices(team: TeamlyticsEntity): Pair<Device, Device> {
+        val a = device()
+        val b = device()
+        a.save(team)
+        a.service.connect()
+        b.service.connect()
+        return a to b
+    }
+
+    private suspend fun Device.edit(id: Uuid, change: (TeamlyticsEntity) -> TeamlyticsEntity) {
+        tick()
+        save(change(teams.get(id)!!).copy(lastUpdatedAt = clock.now()))
+    }
+
+    @Test
+    fun replaysAddedOfflineOnBothDevicesAreAllKept() = runTest {
+        val team = team("Rain").copy(replays = listOf(replay("r1")))
+        val (a, b) = syncedDevices(team)
+
+        a.edit(team.id) { it.copy(replays = it.replays + replay("fromA")) }
+        b.edit(team.id) { it.copy(replays = it.replays + replay("fromB")) }
+        a.service.sync()
+        val status = assertIs<SyncStatus.Idle>(b.service.sync())
+        a.service.sync()
+
+        val expected = setOf("r1", "fromA", "fromB")
+        assertEquals(expected, b.teams.get(team.id)!!.replays.map { it.reference }.toSet())
+        assertEquals(expected, a.teams.get(team.id)!!.replays.map { it.reference }.toSet())
+        val merge = status.merges.single()
+        assertEquals("Rain", merge.teamName)
+        assertEquals(1, merge.summary.replaysAdded)
+    }
+
+    @Test
+    fun notesEditedOnBothDevicesAreKeptTwice() = runTest {
+        val team = team().copy(notes = TeamlyticsNotesEntity("plan", emptyMap()))
+        val (a, b) = syncedDevices(team)
+
+        a.edit(team.id) { it.copy(notes = TeamlyticsNotesEntity("plan from A", emptyMap())) }
+        b.edit(team.id) { it.copy(notes = TeamlyticsNotesEntity("plan from B", emptyMap())) }
+        a.service.sync()
+        b.service.sync()
+        a.service.sync()
+
+        val expected = "plan from B${TeamMerger.SEPARATOR}plan from A"
+        assertEquals(expected, b.teams.get(team.id)!!.notes?.teamNotes)
+        assertEquals(expected, a.teams.get(team.id)!!.notes?.teamNotes)
+    }
+
+    @Test
+    fun replayDeletedOnOneDeviceButNotedOnTheOtherIsKept() = runTest {
+        val team = team().copy(replays = listOf(replay("r1"), replay("r2")))
+        val (a, b) = syncedDevices(team)
+
+        a.edit(team.id) { it.copy(replays = it.replays.filter { replay -> replay.reference != "r2" }) }
+        b.edit(team.id) { it.copy(replays = it.replays.map { replay -> if (replay.reference == "r2") replay.copy(notes = "great game") else replay }) }
+        a.service.sync()
+        b.service.sync()
+
+        assertEquals("great game", b.teams.get(team.id)!!.replays.single { it.reference == "r2" }.notes)
+    }
+
+    @Test
+    fun mergedTeamIsNotSyncedAgainWithoutChanges() = runTest {
+        val team = team()
+        val (a, b) = syncedDevices(team)
+        a.edit(team.id) { it.copy(replays = listOf(replay("fromA"))) }
+        b.edit(team.id) { it.copy(replays = listOf(replay("fromB"))) }
+        a.service.sync()
+        b.service.sync()
+        val uploads = cloud.uploads
+
+        assertIs<SyncStatus.Idle>(b.service.sync()).also { assertTrue(it.merges.isEmpty()) }
+
+        assertEquals(uploads, cloud.uploads)
+        assertNotNull(b.stateStore.state.entries[team.id]?.fingerprint)
+    }
+
+    @Test
+    fun mergesAreEmittedToTellTheUser() = runTest {
+        val team = team()
+        val (a, b) = syncedDevices(team)
+        val merges = mutableListOf<TeamMerge>()
+        backgroundScope.launch { b.service.merges.collect { merges.add(it) } }
+        runCurrent()
+
+        a.edit(team.id) { it.copy(name = "From A") }
+        b.edit(team.id) { it.copy(replays = listOf(replay("fromB"))) }
+        a.service.sync()
+        b.service.sync()
+        runCurrent()
+
+        // the name changed on A only: taken by B
+        assertEquals("From A", merges.single().teamName)
+    }
+
+    @Test
+    fun localChangeMadeDuringASyncIsMergedInsteadOfOverwritten() = runTest {
+        val team = team().copy(replays = listOf(replay("r1")))
+        val (a, b) = syncedDevices(team)
+        a.edit(team.id) { it.copy(replays = it.replays + replay("fromA")) }
+        a.service.sync()
+        // B's sync plans a download (B hasn't changed the team), but B saves while it downloads
+        cloud.onDownload = {
+            cloud.onDownload = null
+            b.edit(team.id) { it.copy(replays = it.replays + replay("fromB")) }
+        }
+
+        val status = assertIs<SyncStatus.Idle>(b.service.sync())
+
+        assertEquals(setOf("r1", "fromA", "fromB"), b.teams.get(team.id)!!.replays.map { it.reference }.toSet())
+        assertEquals(1, status.merges.size)
     }
 }

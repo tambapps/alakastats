@@ -25,8 +25,11 @@ class ManageTeamlyticsListUseCase(
     suspend fun loadTeam(byteArray: ByteArray): Either<LoadTeamError, Teamlytics> =
         serializer.loadTeam(byteArray)
 
-    suspend fun save(team: Teamlytics): Either<GetTeamlyticsError, Teamlytics> =
-        repository.save(team)
+    /**
+     * @param base the version the team was changed from, to merge with what was saved since
+     */
+    suspend fun save(team: Teamlytics, base: Teamlytics): Either<GetTeamlyticsError, Teamlytics> =
+        repository.save(team, base)
 
     suspend fun create(team: Teamlytics): Either<GetTeamlyticsError, Teamlytics> =
         repository.save(team.copy(id = Uuid.random()))

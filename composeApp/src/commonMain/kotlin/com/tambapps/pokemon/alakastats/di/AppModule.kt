@@ -53,6 +53,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.cloud.drive.GoogleDriveClo
 import com.tambapps.pokemon.alakastats.infrastructure.sync.KStoreSyncStateStore
 import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncingTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamWriteLock
 import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.CloudSyncViewModel
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
@@ -106,6 +107,8 @@ val appModules = listOf(module {
     single<KStorage<Uuid, TeamlyticsEntity>>(named("teamsStorage")) { createTeamlyticsKStorage() }
     single<KStorage<Uuid, TeamlyticsPreviewEntity>>(named("previewsStorage")) { createTeamlyticsPreviewKStorage() }
     single { GoogleOAuthClient(get(), get()) }
+    // shared by the app's saves and the sync
+    single { TeamWriteLock() }
     single {
         // only bound on the platforms supporting the cloud sync
         val tokenProvider = getOrNull<OAuthTokenProvider>()
@@ -117,6 +120,7 @@ val appModules = listOf(module {
             stateStore = KStoreSyncStateStore(createSyncStateKStore()),
             pokepasteParser = get(),
             json = get(),
+            writeLock = get(),
         )
     }
     single<TeamlyticsRepository> {
@@ -125,6 +129,7 @@ val appModules = listOf(module {
                 teamsStorage = get(named("teamsStorage")),
                 previewsStorage = get(named("previewsStorage")),
                 pokepasteParser = get(),
+                writeLock = get(),
             ),
             syncService = get(),
         )
@@ -171,7 +176,7 @@ val appModules = listOf(module {
     }
 
     factory { (teamId: Uuid) ->
-        TeamlyticsViewModel(teamId, get(), get())
+        TeamlyticsViewModel(teamId, get(), get(), get())
     }
     factory { (team: Teamlytics, formatData: FormatData?) ->
         ManualReplayViewModel(team, formatData)

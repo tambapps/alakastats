@@ -12,7 +12,7 @@ class SyncingTeamlyticsRepository(
     private val syncService: TeamSyncService,
 ) : TeamlyticsRepository by delegate {
 
-    override suspend fun save(teamlytics: Teamlytics) = delegate.save(teamlytics)
+    override suspend fun save(teamlytics: Teamlytics, base: Teamlytics?) = delegate.save(teamlytics, base)
         .onRight { syncService.requestSync() }
 
     override suspend fun delete(teamlytics: Teamlytics) {

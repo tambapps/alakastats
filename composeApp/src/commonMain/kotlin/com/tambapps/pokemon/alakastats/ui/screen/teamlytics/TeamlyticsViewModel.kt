@@ -22,10 +22,13 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupPlansUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import com.tambapps.pokemon.alakastats.ui.composables.PagerViewModel
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
+import com.tambapps.pokemon.alakastats.util.insertInChain
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.uuid.Uuid
@@ -40,10 +43,12 @@ class TeamlyticsViewModel(
     private val teamId: Uuid,
     private val useCase: ManageTeamlyticsUseCase,
     val formatDataRepository: FormatDataRepository,
+    private val syncService: TeamSyncService,
 ) : ScreenModel, ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase,
     ManageMatchupPlansUseCase, PagerViewModel {
 
     private val scope = CoroutineScope(Dispatchers.Default)
+    private val syncChangesJob: Job
     var teamState by mutableStateOf<TeamState>(TeamState.Loading)
         private set
     override var filters by mutableStateOf(ReplayFilters())
@@ -68,6 +73,28 @@ class TeamlyticsViewModel(
 
     init {
         loadTeam()
+        // the team may have been changed on another device
+        syncService.syncIfStale()
+        syncChangesJob = scope.launch {
+            syncService.teamsChanged.collect { teamIds ->
+                if (teamId in teamIds) refreshTeam()
+            }
+        }
+    }
+
+    override fun onDispose() {
+        syncChangesJob.cancel()
+    }
+
+    /**
+     * Reloads the team changed by a sync, keeping the filters
+     */
+    private suspend fun refreshTeam() {
+        val team = useCase.get(teamId).getOrNull() ?: return
+        withContext(Dispatchers.Main) {
+            teamState = TeamState.Loaded(team, (teamState as? TeamState.Loaded)?.formatData)
+            reloadFilteredTeam()
+        }
     }
 
     private fun loadTeam() {
@@ -102,21 +129,7 @@ class TeamlyticsViewModel(
     override suspend fun addReplays(replays: List<ReplayAnalytics>): Either<DomainError, Unit> {
         val currentTeam = originalTeam
         val teamReplays = currentTeam.replays.toMutableList()
-
-        // add the new replays at the right spot, in case they were unordered
-        for (newReplay in replays) {
-            val previousIndex = teamReplays.indexOfFirst { it.nextBattleRef == newReplay.reference }
-            if (previousIndex >= 0) {
-                teamReplays.add(previousIndex + 1, newReplay)
-                continue
-            }
-            val nextIndex = teamReplays.indexOfFirst { it.reference == newReplay.nextBattleRef }
-            if (nextIndex >= 0) {
-                teamReplays.add(nextIndex, newReplay)
-                continue
-            }
-            teamReplays.add(newReplay)
-        }
+        teamReplays.insertInChain(replays, reference = { it.reference }, nextReference = { it.nextBattleRef })
 
         return save(currentTeam.copy(replays = teamReplays.withComputedElo())).also { onReplaysModified() }
     }
@@ -142,9 +155,11 @@ class TeamlyticsViewModel(
         return save(currentTeam.copy(replays = replays.withComputedElo())).also { onReplaysModified() }
     }
 
+    /**
+     * @param team the team when the edition of the notes started: what was saved since is merged
+     */
     override suspend fun setNotes(team: Teamlytics, notes: TeamlyticsNotes?): Either<DomainError, Unit> {
-        val currentTeam = this.originalTeam
-        return save(currentTeam.copy(notes = notes))
+        return save(team.copy(notes = notes), base = team)
     }
 
     override suspend fun setData(
@@ -155,8 +170,11 @@ class TeamlyticsViewModel(
         return save(currentTeam.copy(data = data))
     }
 
-    private suspend fun save(team: Teamlytics): Either<DomainError, Unit> = either {
-        val updatedTeam = useCase.save(team).bind()
+    /**
+     * @param base the version [team] was changed from: what was saved since (e.g. by a sync) is merged
+     */
+    private suspend fun save(team: Teamlytics, base: Teamlytics = originalTeam): Either<DomainError, Unit> = either {
+        val updatedTeam = useCase.save(team, base).bind()
         withContext(Dispatchers.Main) {
             teamState = TeamState.Loaded(updatedTeam, (teamState as? TeamState.Loaded)?.formatData)
         }

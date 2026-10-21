@@ -18,10 +18,15 @@ data class SyncState(
     val tombstones: Map<Uuid, Instant> = emptyMap(),
 )
 
+/**
+ * @param fingerprint the synced version, base of the merge when both sides changed it. Null in states saved before
+ * merges existed
+ */
 @Serializable
 data class SyncedEntry(
     val remoteFileId: String,
     val syncedUpdatedAt: Instant?,
+    val fingerprint: TeamFingerprint? = null,
 )
 
 interface SyncStateStore {

@@ -42,8 +42,15 @@ sealed interface SyncStatus {
     /** No cloud provider on this platform */
     data object Unavailable : SyncStatus
     data object Disconnected : SyncStatus
-    /** @param failures the teams that couldn't be synced. They're retried at the next sync */
-    data class Idle(val lastSyncAt: Instant?, val failures: List<SyncFailure> = emptyList()) : SyncStatus
+    /**
+     * @param failures the teams that couldn't be synced. They're retried at the next sync
+     * @param merges the teams changed on both sides, merged by the last sync
+     */
+    data class Idle(
+        val lastSyncAt: Instant?,
+        val failures: List<SyncFailure> = emptyList(),
+        val merges: List<TeamMerge> = emptyList(),
+    ) : SyncStatus
     data class Syncing(val lastSyncAt: Instant?) : SyncStatus
     data class Failed(val error: CloudError, val lastSyncAt: Instant?) : SyncStatus {
         /** The user has to connect again for the sync to work */
@@ -57,6 +64,11 @@ sealed interface SyncStatus {
 data class SyncFailure(val teamId: Uuid, val teamName: String?, val reason: String)
 
 /**
+ * A team changed both on this device and in the cloud, merged by a sync
+ */
+data class TeamMerge(val teamId: Uuid, val teamName: String, val summary: MergeSummary)
+
+/**
  * Synchronises the local teams with a [CloudStorage]. Optional: nothing happens until the user connects.
  */
 class TeamSyncService(
@@ -67,6 +79,7 @@ class TeamSyncService(
     private val stateStore: SyncStateStore,
     private val pokepasteParser: PokepasteParser,
     private val json: Json,
+    private val writeLock: TeamWriteLock,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
     private val clock: Clock = Clock.System,
     private val debounce: Duration = 3.seconds,
@@ -77,9 +90,13 @@ class TeamSyncService(
     private val _status = MutableStateFlow(if (isAvailable) SyncStatus.Disconnected else SyncStatus.Unavailable)
     val status: StateFlow<SyncStatus> = _status.asStateFlow()
 
-    private val _teamsChanged = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    /** Emits when a sync changed the local teams */
-    val teamsChanged: SharedFlow<Unit> = _teamsChanged.asSharedFlow()
+    private val _teamsChanged = MutableSharedFlow<Set<Uuid>>(extraBufferCapacity = 8)
+    /** Emits the ids of the local teams a sync changed */
+    val teamsChanged: SharedFlow<Set<Uuid>> = _teamsChanged.asSharedFlow()
+
+    private val _merges = MutableSharedFlow<TeamMerge>(extraBufferCapacity = 16)
+    /** Emits each team merged by a sync, to tell the user */
+    val merges: SharedFlow<TeamMerge> = _merges.asSharedFlow()
 
     private val syncMutex = Mutex()
     private val stateMutex = Mutex()
@@ -129,6 +146,18 @@ class TeamSyncService(
         }
     }
 
+    /**
+     * Syncs right away, unless a sync is running or happened recently. For when the user may find changes made
+     * elsewhere: the app back to the foreground, a team opened
+     */
+    fun syncIfStale(maxAge: Duration = 30.seconds) {
+        if (!isAvailable || _status.value is SyncStatus.Syncing) return
+        scope.launch {
+            val lastSyncAt = currentState().lastSyncAt
+            if (lastSyncAt == null || clock.now() - lastSyncAt > maxAge) sync()
+        }
+    }
+
     suspend fun onLocalDelete(id: Uuid) {
         if (!isAvailable || !currentState().connected) return
         val now = clock.now()
@@ -160,20 +189,27 @@ class TeamSyncService(
         val actions = SyncPlanner.plan(local, remote, currentState())
 
         val failures = mutableListOf<SyncFailure>()
-        var teamsChanged = false
+        val merges = mutableListOf<TeamMerge>()
+        val changedTeams = mutableSetOf<Uuid>()
         for (action in actions) {
             val result = when (action) {
                 is SyncAction.Upload -> upload(cloudStorage, action)
-                is SyncAction.Download -> download(cloudStorage, action).onRight { teamsChanged = true }
-                is SyncAction.DeleteLocal -> deleteLocal(action.teamId).onRight { teamsChanged = true }
+                is SyncAction.Download -> download(cloudStorage, action.teamId, action.fileId, alwaysMerge = false)
+                is SyncAction.Merge -> download(cloudStorage, action.teamId, action.fileId, alwaysMerge = true)
+                is SyncAction.DeleteLocal -> deleteLocal(action.teamId)
                 is SyncAction.DeleteRemote -> deleteRemote(cloudStorage, action)
-                is SyncAction.MarkSynced -> updateState {
-                    it.copy(entries = it.entries + (action.teamId to SyncedEntry(action.fileId, action.updatedAt)))
-                }.right()
+                is SyncAction.MarkSynced -> markSynced(action)
+            }
+            result.onRight { outcome ->
+                if (outcome.changedLocally) changedTeams.add(action.teamId)
+                outcome.merge?.let { merge ->
+                    merges.add(merge)
+                    _merges.tryEmit(merge)
+                }
             }
             val error = result.leftOrNull() ?: continue
             if (error.stopsSync()) {
-                if (teamsChanged) _teamsChanged.tryEmit(Unit)
+                if (changedTeams.isNotEmpty()) _teamsChanged.tryEmit(changedTeams)
                 return failed(error)
             }
             val failure = SyncFailure(action.teamId, previewsStorage.get(action.teamId)?.name, error.message)
@@ -185,9 +221,15 @@ class TeamSyncService(
         val remoteIds = remote.map { it.id }.toSet()
         val now = clock.now()
         val state = updateState { s -> s.copy(lastSyncAt = now, tombstones = s.tombstones.filterKeys { it in remoteIds }) }
-        if (teamsChanged) _teamsChanged.tryEmit(Unit)
-        return SyncStatus.Idle(state.lastSyncAt, failures)
+        if (changedTeams.isNotEmpty()) _teamsChanged.tryEmit(changedTeams)
+        return SyncStatus.Idle(state.lastSyncAt, failures, merges)
     }
+
+    /**
+     * @param changedLocally whether the local team was written or deleted
+     * @param merge set if the team was merged
+     */
+    private data class ActionOutcome(val changedLocally: Boolean = false, val merge: TeamMerge? = null)
 
     private suspend fun localVersions(): List<LocalTeamVersion> {
         val previews = previewsStorage.listEntities().associateBy { it.id }
@@ -198,56 +240,109 @@ class TeamSyncService(
         }
     }
 
-    private suspend fun upload(cloudStorage: CloudStorage, action: SyncAction.Upload): Either<CloudError, Unit> {
-        val entity = teamsStorage.get(action.teamId) ?: return Unit.right()
+    private suspend fun upload(cloudStorage: CloudStorage, action: SyncAction.Upload): Either<CloudError, ActionOutcome> {
+        val entity = teamsStorage.get(action.teamId) ?: return ActionOutcome().right()
+        return uploadEntity(cloudStorage, entity, action.existingFileId).map { ActionOutcome() }
+    }
+
+    private suspend fun uploadEntity(cloudStorage: CloudStorage, entity: TeamlyticsEntity, existingFileId: String?): Either<CloudError, Unit> {
         val bytes = json.encodeToString(entity).encodeToByteArray()
         val properties = remoteProperties(entity)
-        var uploaded = cloudStorage.upload(fileName(entity.id), bytes, properties, action.existingFileId)
-        if (action.existingFileId != null && uploaded.leftOrNull() is CloudError.NotFound) {
+        var uploaded = cloudStorage.upload(fileName(entity.id), bytes, properties, existingFileId)
+        if (existingFileId != null && uploaded.leftOrNull() is CloudError.NotFound) {
             // deleted in the meantime: create it again
             uploaded = cloudStorage.upload(fileName(entity.id), bytes, properties, existingFileId = null)
         }
         val file = uploaded.getOrElse { return it.left() }
-        updateState { it.copy(entries = it.entries + (entity.id to SyncedEntry(file.id, entity.lastUpdatedAt))) }
+        setSynced(entity, file.id)
         return Unit.right()
     }
 
-    private suspend fun download(cloudStorage: CloudStorage, action: SyncAction.Download): Either<CloudError, Unit> {
-        val bytes = cloudStorage.download(action.fileId).getOrElse { return it.left() }
-        val entity = try {
+    /**
+     * Takes the cloud version. Merged with the local one if it changed too: always for [SyncAction.Merge], and for a
+     * download if the team was changed locally since the sync was planned
+     */
+    private suspend fun download(cloudStorage: CloudStorage, teamId: Uuid, fileId: String, alwaysMerge: Boolean): Either<CloudError, ActionOutcome> {
+        val bytes = cloudStorage.download(fileId).getOrElse { return it.left() }
+        val remote = try {
             json.decodeFromString<TeamlyticsEntity>(bytes.decodeToString())
         } catch (e: Exception) {
             return CloudError.Unknown("The Google Drive copy can't be read (${e.message})", e).left()
         }
-        if (entity.id != action.teamId) return CloudError.Unknown("The Google Drive copy belongs to another team").left()
+        if (remote.id != teamId) return CloudError.Unknown("The Google Drive copy belongs to another team").left()
 
-        // saved as is: the lastUpdatedAt of the remote version is kept
+        val entry = currentState().entries[teamId]
+        val merge = writeLock.withLock<Either<CloudError, MergeResult?>> {
+            val local = teamsStorage.get(teamId)
+            val localChanged = local != null && (alwaysMerge || entry == null || !local.lastUpdatedAt.sameMillisAs(entry.syncedUpdatedAt))
+            if (local == null || !localChanged) {
+                // saved as is: the lastUpdatedAt of the remote version is kept
+                saveLocally(remote).getOrElse { return@withLock it.left() }
+                null.right()
+            } else {
+                val localIsNewer = (local.lastUpdatedAt ?: Instant.DISTANT_PAST) >= (remote.lastUpdatedAt ?: Instant.DISTANT_PAST)
+                val result = TeamMerger.merge(entry?.fingerprint, local, remote, localIsNewer, clock.now())
+                saveLocally(result.team).getOrElse { return@withLock it.left() }
+                result.right()
+            }
+        }.getOrElse { return it.left() }
+
+        if (merge == null) {
+            setSynced(remote, fileId)
+            return ActionOutcome(changedLocally = true).right()
+        }
+        // the cloud gets the merged version too
+        uploadEntity(cloudStorage, merge.team, fileId).getOrElse { return it.left() }
+        return ActionOutcome(changedLocally = true, merge = TeamMerge(teamId, merge.team.name, merge.summary)).right()
+    }
+
+    private suspend fun saveLocally(entity: TeamlyticsEntity): Either<CloudError, Unit> {
         teamsStorage.save(entity).getOrElse { return localSaveError(it).left() }
         val team = entity.toDomain(pokepasteParser)
         previewsStorage.save(entity.toPreview(pokepasteParser, computeWinRatePercentage(team.sdNames, team.replays)))
             .getOrElse { return localSaveError(it).left() }
-        updateState { it.copy(entries = it.entries + (entity.id to SyncedEntry(action.fileId, entity.lastUpdatedAt))) }
         return Unit.right()
     }
 
-    private suspend fun deleteLocal(id: Uuid): Either<CloudError, Unit> {
-        teamsStorage.delete(id)
-        previewsStorage.delete(id)
+    private suspend fun markSynced(action: SyncAction.MarkSynced): Either<CloudError, ActionOutcome> {
+        val entry = currentState().entries[action.teamId]
+        val upToDate = entry?.fingerprint != null && entry.remoteFileId == action.fileId
+                && entry.syncedUpdatedAt.sameMillisAs(action.updatedAt)
+        if (!upToDate) {
+            // the fingerprint is the base of a future merge
+            teamsStorage.get(action.teamId)?.let { setSynced(it, action.fileId) }
+        }
+        return ActionOutcome().right()
+    }
+
+    private suspend fun setSynced(entity: TeamlyticsEntity, fileId: String) {
+        val entry = SyncedEntry(fileId, entity.lastUpdatedAt, TeamFingerprint.of(entity))
+        updateState { it.copy(entries = it.entries + (entity.id to entry)) }
+    }
+
+    private suspend fun deleteLocal(id: Uuid): Either<CloudError, ActionOutcome> {
+        writeLock.withLock {
+            teamsStorage.delete(id)
+            previewsStorage.delete(id)
+        }
         updateState { it.copy(entries = it.entries - id) }
-        return Unit.right()
+        return ActionOutcome(changedLocally = true).right()
     }
 
-    private suspend fun deleteRemote(cloudStorage: CloudStorage, action: SyncAction.DeleteRemote): Either<CloudError, Unit> {
+    private suspend fun deleteRemote(cloudStorage: CloudStorage, action: SyncAction.DeleteRemote): Either<CloudError, ActionOutcome> {
         val deleted = cloudStorage.delete(action.fileId)
-        if (deleted.isLeft() && deleted.leftOrNull() !is CloudError.NotFound) return deleted
+        deleted.leftOrNull()?.takeIf { it !is CloudError.NotFound }?.let { return it.left() }
         updateState { state ->
             val entry = state.entries[action.teamId]
             // a duplicate file of a team still synced keeps its entry
             if (entry != null && entry.remoteFileId != action.fileId) state
             else state.copy(entries = state.entries - action.teamId, tombstones = state.tombstones - action.teamId)
         }
-        return Unit.right()
+        return ActionOutcome().right()
     }
+
+    // compared at the millisecond: the cloud only stores milliseconds
+    private fun Instant?.sameMillisAs(other: Instant?) = this?.toEpochMilliseconds() == other?.toEpochMilliseconds()
 
     // e.g. the browser's storage is full
     private fun localSaveError(error: KStorageError) =

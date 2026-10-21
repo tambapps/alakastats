@@ -186,7 +186,8 @@ class HomeViewModel(
                         }
                     }
                     .awaitAll()
-                useCase.save(team.copy(replays = reloadedReplays.withComputedElo())).bind()
+                // fetching replays takes time: what a sync brought in the meantime is merged
+                useCase.save(team.copy(replays = reloadedReplays.withComputedElo()), base = team).bind()
                 doLoadTeams()
             }
             withContext(Dispatchers.Main) {

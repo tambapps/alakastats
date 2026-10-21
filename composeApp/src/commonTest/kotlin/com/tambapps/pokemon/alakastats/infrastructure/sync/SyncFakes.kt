@@ -9,6 +9,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.cloud.CloudStorage
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.OAuthTokenProvider
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorageError
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
 import com.tambapps.pokemon.alakastats.util.Identifiable
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -23,6 +24,8 @@ class FakeCloudStorage(private val clock: Clock) : CloudStorage {
     var listError: CloudError? = null
     var uploadError: CloudError? = null
     var downloadError: CloudError? = null
+    /** run during a download, e.g. to change a team meanwhile */
+    var onDownload: (suspend () -> Unit)? = null
     var calls = 0
         private set
     var uploads = 0
@@ -36,6 +39,7 @@ class FakeCloudStorage(private val clock: Clock) : CloudStorage {
 
     override suspend fun download(fileId: String): Either<CloudError, ByteArray> {
         calls++
+        onDownload?.invoke()
         downloadError?.let { return it.left() }
         return files[fileId]?.bytes?.right() ?: CloudError.NotFound("No file $fileId").left()
     }
@@ -106,3 +110,16 @@ class FakeTokenProvider : OAuthTokenProvider {
 class MutableClock(var now: Instant) : Clock {
     override fun now() = now
 }
+
+fun replay(reference: String, notes: String? = null, nextBattleRef: String? = null, winner: String? = null) = ReplayAnalyticsEntity(
+    players = emptyList(),
+    uploadTime = 0,
+    format = "gen9vgc",
+    rating = null,
+    version = "1",
+    winner = winner,
+    url = "https://replay.pokemonshowdown.com/$reference",
+    reference = reference,
+    nextBattleRef = nextBattleRef,
+    notes = notes,
+)

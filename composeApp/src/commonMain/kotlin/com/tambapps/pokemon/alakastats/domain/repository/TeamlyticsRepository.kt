@@ -14,7 +14,12 @@ interface TeamlyticsRepository {
 
     suspend fun listPreviews(): List<TeamlyticsPreview>
 
-    suspend fun save(teamlytics: Teamlytics): Either<GetTeamlyticsError, Teamlytics>
+    /**
+     * @param base the version the team was changed from. If the stored team changed since (e.g. a sync brought
+     * changes), both are merged instead of overwriting the stored one. Null for a new team, or to overwrite
+     * @return the saved team, merged if needed
+     */
+    suspend fun save(teamlytics: Teamlytics, base: Teamlytics? = null): Either<GetTeamlyticsError, Teamlytics>
 
     suspend fun delete(teamlytics: Teamlytics)
 

@@ -14,7 +14,10 @@ class ManageTeamlyticsUseCase(
 
     suspend fun get(id: Uuid): Either<DomainError, Teamlytics> = repository.get(id)
 
-    suspend fun save(team: Teamlytics) = repository.save(team)
+    /**
+     * @param base the version the team was changed from, to merge with what was saved since
+     */
+    suspend fun save(team: Teamlytics, base: Teamlytics) = repository.save(team, base)
 
     fun export(team: Teamlytics) = teamlyticsSerializer.export(team)
 }

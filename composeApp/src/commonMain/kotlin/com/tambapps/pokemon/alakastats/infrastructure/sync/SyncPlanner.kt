@@ -14,13 +14,16 @@ sealed interface SyncAction {
     data class Download(override val teamId: Uuid, val fileId: String) : SyncAction
     data class DeleteLocal(override val teamId: Uuid) : SyncAction
     data class DeleteRemote(override val teamId: Uuid, val fileId: String) : SyncAction
+    /** Both sides changed since the last sync */
+    data class Merge(override val teamId: Uuid, val fileId: String) : SyncAction
     /** Both sides already have the same version */
     data class MarkSynced(override val teamId: Uuid, val fileId: String, val updatedAt: Instant?) : SyncAction
 }
 
 /**
- * Last-write-wins resolution, based on the teams' lastUpdatedAt. The local files stay the source of truth
- * offline: nothing here is applied, it only tells what to do.
+ * Tells what to do with each team, based on the teams' lastUpdatedAt and on the version synced last: the side that
+ * changed since is taken, and when both did, they are merged. The local files stay the source of truth offline:
+ * nothing here is applied.
  */
 object SyncPlanner {
 
@@ -38,7 +41,7 @@ object SyncPlanner {
             val localTeam = localById[id]
             val remoteTeam = remoteById[id]
             val action = when {
-                localTeam != null && remoteTeam != null -> resolveBoth(localTeam, remoteTeam)
+                localTeam != null && remoteTeam != null -> resolveBoth(localTeam, remoteTeam, state.entries[id])
                 localTeam != null -> resolveLocalOnly(localTeam, state.entries[id])
                 remoteTeam != null -> resolveRemoteOnly(remoteTeam, state.tombstones[id])
                 else -> null
@@ -48,13 +51,20 @@ object SyncPlanner {
         return actions
     }
 
-    private fun resolveBoth(local: LocalTeamVersion, remote: RemoteTeamVersion): SyncAction {
+    private fun resolveBoth(local: LocalTeamVersion, remote: RemoteTeamVersion, entry: SyncedEntry?): SyncAction {
         val localDate = local.updatedAt.orPast()
         val remoteDate = remote.updatedAt.orPast()
+        if (localDate == remoteDate) return SyncAction.MarkSynced(local.id, remote.fileId, local.updatedAt)
+        // never synced from this device: no way to tell which side changed
+        if (entry == null) return SyncAction.Merge(local.id, remote.fileId)
+
+        val syncedDate = entry.syncedUpdatedAt.orPast()
+        val localChanged = localDate != syncedDate
+        val remoteChanged = remoteDate != syncedDate
         return when {
-            localDate > remoteDate -> SyncAction.Upload(local.id, remote.fileId)
-            remoteDate > localDate -> SyncAction.Download(local.id, remote.fileId)
-            else -> SyncAction.MarkSynced(local.id, remote.fileId, local.updatedAt)
+            localChanged && remoteChanged -> SyncAction.Merge(local.id, remote.fileId)
+            localChanged -> SyncAction.Upload(local.id, remote.fileId)
+            else -> SyncAction.Download(local.id, remote.fileId)
         }
     }
 
@@ -74,5 +84,5 @@ object SyncPlanner {
     }
 
     // compared at the millisecond: the cloud only stores milliseconds
-    private fun Instant?.orPast() = this?.let { Instant.fromEpochMilliseconds(it.toEpochMilliseconds()) } ?: Instant.DISTANT_PAST
+    private fun Instant?.orPast() = Instant.fromEpochMilliseconds((this ?: Instant.DISTANT_PAST).toEpochMilliseconds())
 }

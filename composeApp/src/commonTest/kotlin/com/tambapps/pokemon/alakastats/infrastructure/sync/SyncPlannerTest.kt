@@ -24,16 +24,30 @@ class SyncPlannerTest {
         assertEquals(listOf(SyncAction.Download(id, "f")), actions)
     }
 
+    private fun syncedAt(date: Instant) = SyncState(connected = true, entries = mapOf(id to SyncedEntry("f", date)))
+
     @Test
-    fun newerLocalVersionWins() {
-        val actions = SyncPlanner.plan(listOf(LocalTeamVersion(id, t2)), listOf(RemoteTeamVersion(id, "f", t1)), SyncState())
+    fun onlyLocalChangedIsUploaded() {
+        val actions = SyncPlanner.plan(listOf(LocalTeamVersion(id, t2)), listOf(RemoteTeamVersion(id, "f", t1)), syncedAt(t1))
         assertEquals(listOf(SyncAction.Upload(id, "f")), actions)
     }
 
     @Test
-    fun newerRemoteVersionWins() {
-        val actions = SyncPlanner.plan(listOf(LocalTeamVersion(id, t1)), listOf(RemoteTeamVersion(id, "f", t2)), SyncState())
+    fun onlyRemoteChangedIsDownloaded() {
+        val actions = SyncPlanner.plan(listOf(LocalTeamVersion(id, t1)), listOf(RemoteTeamVersion(id, "f", t2)), syncedAt(t1))
         assertEquals(listOf(SyncAction.Download(id, "f")), actions)
+    }
+
+    @Test
+    fun bothChangedAreMerged() {
+        val actions = SyncPlanner.plan(listOf(LocalTeamVersion(id, t3)), listOf(RemoteTeamVersion(id, "f", t2)), syncedAt(t1))
+        assertEquals(listOf(SyncAction.Merge(id, "f")), actions)
+    }
+
+    @Test
+    fun differentVersionsNeverSyncedAreMerged() {
+        val actions = SyncPlanner.plan(listOf(LocalTeamVersion(id, t2)), listOf(RemoteTeamVersion(id, "f", t1)), SyncState())
+        assertEquals(listOf(SyncAction.Merge(id, "f")), actions)
     }
 
     @Test
@@ -84,14 +98,14 @@ class SyncPlannerTest {
         val actions = SyncPlanner.plan(
             listOf(LocalTeamVersion(id, t1)),
             listOf(RemoteTeamVersion(id, "old", t1), RemoteTeamVersion(id, "new", t2)),
-            SyncState(),
+            syncedAt(t1),
         )
         assertEquals(listOf(SyncAction.DeleteRemote(id, "old"), SyncAction.Download(id, "new")), actions)
     }
 
     @Test
     fun missingDatesAreTheOldest() {
-        val actions = SyncPlanner.plan(listOf(LocalTeamVersion(id, null)), listOf(RemoteTeamVersion(id, "f", t1)), SyncState())
+        val actions = SyncPlanner.plan(listOf(LocalTeamVersion(id, null)), listOf(RemoteTeamVersion(id, "f", t1)), syncedAt(Instant.DISTANT_PAST))
         assertEquals(listOf(SyncAction.Download(id, "f")), actions)
     }
 }

@@ -34,6 +34,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncFailure
 import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncStatus
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamMerge
 import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
@@ -75,6 +76,9 @@ object CloudSyncScreen : Screen {
                 SyncStatus.Disconnected -> ConnectButton(viewModel.isConnecting) { viewModel.connect(snackBar) }
                 is SyncStatus.Idle -> {
                     StatusText("Connected", s.lastSyncAt)
+                    if (s.merges.isNotEmpty()) {
+                        SyncMerges(s.merges)
+                    }
                     if (s.failures.isNotEmpty()) {
                         SyncFailures(s.failures)
                     }
@@ -116,9 +120,11 @@ private fun SyncExplanation() {
         add("Your teams are saved in a hidden folder of your own Google Drive, that only Alakastats can access. " +
                 "Connect the same Google account on your other devices to find your teams there.")
         add("Your teams stay on this device too: the app keeps working offline, and your changes are sent at the next sync.")
-        add("Teams are synced when the app starts, a few seconds after each change, and when you tap \"Sync now\".")
-        add("If a team was changed on two devices before a sync, the most recent version is kept entirely, " +
-                "and replaces the other one: changes aren't merged.")
+        add("Teams are synced when the app starts or comes back to the foreground, when you open a team, " +
+                "a few seconds after each change, and when you tap \"Sync now\".")
+        add("If a team was changed on two devices before a sync, both versions are merged, and you're told about it: " +
+                "replays and game plans added on either side are kept, and a note edited on both sides is kept " +
+                "in both versions, one after the other. For the name, the team itself and the format, the most recent change wins.")
         add("Deleting a team deletes it on all your devices, unless it was changed on another device after the deletion.")
         add("Disconnecting stops the sync. Your teams stay on this device and in your Google Drive.")
         if (platform.type == PlatformType.Web) {
@@ -128,6 +134,16 @@ private fun SyncExplanation() {
     Column(Modifier.widthIn(max = 600.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         points.forEach { point ->
             Text("• $point", style = MaterialTheme.typography.bodyLarge)
+        }
+    }
+}
+
+@Composable
+private fun SyncMerges(merges: List<TeamMerge>) {
+    Column(Modifier.widthIn(max = 600.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("Merged at the last sync:", style = MaterialTheme.typography.titleSmall)
+        merges.forEach { merge ->
+            Text("• ${merge.userMessage()}", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

@@ -41,6 +41,9 @@ class OverviewViewModel(
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
+    // the team when the edition of the notes started, so that what a sync brings meanwhile is merged on save
+    private var notesEditionBase: Teamlytics? = null
+
     init {
         initNotesState()
         loadPokemonData()
@@ -48,6 +51,7 @@ class OverviewViewModel(
 
     fun editNotes() {
         isEditingNotes = true
+        notesEditionBase = team
         initNotesState()
         loadPokemonData()
     }
@@ -94,7 +98,7 @@ class OverviewViewModel(
         }
         isTabLoading = true
         scope.launch {
-            val either = useCase.setNotes(team, TeamlyticsNotes(teamNotes, pokemonNotes.toMap()))
+            val either = useCase.setNotes(notesEditionBase ?: team, TeamlyticsNotes(teamNotes, pokemonNotes.toMap()))
             withContext(Dispatchers.Main) {
                 either.onLeft { error -> snackBar.show("Couldn't save notes: ${error.message}", SnackBar.Severity.ERROR) }
                 isTabLoading = false
@@ -110,6 +114,7 @@ class OverviewViewModel(
 
     private fun onStopEditingNotes() {
         isEditingNotes = false
+        notesEditionBase = null
     }
 
     fun removeNotes() {
