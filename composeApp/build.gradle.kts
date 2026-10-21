@@ -67,6 +67,12 @@ kotlin {
                     }
                 }
             }
+            // browser tests need a real browser, e.g. for IndexedDB
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                }
+            }
         }
         binaries.executable()
     }
@@ -126,7 +132,6 @@ kotlin {
             implementation(libs.ktor.client.mock)
         }
         wasmJsMain.dependencies {
-            implementation(libs.kstore.storage)
             implementation(libs.ktor.client.js)
             implementation(libs.kotlinx.browser)
         }

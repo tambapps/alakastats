@@ -27,12 +27,12 @@ abstract class AbstractKStorage<ID: @Serializable Any, T : @Serializable Identif
     override suspend fun get(id: ID) = getStore(id).get()
 
     override suspend fun save(e: T): Either<KStorageError, T> = Either.catch {
-        val ids = listIds()
         val entityId = e.id
-        if (!ids.contains(entityId)) {
+        // the entity first: if saving it fails (e.g. no more space), no id is left without its entity
+        getStore(entityId).set(e)
+        if (!listIds().contains(entityId)) {
             idsStore.update { (it ?: emptyList()) + entityId }
         }
-        getStore(entityId).set(e)
         e
     }.mapLeft { throwable ->
         KStorageError("Failed to save entity: ${throwable.message}", throwable)
