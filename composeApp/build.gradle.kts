@@ -17,8 +17,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-val appVersionName = "1.3"
-val appVersionCode = 4
+val appVersionName = "1.4"
+val appVersionCode = 5
 
 val generateBuildConfig by tasks.registering(GenerateBuildConfigTask::class) {
     versionName.set(appVersionName)
