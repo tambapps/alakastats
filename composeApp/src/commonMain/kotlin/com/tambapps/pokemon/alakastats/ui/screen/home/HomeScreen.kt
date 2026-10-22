@@ -10,6 +10,7 @@ import alakastats.composeapp.generated.resources.cloud_upload
 import alakastats.composeapp.generated.resources.group
 import alakastats.composeapp.generated.resources.more_horiz
 import alakastats.composeapp.generated.resources.quiz
+import alakastats.composeapp.generated.resources.share
 import alakastats.composeapp.generated.resources.visibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -286,7 +287,14 @@ private fun TeamStatusIcons(viewModel: HomeViewModel, team: TeamlyticsPreview, r
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.padding(start = 8.dp, top = 4.dp),
     ) {
-        if (sharedRole != null) {
+        if (sharedRole == ShareRole.OWNER) {
+            Icon(
+                painter = painterResource(Res.drawable.share),
+                contentDescription = "Shared by you",
+                tint = sharingTint,
+                modifier = Modifier.size(iconSize),
+            )
+        } else if (sharedRole != null) {
             Icon(
                 painter = painterResource(Res.drawable.group),
                 contentDescription = "Shared with you · ${sharedRole.label()}",
