@@ -131,8 +131,8 @@ If this Privacy Policy is updated, the "Last updated" date at the top of this do
 
 For any questions regarding this Privacy Policy:
 
-Contact: contact@alakastats.com  
-(or link to the GitHub repository, if applicable)
+- Email: tambapps@gmail.com
+- GitHub issues: https://github.com/tambapps/alakastats/issues
 
 ---
 
