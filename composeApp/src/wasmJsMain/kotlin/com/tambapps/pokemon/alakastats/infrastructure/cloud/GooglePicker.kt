@@ -18,14 +18,18 @@ class GooglePicker(
 
     override suspend fun pick(accessToken: String): Either<CloudError, List<String>> {
         val result = showPicker(accessToken, apiKey, appId).await<JsString>().toString()
-        if (result.startsWith(ERROR_PREFIX)) {
+        if (result == LOAD_ERROR) {
             return CloudError.Network("Couldn't open Google's file picker. Are you offline?").left()
+        }
+        if (result.startsWith(ERROR_PREFIX)) {
+            return CloudError.Unknown("Couldn't open Google's file picker (${result.removePrefix(ERROR_PREFIX)})").left()
         }
         return result.split(',').filter { it.isNotBlank() }.right()
     }
 
     private companion object {
         const val ERROR_PREFIX = "error:"
+        const val LOAD_ERROR = "error:load"
     }
 }
 
@@ -36,22 +40,27 @@ class GooglePicker(
 private fun showPicker(token: String, apiKey: String, appId: String): Promise<JsString> = js("""
     new Promise((resolve) => {
         const build = () => {
-            const view = new google.picker.DocsView(google.picker.ViewId.DOCS)
-                .setOwnedByMe(false)
-                .setMimeTypes('application/json');
-            new google.picker.PickerBuilder()
-                .setAppId(appId)
-                .setOAuthToken(token)
-                .setDeveloperKey(apiKey)
-                .addView(view)
-                .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
-                .setTitle('Pick the shared teams to join')
-                .setCallback((data) => {
-                    if (data.action === google.picker.Action.PICKED) resolve(data.docs.map((doc) => doc.id).join(','));
-                    else if (data.action === google.picker.Action.CANCEL) resolve('');
-                })
-                .build()
-                .setVisible(true);
+            // an error here would leave the promise pending forever
+            try {
+                const view = new google.picker.DocsView(google.picker.ViewId.DOCS)
+                    .setOwnedByMe(false)
+                    .setMimeTypes('application/json');
+                new google.picker.PickerBuilder()
+                    .setAppId(appId)
+                    .setOAuthToken(token)
+                    .setDeveloperKey(apiKey)
+                    .addView(view)
+                    .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+                    .setTitle('Pick the shared teams to join')
+                    .setCallback((data) => {
+                        if (data.action === google.picker.Action.PICKED) resolve(data.docs.map((doc) => doc.id).join(','));
+                        else if (data.action === google.picker.Action.CANCEL) resolve('');
+                    })
+                    .build()
+                    .setVisible(true);
+            } catch (e) {
+                resolve('error:' + e);
+            }
         };
         if (window.google && window.google.picker) { build(); return; }
         const load = () => gapi.load('picker', { callback: build, onerror: () => resolve('error:load') });
