@@ -20,6 +20,8 @@ data class GoogleTokenResponse(
     @SerialName("access_token") val accessToken: String,
     @SerialName("expires_in") val expiresInSeconds: Long = 3600,
     @SerialName("refresh_token") val refreshToken: String? = null,
+    /** the scopes granted so far, space separated */
+    val scope: String? = null,
 )
 
 @Serializable

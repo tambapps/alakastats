@@ -3,7 +3,8 @@ package com.tambapps.pokemon.alakastats.infrastructure.cloud
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
-import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.DRIVE_APPDATA_SCOPE
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.PRIVATE_SYNC_SCOPES
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.SHARING_SCOPES
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.OAuthTokenProvider
 import kotlinx.browser.window
 import kotlinx.coroutines.await
@@ -26,14 +27,14 @@ class GisTokenProvider(
 
     private val mutex = Mutex()
 
-    override suspend fun accessToken(interactive: Boolean): Either<CloudError, String> = mutex.withLock {
-        storedToken()?.let { return it.right() }
+    override suspend fun accessToken(interactive: Boolean, scopes: Set<String>): Either<CloudError, String> = mutex.withLock {
+        storedToken(scopes)?.let { return it.right() }
         if (!interactive) return CloudError.NeedsUserInteraction().left()
 
         if (!loadGis().await<JsBoolean>().toBoolean()) {
             return CloudError.Network("Couldn't load Google's sign in. Are you offline?").left()
         }
-        val response = requestToken(clientId, DRIVE_APPDATA_SCOPE).await<JsAny>()
+        val response = requestToken(clientId, scopes.joinToString(" ")).await<JsAny>()
         errorOf(response)?.let { error ->
             return when (error) {
                 "popup_closed", "access_denied" -> CloudError.Cancelled()
@@ -42,41 +43,51 @@ class GisTokenProvider(
             }.left()
         }
         val token = accessTokenOf(response) ?: return CloudError.Unknown("Google gave no access token").left()
-        store(token, clock.now() + expiresInOf(response).seconds)
+        store(scopes, token, clock.now() + expiresInOf(response).seconds)
         token.right()
     }
 
     override suspend fun invalidate(token: String) = mutex.withLock {
-        if (window.sessionStorage.getItem(TOKEN_KEY) == token) clear()
+        KNOWN_SCOPES.filter { window.sessionStorage.getItem(tokenKey(it)) == token }.forEach(::clear)
     }
 
     override suspend fun signOut() = mutex.withLock {
-        val token = window.sessionStorage.getItem(TOKEN_KEY)
-        clear()
+        val token = KNOWN_SCOPES.firstNotNullOfOrNull { window.sessionStorage.getItem(tokenKey(it)) }
+        KNOWN_SCOPES.forEach(::clear)
+        // revoking a token revokes the whole grant, every scope included
         if (token != null && loadGis().await<JsBoolean>().toBoolean()) revoke(token)
     }
 
-    private fun storedToken(): String? {
-        val token = window.sessionStorage.getItem(TOKEN_KEY) ?: return null
-        val expiresAt = window.sessionStorage.getItem(EXPIRES_AT_KEY)?.toLongOrNull()
-            ?.let { Instant.fromEpochMilliseconds(it) } ?: return null
-        return token.takeIf { clock.now() < expiresAt - EXPIRY_MARGIN }
+    /**
+     * A token with more scopes than asked works too
+     */
+    private fun storedToken(scopes: Set<String>): String? = (listOf(scopes) + KNOWN_SCOPES)
+        .filter { it.containsAll(scopes) }
+        .firstNotNullOfOrNull { candidate ->
+            val token = window.sessionStorage.getItem(tokenKey(candidate)) ?: return@firstNotNullOfOrNull null
+            val expiresAt = window.sessionStorage.getItem(expiresAtKey(candidate))?.toLongOrNull()
+                ?.let { Instant.fromEpochMilliseconds(it) } ?: return@firstNotNullOfOrNull null
+            token.takeIf { clock.now() < expiresAt - EXPIRY_MARGIN }
+        }
+
+    private fun store(scopes: Set<String>, token: String, expiresAt: Instant) {
+        window.sessionStorage.setItem(tokenKey(scopes), token)
+        window.sessionStorage.setItem(expiresAtKey(scopes), expiresAt.toEpochMilliseconds().toString())
     }
 
-    private fun store(token: String, expiresAt: Instant) {
-        window.sessionStorage.setItem(TOKEN_KEY, token)
-        window.sessionStorage.setItem(EXPIRES_AT_KEY, expiresAt.toEpochMilliseconds().toString())
-    }
-
-    private fun clear() {
-        window.sessionStorage.removeItem(TOKEN_KEY)
-        window.sessionStorage.removeItem(EXPIRES_AT_KEY)
+    private fun clear(scopes: Set<String>) {
+        window.sessionStorage.removeItem(tokenKey(scopes))
+        window.sessionStorage.removeItem(expiresAtKey(scopes))
     }
 
     private companion object {
-        const val TOKEN_KEY = "alakastats.googledrive.token"
-        const val EXPIRES_AT_KEY = "alakastats.googledrive.expiresAt"
+        val KNOWN_SCOPES = listOf(PRIVATE_SYNC_SCOPES, SHARING_SCOPES)
         val EXPIRY_MARGIN = 60.seconds
+
+        // e.g. alakastats.googledrive.drive.appdata+drive.file.token
+        fun keyPrefix(scopes: Set<String>) = "alakastats.googledrive." + scopes.sorted().joinToString("+") { it.substringAfterLast('/') }
+        fun tokenKey(scopes: Set<String>) = keyPrefix(scopes) + ".token"
+        fun expiresAtKey(scopes: Set<String>) = keyPrefix(scopes) + ".expiresAt"
     }
 }
 

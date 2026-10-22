@@ -37,6 +37,9 @@ sealed interface CloudError {
 
     data class NotFound(override val message: String) : CloudError
 
+    /** No access to a given file, e.g. a shared file whose owner removed the user. The other files still work */
+    data class FileAccessDenied(override val message: String = "No access to this file") : CloudError
+
     data class Unknown(override val message: String, val cause: Throwable? = null) : CloudError
 }
 

@@ -22,6 +22,7 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupPlansUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamOverviewUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.ShareRole
 import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import com.tambapps.pokemon.alakastats.ui.composables.PagerViewModel
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
@@ -71,13 +72,24 @@ class TeamlyticsViewModel(
 
     private var _filteredTeam by mutableStateOf<Teamlytics?>(null)
 
+    override var isReadOnly by mutableStateOf(syncService.isReadOnly(teamId))
+        private set
+
     init {
         loadTeam()
         // the team may have been changed on another device
         syncService.syncIfStale()
         syncChangesJob = scope.launch {
-            syncService.teamsChanged.collect { teamIds ->
-                if (teamId in teamIds) refreshTeam()
+            launch {
+                syncService.teamsChanged.collect { teamIds ->
+                    if (teamId in teamIds) refreshTeam()
+                }
+            }
+            // the owner can change the user's role at any time
+            launch {
+                syncService.sharing.collect { roles ->
+                    withContext(Dispatchers.Main) { isReadOnly = roles[teamId] == ShareRole.VIEWER }
+                }
             }
         }
     }

@@ -82,6 +82,15 @@ object CloudSyncScreen : Screen {
                     if (s.failures.isNotEmpty()) {
                         SyncFailures(s.failures)
                     }
+                    if (s.sharingNeedsConsent) {
+                        Text(
+                            "Your shared teams can't be synced on this device until you allow it.",
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.widthIn(max = 600.dp),
+                        )
+                        Button(onClick = { viewModel.allowSharing(snackBar) }) { Text("Allow shared teams") }
+                    }
                     ConnectedButtons(viewModel, isSyncing = false)
                 }
                 is SyncStatus.Syncing -> {
@@ -126,6 +135,10 @@ private fun SyncExplanation() {
                 "replays and game plans added on either side are kept, and a note edited on both sides is kept " +
                 "in both versions, one after the other. For the name, the team itself and the format, the most recent change wins.")
         add("Deleting a team deletes it on all your devices, unless it was changed on another device after the deletion.")
+        add("You can share a team with other players (\"Share\" in its menu): it moves to an \"Alakastats\" folder of " +
+                "your Google Drive, and you invite people as editors or viewers. They join it on the Alakastats website " +
+                "(\"Join\" on the home screen), then it syncs on all their devices. Changes from everyone are merged the same way.")
+        add("Deleting a team you shared deletes it for everyone. If you remove someone, or stop sharing, they keep a copy of the team.")
         add("Disconnecting stops the sync. Your teams stay on this device and in your Google Drive.")
         if (platform.type == PlatformType.Web) {
             add("On the web, Google only gives access for about an hour: you'll be asked to reconnect after that.")

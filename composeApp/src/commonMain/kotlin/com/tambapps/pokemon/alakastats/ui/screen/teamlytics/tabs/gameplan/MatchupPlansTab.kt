@@ -64,7 +64,7 @@ fun MatchupPlansTab(viewModel: MatchupPlansViewModel) {
         NoEdit -> {
             FabLayout(
                 fab = {
-                    if (viewModel.hasMatchupPlans) {
+                    if (viewModel.hasMatchupPlans && !viewModel.isReadOnly) {
                         FloatingActionButton(onClick = { viewModel.editMatchupMode = CreateMatchup },) {
                             Icon(
                                 painter = painterResource(Res.drawable.add),
@@ -105,6 +105,10 @@ fun MatchupPlansTab(viewModel: MatchupPlansViewModel) {
 fun NoNotes(viewModel: MatchupPlansViewModel) {
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.align(Alignment.Center).padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            if (viewModel.isReadOnly) {
+                Text("No game plans yet", style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+                return@Column
+            }
             Text("Add your game plans for each matchup to remember how to play against the meta",
                 style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(8.dp))
@@ -155,14 +159,16 @@ internal fun MatchNotes(
                 expanded = isMenuExpandedState.value,
                 onDismissRequest = { isMenuExpandedState.value = false }
             ) {
-                DropdownMenuItem(
-                    text = { Text("Edit") },
-                    onClick = { viewModel.editMatchupMode = EditMatchup(matchupPlan) }
-                )
-                DropdownMenuItem(
-                    text = { Text("Delete") },
-                    onClick = { showDeleteDialog = true }
-                )
+                if (!viewModel.isReadOnly) {
+                    DropdownMenuItem(
+                        text = { Text("Edit") },
+                        onClick = { viewModel.editMatchupMode = EditMatchup(matchupPlan) }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Delete") },
+                        onClick = { showDeleteDialog = true }
+                    )
+                }
             }
         },
         disableWhenOpened = !LocalIsCompact.current, // useful to prevent color changing on hover which can be annoying

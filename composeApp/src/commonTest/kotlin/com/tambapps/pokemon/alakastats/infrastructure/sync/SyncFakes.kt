@@ -94,9 +94,14 @@ class FakeTokenProvider : OAuthTokenProvider {
     var interactiveError: CloudError? = null
     var signedOut = false
         private set
+    /** the scopes of the interactive requests, i.e. what the user was asked to consent to */
+    val consentedScopes = mutableListOf<Set<String>>()
 
-    override suspend fun accessToken(interactive: Boolean): Either<CloudError, String> {
-        if (interactive) interactiveError?.let { return it.left() }
+    override suspend fun accessToken(interactive: Boolean, scopes: Set<String>): Either<CloudError, String> {
+        if (interactive) {
+            interactiveError?.let { return it.left() }
+            consentedScopes.add(scopes)
+        }
         return "token".right()
     }
 

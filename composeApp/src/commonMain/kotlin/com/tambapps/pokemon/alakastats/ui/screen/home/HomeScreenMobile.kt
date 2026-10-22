@@ -80,6 +80,10 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
                 Spacer(Modifier.width(8.dp))
                 SampleTeamButton(viewModel, Modifier.weight(1f))
             }
+            if (viewModel.isSharingAvailable) {
+                Spacer(Modifier.height(4.dp))
+                JoinSharedTeamButton(viewModel, Modifier.fillMaxWidth().padding(horizontal = 8.dp))
+            }
 
             Spacer(Modifier.height(16.dp))
 

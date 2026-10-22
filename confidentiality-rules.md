@@ -1,6 +1,6 @@
 # Privacy Policy – Alakastats (Android/iOS/Web)
 
-**Last updated: October 21, 2026**
+**Last updated: October 22, 2026**
 
 ---
 
@@ -37,7 +37,7 @@ All data you enter into the application (teams, statistics, notes, analyses, etc
 - Is stored **locally on your device** (in your browser for the web version)
 - Is never sent to a server of the developer
 - Is never shared with third parties
-- Is accessible only by you
+- Is accessible only by you, unless you share a team with other people (see section 4)
 
 If you choose to enable the optional Google Drive sync (see section 4), a copy of this data is also stored in **your own** Google Drive.
 
@@ -59,12 +59,21 @@ When you connect your Google Drive:
 - The data goes directly from your device to Google: it never goes through a server of the developer, and the developer has no access to it.
 - Google's sign-in gives the application an access token to your Drive. This token stays on your device (in the system's secure storage on iOS, in the browser's session on the web) and is only used to sync your teams. The application doesn't read nor store your email address, your name or any other information of your Google account.
 
+### Shared teams
+
+If you choose to, you can share a team with other people through Google Drive:
+
+- The application then asks for the `drive.file` permission: access **only to the files Alakastats created, or that you picked in the application** (Google's file picker). It cannot see, read or modify any other file of your Drive.
+- A team you share is moved to an "Alakastats" folder of your Google Drive. You invite people with the email address of their Google account: the application sends it to Google to share the file, and Google sends them an invitation email. The application doesn't store these addresses: it only shows the people the team is shared with, as Google gives them.
+- The people you invite can see the team (and change it, if you made them editors), as with any file shared through Google Drive. They join it by picking it in the application. You can change their role, remove them or stop sharing at any time; they then keep a copy of the team as it was.
+- A team shared with you stays in its owner's Google Drive. If the owner deletes it, stops sharing it or removes you, you keep a copy of it on your devices.
+
 Alakastats' use and transfer of information received from Google APIs adheres to the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), including the Limited Use requirements.
 
 You can stop the sync and delete the synced data at any time:
 
 - **Disconnect** your Google Drive in the application (Sync screen): the sync stops and the application's access is revoked. Your teams stay on your device and in your Drive.
-- **Delete the synced data** from Google Drive: Settings → Manage apps → Alakastats → Options → Delete hidden app data.
+- **Delete the synced data** from Google Drive: Settings → Manage apps → Alakastats → Options → Delete hidden app data. The teams you shared are in the "Alakastats" folder of your Drive, and can be deleted like any file.
 - **Revoke the access** from your Google account: Security → Your connections to third-party apps & services → Alakastats.
 
 ---
@@ -128,4 +137,4 @@ Contact: contact@alakastats.com
 
 ### Summary
 
-Alakastats is a local-first application, with no data collection, no advertising, and no information sharing. If you choose to, your teams can be synced through a hidden folder of your own Google Drive, that the developer never has access to.
+Alakastats is a local-first application, with no data collection and no advertising. If you choose to, your teams can be synced through a hidden folder of your own Google Drive, and shared with the people you invite through Google Drive. The developer never has access to any of it.

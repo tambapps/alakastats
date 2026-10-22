@@ -141,7 +141,8 @@ val appModules = listOf(module {
     singleOf(::ManageTeamlyticsUseCase)
     singleOf(::TeamlyticsSerializer)
 
-    factoryOf(::HomeViewModel)
+    // the file picker only exists on some platforms
+    factory { HomeViewModel(get(), get(), get(), getOrNull()) }
     factoryOf(::CloudSyncViewModel)
     factoryOf(::EditTeamViewModel)
     factoryOf(::MatchupPlanEditViewModel)

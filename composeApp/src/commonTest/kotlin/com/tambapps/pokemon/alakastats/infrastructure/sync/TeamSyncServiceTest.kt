@@ -359,7 +359,8 @@ class TeamSyncServiceTest {
         a.service.disconnect()
 
         assertTrue(tokenProvider.signedOut)
-        assertEquals(SyncState(), a.stateStore.state)
+        // only which teams were synced is kept
+        assertEquals(SyncState(formerlyLinkedTeams = setOf(team.id)), a.stateStore.state)
         assertIs<SyncStatus.Disconnected>(a.service.status.value)
         assertNotNull(a.teams.get(team.id))
         assertEquals(1, cloud.files.size)
@@ -511,5 +512,52 @@ class TeamSyncServiceTest {
 
         assertEquals(setOf("r1", "fromA", "fromB"), b.teams.get(team.id)!!.replays.map { it.reference }.toSet())
         assertEquals(1, status.merges.size)
+    }
+
+    @Test
+    fun teamStatesFollowTheSync() = runTest {
+        val a = device()
+        val team = team()
+        a.save(team)
+        // not connected: nothing to show
+        assertTrue(a.service.teamStates.value.isEmpty())
+
+        a.service.connect()
+        assertEquals(TeamCloudState.SYNCED, a.service.teamStates.value[team.id])
+
+        // changed locally: shown pending right away, before the sync
+        a.edit(team.id) { it.copy(name = "Edited") }
+        a.service.requestSync()
+        runCurrent()
+        assertEquals(TeamCloudState.PENDING, a.service.teamStates.value[team.id])
+
+        cloud.uploadError = CloudError.Unknown("Google Drive error 400")
+        a.service.sync()
+        assertEquals(TeamCloudState.FAILED, a.service.teamStates.value[team.id])
+
+        cloud.uploadError = null
+        a.service.sync()
+        assertEquals(TeamCloudState.SYNCED, a.service.teamStates.value[team.id])
+
+        // disconnected: the team still has a copy in the cloud, no longer kept up to date
+        a.service.disconnect()
+        assertEquals(TeamCloudState.DISCONNECTED, a.service.teamStates.value[team.id])
+
+        a.service.connect()
+        assertEquals(TeamCloudState.SYNCED, a.service.teamStates.value[team.id])
+        assertTrue(a.stateStore.state.formerlyLinkedTeams.isEmpty())
+    }
+
+    @Test
+    fun teamNeverSyncedHasNoStateOnceDisconnected() = runTest {
+        val a = device()
+        a.service.connect()
+        a.service.disconnect()
+        val team = team()
+        a.save(team)
+        a.service.requestSync()
+        runCurrent()
+
+        assertNull(a.service.teamStates.value[team.id])
     }
 }

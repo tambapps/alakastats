@@ -11,6 +11,7 @@ import arrow.core.getOrElse
 import arrow.core.raise.either
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.navigator.Navigator
+import com.tambapps.pokemon.alakastats.domain.error.ReadOnlyTeamError
 import com.tambapps.pokemon.alakastats.domain.error.StorageError
 import com.tambapps.pokemon.alakastats.domain.error.TeamlyticsNotFound
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
@@ -19,7 +20,11 @@ import com.tambapps.pokemon.alakastats.domain.model.withComputedElo
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.downloadToFile
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.CloudError
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.TeamFilePicker
+import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncStatus
 import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
+import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.userMessage
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.getFilePickerSettings
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
@@ -37,17 +42,67 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.uuid.Uuid
 
+/**
+ * @param teamFilePicker to join shared teams. Null where there's none (mobile): joining is done on the web
+ */
 class HomeViewModel(
     private val replayAnalyticsService: ReplayAnalyticsService,
     private val useCase: ManageTeamlyticsListUseCase,
-    syncService: TeamSyncService,
+    private val syncService: TeamSyncService,
+    private val teamFilePicker: TeamFilePicker?,
 ): ScreenModel {
 
     val teamsChangedBySync = syncService.teamsChanged
 
+    /** the user's role in each shared team */
+    val sharing = syncService.sharing
+    /** once disconnected, the role in the teams that were shared */
+    val formerSharing = syncService.formerSharing
+    val isSharingAvailable = syncService.isSharingAvailable
+    /** where each team stands with the cloud, empty when it isn't connected */
+    val teamCloudStates = syncService.teamStates
+
     val teamlyticsList: SnapshotStateList<TeamlyticsPreview> = mutableStateListOf()
     private val scope = CoroutineScope(Dispatchers.Default)
-    
+
+    val shareTeam = ShareTeamState(syncService, scope)
+
+    /** on mobile, explains how to join a shared team on the web */
+    var showJoinOnWebDialog by mutableStateOf(false)
+
+    fun shareTeam(team: TeamlyticsPreview) {
+        hideMenu()
+        shareTeam.open(team)
+    }
+
+    fun joinSharedTeam(snackBar: SnackBar) {
+        if (syncService.status.value !is SyncStatus.Idle && syncService.status.value !is SyncStatus.Syncing) {
+            snackBar.show("Connect your Google Drive in the Sync screen first", SnackBar.Severity.WARNING)
+            return
+        }
+        val picker = teamFilePicker ?: run {
+            showJoinOnWebDialog = true
+            return
+        }
+        scope.launch {
+            val token = syncService.sharingAccessToken().getOrElse { error ->
+                if (error !is CloudError.Cancelled) snackBar.show(error.userMessage(), SnackBar.Severity.ERROR)
+                return@launch
+            }
+            val fileIds = picker.pick(token).getOrElse { error ->
+                snackBar.show(error.userMessage(), SnackBar.Severity.ERROR)
+                return@launch
+            }
+            if (fileIds.isEmpty()) return@launch
+            withContext(Dispatchers.Main) { isLoading = true }
+            syncService.joinSharedTeams(fileIds)
+                .onRight { names -> snackBar.show("Joined ${names.joinToString()}", SnackBar.Severity.SUCCESS) }
+                .onLeft { error -> snackBar.show(error.userMessage(), SnackBar.Severity.ERROR) }
+            doLoadTeams()
+            withContext(Dispatchers.Main) { isLoading = false }
+        }
+    }
+
     var expandedMenuTeamId by mutableStateOf<Uuid?>(null)
         private set
     
@@ -240,6 +295,7 @@ class HomeViewModel(
                     when(error) {
                         is StorageError -> snackBar.show("Storage error: ${error.message}", SnackBar.Severity.ERROR)
                         is TeamlyticsNotFound -> snackBar.show("The team could not be found", SnackBar.Severity.ERROR)
+                        is ReadOnlyTeamError -> snackBar.show(error.message, SnackBar.Severity.ERROR)
                     }
                 },
                 ifRight = { fullTeam ->

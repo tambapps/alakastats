@@ -14,7 +14,6 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
-import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.DRIVE_APPDATA_SCOPE
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.GoogleOAuthClient
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.OAuthTokenProvider
 import kotlinx.coroutines.CancellationException
@@ -36,14 +35,13 @@ class GoogleAuthorizationTokenProvider(
 
     private val client get() = Identity.getAuthorizationClient(context)
     private val mutex = Mutex()
-    private var cachedToken: String? = null
+    private val cachedTokens = mutableMapOf<Set<String>, String>()
 
-    private val request = AuthorizationRequest.builder()
-        .setRequestedScopes(listOf(Scope(DRIVE_APPDATA_SCOPE)))
-        .build()
-
-    override suspend fun accessToken(interactive: Boolean): Either<CloudError, String> = mutex.withLock {
-        cachedToken?.let { return it.right() }
+    override suspend fun accessToken(interactive: Boolean, scopes: Set<String>): Either<CloudError, String> = mutex.withLock {
+        cachedTokens[scopes]?.let { return it.right() }
+        val request = AuthorizationRequest.builder()
+            .setRequestedScopes(scopes.map(::Scope))
+            .build()
         val result = try {
             client.authorize(request).await()
         } catch (e: CancellationException) {
@@ -55,7 +53,7 @@ class GoogleAuthorizationTokenProvider(
             if (!interactive) return CloudError.NeedsUserInteraction().left()
             resolve(result).getOrElse { return it.left() }
         } else result.accessToken ?: return CloudError.Unknown("Google gave no access token").left()
-        cachedToken = token
+        cachedTokens[scopes] = token
         token.right()
     }
 
@@ -72,17 +70,17 @@ class GoogleAuthorizationTokenProvider(
     }
 
     override suspend fun invalidate(token: String) = mutex.withLock {
-        if (cachedToken == token) cachedToken = null
+        cachedTokens.values.removeAll { it == token }
         clearToken(token)
     }
 
     override suspend fun signOut() {
-        val token = mutex.withLock { cachedToken.also { cachedToken = null } }
-            ?: accessToken(interactive = false).getOrNull()
-            ?: return
-        oAuthClient.revoke(token)
-        clearToken(token)
-        mutex.withLock { cachedToken = null }
+        val tokens = mutex.withLock { cachedTokens.values.toSet().also { cachedTokens.clear() } }
+            .ifEmpty { setOfNotNull(accessToken(interactive = false).getOrNull()) }
+        // revoking a token revokes the whole grant, every scope included
+        tokens.firstOrNull()?.let { oAuthClient.revoke(it) }
+        tokens.forEach { clearToken(it) }
+        mutex.withLock { cachedTokens.clear() }
     }
 
     private suspend fun clearToken(token: String) {

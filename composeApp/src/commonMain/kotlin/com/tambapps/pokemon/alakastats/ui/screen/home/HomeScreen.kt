@@ -3,9 +3,16 @@ package com.tambapps.pokemon.alakastats.ui.screen.home
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.calculate
+import alakastats.composeapp.generated.resources.cloud_alert
+import alakastats.composeapp.generated.resources.cloud_done
+import alakastats.composeapp.generated.resources.cloud_off
+import alakastats.composeapp.generated.resources.cloud_upload
+import alakastats.composeapp.generated.resources.group
 import alakastats.composeapp.generated.resources.more_horiz
 import alakastats.composeapp.generated.resources.quiz
+import alakastats.composeapp.generated.resources.visibility
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,11 +41,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.ShareRole
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamCloudState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
@@ -108,21 +120,28 @@ object HomeScreen : Screen {
             )
 
         }
+        val sharing by viewModel.sharing.collectAsState()
         viewModel.teamToDelete?.let { teamToDelete ->
+            val role = sharing[teamToDelete.id]
+            val isLeaving = role != null && role != ShareRole.OWNER
             TeamActionDialog(
                 viewModel = viewModel,
                 teamName = teamToDelete.name,
                 pokemons = teamToDelete.pokemons,
                 winRatePercentage = teamToDelete.winrate,
                 nbReplays = teamToDelete.nbReplays,
-                title = "Delete Team",
-                text = "This action cannot be undone.",
+                title = if (isLeaving) "Leave Team" else "Delete Team",
+                text = when {
+                    isLeaving -> "The team will be removed from your devices. You can join it again while it's shared with you."
+                    role == ShareRole.OWNER -> "The team will be deleted for everyone it's shared with. This action cannot be undone."
+                    else -> "This action cannot be undone."
+                },
                 onDismissRequest = { viewModel.dismissDeleteDialog() },
                 confirmButton = {
                     TextButton(
                         onClick = { viewModel.confirmDelete() }
                     ) {
-                        Text("Delete", color = Color.Red)
+                        Text(if (isLeaving) "Leave" else "Delete", color = Color.Red)
                     }
                 }
             )
@@ -130,6 +149,8 @@ object HomeScreen : Screen {
         viewModel.samplesToShow?.let { samples ->
             SamplesDialog(viewModel, samples)
         }
+        ShareTeamDialog(viewModel)
+        JoinOnWebDialog(viewModel)
     }
 }
 
@@ -152,12 +173,21 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
         onClick = { viewModel.consultTeam(team, navigator) },
         gradientBackgroundColors = elevatedCardGradientColors
     ) {
+        val sharing by viewModel.sharing.collectAsState()
+        val role = sharing[team.id]
         Column(Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.Top
             ) {
-                Text(team.name, style = MaterialTheme.typography.titleLarge)
-                Spacer(Modifier.weight(1f))
+                // a long name is cut, so that the icons and the menu stay on this line
+                Text(
+                    team.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                TeamStatusIcons(viewModel, team, role)
                 Box(modifier = Modifier.offset(y = (-12).dp)) {
                     IconButton(
                         onClick = { viewModel.showMenu(team.id) }
@@ -172,20 +202,32 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
                         onDismissRequest = { viewModel.hideMenu() }
                     ) {
                         val snackBar = LocalSnackBar.current
-                        DropdownMenuItem(
-                            text = { Text("Edit") },
-                            onClick = { viewModel.editTeam(team, navigator, snackBar) }
-                        )
+                        // a viewer of a shared team can't change it
+                        if (role != ShareRole.VIEWER) {
+                            DropdownMenuItem(
+                                text = { Text("Edit") },
+                                onClick = { viewModel.editTeam(team, navigator, snackBar) }
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text("Export") },
                             onClick = { viewModel.exportTeam(team, snackBar) }
                         )
+                        if (role != ShareRole.VIEWER) {
+                            DropdownMenuItem(
+                                text = { Text("Reload replays") },
+                                onClick = { viewModel.reloadReplays(team, snackBar) }
+                            )
+                        }
+                        // only the owner shares
+                        if (viewModel.isSharingAvailable && (role == null || role == ShareRole.OWNER)) {
+                            DropdownMenuItem(
+                                text = { Text(if (role == null) "Share" else "Sharing") },
+                                onClick = { viewModel.shareTeam(team) }
+                            )
+                        }
                         DropdownMenuItem(
-                            text = { Text("Reload replays") },
-                            onClick = { viewModel.reloadReplays(team, snackBar) }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Delete") },
+                            text = { Text(if (role == null || role == ShareRole.OWNER) "Delete" else "Leave") },
                             onClick = { viewModel.deleteTeamDialog(team) }
                         )
                     }
@@ -199,6 +241,78 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
                 Spacer(Modifier.weight(1f))
                 Text("${team.winrate}% winrate")
             }
+        }
+    }
+}
+
+/**
+ * Whether the team is shared, and where it stands with the cloud. Nothing for a team never synced
+ */
+@Composable
+private fun TeamStatusIcons(viewModel: HomeViewModel, team: TeamlyticsPreview, role: ShareRole?) {
+    val cloudStates by viewModel.teamCloudStates.collectAsState()
+    val formerSharing by viewModel.formerSharing.collectAsState()
+    val cloudState = cloudStates[team.id]
+    // disconnected: still shared in the cloud, but not synced on this device
+    val sharedRole = role ?: formerSharing[team.id]
+    if (sharedRole == null && cloudState == null) return
+    val navigator = LocalNavigator.currentOrThrow
+    val iconSize = 20.dp
+    val sharingTint = if (role != null) MaterialTheme.colorScheme.primary
+    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+
+    // aligned with the title's first line
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.padding(start = 8.dp, top = 4.dp),
+    ) {
+        if (sharedRole != null) {
+            Icon(
+                painter = painterResource(Res.drawable.group),
+                contentDescription = "Shared with you · ${sharedRole.label()}",
+                tint = sharingTint,
+                modifier = Modifier.size(iconSize),
+            )
+        }
+        // read only: the edit actions are hidden
+        if (sharedRole == ShareRole.VIEWER) {
+            Icon(
+                painter = painterResource(Res.drawable.visibility),
+                contentDescription = "Viewer: read only",
+                tint = sharingTint,
+                modifier = Modifier.size(iconSize),
+            )
+        }
+        when (cloudState) {
+            TeamCloudState.DISCONNECTED -> Icon(
+                painter = painterResource(Res.drawable.cloud_off),
+                contentDescription = "Google Drive disconnected: its copy there isn't kept up to date",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                // the Sync screen reconnects
+                modifier = Modifier.size(iconSize).clickable { navigator.push(CloudSyncScreen) },
+            )
+            TeamCloudState.SYNCED -> Icon(
+                painter = painterResource(Res.drawable.cloud_done),
+                contentDescription = "Synced",
+                // discreet: the usual case
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(iconSize),
+            )
+            TeamCloudState.PENDING -> Icon(
+                painter = painterResource(Res.drawable.cloud_upload),
+                contentDescription = "Waiting to be synced",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(iconSize),
+            )
+            TeamCloudState.FAILED -> Icon(
+                painter = painterResource(Res.drawable.cloud_alert),
+                contentDescription = "Couldn't be synced",
+                tint = MaterialTheme.colorScheme.error,
+                // the Sync screen tells why
+                modifier = Modifier.size(iconSize).clickable { navigator.push(CloudSyncScreen) },
+            )
+            null -> Unit
         }
     }
 }

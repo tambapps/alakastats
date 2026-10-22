@@ -4,7 +4,7 @@ import arrow.core.Either
 import arrow.core.getOrElse
 import arrow.core.left
 import arrow.core.right
-import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.DRIVE_APPDATA_SCOPE
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.PRIVATE_SYNC_SCOPES
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.GoogleOAuthClient
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.GoogleTokenResponse
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.OAuthTokenProvider
@@ -60,13 +60,15 @@ class IosPkceTokenProvider(
     private var session: ASWebAuthenticationSession? = null
     private var contextProvider: PresentationContextProvider? = null
 
-    override suspend fun accessToken(interactive: Boolean): Either<CloudError, String> = mutex.withLock {
+    override suspend fun accessToken(interactive: Boolean, scopes: Set<String>): Either<CloudError, String> = mutex.withLock {
+        val refreshToken = keychain.get(REFRESH_TOKEN_KEY)
+        // the tokens give access to every scope granted so far
+        val hasScopes = refreshToken != null && grantedScopes().containsAll(scopes)
         val current = accessToken
-        if (current != null && clock.now() < expiresAt - EXPIRY_MARGIN) return current.right()
+        if (hasScopes && current != null && clock.now() < expiresAt - EXPIRY_MARGIN) return current.right()
         val clientId = clientId() ?: return CloudError.Unknown("Google Drive isn't configured in this build").left()
 
-        val refreshToken = keychain.get(REFRESH_TOKEN_KEY)
-        if (refreshToken != null) {
+        if (refreshToken != null && hasScopes) {
             when (val refreshed = oAuthClient.refresh(clientId, refreshToken)) {
                 is Either.Right -> return store(refreshed.value)
                 is Either.Left -> when (refreshed.value) {
@@ -78,8 +80,15 @@ class IosPkceTokenProvider(
             if (!interactive) return CloudError.AccessRevoked().left()
         }
         if (!interactive) return CloudError.NeedsUserInteraction().left()
-        val response = authorizeInteractively(clientId).getOrElse { return it.left() }
+        // the scopes already granted are kept: the new refresh token covers them all
+        val response = authorizeInteractively(clientId, scopes + grantedScopes()).getOrElse { return it.left() }
         store(response)
+    }
+
+    private fun grantedScopes(): Set<String> {
+        val stored = keychain.get(GRANTED_SCOPES_KEY)
+            ?: return if (keychain.get(REFRESH_TOKEN_KEY) != null) PRIVATE_SYNC_SCOPES else emptySet()
+        return stored.split(' ').filter { it.isNotBlank() }.toSet()
     }
 
     override suspend fun invalidate(token: String) = mutex.withLock {
@@ -92,6 +101,7 @@ class IosPkceTokenProvider(
     override suspend fun signOut() = mutex.withLock {
         val token = keychain.get(REFRESH_TOKEN_KEY) ?: accessToken
         keychain.delete(REFRESH_TOKEN_KEY)
+        keychain.delete(GRANTED_SCOPES_KEY)
         accessToken = null
         expiresAt = Instant.DISTANT_PAST
         token?.let { oAuthClient.revoke(it) }
@@ -100,12 +110,13 @@ class IosPkceTokenProvider(
 
     private fun store(response: GoogleTokenResponse): Either<CloudError, String> {
         response.refreshToken?.let { keychain.set(REFRESH_TOKEN_KEY, it) }
+        response.scope?.let { keychain.set(GRANTED_SCOPES_KEY, it) }
         accessToken = response.accessToken
         expiresAt = clock.now() + response.expiresInSeconds.seconds
         return response.accessToken.right()
     }
 
-    private suspend fun authorizeInteractively(clientId: String): Either<CloudError, GoogleTokenResponse> {
+    private suspend fun authorizeInteractively(clientId: String, scopes: Set<String>): Either<CloudError, GoogleTokenResponse> {
         val codeVerifier = base64Url(secureRandomBytes(32))
         val codeChallenge = base64Url(sha256(codeVerifier.encodeToByteArray()))
         val state = base64Url(secureRandomBytes(16))
@@ -115,7 +126,8 @@ class IosPkceTokenProvider(
             parameters.append("client_id", clientId)
             parameters.append("redirect_uri", redirectUri)
             parameters.append("response_type", "code")
-            parameters.append("scope", DRIVE_APPDATA_SCOPE)
+            parameters.append("scope", scopes.joinToString(" "))
+            parameters.append("include_granted_scopes", "true")
             parameters.append("code_challenge", codeChallenge)
             parameters.append("code_challenge_method", "S256")
             parameters.append("state", state)
@@ -179,6 +191,8 @@ class IosPkceTokenProvider(
         const val AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
         const val CLIENT_ID_INFO_KEY = "GoogleIosClientId"
         const val REFRESH_TOKEN_KEY = "refresh_token"
+        // space separated, as Google gives them
+        const val GRANTED_SCOPES_KEY = "granted_scopes"
         val EXPIRY_MARGIN = 60.seconds
 
         fun base64Url(bytes: ByteArray) = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).encode(bytes)

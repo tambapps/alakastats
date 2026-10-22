@@ -11,4 +11,7 @@ interface ConsultTeamlyticsUseCase {
 
     val hasFilteredReplays: Boolean
     val isApplyingFiltersLoading: Boolean
+
+    /** the team is shared with the user as a viewer: the edit actions are hidden */
+    val isReadOnly: Boolean
 }

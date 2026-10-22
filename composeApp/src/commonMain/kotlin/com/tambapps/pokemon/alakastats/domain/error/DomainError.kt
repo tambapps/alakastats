@@ -47,3 +47,11 @@ data class StorageError(
     override val cause: Throwable? = null
 ) : GetTeamlyticsError
 
+/**
+ * The team is shared with the user as a viewer
+ */
+data class ReadOnlyTeamError(val id: Uuid) : GetTeamlyticsError {
+    override val message = "This team is shared with you as a viewer: it can't be changed"
+    override val cause: Throwable? = null
+}
+

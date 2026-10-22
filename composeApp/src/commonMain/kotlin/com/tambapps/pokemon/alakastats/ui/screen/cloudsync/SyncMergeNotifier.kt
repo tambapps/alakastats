@@ -7,13 +7,16 @@ import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 
 /**
- * Tells the user about each team a sync merged, whatever the screen
+ * Tells the user about each team a sync merged, and what else a sync has to say, whatever the screen
  */
 @Composable
 fun SyncMergeNotifier(syncService: TeamSyncService) {
     val snackBar = LocalSnackBar.current
     LaunchedEffect(syncService) {
         syncService.merges.collect { merge -> snackBar.show(merge.userMessage()) }
+    }
+    LaunchedEffect(syncService) {
+        syncService.notices.collect { notice -> snackBar.show(notice) }
     }
 }
 

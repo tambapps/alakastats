@@ -30,6 +30,7 @@ class OverviewViewModel(
 ): TeamlyticsTabViewModel() {
     // important. In this tab we don't want to consider filters
     val team get() = useCase.originalTeam
+    val isReadOnly get() = useCase.isReadOnly
     var isEditingNotes by mutableStateOf(false)
     var teamNotes by mutableStateOf("")
     val pokemonNotes = mutableStateMapOf<PokemonName, String>()

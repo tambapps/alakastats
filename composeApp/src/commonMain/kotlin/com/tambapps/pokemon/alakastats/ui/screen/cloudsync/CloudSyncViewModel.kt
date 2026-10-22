@@ -40,6 +40,19 @@ class CloudSyncViewModel(
         }
     }
 
+    /**
+     * Asks the user the access to the shared teams' files on this device, then syncs them
+     */
+    fun allowSharing(snackBar: SnackBar) {
+        screenModelScope.launch {
+            syncService.authorizeSharing()
+                .onRight { syncService.sync() }
+                .onLeft { error ->
+                    if (error !is CloudError.Cancelled) snackBar.show(error.userMessage(), SnackBar.Severity.ERROR)
+                }
+        }
+    }
+
     fun syncNow(snackBar: SnackBar) {
         screenModelScope.launch {
             when (val status = syncService.sync()) {
@@ -61,5 +74,6 @@ fun CloudError.userMessage(): String = when (this) {
     is CloudError.NeedsUserInteraction -> "Your Google Drive session expired. Reconnect to sync"
     is CloudError.RateLimited -> "Google Drive is busy. Try again in a few minutes"
     is CloudError.Cancelled -> "Connection cancelled"
+    is CloudError.FileAccessDenied -> "You don't have access to this shared team anymore"
     is CloudError.NotFound, is CloudError.Unknown -> "Sync failed: $message"
 }

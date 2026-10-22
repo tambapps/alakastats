@@ -26,6 +26,7 @@ class MatchupPlansViewModel(
     val team get() = useCase.originalTeam
     val matchupPlans get() = team.matchupPlans
     val hasMatchupPlans get() = matchupPlans.isNotEmpty()
+    val isReadOnly get() = useCase.isReadOnly
 
     var editMatchupMode by mutableStateOf<EditMatchupMode>(NoEdit)
 

@@ -111,6 +111,8 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
 
 @Composable
 private fun AddReplayButton(viewModel: TeamReplayViewModel, modifier: Modifier = Modifier) {
+    // a viewer of a shared team can't add replays
+    if (viewModel.isReadOnly) return
     FloatingActionButton(
         onClick = {
             if (!viewModel.isLoading) {
@@ -449,6 +451,11 @@ internal fun ReplayDropDownMenu(
     ) {
         val snackBar = LocalSnackBar.current
         val alreadyHasNotes = !replay.notes.isNullOrBlank()
+        // a viewer of a shared team can't change the replays
+        if (viewModel.isReadOnly) {
+            DropdownMenuItem(text = { Text("Shared with you as a viewer") }, onClick = { isMenuExpandedState.value = false }, enabled = false)
+            return@DropdownMenu
+        }
 
         // only manual replays can be edited, the others are what showdown says they are
         if (replay.isManual) {

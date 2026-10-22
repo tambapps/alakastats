@@ -25,6 +25,7 @@ class TeamReplayViewModel(
     override val formatData: FormatData?
 ): TeamlyticsFiltersTabViewModel() {
     val team get() = useCase.filteredTeam
+    val isReadOnly get() = useCase.isReadOnly
 
     private companion object {
         val REPLAYS_SEPARATOR_REGEX = Regex("[,\\s]+")

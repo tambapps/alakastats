@@ -3,6 +3,8 @@ package com.tambapps.pokemon.alakastats.infrastructure.cloud
 import arrow.core.Either
 import arrow.core.right
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.OAuthTokenProvider
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.PRIVATE_SYNC_SCOPES
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.SHARING_SCOPES
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.drive.GoogleDriveCloudStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -31,7 +33,11 @@ class GoogleDriveCloudStorageTest {
     private class CountingTokenProvider : OAuthTokenProvider {
         var generation = 1
         val invalidated = mutableListOf<String>()
-        override suspend fun accessToken(interactive: Boolean): Either<CloudError, String> = "token-$generation".right()
+        val askedScopes = mutableListOf<Set<String>>()
+        override suspend fun accessToken(interactive: Boolean, scopes: Set<String>): Either<CloudError, String> {
+            askedScopes.add(scopes)
+            return "token-$generation".right()
+        }
         override suspend fun invalidate(token: String) {
             invalidated.add(token)
             generation++
@@ -205,5 +211,116 @@ class GoogleDriveCloudStorageTest {
 
         assertTrue(storage.list().isRight())
         assertEquals(2, calls)
+    }
+
+    private fun HttpRequestData.bodyText() = (body as ByteArrayContent).bytes().decodeToString()
+
+    @Test
+    fun privateSyncOnlyAsksTheAppDataScope() = runTest {
+        storage { json("""{"files":[]}""") }.list()
+
+        assertEquals(listOf(PRIVATE_SYNC_SCOPES), tokenProvider.askedScopes)
+    }
+
+    @Test
+    fun sharedFileIsReadWithTheSharingScopes() = runTest {
+        val storage = storage {
+            json("""{"id":"s1","name":"Rain.json","version":"42","headRevisionId":"rev2","trashed":false,"ownedByMe":false,
+                "owners":[{"emailAddress":"a@gmail.com"}],"capabilities":{"canEdit":true,"canShare":false},"appProperties":{"teamId":"1"}}""")
+        }
+
+        val file = storage.getSharedFile("s1").getOrNull()!!
+
+        assertEquals(listOf(SHARING_SCOPES), tokenProvider.askedScopes)
+        assertEquals(42, file.version)
+        assertEquals("rev2", file.headRevisionId)
+        assertEquals(ShareRole.EDITOR, file.role)
+        assertEquals("a@gmail.com", file.ownerEmail)
+        assertContains(requests.single().url.parameters["fields"]!!, "capabilities(canEdit,canShare)")
+    }
+
+    @Test
+    fun existingFolderIsReused() = runTest {
+        val storage = storage { json("""{"files":[{"id":"folder1"}]}""") }
+
+        assertEquals("folder1", storage.ensureFolder("Alakastats").getOrNull())
+        assertEquals(1, requests.size)
+        assertContains(requests.single().url.parameters["q"]!!, "name = 'Alakastats'")
+    }
+
+    @Test
+    fun missingFolderIsCreated() = runTest {
+        val storage = storage { request ->
+            if (request.method == HttpMethod.Get) json("""{"files":[]}""") else json("""{"id":"new"}""")
+        }
+
+        assertEquals("new", storage.ensureFolder("Alakastats").getOrNull())
+        assertContains(requests[1].bodyText(), "application/vnd.google-apps.folder")
+    }
+
+    @Test
+    fun sharedFileIsCreatedInTheFolder() = runTest {
+        val storage = storage { json("""{"id":"s1","name":"Rain.json","version":"1"}""") }
+
+        storage.uploadSharedFile("Rain.json", "{}".encodeToByteArray(), mapOf("teamId" to "1"), existingFileId = null, folderId = "folder1")
+
+        assertContains(requests.single().bodyText(), """"parents":["folder1"]""")
+        assertTrue("appDataFolder" !in requests.single().bodyText())
+    }
+
+    @Test
+    fun shareSendsAnInvitationWithTheRole() = runTest {
+        val storage = storage { json("{}") }
+
+        storage.share("s1", "b@gmail.com", ShareRole.VIEWER, "Join on the web")
+
+        val request = requests.single()
+        assertEquals("/drive/v3/files/s1/permissions", request.url.encodedPath)
+        assertEquals("true", request.url.parameters["sendNotificationEmail"])
+        assertEquals("Join on the web", request.url.parameters["emailMessage"])
+        val body = request.bodyText()
+        assertContains(body, """"type":"user"""")
+        assertContains(body, """"role":"reader"""")
+        assertContains(body, """"emailAddress":"b@gmail.com"""")
+    }
+
+    @Test
+    fun membersAreListedWithTheirRoles() = runTest {
+        val storage = storage {
+            json("""{"permissions":[{"id":"p1","role":"owner","emailAddress":"a@gmail.com"},{"id":"p2","role":"writer","emailAddress":"b@gmail.com"},{"id":"p3","role":"reader"}]}""")
+        }
+
+        val members = storage.listMembers("s1").getOrNull()!!
+
+        assertEquals(listOf(ShareRole.OWNER, ShareRole.EDITOR, ShareRole.VIEWER), members.map { it.role })
+    }
+
+    @Test
+    fun editorsCantInvite() = runTest {
+        val storage = storage { json("""{"id":"s1"}""") }
+
+        storage.setEditorsCanShare("s1", false)
+
+        assertEquals(HttpMethod.Patch, requests.single().method)
+        assertContains(requests.single().bodyText(), """"writersCanShare":false""")
+    }
+
+    @Test
+    fun revisionsTellWhoWroteThem() = runTest {
+        val storage = storage {
+            json("""{"revisions":[{"id":"r1","lastModifyingUser":{"me":true}},{"id":"r2","lastModifyingUser":{"me":false}}]}""")
+        }
+
+        val revisions = storage.listRevisions("s1").getOrNull()!!
+
+        assertEquals(listOf("r1" to true, "r2" to false), revisions.map { it.id to it.byMe })
+    }
+
+    @Test
+    fun fileNotPickedIsAFileLevelError() = runTest {
+        val storage = storage { error(403, "appNotAuthorizedToFile") }
+
+        // not a revoked access: the other files still work
+        assertIs<CloudError.FileAccessDenied>(storage.getSharedFile("s1").leftOrNull())
     }
 }

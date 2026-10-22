@@ -151,6 +151,8 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
                     viewModel.exportTeam(snackBar)
                 }
             )
+            // a viewer of a shared team can only export it
+            if (viewModel.isReadOnly) return@DropdownMenu
             val navigator = LocalNavigator.currentOrThrow
             DropdownMenuItem(
                 text = { Text("Edit team") },

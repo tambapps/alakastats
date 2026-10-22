@@ -128,7 +128,8 @@ private fun AboutAlakastats() = Section(
         }
         append(".\nEverything is stored locally on your device (in your browser or on your smartphone).")
         if (koinInject<TeamSyncService>().isAvailable) {
-            append(" If you connect your Google Drive, your teams are also saved in a hidden folder of your own Drive, that only Alakastats can access.")
+            append(" If you connect your Google Drive, your teams are also saved in a hidden folder of your own Drive, that only Alakastats can access," +
+                    " and you can share teams with other players through Google Drive.")
         }
         append("\n\n")
 
