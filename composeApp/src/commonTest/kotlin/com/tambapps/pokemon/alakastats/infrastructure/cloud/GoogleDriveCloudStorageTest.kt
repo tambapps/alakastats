@@ -323,4 +323,13 @@ class GoogleDriveCloudStorageTest {
         // not a revoked access: the other files still work
         assertIs<CloudError.FileAccessDenied>(storage.getSharedFile("s1").leftOrNull())
     }
+
+    @Test
+    fun accountEmailWithThePrivateScopeOnly() = runTest {
+        val storage = storage { json("""{"user":{"emailAddress":"me@gmail.com"}}""") }
+
+        assertEquals("me@gmail.com", storage.accountEmail().getOrNull())
+        assertEquals("/drive/v3/about", requests.single().url.encodedPath)
+        assertEquals(listOf(PRIVATE_SYNC_SCOPES), tokenProvider.askedScopes)
+    }
 }

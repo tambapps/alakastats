@@ -97,6 +97,15 @@ class GoogleDriveCloudStorage(
         handle = { }
     )
 
+    override suspend fun accountEmail() = call(
+        request = {
+            method = HttpMethod.Get
+            url("$API_URL/about")
+            parameter("fields", "user(emailAddress)")
+        },
+        handle = { json.decodeFromString<DriveAboutDto>(it.bodyAsText()).user?.emailAddress }
+    )
+
     override suspend fun ensureFolder(name: String): Either<CloudError, String> {
         // with drive.file, only the folders the app created are listed
         val existing = call(

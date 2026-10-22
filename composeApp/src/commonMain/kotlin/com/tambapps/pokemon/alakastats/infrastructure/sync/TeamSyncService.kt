@@ -122,6 +122,10 @@ class TeamSyncService(
     /** The role of the user in each shared team of this device */
     val sharing: StateFlow<Map<Uuid, ShareRole>> = _sharing.asStateFlow()
 
+    private val _accountEmail = MutableStateFlow<String?>(null)
+    /** The e-mail of the connected account, null when not known (yet) */
+    val accountEmail: StateFlow<String?> = _accountEmail.asStateFlow()
+
     private val _formerSharing = MutableStateFlow<Map<Uuid, ShareRole>>(emptyMap())
     /** Once disconnected, the user's role in the teams that were shared: still shared, but not synced anymore */
     val formerSharing: StateFlow<Map<Uuid, ShareRole>> = _formerSharing.asStateFlow()
@@ -352,6 +356,10 @@ class TeamSyncService(
     private suspend fun doSync(cloudStorage: CloudStorage): SyncStatus {
         val remoteFiles = cloudStorage.list().getOrElse { return failed(it) }
         val report = SyncReport()
+        // only to show it: not knowing it doesn't stop the sync
+        if (currentState().accountEmail == null) {
+            cloudStorage.accountEmail().getOrNull()?.let { email -> updateState { it.copy(accountEmail = email) } }
+        }
 
         // the shared teams are out of the private space
         val index = sharedSync?.let { shared ->
@@ -565,6 +573,7 @@ class TeamSyncService(
     private fun publishSharing(state: SyncState) {
         _sharing.value = state.sharedEntries.mapValues { (_, entry) -> entry.role }
         _formerSharing.value = state.formerlySharedRoles
+        _accountEmail.value = state.accountEmail
     }
 
     private fun CloudFile.toRemoteTeamVersion(): RemoteTeamVersion? {

@@ -57,7 +57,8 @@ When you connect your Google Drive:
 - The application only asks for the `drive.appdata` permission: access to a **hidden folder of your Google Drive dedicated to Alakastats**. It cannot see, read or modify any other file of your Drive.
 - Your teams (team, replays analyses, notes, game plans) are saved in this hidden folder, in your own Google account, and count towards your own storage quota.
 - The data goes directly from your device to Google: it never goes through a server of the developer, and the developer has no access to it.
-- Google's sign-in gives the application an access token to your Drive. This token stays on your device (in the system's secure storage on iOS, in the browser's session on the web) and is only used to sync your teams. The application doesn't read nor store your email address, your name or any other information of your Google account.
+- Google's sign-in gives the application an access token to your Drive. This token stays on your device (in the system's secure storage on iOS, in the browser's session on the web) and is only used to sync your teams.
+- The application reads the email address of the connected Google account, only to show you which account is connected. It's kept on your device only, never sent anywhere else, and deleted when you disconnect. The application doesn't read your name or any other information of your Google account.
 
 ### Shared teams
 

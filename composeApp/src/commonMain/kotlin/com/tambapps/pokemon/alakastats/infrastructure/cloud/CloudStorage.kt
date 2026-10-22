@@ -63,4 +63,9 @@ interface CloudStorage {
     ): Either<CloudError, CloudFile>
 
     suspend fun delete(fileId: String): Either<CloudError, Unit>
+
+    /**
+     * @return the e-mail of the connected account, to show the user which one it is
+     */
+    suspend fun accountEmail(): Either<CloudError, String?>
 }

@@ -16,6 +16,8 @@ import kotlin.uuid.Uuid
  * @param formerlyLinkedTeams once disconnected, the teams that were synced: they have a copy in the cloud that isn't
  * kept up to date anymore. Cleared at the next connection
  * @param formerlySharedRoles once disconnected, the user's role in the teams that were shared
+ * @param accountEmail the e-mail of the connected account, only to show it. Stays on the device, cleared on
+ * disconnection
  */
 @Serializable
 data class SyncState(
@@ -28,6 +30,7 @@ data class SyncState(
     val pendingSharedTrash: Set<String> = emptySet(),
     val formerlyLinkedTeams: Set<Uuid> = emptySet(),
     val formerlySharedRoles: Map<Uuid, ShareRole> = emptyMap(),
+    val accountEmail: String? = null,
 )
 
 /**

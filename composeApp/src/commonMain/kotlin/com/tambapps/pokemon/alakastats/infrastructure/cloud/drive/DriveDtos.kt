@@ -25,6 +25,11 @@ internal data class DriveUserDto(
 )
 
 @Serializable
+internal data class DriveAboutDto(
+    val user: DriveUserDto? = null,
+)
+
+@Serializable
 internal data class DriveCapabilitiesDto(
     val canEdit: Boolean = false,
     val canShare: Boolean = false,

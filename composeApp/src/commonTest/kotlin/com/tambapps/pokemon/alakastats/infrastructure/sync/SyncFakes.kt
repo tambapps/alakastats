@@ -14,7 +14,7 @@ import com.tambapps.pokemon.alakastats.util.Identifiable
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-class FakeCloudStorage(private val clock: Clock) : CloudStorage {
+class FakeCloudStorage(private val clock: Clock, private val email: String = "me@gmail.com") : CloudStorage {
 
     data class StoredFile(val name: String, val bytes: ByteArray, val properties: Map<String, String>, val modifiedAt: Instant)
 
@@ -59,6 +59,8 @@ class FakeCloudStorage(private val clock: Clock) : CloudStorage {
         files[id] = file
         return CloudFile(id, name, file.modifiedAt, properties).right()
     }
+
+    override suspend fun accountEmail(): Either<CloudError, String?> = email.right()
 
     override suspend fun delete(fileId: String): Either<CloudError, Unit> {
         calls++

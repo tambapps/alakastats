@@ -55,7 +55,7 @@ class FakeDrive(private val clock: Clock) {
         file.revisions.add(Revision("rev-${nextId++}", user, bytes))
     }
 
-    fun appDataOf(user: String) = appData.getOrPut(user) { FakeCloudStorage(clock) }
+    fun appDataOf(user: String) = appData.getOrPut(user) { FakeCloudStorage(clock, email = user) }
 
     private fun newId(prefix: String) = "$prefix-${nextId++}"
 

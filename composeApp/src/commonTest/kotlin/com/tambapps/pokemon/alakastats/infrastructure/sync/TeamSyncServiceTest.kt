@@ -550,6 +550,19 @@ class TeamSyncServiceTest {
     }
 
     @Test
+    fun connectedAccountEmailIsKeptUntilDisconnection() = runTest {
+        val a = device()
+        assertNull(a.service.accountEmail.value)
+
+        a.service.connect()
+        assertEquals("me@gmail.com", a.service.accountEmail.value)
+        assertEquals("me@gmail.com", a.stateStore.state.accountEmail)
+
+        a.service.disconnect()
+        assertNull(a.service.accountEmail.value)
+    }
+
+    @Test
     fun teamKeptOnThisDeviceOnlyIsNeverUploaded() = runTest {
         val a = device()
         val team = team().copy(localOnly = true)

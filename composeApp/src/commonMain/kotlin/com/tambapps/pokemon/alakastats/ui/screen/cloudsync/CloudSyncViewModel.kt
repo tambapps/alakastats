@@ -16,6 +16,7 @@ class CloudSyncViewModel(
 ) : ScreenModel {
 
     val status = syncService.status
+    val accountEmail = syncService.accountEmail
 
     var isConnecting by mutableStateOf(false)
         private set

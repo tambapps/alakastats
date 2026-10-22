@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -50,7 +52,6 @@ object CloudSyncScreen : Screen {
         val viewModel = koinScreenModel<CloudSyncViewModel>()
         val status by viewModel.status.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
-        val snackBar = LocalSnackBar.current
         val isCompact = LocalIsCompact.current
         IosSwipeBack { navigator.pop() }
 
@@ -60,66 +61,70 @@ object CloudSyncScreen : Screen {
                 .then(
                     if (isCompact) Modifier.safeContentPadding().padding(horizontal = 8.dp)
                     else Modifier.padding(all = 32.dp)
-                )
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                ),
         ) {
-            Box(Modifier.fillMaxWidth()) {
-                if (!isCompact) {
-                    BackIconButton(navigator, Modifier.scale(2f).align(Alignment.CenterStart))
-                }
-                Text("Google Drive sync", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.align(Alignment.Center))
+            // out of the scrolled content: always visible
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                BackIconButton(navigator)
+                Spacer(Modifier.width(8.dp))
+                Text("Google Drive sync", style = MaterialTheme.typography.headlineMedium)
             }
-            SyncExplanation()
-
-            when (val s = status) {
-                SyncStatus.Unavailable -> Text("Not available on this platform", style = MaterialTheme.typography.bodyLarge)
-                SyncStatus.Disconnected -> ConnectButton(viewModel.isConnecting) { viewModel.connect(snackBar) }
-                is SyncStatus.Idle -> {
-                    StatusText("Connected", s.lastSyncAt)
-                    if (s.merges.isNotEmpty()) {
-                        SyncMerges(s.merges)
-                    }
-                    if (s.failures.isNotEmpty()) {
-                        SyncFailures(s.failures)
-                    }
-                    if (s.sharingNeedsConsent) {
-                        Text(
-                            "Your shared teams can't be synced on this device until you allow it.",
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.widthIn(max = 600.dp),
-                        )
-                        Button(onClick = { viewModel.allowSharing(snackBar) }) { Text("Allow shared teams") }
-                    }
-                    ConnectedButtons(viewModel, isSyncing = false)
-                }
-                is SyncStatus.Syncing -> {
-                    StatusText("Syncing…", s.lastSyncAt)
-                    ConnectedButtons(viewModel, isSyncing = true)
-                }
-                is SyncStatus.Failed -> {
-                    StatusText("Connected", s.lastSyncAt)
-                    Text(
-                        s.error.userMessage(),
-                        color = MaterialTheme.colorScheme.error,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.widthIn(max = 600.dp),
-                    )
-                    if (s.needsReconnection) {
-                        ConnectButton(viewModel.isConnecting, label = "Reconnect Google Drive") { viewModel.connect(snackBar) }
-                        TextButton(onClick = { viewModel.disconnect(snackBar) }) { Text("Disconnect") }
-                    } else {
-                        ConnectedButtons(viewModel, isSyncing = false)
-                    }
-                }
+            Column(
+                Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                SyncContent(viewModel, status)
             }
+        }
+    }
+}
 
-            if (isCompact) {
-                OutlinedButton(onClick = { navigator.pop() }) {
-                    Text("Back")
-                }
+@Composable
+private fun SyncContent(viewModel: CloudSyncViewModel, status: SyncStatus) {
+    val snackBar = LocalSnackBar.current
+    val accountEmail by viewModel.accountEmail.collectAsState()
+    SyncExplanation()
+
+    when (status) {
+        SyncStatus.Unavailable -> Text("Not available on this platform", style = MaterialTheme.typography.bodyLarge)
+        SyncStatus.Disconnected -> ConnectButton(viewModel.isConnecting) { viewModel.connect(snackBar) }
+        is SyncStatus.Idle -> {
+            StatusText("Connected", status.lastSyncAt, accountEmail)
+            if (status.merges.isNotEmpty()) {
+                SyncMerges(status.merges)
+            }
+            if (status.failures.isNotEmpty()) {
+                SyncFailures(status.failures)
+            }
+            if (status.sharingNeedsConsent) {
+                Text(
+                    "Your shared teams can't be synced on this device until you allow it.",
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.widthIn(max = 600.dp),
+                )
+                Button(onClick = { viewModel.allowSharing(snackBar) }) { Text("Allow shared teams") }
+            }
+            ConnectedButtons(viewModel, isSyncing = false)
+        }
+        is SyncStatus.Syncing -> {
+            StatusText("Syncing…", status.lastSyncAt, accountEmail)
+            ConnectedButtons(viewModel, isSyncing = true)
+        }
+        is SyncStatus.Failed -> {
+            StatusText("Connected", status.lastSyncAt, accountEmail)
+            Text(
+                status.error.userMessage(),
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.widthIn(max = 600.dp),
+            )
+            if (status.needsReconnection) {
+                ConnectButton(viewModel.isConnecting, label = "Reconnect Google Drive") { viewModel.connect(snackBar) }
+                TextButton(onClick = { viewModel.disconnect(snackBar) }) { Text("Disconnect") }
+            } else {
+                ConnectedButtons(viewModel, isSyncing = false)
             }
         }
     }
@@ -184,9 +189,12 @@ private fun SyncFailures(failures: List<SyncFailure>) {
 }
 
 @Composable
-private fun StatusText(state: String, lastSyncAt: Instant?) {
+private fun StatusText(state: String, lastSyncAt: Instant?, accountEmail: String?) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(state, style = MaterialTheme.typography.titleMedium)
+        accountEmail?.let {
+            Text("as $it", style = MaterialTheme.typography.bodyMedium)
+        }
         Text(
             "Last sync: " + (lastSyncAt?.let(::formatDate) ?: "never"),
             style = MaterialTheme.typography.bodyMedium,
