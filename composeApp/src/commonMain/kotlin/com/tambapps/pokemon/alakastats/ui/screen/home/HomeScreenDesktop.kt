@@ -58,6 +58,7 @@ internal fun HomeScreenDesktop(viewModel: HomeViewModel) {
             AboutButton()
         }
         CatchPhrase()
+        SyncReconnectionWarning(viewModel, Modifier.padding(top = 8.dp))
         Spacer(Modifier.height(8.dp))
         Row(
             modifier = Modifier,

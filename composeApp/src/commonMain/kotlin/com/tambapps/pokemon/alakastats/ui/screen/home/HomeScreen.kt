@@ -12,7 +12,11 @@ import alakastats.composeapp.generated.resources.more_horiz
 import alakastats.composeapp.generated.resources.quiz
 import alakastats.composeapp.generated.resources.share
 import alakastats.composeapp.generated.resources.visibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.CloudError
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -453,8 +457,49 @@ internal fun CloudSyncButton(modifier: Modifier = Modifier) {
     val syncService = koinInject<TeamSyncService>()
     if (!syncService.isAvailable) return
     val navigator = LocalNavigator.currentOrThrow
+    val status by syncService.status.collectAsState()
+    val needsReconnection = (status as? SyncStatus.Failed)?.needsReconnection == true
     TextButton(onClick = { navigator.push(CloudSyncScreen) }, modifier = modifier) {
-        Text("Sync", style = buttonTextStyle)
+        Text(
+            "Sync",
+            style = buttonTextStyle,
+            color = if (needsReconnection) MaterialTheme.colorScheme.error else Color.Unspecified,
+        )
+    }
+}
+
+/**
+ * Tells the user that the cloud access expired or was revoked: the teams aren't synced until they reconnect
+ */
+@Composable
+internal fun SyncReconnectionWarning(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
+    val status by viewModel.syncStatus.collectAsState()
+    val failed = status as? SyncStatus.Failed ?: return
+    if (!failed.needsReconnection) return
+    val navigator = LocalNavigator.currentOrThrow
+    val message = if (failed.error is CloudError.AccessRevoked) "The access to your Google Drive was lost"
+    else "Your Google Drive session expired"
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.errorContainer)
+            .clickable { navigator.push(CloudSyncScreen) }
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.cloud_alert),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onErrorContainer,
+            modifier = Modifier.size(20.dp),
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            "$message: your teams aren't synced. Tap here to reconnect",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onErrorContainer,
+        )
     }
 }
 

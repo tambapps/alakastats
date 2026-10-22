@@ -57,6 +57,7 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
                 CloudSyncButton(Modifier.align(Alignment.TopStart))
                 AboutButton(Modifier.align(Alignment.TopEnd))
             }
+            SyncReconnectionWarning(viewModel, Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp))
             Text("Alakastats", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             CatchPhrase(skipLine = true, textAlign = TextAlign.Center)
 
