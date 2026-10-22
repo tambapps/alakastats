@@ -43,6 +43,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.DeviceType
 import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
+import com.tambapps.pokemon.alakastats.ui.composables.IosSwipeBack
 import com.tambapps.pokemon.alakastats.ui.screen.home.AlakastatsLabel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
@@ -65,6 +66,7 @@ object AboutScreen : Screen {
                 .verticalScroll(rememberScrollState()),
         ) {
             val navigator = LocalNavigator.currentOrThrow
+            IosSwipeBack { navigator.pop() }
             Box(Modifier.fillMaxWidth()) {
                 if (!isCompact) {
                     BackIconButton(navigator, Modifier.scale(2f).align(Alignment.CenterStart))

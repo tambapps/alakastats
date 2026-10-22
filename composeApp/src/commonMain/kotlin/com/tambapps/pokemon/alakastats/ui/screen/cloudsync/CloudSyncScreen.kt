@@ -38,6 +38,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamMerge
 import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
+import com.tambapps.pokemon.alakastats.ui.composables.IosSwipeBack
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -51,6 +52,7 @@ object CloudSyncScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val snackBar = LocalSnackBar.current
         val isCompact = LocalIsCompact.current
+        IosSwipeBack { navigator.pop() }
 
         Column(
             Modifier.fillMaxSize()
