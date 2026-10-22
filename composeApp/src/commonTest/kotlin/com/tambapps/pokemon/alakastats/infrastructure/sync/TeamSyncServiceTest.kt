@@ -79,6 +79,7 @@ class TeamSyncServiceTest {
         nbReplays = team.replays.size,
         winrate = 0,
         lastUpdatedAt = team.lastUpdatedAt,
+        localOnly = team.localOnly,
     )
 
     private fun tick() {
@@ -546,6 +547,52 @@ class TeamSyncServiceTest {
         a.service.connect()
         assertEquals(TeamCloudState.SYNCED, a.service.teamStates.value[team.id])
         assertTrue(a.stateStore.state.formerlyLinkedTeams.isEmpty())
+    }
+
+    @Test
+    fun teamKeptOnThisDeviceOnlyIsNeverUploaded() = runTest {
+        val a = device()
+        val team = team().copy(localOnly = true)
+        a.save(team)
+
+        a.service.connect()
+        a.service.sync()
+
+        assertTrue(cloud.files.isEmpty())
+        assertNotNull(a.teams.get(team.id))
+        // no cloud icon for it
+        assertNull(a.service.teamStates.value[team.id])
+    }
+
+    @Test
+    fun keepingOnThisDeviceOnlyRemovesItFromTheCloudAndTheOtherDevices() = runTest {
+        val team = team("Rain")
+        val (a, b) = syncedDevices(team)
+
+        a.edit(team.id) { it.copy(localOnly = true) }
+        a.service.sync()
+        b.service.sync()
+
+        assertTrue(cloud.files.isEmpty())
+        assertNotNull(a.teams.get(team.id))
+        assertNull(b.teams.get(team.id))
+    }
+
+    @Test
+    fun syncingAgainSendsItBackToTheOtherDevices() = runTest {
+        val team = team("Rain")
+        val (a, b) = syncedDevices(team)
+        a.edit(team.id) { it.copy(localOnly = true) }
+        a.service.sync()
+        b.service.sync()
+
+        a.edit(team.id) { it.copy(localOnly = false) }
+        a.service.sync()
+        b.service.sync()
+
+        assertEquals(1, cloud.files.size)
+        assertEquals("Rain", b.teams.get(team.id)?.name)
+        assertEquals(TeamCloudState.SYNCED, a.service.teamStates.value[team.id])
     }
 
     @Test

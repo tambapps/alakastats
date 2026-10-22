@@ -38,7 +38,8 @@ class EditTeamlyticsUseCase(
         name: String,
         pokePaste: PokePaste,
         sdNames: List<UserName>,
-        format: Format
+        format: Format,
+        localOnly: Boolean = false,
     ): Either<GetTeamlyticsError, Teamlytics> {
         val teamlytics = Teamlytics(
             id = Uuid.random(),
@@ -50,7 +51,8 @@ class EditTeamlyticsUseCase(
             notes = null,
             matchupPlans = emptyList(),
             data = TeamlyticsData(emptyMap()),
-            format = format
+            format = format,
+            localOnly = localOnly,
         )
         return teamlyticsRepository.save(teamlytics)
     }

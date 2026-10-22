@@ -38,7 +38,8 @@ fun Teamlytics.toEntity() = TeamlyticsEntity(
     notes = notes?.toEntity(),
     matchupNotes = matchupPlans.map { it.toEntity() },
     data = data.toEntity(),
-    format = format.name
+    format = format.name,
+    localOnly = localOnly,
 )
 
 fun TeamlyticsEntity.toDomain(pokepasteParser: PokepasteParser): Teamlytics {
@@ -60,7 +61,8 @@ fun TeamlyticsEntity.toDomain(pokepasteParser: PokepasteParser): Teamlytics {
             } catch (e: IllegalArgumentException) {
                 Format.NONE
             }
-        } ?: Format.NONE
+        } ?: Format.NONE,
+        localOnly = localOnly,
     )
 }
 
@@ -71,7 +73,8 @@ fun TeamlyticsEntity.toPreview(pokepasteParser: PokepasteParser, winrate: Int) =
     pokemons = pokepasteParser.tryParse(pokePaste)?.pokemons?.map { it.name.value } ?: emptyList(),
     nbReplays = replays.size,
     winrate = winrate,
-    lastUpdatedAt = lastUpdatedAt
+    lastUpdatedAt = lastUpdatedAt,
+    localOnly = localOnly,
 )
 
 fun TeamlyticsPreview.toEntity() = TeamlyticsPreviewEntity(
@@ -81,7 +84,8 @@ fun TeamlyticsPreview.toEntity() = TeamlyticsPreviewEntity(
     pokemons = pokemons.map { it.value },
     nbReplays = nbReplays,
     winrate = winrate,
-    lastUpdatedAt = lastUpdatedAt
+    lastUpdatedAt = lastUpdatedAt,
+    localOnly = localOnly,
 )
 
 fun TeamlyticsPreviewEntity.toDomain() = TeamlyticsPreview(
@@ -91,7 +95,8 @@ fun TeamlyticsPreviewEntity.toDomain() = TeamlyticsPreview(
     pokemons = pokemons.map { PokemonName(it) },
     nbReplays = nbReplays,
     winrate = winrate,
-    lastUpdatedAt = lastUpdatedAt ?: Clock.System.now()
+    lastUpdatedAt = lastUpdatedAt ?: Clock.System.now(),
+    localOnly = localOnly,
 )
 
 fun TeamlyticsNotes.toEntity() = TeamlyticsNotesEntity(

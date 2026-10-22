@@ -10,6 +10,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.usecase.EditTeamlyticsUseCase
+import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
 import com.tambapps.pokemon.alakastats.util.isSdNameValid
@@ -23,11 +24,16 @@ import kotlin.uuid.Uuid
 class EditTeamViewModel(
     pokepasteParser: PokepasteParser,
     private val editTeamlyticsUseCase: EditTeamlyticsUseCase,
-    httpClient: HttpClient
+    httpClient: HttpClient,
+    private val syncService: TeamSyncService,
 ) : PokepasteEditingViewModel(pokepasteParser, httpClient), ScreenModel {
 
     private var editingTeam: Teamlytics? = null
     val isEditing get() = editingTeam != null
+
+    /** a new team can be kept on this device only, when the cloud is connected. Later, from the team's menu */
+    val canChooseSync get() = !isEditing && syncService.isConnected
+    var syncWithCloud by mutableStateOf(true)
 
     var teamName by mutableStateOf("")
         private set
@@ -90,7 +96,8 @@ class EditTeamViewModel(
                         name = teamName,
                         sdNames = sdNames.map(::UserName),
                         pokePaste = pokepaste,
-                        format = format
+                        format = format,
+                        localOnly = canChooseSync && !syncWithCloud,
                     ).getOrNull()
                 }
                 onSuccess.invoke()

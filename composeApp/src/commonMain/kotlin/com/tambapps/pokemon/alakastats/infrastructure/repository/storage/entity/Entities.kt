@@ -18,7 +18,9 @@ data class TeamlyticsEntity(
     val notes: TeamlyticsNotesEntity? = null,
     val lastUpdatedAt: Instant?,
     val matchupNotes: List<MatchupNotesEntity>? = null,
-    val format: String? = null
+    val format: String? = null,
+    // kept on this device only, never synced to the cloud
+    val localOnly: Boolean = false,
 ): Identifiable<Uuid>
 
 @Serializable
@@ -56,7 +58,8 @@ data class TeamlyticsPreviewEntity(
     val pokemons: List<String>,
     val nbReplays: Int,
     val winrate: Int,
-    val lastUpdatedAt: Instant?
+    val lastUpdatedAt: Instant?,
+    val localOnly: Boolean = false,
 ): Identifiable<Uuid>
 
 @Serializable

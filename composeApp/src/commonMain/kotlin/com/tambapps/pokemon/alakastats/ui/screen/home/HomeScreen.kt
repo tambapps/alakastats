@@ -44,6 +44,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.ShareRole
+import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncStatus
 import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamCloudState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -150,6 +151,7 @@ object HomeScreen : Screen {
             SamplesDialog(viewModel, samples)
         }
         ImportChoiceDialog(viewModel)
+        KeepLocalDialog(viewModel)
         ShareTeamDialog(viewModel)
         JoinOnWebDialog(viewModel)
     }
@@ -176,6 +178,8 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
     ) {
         val sharing by viewModel.sharing.collectAsState()
         val role = sharing[team.id]
+        val syncStatus by viewModel.syncStatus.collectAsState()
+        val isCloudConnected = syncStatus !is SyncStatus.Disconnected && syncStatus !is SyncStatus.Unavailable
         Column(Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.Top
@@ -220,12 +224,26 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
                                 onClick = { viewModel.reloadReplays(team, snackBar) }
                             )
                         }
-                        // only the owner shares
-                        if (viewModel.isSharingAvailable && (role == null || role == ShareRole.OWNER)) {
+                        // only the owner shares, and a team kept on this device only can't be
+                        if (viewModel.isSharingAvailable && !team.localOnly && (role == null || role == ShareRole.OWNER)) {
                             DropdownMenuItem(
                                 text = { Text(if (role == null) "Share" else "Sharing") },
                                 onClick = { viewModel.shareTeam(team) }
                             )
+                        }
+                        // a shared team is synced by nature
+                        if (isCloudConnected && role == null) {
+                            if (team.localOnly) {
+                                DropdownMenuItem(
+                                    text = { Text("Sync with Google Drive") },
+                                    onClick = { viewModel.setLocalOnly(team, localOnly = false, snackBar) }
+                                )
+                            } else {
+                                DropdownMenuItem(
+                                    text = { Text("Keep on this device only") },
+                                    onClick = { viewModel.keepOnThisDeviceOnly(team) }
+                                )
+                            }
                         }
                         DropdownMenuItem(
                             text = { Text(if (role == null || role == ShareRole.OWNER) "Delete" else "Leave") },
@@ -374,6 +392,29 @@ private fun ImportChoiceDialog(viewModel: HomeViewModel) {
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = { viewModel.showImportChoiceDialog = false }) { Text("Cancel") }
+        },
+    )
+}
+
+@Composable
+private fun KeepLocalDialog(viewModel: HomeViewModel) {
+    val team = viewModel.teamToKeepLocal ?: return
+    val snackBar = LocalSnackBar.current
+    AlertDialog(
+        onDismissRequest = { viewModel.teamToKeepLocal = null },
+        title = { Text("Keep ${team.name} on this device only?") },
+        text = {
+            Text(
+                "It will be removed from your Google Drive and from your other devices. " +
+                        "You can sync it again later from its menu.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { viewModel.setLocalOnly(team, localOnly = true, snackBar) }) { Text("Keep on this device") }
+        },
+        dismissButton = {
+            TextButton(onClick = { viewModel.teamToKeepLocal = null }) { Text("Cancel") }
         },
     )
 }

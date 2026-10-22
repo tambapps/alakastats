@@ -141,6 +141,9 @@ class TeamSyncService(
     /** Whether teams can be shared with other users on this platform */
     val isSharingAvailable = isAvailable && sharedSync != null
 
+    /** Whether the user connected a cloud storage, even if the last sync failed */
+    val isConnected get() = _status.value !is SyncStatus.Disconnected && _status.value !is SyncStatus.Unavailable
+
     /** A viewer of a shared team can't change it */
     fun isReadOnly(teamId: Uuid) = _sharing.value[teamId] == ShareRole.VIEWER
 
@@ -155,12 +158,14 @@ class TeamSyncService(
             _teamStates.value = emptyMap()
             return
         }
+        // a team kept on this device only has nothing to tell about the cloud
+        val versions = localTeams.versions().filter { !it.localOnly || it.id in state.sharedEntries }
         if (!state.connected) {
-            val localIds = localTeams.versions().map { it.id }.toSet()
+            val localIds = versions.map { it.id }.toSet()
             _teamStates.value = (state.formerlyLinkedTeams intersect localIds).associateWith { TeamCloudState.DISCONNECTED }
             return
         }
-        _teamStates.value = localTeams.versions().associate { version ->
+        _teamStates.value = versions.associate { version ->
             val syncedAt = state.sharedEntries[version.id]?.synced?.syncedUpdatedAt ?: state.entries[version.id]?.syncedUpdatedAt
             version.id to when {
                 version.id in lastFailedTeams -> TeamCloudState.FAILED
@@ -355,13 +360,18 @@ class TeamSyncService(
             index
         }
         val sharedIds = index?.sharedTeamIds.orEmpty()
+        val localVersions = localTeams.versions()
+        // a shared team can't be kept on this device only
+        val localOnlyIds = localVersions.filter { it.localOnly }.map { it.id }.toSet() - sharedIds
+        val excludedIds = sharedIds + localOnlyIds
 
         val remote = remoteFiles.mapNotNull { it.toRemoteTeamVersion() }
-        val (sharedLeftovers, privateRemote) = remote.partition { it.id in sharedIds }
-        val local = localTeams.versions().filter { it.id !in sharedIds }
-        val state = updateState { it.copy(entries = it.entries - sharedIds, tombstones = it.tombstones - sharedIds) }
-        // a private copy left by a team that moved to the shared space
-        val actions = sharedLeftovers.map { SyncAction.DeleteRemote(it.id, it.fileId) } + SyncPlanner.plan(local, privateRemote, state)
+        val (leftovers, privateRemote) = remote.partition { it.id in excludedIds }
+        val local = localVersions.filter { it.id !in excludedIds }
+        val state = updateState { it.copy(entries = it.entries - excludedIds, tombstones = it.tombstones - excludedIds) }
+        // the private copy of a team that moved to the shared space, or that is now kept on this device only: the
+        // other devices of the user remove it in turn
+        val actions = leftovers.map { SyncAction.DeleteRemote(it.id, it.fileId) } + SyncPlanner.plan(local, privateRemote, state)
 
         for (action in actions) {
             val result = when (action) {

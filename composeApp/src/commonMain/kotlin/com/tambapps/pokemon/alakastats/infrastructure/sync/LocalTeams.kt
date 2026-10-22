@@ -34,9 +34,10 @@ class LocalTeams(
     suspend fun versions(): List<LocalTeamVersion> {
         val previews = previewsStorage.listEntities().associateBy { it.id }
         return teamsStorage.listIds().map { id ->
-            // the preview holds the same date as the team, and is way lighter to load
-            val updatedAt = previews[id]?.lastUpdatedAt ?: teamsStorage.get(id)?.lastUpdatedAt
-            LocalTeamVersion(id, updatedAt)
+            // the preview holds the same date and flag as the team, and is way lighter to load
+            val preview = previews[id]
+            if (preview != null) LocalTeamVersion(id, preview.lastUpdatedAt, preview.localOnly)
+            else teamsStorage.get(id).let { LocalTeamVersion(id, it?.lastUpdatedAt, it?.localOnly == true) }
         }
     }
 

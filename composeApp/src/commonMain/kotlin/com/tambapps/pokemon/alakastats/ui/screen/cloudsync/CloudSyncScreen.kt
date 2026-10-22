@@ -135,6 +135,8 @@ private fun SyncExplanation() {
                 "replays and game plans added on either side are kept, and a note edited on both sides is kept " +
                 "in both versions, one after the other. For the name, the team itself and the format, the most recent change wins.")
         add("Deleting a team deletes it on all your devices, unless it was changed on another device after the deletion.")
+        add("A team can be kept on this device only: when you create it, or later from its menu. It's then removed " +
+                "from your Google Drive and from your other devices, until you sync it again.")
         add("You can share a team with other players (\"Share\" in its menu): it moves to an \"Alakastats\" folder of " +
                 "your Google Drive, and you invite people as editors or viewers. They join it on the Alakastats website " +
                 "(\"Join\" on the home screen), then it syncs on all their devices. Changes from everyone are merged the same way.")

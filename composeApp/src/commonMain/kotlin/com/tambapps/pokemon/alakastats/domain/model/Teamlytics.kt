@@ -62,7 +62,9 @@ data class Teamlytics(
     val data: TeamlyticsData,
     val notes: TeamlyticsNotes?,
     val matchupPlans: List<MatchupPlan>,
-    val format: Format
+    val format: Format,
+    /** kept on this device only, never synced to the cloud */
+    val localOnly: Boolean = false,
 ) {
     val winRate get() = computeWinRatePercentage(sdNames, replays)
 
@@ -107,7 +109,8 @@ data class TeamlyticsPreview(
     val pokemons: List<PokemonName>,
     val nbReplays: Int,
     val winrate: Int,
-    val lastUpdatedAt: Instant
+    val lastUpdatedAt: Instant,
+    val localOnly: Boolean = false,
 )
 
 fun Teamlytics.computeWinRatePercentage() = computeWinRatePercentage(sdNames, replays)

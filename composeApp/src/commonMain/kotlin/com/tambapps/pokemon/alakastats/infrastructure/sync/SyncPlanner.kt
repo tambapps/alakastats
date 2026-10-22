@@ -3,7 +3,10 @@ package com.tambapps.pokemon.alakastats.infrastructure.sync
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
-data class LocalTeamVersion(val id: Uuid, val updatedAt: Instant?)
+/**
+ * @param localOnly the team is kept on this device only: it's out of the sync
+ */
+data class LocalTeamVersion(val id: Uuid, val updatedAt: Instant?, val localOnly: Boolean = false)
 
 data class RemoteTeamVersion(val id: Uuid, val fileId: String, val updatedAt: Instant?)
 

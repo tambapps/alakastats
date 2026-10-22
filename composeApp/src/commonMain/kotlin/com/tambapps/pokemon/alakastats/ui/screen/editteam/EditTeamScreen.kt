@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -99,6 +100,10 @@ data class EditTeamScreen(
                 ShowdownNamesInput(viewModel)
 
                 PokePasteInput(viewModel)
+
+                if (viewModel.canChooseSync) {
+                    SyncInput(viewModel)
+                }
 
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -186,6 +191,25 @@ private fun FormatNameInput(viewModel: EditTeamViewModel) {
         onFormatChange = { viewModel.format = it },
         modifier = Modifier.fillMaxWidth()
     )
+}
+
+@Composable
+private fun SyncInput(viewModel: EditTeamViewModel) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = "Sync with Google Drive",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = if (viewModel.syncWithCloud) "The team will be on all your devices"
+                else "The team will stay on this device only. You can change it later from its menu",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        Switch(checked = viewModel.syncWithCloud, onCheckedChange = { viewModel.syncWithCloud = it })
+    }
 }
 
 @Composable

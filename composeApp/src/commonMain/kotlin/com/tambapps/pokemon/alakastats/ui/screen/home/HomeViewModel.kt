@@ -73,6 +73,41 @@ class HomeViewModel(
     /** importing a team: from a file, or a sample team */
     var showImportChoiceDialog by mutableStateOf(false)
 
+    val syncStatus = syncService.status
+
+    /** asks the confirmation before removing the team from the cloud and the other devices */
+    var teamToKeepLocal by mutableStateOf<TeamlyticsPreview?>(null)
+
+    fun keepOnThisDeviceOnly(team: TeamlyticsPreview) {
+        hideMenu()
+        teamToKeepLocal = team
+    }
+
+    /**
+     * @param localOnly true to keep the team on this device only: its cloud copy is deleted at the next sync, and
+     * the other devices remove it in turn. false to sync it again
+     */
+    fun setLocalOnly(team: TeamlyticsPreview, localOnly: Boolean, snackBar: SnackBar) {
+        hideMenu()
+        teamToKeepLocal = null
+        scope.launch {
+            val either = either {
+                val fullTeam = useCase.get(team.id).bind()
+                useCase.save(fullTeam.copy(localOnly = localOnly), base = fullTeam).bind()
+            }
+            either.fold(
+                ifLeft = { snackBar.show("Error: ${it.message}", SnackBar.Severity.ERROR) },
+                ifRight = {
+                    snackBar.show(
+                        if (localOnly) "${team.name} is now kept on this device only"
+                        else "${team.name} will be synced with your Google Drive"
+                    )
+                },
+            )
+            doLoadTeams()
+        }
+    }
+
     fun importFromFile(snackBar: SnackBar) {
         showImportChoiceDialog = false
         importTeam(snackBar)
