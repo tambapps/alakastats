@@ -117,7 +117,6 @@ private fun ButtonBarContent(viewModel: HomeViewModel) {
     NewTeamButton()
     ImportTeamButton(viewModel)
     JoinSharedTeamButton(viewModel)
-    SampleTeamButton(viewModel)
 }
 
 @OptIn(ExperimentalFoundationApi::class)

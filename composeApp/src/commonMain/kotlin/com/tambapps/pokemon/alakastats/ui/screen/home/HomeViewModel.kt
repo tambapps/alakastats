@@ -70,6 +70,19 @@ class HomeViewModel(
     /** on mobile, explains how to join a shared team on the web */
     var showJoinOnWebDialog by mutableStateOf(false)
 
+    /** importing a team: from a file, or a sample team */
+    var showImportChoiceDialog by mutableStateOf(false)
+
+    fun importFromFile(snackBar: SnackBar) {
+        showImportChoiceDialog = false
+        importTeam(snackBar)
+    }
+
+    fun chooseSample() {
+        showImportChoiceDialog = false
+        showSamplesDialog()
+    }
+
     fun shareTeam(team: TeamlyticsPreview) {
         hideMenu()
         shareTeam.open(team)

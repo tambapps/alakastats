@@ -149,6 +149,7 @@ object HomeScreen : Screen {
         viewModel.samplesToShow?.let { samples ->
             SamplesDialog(viewModel, samples)
         }
+        ImportChoiceDialog(viewModel)
         ShareTeamDialog(viewModel)
         JoinOnWebDialog(viewModel)
     }
@@ -341,16 +342,49 @@ internal val buttonTextStyle  @Composable get() = MaterialTheme.typography.label
 
 @Composable
 internal fun ImportTeamButton(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
-    val snackbar = LocalSnackBar.current
-    OutlinedButton(onClick = { viewModel.importTeam(snackbar) }, modifier = modifier) {
+    OutlinedButton(onClick = { viewModel.showImportChoiceDialog = true }, modifier = modifier) {
         Text("Import", style = buttonTextStyle)
     }
 }
 
+/**
+ * Import from a save file, or start from a sample team
+ */
 @Composable
-internal fun SampleTeamButton(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
-    OutlinedButton(onClick = { viewModel.showSamplesDialog() }, modifier = modifier) {
-        Text("Sample", style = buttonTextStyle)
+private fun ImportChoiceDialog(viewModel: HomeViewModel) {
+    if (!viewModel.showImportChoiceDialog) return
+    val snackBar = LocalSnackBar.current
+    AlertDialog(
+        onDismissRequest = { viewModel.showImportChoiceDialog = false },
+        title = { Text("Import a team") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                ImportChoice(
+                    title = "From a file",
+                    description = "An Alakastats save (.json)",
+                    onClick = { viewModel.importFromFile(snackBar) },
+                )
+                ImportChoice(
+                    title = "A sample team",
+                    description = "To try the app with an example team",
+                    onClick = { viewModel.chooseSample() },
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = { viewModel.showImportChoiceDialog = false }) { Text("Cancel") }
+        },
+    )
+}
+
+@Composable
+private fun ImportChoice(title: String, description: String, onClick: () -> Unit) {
+    OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(description, style = MaterialTheme.typography.bodySmall)
+        }
     }
 }
 
