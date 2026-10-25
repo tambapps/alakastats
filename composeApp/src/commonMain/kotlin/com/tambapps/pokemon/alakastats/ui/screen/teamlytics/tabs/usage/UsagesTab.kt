@@ -193,7 +193,8 @@ private fun PokemonUsagesDonut(
         },
         holeSize = 0.75F,
         forceCenteredPie = true,
-        minPieDiameter = diameter,
+        // koalaplot requires min < max
+        minPieDiameter = diameter - 1.dp,
         maxPieDiameter = diameter,
         holeContent = {
             Box(
