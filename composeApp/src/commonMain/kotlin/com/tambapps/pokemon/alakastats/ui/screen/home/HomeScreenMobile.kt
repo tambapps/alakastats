@@ -89,7 +89,8 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
             for (team in viewModel.teamlyticsList) {
                 TeamCard(viewModel, team, Modifier.padding(all = 8.dp))
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
+            PrivacyPolicyLink(Modifier.align(Alignment.End).padding(end = 8.dp))
         }
     }
 }

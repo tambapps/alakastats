@@ -10,5 +10,11 @@
     <script type="application/javascript" src="composeApp.js"></script>
 </head>
 <body>
+<!--
+    Google requires a link to the privacy policy on the home page to verify the app's OAuth consent screen. The app
+    is drawn in a canvas, so the "Privacy policy" link shown at the bottom of the home screen isn't an HTML link that
+    Google can find. This one is: it's behind the app's canvas (once the app is loaded), so the user never sees it.
+-->
+<a class="privacy-link" href="privacy.html">Privacy policy</a>
 </body>
 </html>

@@ -66,7 +66,8 @@ internal fun HomeScreenDesktop(viewModel: HomeViewModel) {
         ) {
             ButtonBarContent(viewModel)
         }
-        TeamCardGrid(viewModel, 3)
+        TeamCardGrid(viewModel, 3, Modifier.weight(1f))
+        PrivacyPolicyLink(Modifier.align(Alignment.End))
     }
 }
 

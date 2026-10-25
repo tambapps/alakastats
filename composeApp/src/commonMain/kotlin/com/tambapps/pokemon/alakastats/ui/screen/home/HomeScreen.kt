@@ -54,6 +54,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamCloudState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -446,6 +447,23 @@ internal fun AboutButton(modifier: Modifier = Modifier) {
     val navigator = LocalNavigator.currentOrThrow
     TextButton(onClick = { navigator.push(AboutScreen) }, modifier = modifier) {
         Text("About", style = buttonTextStyle)
+    }
+}
+
+private const val PRIVACY_POLICY_URL = "https://tambapps.github.io/alakastats/privacy.html"
+
+/**
+ * Google requires a link to the privacy policy on the home page (see also the one in the web app's index.html)
+ */
+@Composable
+internal fun PrivacyPolicyLink(modifier: Modifier = Modifier) {
+    val uriHandler = LocalUriHandler.current
+    TextButton(onClick = { uriHandler.openUri(PRIVACY_POLICY_URL) }, modifier = modifier) {
+        Text(
+            "Privacy policy",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+        )
     }
 }
 

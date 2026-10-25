@@ -5,3 +5,11 @@ html, body {
     padding: 0;
     overflow: hidden;
 }
+
+/* out of the flow and behind the app's canvas, see index.html */
+.privacy-link {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: -1;
+}
