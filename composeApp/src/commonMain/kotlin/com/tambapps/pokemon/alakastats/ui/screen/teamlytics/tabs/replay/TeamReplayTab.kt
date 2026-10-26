@@ -67,7 +67,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
-import com.tambapps.pokemon.alakastats.ui.screen.replayviewer.ReplayViewerScreen
+import com.tambapps.pokemon.alakastats.ui.screen.replayviewer.ReplayViewerDialog
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
@@ -301,13 +301,16 @@ internal fun ViewReplayButton(
     if (asP2) {
         browserUrl += "?p2"
     }
-    val navigator = LocalNavigator.currentOrThrow
+    var showViewer by remember { mutableStateOf(false) }
 
     OutlinedButton(
         modifier = modifier,
-        onClick = { navigator.push(ReplayViewerScreen(url, browserUrl, asP2)) },
+        onClick = { showViewer = true },
     ) {
         Text("Replay")
+    }
+    if (showViewer) {
+        ReplayViewerDialog(url, browserUrl, asP2, onDismissRequest = { showViewer = false })
     }
 }
 
