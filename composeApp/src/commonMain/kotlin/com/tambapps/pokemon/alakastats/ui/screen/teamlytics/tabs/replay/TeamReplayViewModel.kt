@@ -109,6 +109,8 @@ class TeamReplayViewModel(
 
     fun showNoteReplayDialog(replay: ReplayAnalytics) {
         replayToNote = replay
+        // to edit them rather than retype them
+        replayNotesText = replay.notes.orEmpty()
     }
 
     fun removeReplay() {

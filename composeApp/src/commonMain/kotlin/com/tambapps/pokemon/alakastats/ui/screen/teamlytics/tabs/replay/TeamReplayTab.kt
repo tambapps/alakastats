@@ -503,26 +503,29 @@ internal fun ReplayDropDownMenu(
             )
         }
 
-        DropdownMenuItem(
-            text = {
-                Text(
-                    if (!alreadyHasNotes) "Add notes" else "Edit notes"
-                )
-            },
-            onClick = {
-                guardedChange { viewModel.showNoteReplayDialog(replay) }
-                isMenuExpandedState.value = false
-            }
-        )
-
-        if (alreadyHasNotes) {
+        // a manual replay's notes are edited with the rest of it
+        if (!replay.isManual) {
             DropdownMenuItem(
-                text = { Text("Remove notes") },
+                text = {
+                    Text(
+                        if (!alreadyHasNotes) "Add notes" else "Edit notes"
+                    )
+                },
                 onClick = {
-                    guardedChange { viewModel.editNotes(replay, null) }
+                    guardedChange { viewModel.showNoteReplayDialog(replay) }
                     isMenuExpandedState.value = false
                 }
             )
+
+            if (alreadyHasNotes) {
+                DropdownMenuItem(
+                    text = { Text("Remove notes") },
+                    onClick = {
+                        guardedChange { viewModel.editNotes(replay, null) }
+                        isMenuExpandedState.value = false
+                    }
+                )
+            }
         }
 
         // another link (e.g. a YouTube video) has nothing to fetch
