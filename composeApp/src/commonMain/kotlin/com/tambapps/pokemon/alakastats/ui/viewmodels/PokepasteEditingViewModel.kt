@@ -12,10 +12,28 @@ import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/**
+ * The text of a PokePaste, from its page's URL
+ */
+suspend fun HttpClient.fetchPokepaste(url: String): Either<DomainError, String> = Either.catch {
+    var normalizedUrl = url.trim()
+    if (!normalizedUrl.endsWith("/raw")) {
+        if (!normalizedUrl.endsWith("/")) {
+            normalizedUrl = "$normalizedUrl/"
+        }
+        normalizedUrl += "raw"
+    }
+    val response = get(normalizedUrl)
+    // e.g. a 404 for a paste that doesn't exist, rather than an empty paste
+    check(response.status.isSuccess()) { "the server answered ${response.status}" }
+    response.bodyAsText()
+}.mapLeft { error -> NetworkError(error.message ?: "unknown error", error) }
 
 abstract class PokepasteEditingViewModel(
     protected val pokepasteParser: PokepasteParser,
@@ -58,7 +76,7 @@ abstract class PokepasteEditingViewModel(
             pokepasteUrlError = null
 
             scope.launch {
-                fetchUrlContent(pokePasteUrlInput).fold(
+                httpClient.fetchPokepaste(pokePasteUrlInput).fold(
                     ifLeft = { error ->
                         pokepasteUrlError = "Failed to load URL: ${error.message}"
                     },
@@ -73,19 +91,6 @@ abstract class PokepasteEditingViewModel(
             }
         }
     }
-
-    private suspend fun fetchUrlContent(url: String): Either<DomainError, String> = Either.catch {
-        var normalizedUrl = url
-        if (!normalizedUrl.endsWith("/raw")) {
-            if (!normalizedUrl.endsWith("/")) {
-                normalizedUrl = "$normalizedUrl/"
-            }
-            normalizedUrl += "raw"
-        }
-        val response = httpClient.get(normalizedUrl)
-        response.bodyAsText()
-    }.mapLeft { error -> NetworkError(error.message ?: "unknown error", error) }
-
 
     fun showPokepasteUrlDialog() {
         showPokePasteUrlDialog = true

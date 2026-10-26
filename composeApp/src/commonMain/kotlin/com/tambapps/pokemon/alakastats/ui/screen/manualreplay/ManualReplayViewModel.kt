@@ -4,7 +4,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import arrow.core.Either
+import arrow.core.flatMap
 import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.screenModelScope
+import io.ktor.client.HttpClient
+import kotlinx.coroutines.launch
 import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
@@ -23,6 +28,10 @@ import com.tambapps.pokemon.alakastats.domain.model.TeamPreview
 import com.tambapps.pokemon.alakastats.domain.model.TeamPreviewPokemon
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.UserName
+import com.tambapps.pokemon.alakastats.PlatformType
+import com.tambapps.pokemon.alakastats.platform
+import com.tambapps.pokemon.alakastats.ui.viewmodels.fetchPokepaste
+import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import com.tambapps.pokemon.util.MegaUtils
 import com.tambapps.pokemon.util.MegaUtils.canMega
 import com.tambapps.pokemon.util.MegaUtils.toMega
@@ -45,7 +54,11 @@ data class ManualReplayValidationError(val page: ManualReplayPage, val message: 
 
 class ManualReplayViewModel(
     private val team: Teamlytics,
-    formatData: FormatData?
+    formatData: FormatData?,
+    private val pokepasteParser: PokepasteParser,
+    private val httpClient: HttpClient,
+    // on the web, the browser blocks the request to pokepast.es (CORS)
+    val canLoadPokepasteLinks: Boolean = platform.type != PlatformType.Web,
 ) : ScreenModel {
 
     val popularTeams = formatData?.popularTeams.orEmpty()
@@ -190,11 +203,82 @@ class ManualReplayViewModel(
 
     // replaces whatever was entered, a popular team is a starting point
     fun selectPopularTeam(popularTeam: PopularTeam) {
+        setOpponentTeam(popularTeam.pokemons)
+        hidePopularTeamsDialog()
+    }
+
+    private fun setOpponentTeam(pokemons: List<PokemonName>) {
         opponentPokemonStates.clear()
         opponentSelection.clear()
         // the team only tells a pokemon can mega evolve, whether it did in this game is up to the user
-        popularTeam.pokemons.forEach { addOpponentBaseForm(it) }
-        hidePopularTeamsDialog()
+        pokemons.forEach { addOpponentBaseForm(it) }
+    }
+
+    var showPokepasteDialog by mutableStateOf(false)
+        private set
+
+    /** the paste itself, or the link to it */
+    var pokepasteInput by mutableStateOf("")
+        private set
+
+    var isLoadingPokepaste by mutableStateOf(false)
+        private set
+
+    var pokepasteError by mutableStateOf<String?>(null)
+        private set
+
+    fun showPokepasteDialog() {
+        pokepasteInput = ""
+        pokepasteError = null
+        showPokepasteDialog = true
+    }
+
+    fun hidePokepasteDialog() {
+        if (!isLoadingPokepaste) showPokepasteDialog = false
+    }
+
+    fun updatePokepasteInput(input: String) {
+        pokepasteInput = input
+        pokepasteError = null
+    }
+
+    /**
+     * Fills the opponent's team with the pokemons of the paste, replacing whatever was entered, like a popular team
+     */
+    fun loadOpponentPokepaste() {
+        if (pokepasteInput.isBlank() || isLoadingPokepaste) return
+        isLoadingPokepaste = true
+        screenModelScope.launch { doLoadOpponentPokepaste() }
+    }
+
+    internal suspend fun doLoadOpponentPokepaste() {
+        val input = pokepasteInput.trim()
+        val paste = when {
+            !isValidLink(input) -> Either.Right(input)
+            canLoadPokepasteLinks -> httpClient.fetchPokepaste(input)
+            else -> {
+                pokepasteError = "Enter the pokepaste content, not the URL"
+                isLoadingPokepaste = false
+                return
+            }
+        }
+        paste.mapLeft { "Couldn't load the PokéPaste: ${it.message}" }
+            .flatMap { text ->
+                Either.catch { pokepasteParser.parse(text) }
+                    .mapLeft { it.message ?: "Invalid PokéPaste" }
+            }
+            .flatMap { pokePaste ->
+                if (pokePaste.pokemons.isEmpty()) Either.Left("No pokemon found in this PokéPaste")
+                else Either.Right(pokePaste)
+            }
+            .fold(
+                ifLeft = { pokepasteError = it },
+                ifRight = { pokePaste ->
+                    setOpponentTeam(pokePaste.pokemons.map { it.name })
+                    showPokepasteDialog = false
+                }
+            )
+        isLoadingPokepaste = false
     }
 
     fun containsOpponentPokemon(pokemonName: PokemonName) =

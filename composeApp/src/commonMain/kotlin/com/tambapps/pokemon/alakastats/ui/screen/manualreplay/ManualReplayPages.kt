@@ -67,12 +67,17 @@ internal fun OpponentPage(viewModel: ManualReplayViewModel) {
     ManualPokemonGrid(
         pokemonStates = viewModel.opponentPokemonStates,
         header = {
-            if (viewModel.popularTeams.isNotEmpty()) {
-                OutlinedButton(
-                    onClick = { viewModel.showPopularTeamsDialog() },
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    Text("Popular teams")
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                if (viewModel.popularTeams.isNotEmpty()) {
+                    OutlinedButton(onClick = { viewModel.showPopularTeamsDialog() }) {
+                        Text("Popular teams")
+                    }
+                }
+                OutlinedButton(onClick = { viewModel.showPokepasteDialog() }) {
+                    Text("From PokéPaste")
                 }
             }
         },

@@ -143,6 +143,9 @@ data class ManualReplayScreen(
         if (viewModel.showPopularTeamsDialog) {
             SelectPopularTeamDialog(viewModel)
         }
+        if (viewModel.showPokepasteDialog) {
+            OpponentPokepasteDialog(viewModel)
+        }
         viewModel.megaStoneSelectionFor?.let {
             SelectMegaStoneDialog(viewModel, it)
         }
@@ -184,6 +187,47 @@ internal fun <T> ManualPokemonGrid(
 }
 
 private const val MOBILE_POKEMONS_PER_LINE = 3
+
+@Composable
+private fun OpponentPokepasteDialog(viewModel: ManualReplayViewModel) {
+    val isLoading = viewModel.isLoadingPokepaste
+    AlertDialog(
+        onDismissRequest = { viewModel.hidePokepasteDialog() },
+        title = { Text("Opponent's PokéPaste") },
+        text = {
+            OutlinedTextField(
+                value = viewModel.pokepasteInput,
+                onValueChange = viewModel::updatePokepasteInput,
+                label = { Text("PokéPaste") },
+                placeholder = {
+                    Text(
+                        if (viewModel.canLoadPokepasteLinks) "The pokepaste URL, or its content"
+                        else "The pokepaste content (not the URL)"
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
+                maxLines = 12,
+                enabled = !isLoading,
+                isError = viewModel.pokepasteError != null,
+                supportingText = viewModel.pokepasteError?.let { error -> { Text(error) } },
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { viewModel.loadOpponentPokepaste() },
+                enabled = viewModel.pokepasteInput.isNotBlank() && !isLoading
+            ) {
+                Text(if (isLoading) "Loading..." else "OK")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { viewModel.hidePokepasteDialog() }, enabled = !isLoading) {
+                Text("Cancel")
+            }
+        }
+    )
+}
 
 // same display as the common filters of the filters bar, a team is recognized by its sprites
 @Composable
