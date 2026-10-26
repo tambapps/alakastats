@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +11,8 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.model.ReplaySort
+import com.tambapps.pokemon.alakastats.ui.model.sortedReplays
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
@@ -50,6 +53,16 @@ class TeamReplayViewModel(
     private val scope = CoroutineScope(Dispatchers.Default)
 
     val hasNoReplaysToShow get() = team.replays.isEmpty() && !isLoading
+
+    // only the display order: nothing is saved nor synced, and the stats stay the same
+    var sort by mutableStateOf(ReplaySort())
+        private set
+
+    val sortedReplays by derivedStateOf { team.sortedReplays(sort) }
+
+    fun applySort(sort: ReplaySort) {
+        this.sort = sort
+    }
 
     fun showAddReplayDialog() {
         showAddReplayDialog = true

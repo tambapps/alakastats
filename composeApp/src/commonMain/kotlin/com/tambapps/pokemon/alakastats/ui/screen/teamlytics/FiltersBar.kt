@@ -87,7 +87,9 @@ private data class PokemonsFilter(
 fun FiltersBar(
     parentViewModel: TeamlyticsFiltersTabViewModel,
     modifier: Modifier = Modifier,
-    additionalFilters: (@Composable () -> Unit)? = null
+    additionalFilters: (@Composable () -> Unit)? = null,
+    // displayed at the end of the title row, e.g. to sort what is filtered
+    headerActions: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val filters = parentViewModel.filters
     val viewModel = remember(filters) { FiltersViewModel(parentViewModel.useCase) }
@@ -100,7 +102,15 @@ fun FiltersBar(
 
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-            Text("Filters", style = MaterialTheme.typography.titleLarge)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Filters", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                if (filters.hasAny()) {
+                    TextButton(onClick = { viewModel.applyFilters(ReplayFilters()) }) {
+                        Text("Clear all")
+                    }
+                }
+                headerActions?.invoke(this)
+            }
             Spacer(Modifier.height(8.dp))
             FlowRow {
                 PokemonFilterButton(

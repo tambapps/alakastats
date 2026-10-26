@@ -54,7 +54,7 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: LazyListState) {
     val team = viewModel.team
-    LaunchedEffect(viewModel.useCase.filters) {
+    LaunchedEffect(viewModel.useCase.filters, viewModel.sort) {
         scrollState.scrollToItem(index = 0, scrollOffset = 0)
     }
     LazyColumnWithScrollbar(
@@ -65,13 +65,13 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: L
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            FiltersBar(viewModel)
+            FiltersBar(viewModel, headerActions = { ReplaySortChip(viewModel.sort, viewModel::applySort) })
             Spacer(Modifier.padding(16.dp))
         }
         item {
             Header(viewModel.useCase)
         }
-        itemsIndexed(team.replays) { index, replay ->
+        itemsIndexed(viewModel.sortedReplays) { index, replay ->
             DesktopReplay(viewModel, team, replay)
             Spacer(Modifier.height(32.dp))
         }
