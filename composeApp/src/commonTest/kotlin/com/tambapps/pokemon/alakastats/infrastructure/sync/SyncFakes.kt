@@ -6,6 +6,7 @@ import arrow.core.right
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.CloudError
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.CloudFile
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.CloudStorage
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.DRIVE_FILE_SCOPE
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.OAuthTokenProvider
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorageError
@@ -96,6 +97,8 @@ class FakeTokenProvider : OAuthTokenProvider {
     var interactiveError: CloudError? = null
     /** e.g. an expired session, that only an interactive request renews */
     var nonInteractiveError: CloudError? = null
+    /** for the access to the shared files only, e.g. on the web where it expires apart from the private one */
+    var nonInteractiveSharingError: CloudError? = null
     var signedOut = false
         private set
     /** the scopes of the interactive requests, i.e. what the user was asked to consent to */
@@ -107,6 +110,7 @@ class FakeTokenProvider : OAuthTokenProvider {
             consentedScopes.add(scopes)
         } else {
             nonInteractiveError?.let { return it.left() }
+            if (DRIVE_FILE_SCOPE in scopes) nonInteractiveSharingError?.let { return it.left() }
         }
         return "token".right()
     }

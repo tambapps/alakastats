@@ -73,7 +73,7 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
         val viewModel = koinScreenModel<TeamlyticsViewModel> { parametersOf(teamId) }
         val isCompact = LocalIsCompact.current
         val pagerState = rememberPagerState(pageCount = { TABS.size })
-        val reconnectionGuard = rememberReconnectionGuard()
+        val reconnectionGuard = rememberReconnectionGuard(teamId)
 
         CompositionLocalProvider(LocalReconnectionGuard provides reconnectionGuard) {
             TeamlyticsContent(viewModel, isCompact, pagerState)

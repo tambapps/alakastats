@@ -46,8 +46,7 @@ class CloudSyncViewModel(
      */
     fun allowSharing(snackBar: SnackBar) {
         screenModelScope.launch {
-            syncService.authorizeSharing()
-                .onRight { syncService.sync() }
+            syncService.allowSharing()
                 .onLeft { error ->
                     if (error !is CloudError.Cancelled) snackBar.show(error.userMessage(), SnackBar.Severity.ERROR)
                 }

@@ -11,6 +11,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.cloud.Member
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.ShareRole
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.SharingCloudStorage
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.OAuthTokenProvider
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.PRIVATE_SYNC_SCOPES
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.SHARING_SCOPES
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
@@ -58,6 +59,16 @@ sealed interface SyncStatus {
         /** The user has to connect again for the sync to work */
         val needsReconnection get() = error is CloudError.AccessRevoked || error is CloudError.NeedsUserInteraction
     }
+}
+
+/**
+ * Why what the user changes wouldn't be synced
+ */
+enum class MissingAccess {
+    /** the cloud session expired or was revoked: the user has to reconnect */
+    SESSION,
+    /** a shared team, while the access to the shared files isn't given on this device */
+    SHARING,
 }
 
 /**
@@ -192,7 +203,11 @@ class TeamSyncService(
 
     suspend fun connect(): Either<CloudError, Unit> {
         val tokenProvider = tokenProvider ?: return CloudError.Unknown("Cloud sync isn't available").left()
-        tokenProvider.accessToken(interactive = true).getOrElse { return it.left() }
+        // with shared teams, the access to them is asked too: a single consent, instead of a second one to allow them
+        val state = currentState()
+        val hasSharedTeams = state.sharedEntries.isNotEmpty() || state.formerlySharedRoles.isNotEmpty()
+        val scopes = if (hasSharedTeams && sharedSync != null) SHARING_SCOPES else PRIVATE_SYNC_SCOPES
+        tokenProvider.accessToken(interactive = true, scopes).getOrElse { return it.left() }
         // the sync takes over from what was known at the disconnection
         updateState { it.copy(connected = true, formerlyLinkedTeams = emptySet(), formerlySharedRoles = emptyMap()) }
         val status = sync()
@@ -220,18 +235,31 @@ class TeamSyncService(
     }
 
     /**
-     * Whether the user has to connect again for what they change to be synced. The token is checked too: an expired
-     * session is otherwise only known at the next sync
+     * What the user has to do for what they change in the team to be synced, null if nothing. The tokens are checked
+     * too: an expired session is otherwise only known at the next sync
      */
-    suspend fun needsReconnection(): Boolean {
+    suspend fun missingAccess(teamId: Uuid): MissingAccess? {
         when (val status = _status.value) {
-            SyncStatus.Unavailable, SyncStatus.Disconnected -> return false
-            is SyncStatus.Failed -> if (status.needsReconnection) return true
+            SyncStatus.Unavailable, SyncStatus.Disconnected -> return null
+            is SyncStatus.Failed -> if (status.needsReconnection) return MissingAccess.SESSION
             else -> Unit
         }
-        val error = tokenProvider?.accessToken(interactive = false)?.leftOrNull() ?: return false
-        return error is CloudError.AccessRevoked || error is CloudError.NeedsUserInteraction
+        if (tokenProvider?.accessToken(interactive = false).needsUser()) return MissingAccess.SESSION
+        if (teamId !in _sharing.value) return null
+        val status = _status.value
+        if (status is SyncStatus.Idle && status.sharingNeedsConsent) return MissingAccess.SHARING
+        // e.g. on the web, where the access to the shared files expires apart from the private one
+        return if (tokenProvider?.accessToken(interactive = false, SHARING_SCOPES).needsUser()) MissingAccess.SHARING else null
     }
+
+    // offline, the session isn't known to be expired
+    private fun Either<CloudError, String>?.needsUser() =
+        this?.leftOrNull().let { it is CloudError.AccessRevoked || it is CloudError.NeedsUserInteraction }
+
+    /**
+     * Asks the user the access to the shared files, then syncs them
+     */
+    suspend fun allowSharing(): Either<CloudError, Unit> = authorizeSharing().map { sync() }
 
     /**
      * Syncs a bit later, so that a burst of local changes gives a single sync

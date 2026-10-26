@@ -59,7 +59,7 @@ class FakeDrive(private val clock: Clock) {
 
     private fun newId(prefix: String) = "$prefix-${nextId++}"
 
-    inner class Client(private val user: String, private val sharingConsent: Boolean) :
+    inner class Client(private val user: String, var sharingConsent: Boolean) :
         SharingCloudStorage, CloudStorage by appDataOf(user) {
 
         private fun reachable(fileId: String): Either<CloudError, File> {

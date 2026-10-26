@@ -19,6 +19,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.CloudError
+import com.tambapps.pokemon.alakastats.infrastructure.sync.MissingAccess
 import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
@@ -27,15 +28,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
+import kotlin.uuid.Uuid
 
 /**
- * Warns the user before they change the team that their cloud session expired: what they change wouldn't be synced
- * until they reconnect
+ * Warns the user before they change the team that what they change wouldn't be synced: their cloud session expired,
+ * or the team is shared and this device isn't allowed to sync the shared teams
  */
-class ReconnectionGuard(private val syncService: TeamSyncService, private val scope: CoroutineScope) {
+class ReconnectionGuard(
+    private val syncService: TeamSyncService,
+    private val teamId: Uuid,
+    private val scope: CoroutineScope,
+) {
 
     /** the change the user wanted to make, waiting for their answer to the warning */
     var pendingAction by mutableStateOf<(() -> Unit)?>(null)
+        private set
+
+    /** what the user has to give for [pendingAction] to be synced */
+    var missingAccess by mutableStateOf<MissingAccess?>(null)
         private set
 
     var isConnecting by mutableStateOf(false)
@@ -46,8 +56,12 @@ class ReconnectionGuard(private val syncService: TeamSyncService, private val sc
      */
     fun run(action: () -> Unit) {
         scope.launch {
-            if (syncService.needsReconnection()) pendingAction = action
-            else action()
+            val missing = syncService.missingAccess(teamId)
+            if (missing == null) action()
+            else {
+                missingAccess = missing
+                pendingAction = action
+            }
         }
     }
 
@@ -55,12 +69,13 @@ class ReconnectionGuard(private val syncService: TeamSyncService, private val sc
         if (isConnecting) return
         isConnecting = true
         scope.launch {
-            syncService.connect()
+            val sharing = missingAccess == MissingAccess.SHARING
+            (if (sharing) syncService.allowSharing() else syncService.connect())
                 .onLeft { error ->
                     if (error !is CloudError.Cancelled) snackBar.show(error.userMessage(), SnackBar.Severity.ERROR)
                 }
                 .onRight {
-                    snackBar.show("Google Drive connected", SnackBar.Severity.SUCCESS)
+                    snackBar.show(if (sharing) "Shared teams allowed" else "Google Drive connected", SnackBar.Severity.SUCCESS)
                     continueAnyway()
                 }
             isConnecting = false
@@ -69,12 +84,13 @@ class ReconnectionGuard(private val syncService: TeamSyncService, private val sc
 
     fun continueAnyway() {
         val action = pendingAction ?: return
-        pendingAction = null
+        cancel()
         action()
     }
 
     fun cancel() {
         pendingAction = null
+        missingAccess = null
     }
 }
 
@@ -82,14 +98,14 @@ class ReconnectionGuard(private val syncService: TeamSyncService, private val sc
 val LocalReconnectionGuard = staticCompositionLocalOf<ReconnectionGuard?> { null }
 
 @Composable
-fun rememberReconnectionGuard(): ReconnectionGuard {
+fun rememberReconnectionGuard(teamId: Uuid): ReconnectionGuard {
     val syncService = koinInject<TeamSyncService>()
     val scope = rememberCoroutineScope()
-    return remember { ReconnectionGuard(syncService, scope) }
+    return remember(teamId) { ReconnectionGuard(syncService, teamId, scope) }
 }
 
 /**
- * Gives a function to call with each change of the team, which warns the user first if their cloud session expired
+ * Gives a function to call with each change of the team, which warns the user first if the change wouldn't be synced
  */
 @Composable
 fun rememberGuardedChange(): (() -> Unit) -> Unit {
@@ -103,15 +119,22 @@ fun rememberGuardedChange(): (() -> Unit) -> Unit {
 fun ReconnectionDialog(guard: ReconnectionGuard) {
     if (guard.pendingAction == null) return
     val snackBar = LocalSnackBar.current
+    val sharing = guard.missingAccess == MissingAccess.SHARING
     AlertDialog(
         onDismissRequest = { if (!guard.isConnecting) guard.cancel() },
         icon = { Icon(painterResource(Res.drawable.cloud_alert), contentDescription = null) },
-        title = { Text("Google Drive session expired") },
-        text = { Text("What you change now won't be synced to your Google Drive until you reconnect.") },
+        title = { Text(if (sharing) "Shared teams not allowed" else "Google Drive session expired") },
+        text = {
+            Text(
+                if (sharing) "This team is shared, but this device isn't allowed to sync the shared teams yet. " +
+                        "What you change now won't reach the other members until you allow it."
+                else "What you change now won't be synced to your Google Drive until you reconnect."
+            )
+        },
         confirmButton = {
             Button(onClick = { guard.reconnect(snackBar) }, enabled = !guard.isConnecting) {
                 if (guard.isConnecting) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                else Text("Reconnect")
+                else Text(if (sharing) "Allow shared teams" else "Reconnect")
             }
         },
         dismissButton = {

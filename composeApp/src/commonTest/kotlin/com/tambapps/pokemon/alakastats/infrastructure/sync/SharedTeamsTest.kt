@@ -1,6 +1,9 @@
 package com.tambapps.pokemon.alakastats.infrastructure.sync
 
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.CloudError
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.ShareRole
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.PRIVATE_SYNC_SCOPES
+import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.SHARING_SCOPES
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
@@ -31,9 +34,11 @@ class SharedTeamsTest {
         val teams = InMemoryKStorage<Uuid, TeamlyticsEntity>()
         val previews = InMemoryKStorage<Uuid, TeamlyticsPreviewEntity>()
         val stateStore = InMemorySyncStateStore()
+        val tokenProvider = FakeTokenProvider()
+        val cloud = drive.client(user, sharingConsent)
         val service = TeamSyncService(
-            cloudStorage = drive.client(user, sharingConsent),
-            tokenProvider = FakeTokenProvider(),
+            cloudStorage = cloud,
+            tokenProvider = tokenProvider,
             teamsStorage = teams,
             previewsStorage = previews,
             stateStore = stateStore,
@@ -271,6 +276,55 @@ class SharedTeamsTest {
 
         assertTrue(status.sharingNeedsConsent)
         assertNull(b2.teams.get(team.id))
+    }
+
+    @Test
+    fun missingSharingAccessIsOnlyForTheSharedTeams() = runTest {
+        val (_, b) = sharedBetween()
+        val privateTeam = team.copy(id = Uuid.random(), name = "Private")
+        b.save(privateTeam)
+        assertNull(b.service.missingAccess(team.id))
+
+        // e.g. on the web, the access to the shared files expired while the private one is still valid
+        b.tokenProvider.nonInteractiveSharingError = CloudError.NeedsUserInteraction()
+        assertEquals(MissingAccess.SHARING, b.service.missingAccess(team.id))
+        assertNull(b.service.missingAccess(privateTeam.id))
+
+        // an expired session comes first: reconnecting gives the shared access too
+        b.tokenProvider.nonInteractiveError = CloudError.NeedsUserInteraction()
+        assertEquals(MissingAccess.SESSION, b.service.missingAccess(team.id))
+    }
+
+    @Test
+    fun allowingSharingSyncsTheSharedTeams() = runTest {
+        val (_, b1) = sharedBetween()
+        b1.service.sync()
+        val b2 = device("b", sharingConsent = false)
+        assertTrue(assertIs<SyncStatus.Idle>(b2.service.status.value).sharingNeedsConsent)
+
+        b2.cloud.sharingConsent = true
+        assertTrue(b2.service.allowSharing().isRight())
+        assertEquals(listOf(SHARING_SCOPES), b2.tokenProvider.consentedScopes.takeLast(1))
+
+        assertFalse(assertIs<SyncStatus.Idle>(b2.service.status.value).sharingNeedsConsent)
+        assertNotNull(b2.teams.get(team.id))
+    }
+
+    @Test
+    fun reconnectingWithSharedTeamsAsksTheSharedAccessToo() = runTest {
+        val (a, _) = sharedBetween()
+        a.tokenProvider.consentedScopes.clear()
+
+        a.service.connect()
+
+        assertEquals(listOf(SHARING_SCOPES), a.tokenProvider.consentedScopes)
+    }
+
+    @Test
+    fun connectingWithoutSharedTeamsAsksThePrivateAccessOnly() = runTest {
+        val a = device("a")
+
+        assertEquals(listOf(PRIVATE_SYNC_SCOPES), a.tokenProvider.consentedScopes)
     }
 
     @Test
