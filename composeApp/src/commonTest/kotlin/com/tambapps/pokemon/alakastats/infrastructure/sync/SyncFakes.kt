@@ -94,6 +94,8 @@ class InMemorySyncStateStore : SyncStateStore {
 
 class FakeTokenProvider : OAuthTokenProvider {
     var interactiveError: CloudError? = null
+    /** e.g. an expired session, that only an interactive request renews */
+    var nonInteractiveError: CloudError? = null
     var signedOut = false
         private set
     /** the scopes of the interactive requests, i.e. what the user was asked to consent to */
@@ -103,6 +105,8 @@ class FakeTokenProvider : OAuthTokenProvider {
         if (interactive) {
             interactiveError?.let { return it.left() }
             consentedScopes.add(scopes)
+        } else {
+            nonInteractiveError?.let { return it.left() }
         }
         return "token".right()
     }

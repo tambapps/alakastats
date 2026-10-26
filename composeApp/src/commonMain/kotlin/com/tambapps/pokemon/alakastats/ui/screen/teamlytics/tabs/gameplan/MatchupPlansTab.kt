@@ -48,6 +48,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.rememberGuardedChange
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit.MatchupPlansEdit
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ExpandableDesktopReplay
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ReplayCompact
@@ -60,12 +61,13 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun MatchupPlansTab(viewModel: MatchupPlansViewModel) {
     val snackBar = LocalSnackBar.current
+    val guardedChange = rememberGuardedChange()
     when (val mode = viewModel.editMatchupMode) {
         NoEdit -> {
             FabLayout(
                 fab = {
                     if (viewModel.hasMatchupPlans && !viewModel.isReadOnly) {
-                        FloatingActionButton(onClick = { viewModel.editMatchupMode = CreateMatchup },) {
+                        FloatingActionButton(onClick = { guardedChange { viewModel.editMatchupMode = CreateMatchup } },) {
                             Icon(
                                 painter = painterResource(Res.drawable.add),
                                 contentDescription = "Add",
@@ -113,7 +115,8 @@ fun NoNotes(viewModel: MatchupPlansViewModel) {
                 style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
             Spacer(Modifier.height(8.dp))
 
-            Button(onClick = { viewModel.editMatchupMode = CreateMatchup }) {
+            val guardedChange = rememberGuardedChange()
+            Button(onClick = { guardedChange { viewModel.editMatchupMode = CreateMatchup } }) {
                 Icon(
                     painter = painterResource(Res.drawable.add),
                     contentDescription = "Add",
@@ -160,13 +163,14 @@ internal fun MatchNotes(
                 onDismissRequest = { isMenuExpandedState.value = false }
             ) {
                 if (!viewModel.isReadOnly) {
+                    val guardedChange = rememberGuardedChange()
                     DropdownMenuItem(
                         text = { Text("Edit") },
-                        onClick = { viewModel.editMatchupMode = EditMatchup(matchupPlan) }
+                        onClick = { guardedChange { viewModel.editMatchupMode = EditMatchup(matchupPlan) } }
                     )
                     DropdownMenuItem(
                         text = { Text("Delete") },
-                        onClick = { showDeleteDialog = true }
+                        onClick = { guardedChange { showDeleteDialog = true } }
                     )
                 }
             }

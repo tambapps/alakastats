@@ -220,6 +220,20 @@ class TeamSyncService(
     }
 
     /**
+     * Whether the user has to connect again for what they change to be synced. The token is checked too: an expired
+     * session is otherwise only known at the next sync
+     */
+    suspend fun needsReconnection(): Boolean {
+        when (val status = _status.value) {
+            SyncStatus.Unavailable, SyncStatus.Disconnected -> return false
+            is SyncStatus.Failed -> if (status.needsReconnection) return true
+            else -> Unit
+        }
+        val error = tokenProvider?.accessToken(interactive = false)?.leftOrNull() ?: return false
+        return error is CloudError.AccessRevoked || error is CloudError.NeedsUserInteraction
+    }
+
+    /**
      * Syncs a bit later, so that a burst of local changes gives a single sync
      */
     fun requestSync() {

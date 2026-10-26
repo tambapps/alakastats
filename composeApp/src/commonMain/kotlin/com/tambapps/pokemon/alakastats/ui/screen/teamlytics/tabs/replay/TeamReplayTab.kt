@@ -69,6 +69,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
 import com.tambapps.pokemon.alakastats.ui.screen.replayviewer.ReplayViewerDialog
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.rememberGuardedChange
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
@@ -113,10 +114,11 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
 private fun AddReplayButton(viewModel: TeamReplayViewModel, modifier: Modifier = Modifier) {
     // a viewer of a shared team can't add replays
     if (viewModel.isReadOnly) return
+    val guardedChange = rememberGuardedChange()
     FloatingActionButton(
         onClick = {
             if (!viewModel.isLoading) {
-                viewModel.showAddReplayDialog()
+                guardedChange { viewModel.showAddReplayDialog() }
             }
         },
         modifier = modifier,
@@ -317,15 +319,18 @@ internal fun ViewReplayButton(
 @Composable
 internal fun EditSdNamesButton(viewModel: TeamReplayViewModel) {
     val navigator = LocalNavigator.currentOrThrow
+    val guardedChange = rememberGuardedChange()
 
     // don't push because when coming to the screen, this screen doesn't recompose and take into account the updated team
     OutlinedButton(onClick = {
-        navigator.replace(
-            EditTeamScreen(
-                viewModel.team.id,
-                redirectToTeamlyticsScreen = true
+        guardedChange {
+            navigator.replace(
+                EditTeamScreen(
+                    viewModel.team.id,
+                    redirectToTeamlyticsScreen = true
+                )
             )
-        )
+        }
     }) {
         Text("Edit Showdown Names")
     }
@@ -461,6 +466,7 @@ internal fun ReplayDropDownMenu(
             return@DropdownMenu
         }
 
+        val guardedChange = rememberGuardedChange()
         // only manual replays can be edited, the others are what showdown says they are
         if (replay.isManual) {
             val navigator = LocalNavigator.currentOrThrow
@@ -468,11 +474,13 @@ internal fun ReplayDropDownMenu(
                 text = { Text("Edit") },
                 onClick = {
                     isMenuExpandedState.value = false
-                    navigator.push(
-                        ManualReplayScreen(viewModel.team, viewModel.formatData, replayToEdit = replay) { editedReplay ->
-                            viewModel.saveManualReplay(snackBar, editedReplay, replacing = replay)
-                        }
-                    )
+                    guardedChange {
+                        navigator.push(
+                            ManualReplayScreen(viewModel.team, viewModel.formatData, replayToEdit = replay) { editedReplay ->
+                                viewModel.saveManualReplay(snackBar, editedReplay, replacing = replay)
+                            }
+                        )
+                    }
                 }
             )
         }
@@ -484,7 +492,7 @@ internal fun ReplayDropDownMenu(
                 )
             },
             onClick = {
-                viewModel.showNoteReplayDialog(replay)
+                guardedChange { viewModel.showNoteReplayDialog(replay) }
                 isMenuExpandedState.value = false
             }
         )
@@ -493,7 +501,7 @@ internal fun ReplayDropDownMenu(
             DropdownMenuItem(
                 text = { Text("Remove notes") },
                 onClick = {
-                    viewModel.editNotes(replay, null)
+                    guardedChange { viewModel.editNotes(replay, null) }
                     isMenuExpandedState.value = false
                 }
             )
@@ -503,7 +511,7 @@ internal fun ReplayDropDownMenu(
             DropdownMenuItem(
                 text = { Text("Reload") },
                 onClick = {
-                    viewModel.reloadReplay(snackBar, replay, replayUrl)
+                    guardedChange { viewModel.reloadReplay(snackBar, replay, replayUrl) }
                     isMenuExpandedState.value = false
                 }
             )
@@ -512,7 +520,7 @@ internal fun ReplayDropDownMenu(
         DropdownMenuItem(
             text = { Text("Delete") },
             onClick = {
-                viewModel.showRemoveReplayDialog(replay)
+                guardedChange { viewModel.showRemoveReplayDialog(replay) }
                 isMenuExpandedState.value = false
             }
         )

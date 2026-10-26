@@ -42,6 +42,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.rememberGuardedChange
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailsScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
@@ -154,17 +155,20 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
             // a viewer of a shared team can only export it
             if (viewModel.isReadOnly) return@DropdownMenu
             val navigator = LocalNavigator.currentOrThrow
+            val guardedChange = rememberGuardedChange()
             DropdownMenuItem(
                 text = { Text("Edit team") },
                 onClick = {
                     isMenuExpanded = false
-                    // don't push because when coming to the screen, this screen doesn't recompose and take into account the updated team
-                    navigator.replace(
-                        EditTeamScreen(
-                            viewModel.team.id,
-                            redirectToTeamlyticsScreen = true
+                    guardedChange {
+                        // don't push because when coming to the screen, this screen doesn't recompose and take into account the updated team
+                        navigator.replace(
+                            EditTeamScreen(
+                                viewModel.team.id,
+                                redirectToTeamlyticsScreen = true
+                            )
                         )
-                    )
+                    }
                 }
             )
 
@@ -176,7 +180,7 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
                     )
                 },
                 onClick = {
-                    viewModel.editNotes()
+                    guardedChange { viewModel.editNotes() }
                     isMenuExpanded = false
                 }
             )
@@ -185,7 +189,7 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
                 DropdownMenuItem(
                     text = { Text("Remove notes") },
                     onClick = {
-                        viewModel.removeNotes()
+                        guardedChange { viewModel.removeNotes() }
                         isMenuExpanded = false
                     }
                 )

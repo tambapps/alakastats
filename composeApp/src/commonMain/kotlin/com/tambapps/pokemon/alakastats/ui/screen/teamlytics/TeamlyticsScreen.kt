@@ -18,6 +18,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,7 +73,16 @@ data class TeamlyticsScreen(val teamId: Uuid) : Screen {
         val viewModel = koinScreenModel<TeamlyticsViewModel> { parametersOf(teamId) }
         val isCompact = LocalIsCompact.current
         val pagerState = rememberPagerState(pageCount = { TABS.size })
+        val reconnectionGuard = rememberReconnectionGuard()
 
+        CompositionLocalProvider(LocalReconnectionGuard provides reconnectionGuard) {
+            TeamlyticsContent(viewModel, isCompact, pagerState)
+        }
+        ReconnectionDialog(reconnectionGuard)
+    }
+
+    @Composable
+    private fun TeamlyticsContent(viewModel: TeamlyticsViewModel, isCompact: Boolean, pagerState: PagerState) {
         Box(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)

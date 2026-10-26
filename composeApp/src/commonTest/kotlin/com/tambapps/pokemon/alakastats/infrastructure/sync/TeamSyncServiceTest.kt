@@ -15,6 +15,7 @@ import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -103,6 +104,22 @@ class TeamSyncServiceTest {
         val preview = assertNotNull(b.previews.get(team.id))
         assertEquals("Rain", preview.name)
         assertEquals(team.lastUpdatedAt, preview.lastUpdatedAt)
+    }
+
+    @Test
+    fun expiredSessionNeedsReconnectionBeforeTheNextSync() = runTest {
+        val tokenProvider = FakeTokenProvider()
+        val a = device(tokenProvider)
+        assertFalse(a.service.needsReconnection())
+        a.service.connect()
+        assertFalse(a.service.needsReconnection())
+
+        tokenProvider.nonInteractiveError = CloudError.NeedsUserInteraction()
+        assertTrue(a.service.needsReconnection())
+
+        // e.g. offline: the session isn't known to be expired
+        tokenProvider.nonInteractiveError = CloudError.Network("offline")
+        assertFalse(a.service.needsReconnection())
     }
 
     @Test
