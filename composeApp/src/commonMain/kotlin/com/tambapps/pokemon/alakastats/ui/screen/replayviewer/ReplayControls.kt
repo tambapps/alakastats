@@ -105,6 +105,14 @@ fun ReplayControls(
                         onOverlayChange(false)
                     }
                 )
+                DropdownMenuItem(
+                    text = { Text(if (player.showLog) "Hide battle log" else "Show battle log") },
+                    onClick = {
+                        player.toggleLog()
+                        showMenu = false
+                        onOverlayChange(false)
+                    }
+                )
                 HorizontalDivider()
                 DropdownMenuItem(text = { Text("Speed", style = MaterialTheme.typography.labelLarge) }, onClick = {}, enabled = false)
                 ReplaySpeed.entries.forEach { speed ->

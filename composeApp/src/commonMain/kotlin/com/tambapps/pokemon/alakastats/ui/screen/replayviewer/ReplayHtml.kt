@@ -9,6 +9,9 @@ const val REPLAY_HTML_BASE_URL = "https://replay.pokemonshowdown.com/"
 
 private const val SHOWDOWN_CLIENT = "https://play.pokemonshowdown.com"
 
+// the class of the page's body when the battle's log is hidden
+internal const val HIDE_LOG_CLASS = "hide-log"
+
 // what Showdown's replay-embed.js loads, in the order they depend on each other
 private val SHOWDOWN_STYLES = listOf(
     "style/font-awesome.css",
@@ -45,8 +48,10 @@ private val SHOWDOWN_SCRIPTS = listOf(
  * @param log the protocol log of the replay
  * @param asP2 whether to show the battle from the second player's side
  * @param dark whether to use Showdown's dark color scheme
+ * @param showLog whether to show the battle's log, which [ReplayPlayer.toggleLog] then changes
  */
-fun replayHtml(log: String, asP2: Boolean, dark: Boolean): String {
+fun replayHtml(log: String, asP2: Boolean, dark: Boolean, showLog: Boolean): String {
+    val bodyClasses = listOfNotNull("dark".takeIf { dark }, HIDE_LOG_CLASS.takeIf { !showLog })
     // turned back into / by the page, it keeps a </script> in the log from closing the tag
     val escapedLog = log.replace("/", "\\/")
     return """
@@ -58,28 +63,28 @@ fun replayHtml(log: String, asP2: Boolean, dark: Boolean): String {
 ${SHOWDOWN_STYLES.joinToString("\n") { """<link rel="stylesheet" href="$SHOWDOWN_CLIENT/$it">""" }}
 <style>
   body { margin: 0; }
-  .wrapper { max-width: 1180px; margin: 0 auto; padding: 8px 4px; box-sizing: border-box; }
+  /*
+   * flow-root keeps in the wrapper the negative margin-bottom the battle gives itself when it scales down, which
+   * would otherwise go through it and leave its height, the one the app sizes the view to, unscaled
+   */
+  .wrapper { display: flow-root; max-width: 1180px; margin: 0 auto; padding: 8px 4px; box-sizing: border-box; }
+  body.$HIDE_LOG_CLASS .battle-log { display: none; }
   /* the battle is at a fixed position, the log on its right */
   .replay-wrapper { padding-top: 372px !important; }
   /*
-   * on narrow screens, the log goes below the battle as on the replay site, taking the rest of the height. Under
-   * 640px, the battle scales itself down to the width of the page, which only works when it is in the flow
+   * on narrow screens, the log goes below the battle as on the replay site. Under 640px, the battle scales itself
+   * down to the width of the page, which only works when it is in the flow. The log has a fixed height, as the app
+   * sizes the view to the page's content
    */
   @media (max-width: 820px) {
     html, body { overflow-x: hidden; }
     .replay-wrapper { padding: 0 !important; }
     .battle { position: relative; top: 0; left: 0; margin: 0 auto; }
-    .battle-log {
-      position: static;
-      margin: 4px auto 0;
-      max-width: 640px;
-      height: calc(100vh - min(100vw * 360 / 640, 360px) - 8px);
-      min-height: 150px;
-    }
+    .battle-log { position: static; margin: 4px auto 0; max-width: 640px; height: 300px; }
   }
 </style>
 </head>
-<body${if (dark) " class=\"dark\"" else ""}>
+<body class="${bodyClasses.joinToString(" ")}">
 <div class="wrapper replay-wrapper">
   <div class="battle"></div>
   <div class="battle-log"></div>
@@ -109,15 +114,20 @@ ${SHOWDOWN_SCRIPTS.joinToString("\n") { """<script src="$SHOWDOWN_CLIENT/$it"></
     battle.scene.updateAcceleration();
   }
 
+  var wrapper = document.querySelector('.wrapper');
   function postState() {
     postToApp(JSON.stringify({
       turn: battle.turn,
       paused: battle.paused,
       atEnd: battle.atQueueEnd,
-      started: battle.started
+      started: battle.started,
+      // the wrapper's rather than the page's, which is at least the height of the view
+      contentHeight: wrapper.offsetHeight
     }));
   }
   battle.subscribe(postState);
+  // the content height changes with the log shown or not, and with the width the battle scales to
+  if (window.ResizeObserver) new ResizeObserver(postState).observe(wrapper);
   postState();
 </script>
 </body>

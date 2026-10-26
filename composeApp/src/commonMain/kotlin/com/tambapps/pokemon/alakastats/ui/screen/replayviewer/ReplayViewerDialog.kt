@@ -2,11 +2,12 @@ package com.tambapps.pokemon.alakastats.ui.screen.replayviewer
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,8 +34,16 @@ import arrow.core.Either
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.composables.HtmlView
+import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.koin.compose.koinInject
+
+// the height of the dialog's body until the replay tells its own
+private val LOADING_HEIGHT = 200.dp
+// Showdown's battle, 640px and its border: below it, the battle scales down
+private val BATTLE_WIDTH = 642.dp
+// the battle and its log on its right
+private val BATTLE_WITH_LOG_WIDTH = 1200.dp
 
 /**
  * Plays a Showdown replay back in the app
@@ -54,49 +63,67 @@ fun ReplayViewerDialog(
     val log by produceState<Either<DomainError, String>?>(null, replayUrl) {
         value = replayService.fetchLog(replayUrl)
     }
+    // on desktop, the log fits on the right of the battle. On mobile, it is hidden at first, the battle alone being
+    // enough to follow it
+    val isCompact = LocalIsCompact.current
+    val player = remember { ReplayPlayer(showLog = !isCompact) }
 
     // the platform's default width is too narrow for the battle
     Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Surface(
-            // the width of the battle and its log side by side
-            modifier = Modifier.fillMaxWidth(0.95f).widthIn(max = 1200.dp).fillMaxHeight(0.9f),
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface,
-        ) {
-            Column(Modifier.fillMaxSize()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text("Replay", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
-                    TextButton(onClick = { uriHandler.openUri(browserUrl) }) {
-                        Text("Open in browser")
+        BoxWithConstraints {
+            Surface(
+                // as wide as the battle, with its log on its right when shown, the page putting it below when it
+                // doesn't fit. As high as its content, which scrolls beyond
+                modifier = Modifier.fillMaxWidth(0.95f)
+                    .widthIn(max = if (player.showLog) BATTLE_WITH_LOG_WIDTH else BATTLE_WIDTH)
+                    .heightIn(max = maxHeight * 0.9f),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surface,
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("Replay", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                        TextButton(onClick = { uriHandler.openUri(browserUrl) }) {
+                            Text("Open in browser")
+                        }
+                        TextButton(onClick = onDismissRequest) {
+                            Text("Close")
+                        }
                     }
-                    TextButton(onClick = onDismissRequest) {
-                        Text("Close")
-                    }
-                }
-                Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
                     when (val result = log) {
-                        null -> CircularProgressIndicator()
+                        null -> Box(Modifier.fillMaxWidth().height(LOADING_HEIGHT), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
                         is Either.Left -> Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.padding(16.dp)
+                            modifier = Modifier.fillMaxWidth().padding(16.dp)
                         ) {
                             Text("Couldn't load the replay: ${result.value.message}", textAlign = TextAlign.Center)
                             OutlinedButton(onClick = { uriHandler.openUri(browserUrl) }) {
                                 Text("Open in browser")
                             }
                         }
-                        is Either.Right -> Column(Modifier.fillMaxSize()) {
-                            val player = remember { ReplayPlayer() }
+                        is Either.Right -> {
                             var obscured by remember { mutableStateOf(false) }
+                            val dark = isDarkThemeEnabled()
+                            // toggling the log changes the loaded page, not this one, which would reload it: the
+                            // page only takes it when it is reloaded for another reason
+                            val html = remember(result.value, dark) {
+                                replayHtml(result.value, asP2, dark, showLog = player.showLog)
+                            }
                             HtmlView(
-                                html = replayHtml(result.value, asP2, dark = isDarkThemeEnabled()),
+                                html = html,
                                 baseUrl = REPLAY_HTML_BASE_URL,
                                 bridge = player.bridge,
-                                modifier = Modifier.fillMaxWidth().weight(1f),
+                                // the height of the page's content, with or without the log, or less when the
+                                // dialog can't be that high
+                                modifier = Modifier.fillMaxWidth()
+                                    .weight(1f, fill = false)
+                                    .height(player.state?.contentHeight?.dp ?: LOADING_HEIGHT),
                                 obscured = obscured,
                             )
                             ReplayControls(

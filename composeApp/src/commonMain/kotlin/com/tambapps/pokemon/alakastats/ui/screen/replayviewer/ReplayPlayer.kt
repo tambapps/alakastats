@@ -16,6 +16,8 @@ data class ReplayPlaybackState(
     val paused: Boolean,
     val atEnd: Boolean,
     val started: Boolean,
+    // in CSS pixels, which are dp on every platform
+    val contentHeight: Int,
 )
 
 enum class ReplaySpeed(val label: String, internal val showdownValue: String) {
@@ -28,14 +30,17 @@ enum class ReplaySpeed(val label: String, internal val showdownValue: String) {
 
 /**
  * Drives the battle of the page built by [replayHtml], through its battle and setSpeed globals
+ * @param showLog whether the battle's log is shown at first
  */
-class ReplayPlayer {
+class ReplayPlayer(showLog: Boolean) {
     /**
      * Null until the battle is loaded
      */
     var state by mutableStateOf<ReplayPlaybackState?>(null)
         private set
     var speed by mutableStateOf(ReplaySpeed.NORMAL)
+        private set
+    var showLog by mutableStateOf(showLog)
         private set
 
     val bridge = HtmlBridge { message ->
@@ -59,6 +64,11 @@ class ReplayPlayer {
     fun changeSpeed(speed: ReplaySpeed) {
         this.speed = speed
         run("setSpeed('${speed.showdownValue}')")
+    }
+
+    fun toggleLog() {
+        showLog = !showLog
+        run("document.body.classList.toggle('$HIDE_LOG_CLASS', ${!showLog})")
     }
 
     private fun run(script: String) {
