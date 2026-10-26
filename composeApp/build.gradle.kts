@@ -112,6 +112,9 @@ kotlin {
             implementation(libs.pokemon.pokeApi.client)
             implementation(libs.pokemon.championsEngine)
             implementation(libs.serialization.json)
+            // kstore-file brings an older one, compiled against an older kotlinx-serialization-json: it crashes at launch
+            // on iOS (IrLinkageError) when reading the teams
+            implementation(libs.serialization.json.io)
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.screenmodel)
             implementation(libs.voyager.koin)
