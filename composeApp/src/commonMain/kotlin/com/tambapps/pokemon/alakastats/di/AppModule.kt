@@ -77,6 +77,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.serialization.kotlinx.json.json
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
@@ -88,6 +89,13 @@ val appModules = listOf(module {
         HttpClient {
             install(ContentNegotiation) {
                 json(get<Json>())
+            }
+            // so that a stalled request fails instead of blocking e.g. the cloud sync. The browser only supports the
+            // request timeout
+            install(HttpTimeout) {
+                connectTimeoutMillis = 15_000
+                socketTimeoutMillis = 30_000
+                requestTimeoutMillis = 60_000
             }
         }
     }

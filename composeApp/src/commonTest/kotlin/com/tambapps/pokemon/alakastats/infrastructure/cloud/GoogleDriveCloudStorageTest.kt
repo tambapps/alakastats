@@ -10,6 +10,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandleScope
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.HttpRequestData
 import io.ktor.client.request.HttpResponseData
 import io.ktor.http.HttpHeaders
@@ -17,7 +18,10 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.headersOf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -45,6 +49,10 @@ class GoogleDriveCloudStorageTest {
         override suspend fun signOut() = Unit
     }
 
+    private companion object {
+        const val REQUEST_TIMEOUT_MILLIS = 100L
+    }
+
     private val tokenProvider = CountingTokenProvider()
     private val requests = mutableListOf<HttpRequestData>()
     private var retrySleeps = 0
@@ -53,7 +61,9 @@ class GoogleDriveCloudStorageTest {
         httpClient = HttpClient(MockEngine { request ->
             requests.add(request)
             handler(request)
-        }),
+        }) {
+            install(HttpTimeout) { requestTimeoutMillis = REQUEST_TIMEOUT_MILLIS }
+        },
         tokenProvider = tokenProvider,
         json = Json { ignoreUnknownKeys = true },
         retryPolicy = RetryPolicy(maxAttempts = 3, sleep = { retrySleeps++ }),
@@ -202,6 +212,18 @@ class GoogleDriveCloudStorageTest {
         assertIs<CloudError.Network>(storage.list().leftOrNull())
         assertEquals(2, requests.size)
         assertEquals(1, retrySleeps)
+    }
+
+    @Test
+    fun stalledRequestTimesOutAndIsRetried() = runTest {
+        val storage = storage {
+            // real time: the client's timeout doesn't run on the test's virtual time
+            withContext(Dispatchers.Default) { delay(REQUEST_TIMEOUT_MILLIS * 20) }
+            json("""{"files":[]}""")
+        }
+
+        assertIs<CloudError.Network>(storage.list().leftOrNull())
+        assertEquals(2, requests.size)
     }
 
     @Test

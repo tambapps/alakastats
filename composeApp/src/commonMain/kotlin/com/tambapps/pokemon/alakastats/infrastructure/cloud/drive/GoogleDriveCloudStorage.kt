@@ -16,6 +16,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.OAuthTokenProvi
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.PRIVATE_SYNC_SCOPES
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.SHARING_SCOPES
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.header
@@ -242,6 +243,7 @@ class GoogleDriveCloudStorage(
             method = HttpMethod.Get
             url("$API_URL/files/$fileId/revisions/$revisionId")
             parameter("alt", "media")
+            downloadTimeout()
         },
         handle = { it.bodyAsBytes() }
     )
@@ -252,6 +254,7 @@ class GoogleDriveCloudStorage(
             method = HttpMethod.Get
             url("$API_URL/files/$fileId")
             parameter("alt", "media")
+            downloadTimeout()
         },
         handle = { it.bodyAsBytes() }
     )
@@ -290,12 +293,9 @@ class GoogleDriveCloudStorage(
             parameter("uploadType", "multipart")
             parameter("fields", fields)
             val boundary = "alakastats-${Uuid.random().toHexString()}"
-            setBody(
-                ByteArrayContent(
-                    bytes = multipartRelatedBody(boundary, json.encodeToString(metadata), bytes),
-                    contentType = ContentType("multipart", "related").withParameter("boundary", boundary)
-                )
-            )
+            val body = multipartRelatedBody(boundary, json.encodeToString(metadata), bytes)
+            setBody(ByteArrayContent(body, ContentType("multipart", "related").withParameter("boundary", boundary)))
+            uploadTimeout(body.size)
         },
         handle = { json.decodeFromString<DriveFileDto>(it.bodyAsText()) }
     )
@@ -330,6 +330,7 @@ class GoogleDriveCloudStorage(
                 method = HttpMethod.Put
                 url(sessionUrl)
                 setBody(ByteArrayContent(bytes, JSON_CONTENT_TYPE))
+                uploadTimeout(bytes.size)
             },
             handle = { json.decodeFromString<DriveFileDto>(it.bodyAsText()) }
         )
@@ -343,6 +344,15 @@ class GoogleDriveCloudStorage(
             method = HttpMethod.Patch
             url("$UPLOAD_URL/files/$existingFileId")
         }
+    }
+
+    // the client's request timeout is for small requests: a team file can be big, and the connection slow
+    private fun HttpRequestBuilder.uploadTimeout(size: Int) = timeout {
+        requestTimeoutMillis = TRANSFER_BASE_TIMEOUT_MILLIS + size / MIN_UPLOAD_BYTES_PER_MILLI
+    }
+
+    private fun HttpRequestBuilder.downloadTimeout() = timeout {
+        requestTimeoutMillis = DOWNLOAD_TIMEOUT_MILLIS
     }
 
     private fun HttpRequestBuilder.jsonBody(body: String) {
@@ -475,6 +485,10 @@ class GoogleDriveCloudStorage(
         private const val FOLDER_MIME_TYPE = "application/vnd.google-apps.folder"
         // Google recommends resumable uploads above 5MB
         internal const val MULTIPART_MAX_SIZE = 5 * 1024 * 1024
+        private const val TRANSFER_BASE_TIMEOUT_MILLIS = 60_000L
+        // 20 KB/s, a very slow connection: a 5MB team gets about 5 minutes
+        private const val MIN_UPLOAD_BYTES_PER_MILLI = 20
+        private const val DOWNLOAD_TIMEOUT_MILLIS = 120_000L
         private val JSON_CONTENT_TYPE = ContentType.Application.Json
         private val RATE_LIMIT_REASONS = setOf("rateLimitExceeded", "userRateLimitExceeded")
         private val STORAGE_FULL_REASONS = setOf("storageQuotaExceeded", "quotaExceeded")
