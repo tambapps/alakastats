@@ -59,6 +59,20 @@ class ReplayAnalyticsService(
         }
     }
 
+    /**
+     * The raw protocol log of the replay, to play it back in the app
+     */
+    suspend fun fetchLog(sdReplayUrl: String): Either<DomainError, String> {
+        return try {
+            httpClient.get(jsonReplayUrl(sdReplayUrl)).body<RawSdReplay>().logs.right()
+        } catch (e: Exception) {
+            NetworkError(
+                message = e.message ?: "Failed to fetch replay",
+                cause = e
+            ).left()
+        }
+    }
+
     private fun jsonReplayUrl(originUrl: String): String {
         var result = originUrl
         val qpBeginningIndex = originUrl.indexOf(',')

@@ -45,7 +45,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -68,6 +67,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
+import com.tambapps.pokemon.alakastats.ui.screen.replayviewer.ReplayViewerScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
@@ -296,15 +296,16 @@ internal fun ViewReplayButton(
     url: String,
     modifier: Modifier = Modifier
 ) {
-    var url = url.removeSuffix(".json")
-    if (!team.sdNames.contains(replay.player1.name)) {
-        url += "?p2"
+    val asP2 = !team.sdNames.contains(replay.player1.name)
+    var browserUrl = url.removeSuffix(".json")
+    if (asP2) {
+        browserUrl += "?p2"
     }
-    val uriHandler = LocalUriHandler.current
+    val navigator = LocalNavigator.currentOrThrow
 
     OutlinedButton(
         modifier = modifier,
-        onClick = { uriHandler.openUri(url) },
+        onClick = { navigator.push(ReplayViewerScreen(url, browserUrl, asP2)) },
     ) {
         Text("Replay")
     }
