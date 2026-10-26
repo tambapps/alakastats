@@ -106,15 +106,29 @@ class TeamlyticsSerializer(
     }
 
     private suspend fun loadReplaysFromTeamlyticsReplaysArray(jsonArray: JsonArray): Either<LoadTeamError, List<ReplayAnalyticsEntity>> = either {
-        val replayUrlsWithNotes = jsonAccess {
-            jsonArray.mapNotNull {
-                val url = it.jsonObject[ReplayAnalyticsEntity::url.name]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
-                url to it.jsonObject[ReplayAnalyticsEntity::notes.name]?.jsonPrimitive?.contentOrNull
+        val savedReplays = jsonAccess {
+            jsonArray.map {
+                SavedReplay(
+                    url = it.jsonObject[ReplayAnalyticsEntity::url.name]?.jsonPrimitive?.contentOrNull,
+                    notes = it.jsonObject[ReplayAnalyticsEntity::notes.name]?.jsonPrimitive?.contentOrNull,
+                    // null for the saves that only had the url and the notes of each replay
+                    entity = Either.catch { json.decodeFromJsonElement<ReplayAnalyticsEntity>(it) }.getOrNull(),
+                )
             }
         }.bind()
 
-        loadReplays(replayUrlsWithNotes)
+        withContext(Dispatchers.Default) {
+            savedReplays.map { saved ->
+                async {
+                    // fetched again from showdown when possible. The others (e.g. entered manually) are kept as saved
+                    saved.url?.let { url -> replayService.fetch(url).getOrNull()?.copy(notes = saved.notes)?.toEntity() }
+                        ?: saved.entity
+                }
+            }.awaitAll().filterNotNull()
+        }
     }
+
+    private class SavedReplay(val url: String?, val notes: String?, val entity: ReplayAnalyticsEntity?)
 
     private suspend fun loadReplays(replayUrlsWithNotes: List<Pair<String, String?>>): List<ReplayAnalyticsEntity> {
         val replays = withContext(Dispatchers.Default) {
