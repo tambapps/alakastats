@@ -520,19 +520,38 @@ internal fun ReplayDropDownMenu(
 }
 
 @Composable
-internal fun VsText(currentPlayer: Player, opponentPlayer: Player, gameOutcome: GameOutcome, modifier: Modifier = Modifier) {
-    val text =
-        if (gameOutcome != GameOutcome.UNKNOWN) "VS ${opponentPlayer.name.value}"
-        else "${currentPlayer.name.value}\nVS\n${opponentPlayer.name.value}"
-    SelectionContainer {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = modifier.padding(start = 8.dp),
-            textAlign = if (gameOutcome != GameOutcome.UNKNOWN) null else TextAlign.Center,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1
-        )
+internal fun VsText(
+    currentPlayer: Player,
+    opponentPlayer: Player,
+    gameOutcome: GameOutcome,
+    isInternalMatch: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val text = when {
+        gameOutcome == GameOutcome.UNKNOWN -> "${currentPlayer.name.value}\nVS\n${opponentPlayer.name.value}"
+        // both players are the user's: the outcome is the first one's
+        isInternalMatch -> "${currentPlayer.name.value} VS ${opponentPlayer.name.value}"
+        else -> "VS ${opponentPlayer.name.value}"
+    }
+    Column(modifier = modifier.padding(start = 8.dp)) {
+        SelectionContainer {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = if (gameOutcome != GameOutcome.UNKNOWN) null else TextAlign.Center,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+        }
+        if (isInternalMatch) {
+            Text(
+                text = "Internal match, not counted in the stats",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
 

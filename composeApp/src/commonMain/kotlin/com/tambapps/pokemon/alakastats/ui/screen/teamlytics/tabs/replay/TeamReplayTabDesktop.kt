@@ -35,6 +35,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.getGameOutcome
+import com.tambapps.pokemon.alakastats.domain.model.isInternalMatch
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutcomeCard
@@ -154,7 +155,7 @@ private fun HeadRow(
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
         GameOutcomeCard(gameOutcome)
-        VsText(currentPlayer, opponentPlayer, gameOutcome)
+        VsText(currentPlayer, opponentPlayer, gameOutcome, team.isInternalMatch(replay))
         Spacer(Modifier.width(16.dp))
         if (gameOutcome != GameOutcome.UNKNOWN) {
             PokemonTeamPreview(opponentPlayer,

@@ -10,6 +10,7 @@ import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.error.GetPokemonDataError
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.isInternalMatch
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultPokemonDetailUseCase
 import com.tambapps.pokemon.alakastats.ui.composables.PagerViewModel
@@ -73,7 +74,7 @@ class PokemonDetailViewModel(
 
     private fun computeUsages(team: Teamlytics) = team.withContext {
         team.replays.asSequence()
-            .filter { it.youPlayer.hasSelected(pokemonName) }
+            .filter { !team.isInternalMatch(it) && it.youPlayer.hasSelected(pokemonName) }
             .map { PokemonUsages.from(it, it.youPlayer, pokemonName) }
             .reduceOrNull { a, b -> a.mergeWith(b) }
     }

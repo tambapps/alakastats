@@ -78,7 +78,8 @@ class MatchupsViewModel(
     private fun computeLeadsStats(): Pair<List<LeadStats>, List<LeadStats>> = useCase.filteredTeam.withContext {
         // don't want to compute lead stats if no filters is applied because they are intended to be used when filtering on specific matchup
         if (!filters.hasAny()) return@withContext emptyList<LeadStats>() to emptyList()
-        val replays = team.replays.filter { it.gameOutcome != GameOutcome.UNKNOWN }
+        // a game ended at team preview has no lead
+        val replays = team.replays.filter { it.countsInStats && it.opponentPlayer.lead.isNotEmpty() }
 
         val leadsStats = buildMap {
             for (replay in replays) {
@@ -117,7 +118,7 @@ class MatchupsViewModel(
         bestComparator: Comparator<in T>,
         worstComparator: Comparator<in T>
     ): Pair<List<T>, List<T>> = useCase.filteredTeam.withContext {
-        val replays = team.replays.filter { it.gameOutcome != GameOutcome.UNKNOWN }
+        val replays = team.replays.filter { it.countsInStats }
 
         val stats = buildMap {
             for (replay in replays) {

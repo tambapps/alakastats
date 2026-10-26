@@ -24,7 +24,18 @@ fun Teamlytics.getPlayers(replay: ReplayAnalytics): Pair<Player, Player> =
     if (sdNames.contains(replay.player1.name)) replay.player1 to replay.player2
     else replay.player2 to replay.player1
 
+// a match between two of the team's sdNames: it tells nothing about the team, so it isn't counted in the stats
+fun ReplayAnalytics.isInternalMatch(sdNames: List<UserName>) = players.all { sdNames.contains(it.name) }
+
+fun Teamlytics.isInternalMatch(replay: ReplayAnalytics) = replay.isInternalMatch(sdNames)
+
 fun Teamlytics.getGameOutcome(replay: ReplayAnalytics) = when {
+    // the player 1 is the "you" player
+    isInternalMatch(replay) -> when (replay.winner) {
+        replay.player1.name -> GameOutcome.WIN
+        replay.player2.name -> GameOutcome.LOOSE
+        else -> GameOutcome.UNKNOWN
+    }
     sdNames.contains(replay.winner) -> GameOutcome.WIN
     sdNames.contains(replay.looser) -> GameOutcome.LOOSE
     else -> GameOutcome.UNKNOWN
@@ -39,6 +50,10 @@ class TeamlyticsContext(val team: Teamlytics) {
 
     val ReplayAnalytics.opponentPlayer: Player
         get() = team.getOpponentPlayer(this)
+
+    /** Whether the replay is one the stats are computed from */
+    val ReplayAnalytics.countsInStats: Boolean
+        get() = gameOutcome != GameOutcome.UNKNOWN && !isInternalMatch(team.sdNames)
 
 
     fun ReplayFilters.matches(replay: ReplayAnalytics): Boolean = matches(

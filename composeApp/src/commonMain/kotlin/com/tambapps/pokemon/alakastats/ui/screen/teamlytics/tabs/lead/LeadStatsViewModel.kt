@@ -51,7 +51,8 @@ class LeadStatsViewModel(
     }
 
     private fun computeStats(): Triple<List<LeadStats>, List<LeadStats>, List<LeadStats>> = useCase.filteredTeam.withContext {
-        val replays = team.replays.filter { it.gameOutcome != GameOutcome.UNKNOWN }
+        // a game ended at team preview has no lead
+        val replays = team.replays.filter { it.countsInStats && it.youPlayer.lead.isNotEmpty() }
         val leadsStats = computeLeadsStats(replays)
         val pokemonLeadAndWins = computeIndividualStats(replays)
         val leadAndWinStats = pokemonLeadAndWins

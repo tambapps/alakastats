@@ -115,7 +115,8 @@ data class TeamlyticsPreview(
 
 fun Teamlytics.computeWinRatePercentage() = computeWinRatePercentage(sdNames, replays)
 
-fun computeWinRatePercentage(sdNames: List<UserName>, replays: List<ReplayAnalytics>): Int {
+fun computeWinRatePercentage(sdNames: List<UserName>, allReplays: List<ReplayAnalytics>): Int {
+    val replays = allReplays.filterNot { it.isInternalMatch(sdNames) }
     if (replays.isEmpty()) return 0
     val nbGames = replays.size
     val wonGames = replays.count { replay ->

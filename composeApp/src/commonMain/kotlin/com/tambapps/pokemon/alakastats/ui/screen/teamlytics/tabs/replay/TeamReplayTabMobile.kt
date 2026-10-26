@@ -27,6 +27,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.getGameOutcome
+import com.tambapps.pokemon.alakastats.domain.model.isInternalMatch
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutcomeCard
@@ -108,7 +109,7 @@ fun ReplayCompact(
     ExpansionTile(
         title = { isExpanded ->
             GameOutcomeCard(gameOutput)
-            VsText(currentPlayer, opponentPlayer, gameOutput)
+            VsText(currentPlayer, opponentPlayer, gameOutput, team.isInternalMatch(replay))
         },
         subtitle = {
             if (gameOutput != GameOutcome.UNKNOWN) {
