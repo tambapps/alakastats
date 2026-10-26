@@ -1,5 +1,8 @@
 package com.tambapps.pokemon.alakastats.ui.screen.replayviewer
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.close
+import alakastats.composeapp.generated.resources.open_in_new
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -12,11 +15,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +46,9 @@ import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsSer
 import com.tambapps.pokemon.alakastats.ui.composables.HtmlView
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
+import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
 // the height of the dialog's body until the replay tells its own
@@ -86,12 +99,8 @@ fun ReplayViewerDialog(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text("Replay", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
-                        TextButton(onClick = { uriHandler.openUri(browserUrl) }) {
-                            Text("Open in browser")
-                        }
-                        TextButton(onClick = onDismissRequest) {
-                            Text("Close")
-                        }
+                        HeaderIconButton(Res.drawable.open_in_new, "Open in browser") { uriHandler.openUri(browserUrl) }
+                        HeaderIconButton(Res.drawable.close, "Close", onClick = onDismissRequest)
                     }
                     when (val result = log) {
                         null -> Box(Modifier.fillMaxWidth().height(LOADING_HEIGHT), contentAlignment = Alignment.Center) {
@@ -135,6 +144,25 @@ fun ReplayViewerDialog(
                     }
                 }
             }
+        }
+    }
+}
+
+// the label shows as a tooltip, an icon alone being less obvious than a text
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HeaderIconButton(icon: DrawableResource, label: String, onClick: () -> Unit) {
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text(label) } },
+        state = rememberTooltipState(),
+    ) {
+        IconButton(onClick = onClick) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = label,
+                tint = MaterialTheme.colorScheme.defaultIconColor,
+            )
         }
     }
 }
