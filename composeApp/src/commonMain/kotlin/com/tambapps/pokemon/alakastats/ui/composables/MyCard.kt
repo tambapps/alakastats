@@ -49,7 +49,9 @@ fun MyCard(
         cardModifier = cardModifier.border(border, shape)
     }
 
-    val cardColors = if (gradientBackgroundColors != null) colors.copy(containerColor = Color.Transparent) else colors
+    val cardColors = (if (gradientBackgroundColors != null) colors.copy(containerColor = Color.Transparent) else colors)
+        // disabled only to stop reacting to clicks (e.g. an opened ExpansionTile): its content isn't faded
+        .let { it.copy(disabledContainerColor = it.containerColor, disabledContentColor = it.contentColor) }
     val cardContent: @Composable ColumnScope.() -> Unit = {
         if (gradientBackgroundColors != null) {
             Column(

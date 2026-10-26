@@ -101,7 +101,6 @@ fun ExpandableDesktopReplay(
                 viewModel = null
             )
         },
-        disableWhenOpened = true
     ) {
         ReplayContent(
             replay,
