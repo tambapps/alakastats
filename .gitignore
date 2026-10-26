@@ -20,6 +20,7 @@ kotlin-js-store/yarn.lock
 
 .claude/
 composeApp/release/
+androidApp/release/
 
 CLAUDE.md
 

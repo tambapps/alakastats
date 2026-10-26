@@ -11,17 +11,14 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlin.serialization)
 }
 
-val appVersionName = "1.4"
-val appVersionCode = 5
-
 val generateBuildConfig by tasks.registering(GenerateBuildConfigTask::class) {
-    versionName.set(appVersionName)
+    versionName.set(libs.versions.app.versionName)
     outputDir.set(layout.buildDirectory.dir("generated/buildconfig/commonMain/kotlin"))
 }
 
@@ -34,10 +31,20 @@ kotlin {
         }
     }
     
-    androidTarget {
+    // the app itself is :androidApp
+    android {
+        namespace = "com.tambapps.pokemon.alakastats.shared"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
+        // for the Compose resources
+        androidResources {
+            enable = true
+        }
+        // runs commonTest on the JVM too
+        withHostTest {}
     }
     
     listOf(
@@ -142,39 +149,9 @@ kotlin {
     }
 }
 
-android {
-    namespace = "com.tambapps.pokemon.alakastats"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-
-    defaultConfig {
-        applicationId = "com.tambapps.pokemon.alakastats"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = appVersionCode
-        versionName = appVersionName
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = true
-        }
-
-        getByName("debug") {
-            isMinifyEnabled = false
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-}
-
 dependencies {
-    debugImplementation(compose.uiTooling)
+    // for the previews in Android Studio
+    "androidRuntimeClasspath"(libs.compose.uiTooling)
 }
 
 abstract class GenerateBuildConfigTask : DefaultTask() {
