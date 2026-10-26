@@ -8,6 +8,7 @@ import com.tambapps.pokemon.AbilityName
 import com.tambapps.pokemon.alakastats.domain.error.JsonError
 import com.tambapps.pokemon.alakastats.domain.error.LoadTeamError
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.isShowdownReplayUrl
 import com.tambapps.pokemon.alakastats.domain.transformer.toDomain
 import com.tambapps.pokemon.alakastats.domain.transformer.toEntity
 import com.tambapps.pokemon.Gender
@@ -121,7 +122,7 @@ class TeamlyticsSerializer(
             savedReplays.map { saved ->
                 async {
                     // fetched again from showdown when possible. The others (e.g. entered manually) are kept as saved
-                    saved.url?.let { url -> replayService.fetch(url).getOrNull()?.copy(notes = saved.notes)?.toEntity() }
+                    saved.url?.takeIf(::isShowdownReplayUrl)?.let { url -> replayService.fetch(url).getOrNull()?.copy(notes = saved.notes)?.toEntity() }
                         ?: saved.entity
                 }
             }.awaitAll().filterNotNull()

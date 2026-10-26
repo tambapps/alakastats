@@ -73,6 +73,16 @@ enum class GameOutcome {
 
 // manually entered replays have no showdown replay to refer to, so their reference is generated
 const val MANUAL_REFERENCE_PREFIX = "manual_"
+
+/**
+ * Whether the link is a showdown replay, that the app can fetch and show. Any other link (e.g. a YouTube video of a
+ * manual replay) is only opened
+ */
+fun isShowdownReplayUrl(url: String) = url.contains("replay.pokemonshowdown.com")
+
+private val LINK_REGEX = Regex("^https?://[^\\s/]+\\.[^\\s]+$")
+fun isValidLink(url: String) = LINK_REGEX.matches(url)
+
 data class ReplayAnalytics(
     val players: List<Player>,
     val uploadTime: Long,
@@ -95,6 +105,9 @@ data class ReplayAnalytics(
     val player2 get() = players[1]
 
     val isManual get() = reference.startsWith(MANUAL_REFERENCE_PREFIX)
+
+    /** the showdown replay to fetch it again from, null if the replay has no link or another one */
+    val showdownUrl get() = url?.takeIf(::isShowdownReplayUrl)
 
     fun hasWon(player: Player) = winner == player.name
 

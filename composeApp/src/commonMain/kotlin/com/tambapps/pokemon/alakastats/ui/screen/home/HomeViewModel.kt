@@ -278,7 +278,8 @@ class HomeViewModel(
                     .distinctBy { it.reference } // just in case there were some duplicates
                     .map { replay ->
                         async {
-                            replay.url?.let { replayUrl ->
+                            // another link (e.g. a YouTube video) has nothing to fetch
+                            replay.showdownUrl?.let { replayUrl ->
                                 replayAnalyticsService.fetch(replayUrl).getOrElse { error ->
                                     withContext(Dispatchers.Main) {
                                         snackBar.show("Failed to fetch replay: ${error.message}", SnackBar.Severity.ERROR)

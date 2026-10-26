@@ -4,6 +4,7 @@ import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.arrow_forward
 import alakastats.composeapp.generated.resources.mega
+import alakastats.composeapp.generated.resources.open_in_new
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -45,6 +47,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -58,6 +61,7 @@ import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.isShowdownReplayUrl
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
@@ -298,6 +302,20 @@ internal fun ViewReplayButton(
     url: String,
     modifier: Modifier = Modifier
 ) {
+    if (!isShowdownReplayUrl(url)) {
+        // e.g. a YouTube video: opened in a new tab
+        val uriHandler = LocalUriHandler.current
+        OutlinedButton(modifier = modifier, onClick = { uriHandler.openUri(url) }) {
+            Text("Replay")
+            Spacer(Modifier.width(8.dp))
+            Icon(
+                painter = painterResource(Res.drawable.open_in_new),
+                contentDescription = "Opens in a new tab",
+                modifier = Modifier.size(ButtonDefaults.IconSize),
+            )
+        }
+        return
+    }
     val asP2 = !team.sdNames.contains(replay.player1.name)
     var browserUrl = url.removeSuffix(".json")
     if (asP2) {
@@ -507,7 +525,8 @@ internal fun ReplayDropDownMenu(
             )
         }
 
-        replay.url?.let { replayUrl ->
+        // another link (e.g. a YouTube video) has nothing to fetch
+        replay.showdownUrl?.let { replayUrl ->
             DropdownMenuItem(
                 text = { Text("Reload") },
                 onClick = {

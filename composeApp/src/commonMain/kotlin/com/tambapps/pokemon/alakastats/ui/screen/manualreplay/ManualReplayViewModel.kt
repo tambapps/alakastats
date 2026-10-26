@@ -17,6 +17,8 @@ import com.tambapps.pokemon.alakastats.domain.model.PopularTeam
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.getGameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.getPlayers
+import com.tambapps.pokemon.alakastats.domain.model.isShowdownReplayUrl
+import com.tambapps.pokemon.alakastats.domain.model.isValidLink
 import com.tambapps.pokemon.alakastats.domain.model.TeamPreview
 import com.tambapps.pokemon.alakastats.domain.model.TeamPreviewPokemon
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
@@ -64,6 +66,10 @@ class ManualReplayViewModel(
     var notes by mutableStateOf("")
         private set
 
+    /** e.g. a YouTube video of the game, opened from the replay */
+    var link by mutableStateOf("")
+        private set
+
     val isEditing get() = editedReplay != null
 
     private val youName = team.sdNames.firstOrNull() ?: UserName("you")
@@ -80,6 +86,7 @@ class ManualReplayViewModel(
         val (youPlayer, opponentPlayer) = team.getPlayers(replay)
         won = team.getGameOutcome(replay) == GameOutcome.WIN
         notes = replay.notes.orEmpty()
+        link = replay.url.orEmpty()
 
         opponentPokemonStates.addAll(
             opponentPlayer.teamPreview.pokemons.map { OpponentPokemonState(it.name) }
@@ -139,6 +146,15 @@ class ManualReplayViewModel(
             ManualReplayPage.OPPONENT,
             "Select at least the $LEAD_SIZE pokemons the opponent led with"
         )
+        link.isNotBlank() && !isValidLink(link.trim()) -> ManualReplayValidationError(
+            ManualReplayPage.NOTES,
+            "The link must be a web address, starting with https://"
+        )
+        // a manual replay with a showdown link would be replaced by the showdown one when reloaded
+        link.isNotBlank() && isShowdownReplayUrl(link) -> ManualReplayValidationError(
+            ManualReplayPage.NOTES,
+            "Showdown replays are added from the Replays tab, with their link"
+        )
         else -> null
     }
 
@@ -150,6 +166,10 @@ class ManualReplayViewModel(
 
     fun updateNotes(notes: String) {
         this.notes = notes
+    }
+
+    fun updateLink(link: String) {
+        this.link = link
     }
 
     fun showSelectPokemonDialog() {
@@ -273,7 +293,7 @@ class ManualReplayViewModel(
             false -> OPPONENT_NAME
             null -> null
         },
-        url = null,
+        url = link.trim().takeIf { it.isNotEmpty() },
         reference = editedReplay?.reference ?: (MANUAL_REFERENCE_PREFIX + Uuid.random()),
         nextBattleRef = null,
         notes = notes.takeIf { it.isNotBlank() },

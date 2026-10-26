@@ -8,6 +8,7 @@ import arrow.core.flatMap
 import arrow.core.getOrElse
 import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.isShowdownReplayUrl
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.SnackBar
@@ -208,7 +209,7 @@ class TeamReplayViewModel(
     }
 
     private fun isValidReplayUrl(url: String): Boolean {
-        return isValidUrl(url) && url.contains("replay.pokemonshowdown.com")
+        return isValidUrl(url) && isShowdownReplayUrl(url)
     }
 
     private fun isValidUrl(s: String) = try {

@@ -93,6 +93,14 @@ internal fun NotesPage(viewModel: ManualReplayViewModel) {
     ) {
         PageHeader("Write down anything worth remembering about this game.")
         OutlinedTextField(
+            value = viewModel.link,
+            onValueChange = viewModel::updateLink,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            label = { Text("Link (optional)") },
+            placeholder = { Text("e.g. a YouTube video of the game") },
+            singleLine = true,
+        )
+        OutlinedTextField(
             value = viewModel.notes,
             onValueChange = viewModel::updateNotes,
             modifier = Modifier.fillMaxWidth().weight(1f).padding(bottom = teamlyticsTabPaddingBottom),
