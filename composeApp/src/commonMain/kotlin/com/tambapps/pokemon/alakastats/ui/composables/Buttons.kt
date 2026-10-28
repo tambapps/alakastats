@@ -43,8 +43,11 @@ fun BackIconButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
 val WIN_COLOR = Color(0xFF4CAF50)
 val LOOSE_COLOR = Color(0xFFF44336)
 
+/**
+ * @param letter what the card tells, the outcome's initial by default
+ */
 @Composable
-fun GameOutcomeCard(output: GameOutcome) {
+fun GameOutcomeCard(output: GameOutcome, letter: Char = output.name[0]) {
     val color = when (output) {
         GameOutcome.WIN -> WIN_COLOR
         GameOutcome.LOOSE -> LOOSE_COLOR
@@ -62,7 +65,7 @@ fun GameOutcomeCard(output: GameOutcome) {
     ) {
         Text(
             modifier = Modifier.padding(all = 8.dp).fillMaxSize(),
-            text = output.name[0].toString(),
+            text = letter.toString(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge,
             color = if (isDarkThemeEnabled()) Color(0xFF222222) else Color.White,

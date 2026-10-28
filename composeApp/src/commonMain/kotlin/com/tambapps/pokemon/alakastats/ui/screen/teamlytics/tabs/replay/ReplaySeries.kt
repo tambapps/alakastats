@@ -77,7 +77,8 @@ private fun SeriesView(
     val isCompact = LocalIsCompact.current
     ExpansionTile(
         title = {
-            GameOutcomeCard(series.outcome)
+            // an unknown outcome is an incomplete series, as its subtitle tells
+            GameOutcomeCard(series.outcome, letter = if (series.outcome == GameOutcome.UNKNOWN) 'I' else series.outcome.name[0])
             SeriesTitle(series, opponent)
             // on the same line when there is room, below otherwise
             if (!isCompact) {
