@@ -10,6 +10,8 @@ import kotlinx.serialization.Serializable
 data class AppPreferences(
     /** in the replays tab, the games of a same series (e.g. a best-of-3) are grouped */
     val groupReplaysBySeries: Boolean = false,
+    /** the speed of the replays played in the app, the name of a ReplaySpeed. Null for the default one */
+    val replaySpeed: String? = null,
 )
 
 class AppPreferencesRepository(private val store: KStore<AppPreferences>) {

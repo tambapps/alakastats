@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,11 +43,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import arrow.core.Either
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
+import com.tambapps.pokemon.alakastats.infrastructure.preferences.AppPreferencesRepository
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.composables.HtmlView
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
@@ -73,13 +76,22 @@ fun ReplayViewerDialog(
 ) {
     val uriHandler = LocalUriHandler.current
     val replayService = koinInject<ReplayAnalyticsService>()
-    val log by produceState<Either<DomainError, String>?>(null, replayUrl) {
-        value = replayService.fetchLog(replayUrl)
-    }
+    val preferences = koinInject<AppPreferencesRepository>()
+    val scope = rememberCoroutineScope()
     // on desktop, the log fits on the right of the battle. On mobile, it is hidden at first, the battle alone being
     // enough to follow it
     val isCompact = LocalIsCompact.current
-    val player = remember { ReplayPlayer(showLog = !isCompact) }
+    val player = remember {
+        // the speed is remembered for all the replays
+        ReplayPlayer(showLog = !isCompact, onSpeedChange = { speed ->
+            scope.launch { preferences.update { it.copy(replaySpeed = speed.name) } }
+        })
+    }
+    val log by produceState<Either<DomainError, String>?>(null, replayUrl) {
+        // read before the page is built, which starts at this speed
+        player.startWith(ReplaySpeed.fromName(preferences.get().replaySpeed))
+        value = replayService.fetchLog(replayUrl)
+    }
 
     // the platform's default width is too narrow for the battle
     Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -122,7 +134,7 @@ fun ReplayViewerDialog(
                             // toggling the log changes the loaded page, not this one, which would reload it: the
                             // page only takes it when it is reloaded for another reason
                             val html = remember(result.value, dark) {
-                                replayHtml(result.value, asP2, dark, showLog = player.showLog)
+                                replayHtml(result.value, asP2, dark, showLog = player.showLog, speed = player.speed)
                             }
                             HtmlView(
                                 html = html,

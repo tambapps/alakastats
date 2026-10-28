@@ -49,8 +49,9 @@ private val SHOWDOWN_SCRIPTS = listOf(
  * @param asP2 whether to show the battle from the second player's side
  * @param dark whether to use Showdown's dark color scheme
  * @param showLog whether to show the battle's log, which [ReplayPlayer.toggleLog] then changes
+ * @param speed the speed to play at, which [ReplayPlayer.changeSpeed] then changes
  */
-fun replayHtml(log: String, asP2: Boolean, dark: Boolean, showLog: Boolean): String {
+fun replayHtml(log: String, asP2: Boolean, dark: Boolean, showLog: Boolean, speed: ReplaySpeed = ReplaySpeed.NORMAL): String {
     val bodyClasses = listOfNotNull("dark".takeIf { dark }, HIDE_LOG_CLASS.takeIf { !showLog })
     // turned back into / by the page, it keeps a </script> in the log from closing the tag
     val escapedLog = log.replace("/", "\\/")
@@ -113,6 +114,7 @@ ${SHOWDOWN_SCRIPTS.joinToString("\n") { """<script src="$SHOWDOWN_CLIENT/$it"></
     battle.messageFadeTime = messageFadeTimes[speed];
     battle.scene.updateAcceleration();
   }
+  setSpeed('${speed.showdownValue}');
 
   var wrapper = document.querySelector('.wrapper');
   function postState() {

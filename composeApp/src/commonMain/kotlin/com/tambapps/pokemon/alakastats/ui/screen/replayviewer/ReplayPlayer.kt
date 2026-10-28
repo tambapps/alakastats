@@ -25,14 +25,19 @@ enum class ReplaySpeed(val label: String, internal val showdownValue: String) {
     FAST("Fast", "fast"),
     NORMAL("Normal", "normal"),
     SLOW("Slow", "slow"),
-    REALLY_SLOW("Really slow", "reallyslow"),
+    REALLY_SLOW("Really slow", "reallyslow");
+
+    companion object {
+        fun fromName(name: String?) = entries.find { it.name == name } ?: NORMAL
+    }
 }
 
 /**
  * Drives the battle of the page built by [replayHtml], through its battle and setSpeed globals
  * @param showLog whether the battle's log is shown at first
+ * @param onSpeedChange e.g. to remember the speed the user chose
  */
-class ReplayPlayer(showLog: Boolean) {
+class ReplayPlayer(showLog: Boolean, private val onSpeedChange: (ReplaySpeed) -> Unit = {}) {
     /**
      * Null until the battle is loaded
      */
@@ -64,6 +69,14 @@ class ReplayPlayer(showLog: Boolean) {
     fun changeSpeed(speed: ReplaySpeed) {
         this.speed = speed
         run("setSpeed('${speed.showdownValue}')")
+        onSpeedChange(speed)
+    }
+
+    /**
+     * The speed to start with, before the page is built: [replayHtml] applies it
+     */
+    fun startWith(speed: ReplaySpeed) {
+        this.speed = speed
     }
 
     fun toggleLog() {
