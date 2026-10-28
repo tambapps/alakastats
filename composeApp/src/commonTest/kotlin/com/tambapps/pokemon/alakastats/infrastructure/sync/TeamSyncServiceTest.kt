@@ -123,6 +123,22 @@ class TeamSyncServiceTest {
     }
 
     @Test
+    fun teamKeptOnThisDeviceNeedsNoReconnection() = runTest {
+        val tokenProvider = FakeTokenProvider()
+        val a = device(tokenProvider)
+        val localTeam = team().copy(localOnly = true)
+        val syncedTeam = team()
+        a.save(localTeam)
+        a.save(syncedTeam)
+        a.service.connect()
+
+        tokenProvider.nonInteractiveError = CloudError.NeedsUserInteraction()
+
+        assertNull(a.service.missingAccess(localTeam.id))
+        assertEquals(MissingAccess.SESSION, a.service.missingAccess(syncedTeam.id))
+    }
+
+    @Test
     fun syncWithoutChangesUploadsNothing() = runTest {
         val a = device()
         a.save(team())

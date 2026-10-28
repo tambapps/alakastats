@@ -241,9 +241,11 @@ class TeamSyncService(
     suspend fun missingAccess(teamId: Uuid): MissingAccess? {
         when (val status = _status.value) {
             SyncStatus.Unavailable, SyncStatus.Disconnected -> return null
-            is SyncStatus.Failed -> if (status.needsReconnection) return MissingAccess.SESSION
+            is SyncStatus.Failed -> if (status.needsReconnection && !isLocalOnly(teamId)) return MissingAccess.SESSION
             else -> Unit
         }
+        // kept on this device only: what changes in it isn't synced anyway
+        if (isLocalOnly(teamId)) return null
         if (tokenProvider?.accessToken(interactive = false).needsUser()) return MissingAccess.SESSION
         if (teamId !in _sharing.value) return null
         val status = _status.value
@@ -251,6 +253,9 @@ class TeamSyncService(
         // e.g. on the web, where the access to the shared files expires apart from the private one
         return if (tokenProvider?.accessToken(interactive = false, SHARING_SCOPES).needsUser()) MissingAccess.SHARING else null
     }
+
+    // a shared team is synced, whatever its flag
+    private suspend fun isLocalOnly(teamId: Uuid) = teamId !in _sharing.value && localTeams.isLocalOnly(teamId)
 
     // offline, the session isn't known to be expired
     private fun Either<CloudError, String>?.needsUser() =

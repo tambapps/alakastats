@@ -41,6 +41,9 @@ class LocalTeams(
         }
     }
 
+    /** Whether the team is kept on this device only, out of the sync */
+    suspend fun isLocalOnly(id: Uuid) = previewsStorage.get(id)?.localOnly ?: (teamsStorage.get(id)?.localOnly == true)
+
     suspend fun save(entity: TeamlyticsEntity) = writeLock.withLock { saveUnlocked(entity) }
 
     suspend fun delete(id: Uuid) = writeLock.withLock {
