@@ -77,6 +77,8 @@ fun ExpansionTile(
     gradientBackgroundColors: List<Color>? = null,
     onClick: (() -> Unit)? = null,
     borderColor: Color? = null,
+    // e.g. off for a card holding bordered cards
+    bordered: Boolean = true,
     disableWhenOpened: Boolean = false,
     initiallyExpanded: Boolean = false,
     content: @Composable () -> Unit,
@@ -111,6 +113,7 @@ fun ExpansionTile(
         },
         onClick=onClick,
         borderColor=borderColor,
+        bordered=bordered,
         shrinkTitleWeightOnExpanded=menu != null
     )
 }
@@ -127,6 +130,7 @@ private fun AbstractExpansionTile(
     disableWhenOpened: Boolean = false,
     onClick: (() -> Unit)? = null,
     borderColor: Color? = null,
+    bordered: Boolean = true,
     initiallyExpanded: Boolean = false,
     saveExpandedState: Boolean = false,
 ) {
@@ -138,10 +142,10 @@ private fun AbstractExpansionTile(
         enabled = !disableWhenOpened || !isCardExpandedState.value,
         modifier = modifier
             .fillMaxWidth(),
-        border = BorderStroke(
+        border = if (bordered) BorderStroke(
             width = 2.dp,
             color = borderColor ?: MaterialTheme.colorScheme.outline
-        ),
+        ) else null,
         gradientBackgroundColors = gradientBackgroundColors,
         onClick = onClick ?: { isCardExpandedState.value = !isCardExpandedState.value }
     ) {

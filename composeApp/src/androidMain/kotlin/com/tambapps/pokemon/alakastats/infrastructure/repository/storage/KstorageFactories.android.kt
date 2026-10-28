@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.infrastructure.repository.storage
 import android.content.Context
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
+import com.tambapps.pokemon.alakastats.infrastructure.preferences.AppPreferences
 import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncState
 import com.tambapps.pokemon.alakastats.util.Identifiable
 import io.github.xxfast.kstore.KStore
@@ -26,6 +27,12 @@ actual fun createSyncStateKStore(): KStore<SyncState> = object : KoinComponent {
     val context: Context by inject()
 }.let { koinComponent ->
     storeOf(file = Path(getRepositoryDir(koinComponent.context, "sync").absolutePath, "state.kstore"), enableCache = false, version = 0)
+}
+
+actual fun createAppPreferencesKStore(): KStore<AppPreferences> = object : KoinComponent {
+    val context: Context by inject()
+}.let { koinComponent ->
+    storeOf(file = Path(getRepositoryDir(koinComponent.context, "preferences").absolutePath, "preferences.kstore"), enableCache = false, version = 0)
 }
 
 actual suspend fun downloadToFile(fileName: String, extension: String, bytes: ByteArray): Boolean {

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import arrow.core.Either
 import arrow.core.raise.either
+import arrow.core.right
 import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.Format
@@ -164,6 +165,13 @@ class TeamlyticsViewModel(
         val replays = currentTeam.replays.mapIndexed { index, r ->
             if (index == replayIndex) replay else r
         }
+        return save(currentTeam.copy(replays = replays.withComputedElo())).also { onReplaysModified() }
+    }
+
+    override suspend fun replaceReplays(replacements: Map<ReplayAnalytics, ReplayAnalytics>): Either<DomainError, Unit> {
+        if (replacements.isEmpty()) return Unit.right()
+        val currentTeam = originalTeam
+        val replays = currentTeam.replays.map { replacements[it] ?: it }
         return save(currentTeam.copy(replays = replays.withComputedElo())).also { onReplaysModified() }
     }
 

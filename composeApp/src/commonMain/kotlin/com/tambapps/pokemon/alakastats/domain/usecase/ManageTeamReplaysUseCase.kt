@@ -12,4 +12,11 @@ interface ManageTeamReplaysUseCase: ManageReplayFiltersUseCase, ConsultTeamlytic
 
     suspend fun replaceReplay(original: ReplayAnalytics, replay: ReplayAnalytics): Either<DomainError, Unit>
 
+    /**
+     * Replaces several replays in a single change of the team
+     *
+     * @param replacements the new version of each replay
+     */
+    suspend fun replaceReplays(replacements: Map<ReplayAnalytics, ReplayAnalytics>): Either<DomainError, Unit>
+
 }

@@ -12,8 +12,12 @@ import com.tambapps.pokemon.alakastats.domain.model.isShowdownReplayUrl
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamReplaysUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.infrastructure.preferences.AppPreferencesRepository
+import com.tambapps.pokemon.alakastats.ui.model.ReplayListItem
 import com.tambapps.pokemon.alakastats.ui.model.ReplaySort
+import com.tambapps.pokemon.alakastats.ui.model.groupedBySeries
 import com.tambapps.pokemon.alakastats.ui.model.sortedReplays
+import com.tambapps.pokemon.alakastats.ui.model.ungroupedSeriesReplays
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +30,8 @@ import kotlinx.coroutines.withContext
 class TeamReplayViewModel(
     override val useCase: ManageTeamReplaysUseCase,
     private val replayService: ReplayAnalyticsService,
-    override val formatData: FormatData?
+    override val formatData: FormatData?,
+    private val preferences: AppPreferencesRepository,
 ): TeamlyticsFiltersTabViewModel() {
     val team get() = useCase.filteredTeam
     val isReadOnly get() = useCase.isReadOnly
@@ -61,8 +66,57 @@ class TeamReplayViewModel(
 
     val sortedReplays by derivedStateOf { team.sortedReplays(sort) }
 
+    // remembered on this device
+    var groupBySeries by mutableStateOf(false)
+        private set
+
+    init {
+        scope.launch { groupBySeries = preferences.get().groupReplaysBySeries }
+    }
+
+    val hasSeries get() = useCase.originalTeam.replays.any { it.bestOf != null }
+
+    val replayItems by derivedStateOf {
+        if (groupBySeries) useCase.originalTeam.groupedBySeries(sortedReplays)
+        else sortedReplays.map(ReplayListItem::Single)
+    }
+
+    /** the best-of-3 replays to reload for them to be grouped */
+    val ungroupedSeriesReplays by derivedStateOf { useCase.originalTeam.ungroupedSeriesReplays }
+
     fun applySort(sort: ReplaySort) {
         this.sort = sort
+    }
+
+    fun updateGroupBySeries(groupBySeries: Boolean) {
+        this.groupBySeries = groupBySeries
+        scope.launch { preferences.update { it.copy(groupReplaysBySeries = groupBySeries) } }
+    }
+
+    /**
+     * Reloads the best-of-3 replays loaded before their game number was known, in a single change of the team
+     */
+    fun reloadUngroupedSeriesReplays(snackBar: SnackBar) {
+        if (isTabLoading) return
+        val replays = ungroupedSeriesReplays
+        isTabLoading = true
+        scope.launch {
+            val reloaded = replays.map { replay ->
+                async { replay.showdownUrl?.let { url -> replayService.fetch(url).getOrNull() }?.let { replay to it.completedWith(replay) } }
+            }.awaitAll().filterNotNull().toMap()
+            val result = useCase.replaceReplays(reloaded)
+            withContext(Dispatchers.Main) {
+                isTabLoading = false
+                result.fold(
+                    ifLeft = { snackBar.show("Failed to reload the replays: ${it.message}", SnackBar.Severity.ERROR) },
+                    ifRight = {
+                        val failed = replays.size - reloaded.size
+                        if (failed == 0) snackBar.show("Reloaded ${reloaded.size} replay(s)", SnackBar.Severity.SUCCESS)
+                        else snackBar.show("$failed replay(s) couldn't be reloaded", SnackBar.Severity.WARNING)
+                    },
+                )
+            }
+        }
     }
 
     fun showAddReplayDialog() {

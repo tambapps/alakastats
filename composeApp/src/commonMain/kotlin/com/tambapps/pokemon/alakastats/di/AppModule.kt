@@ -47,6 +47,8 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorag
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsPreviewKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createSyncStateKStore
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createAppPreferencesKStore
+import com.tambapps.pokemon.alakastats.infrastructure.preferences.AppPreferencesRepository
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.GoogleOAuthClient
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.OAuthTokenProvider
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.drive.GoogleDriveCloudStorage
@@ -100,6 +102,7 @@ val appModules = listOf(module {
         }
     }
     single<PokepasteParser> { PokepasteParser() }
+    single { AppPreferencesRepository(createAppPreferencesKStore()) }
     single<ReplayAnalyticsService> { ReplayAnalyticsService(get()) }
     single { PokeApiGqlClient(get()) }
     singleOf(::LocalPokemonBaseStatsRepository).bind(PokemonBaseStatsRepository::class)
@@ -203,7 +206,7 @@ val appModules = listOf(module {
         PokemonSpeedScaleViewModel(state.team, state.pokemon, state.megaPokemon, megaSelectedState.value, state.pokemonData, get(), get())
     }
     factory { (useCase: ManageTeamReplaysUseCase, formatData: FormatData?) ->
-        TeamReplayViewModel(useCase, get(), formatData)
+        TeamReplayViewModel(useCase, get(), formatData, get())
     }
     factory { (useCase: ManageReplayFiltersUseCase, formatData: FormatData?) ->
         LeadStatsViewModel(useCase, formatData)

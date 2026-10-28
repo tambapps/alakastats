@@ -41,8 +41,8 @@ import com.tambapps.pokemon.util.MegaUtils.toMega
 @Composable
 internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: LazyListState) {
     val team = viewModel.team
-    val replays = viewModel.sortedReplays
-    LaunchedEffect(viewModel.useCase.filters, viewModel.sort) {
+    val items = viewModel.replayItems
+    LaunchedEffect(viewModel.useCase.filters, viewModel.sort, viewModel.groupBySeries) {
         scrollState.scrollToItem(index = 0, scrollOffset = 0)
     }
     LazyColumn(
@@ -54,7 +54,10 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: La
     ) {
         item {
             Spacer(Modifier.height(tabReplaysTextMarginTopMobile))
-            FiltersBar(viewModel, headerActions = { ReplaySortChip(viewModel.sort, viewModel::applySort) })
+            FiltersBar(viewModel, headerActions = {
+                GroupBySeriesChip(viewModel, Modifier.padding(end = 8.dp))
+                ReplaySortChip(viewModel.sort, viewModel::applySort)
+            })
             Spacer(Modifier.height(16.dp))
         }
 
@@ -62,9 +65,13 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: La
             Header(viewModel.useCase)
         }
 
-        itemsIndexed(replays) { index, replay ->
-            MobileReplay(viewModel, team, replay)
-            if (index < replays.size - 1) {
+        item {
+            ReloadUngroupedSeriesHint(viewModel, Modifier.padding(vertical = 8.dp))
+        }
+
+        itemsIndexed(items) { index, item ->
+            ReplayListItemView(team, item) { replay -> MobileReplay(viewModel, team, replay) }
+            if (index < items.size - 1) {
                 Spacer(Modifier.height(32.dp))
             }
         }

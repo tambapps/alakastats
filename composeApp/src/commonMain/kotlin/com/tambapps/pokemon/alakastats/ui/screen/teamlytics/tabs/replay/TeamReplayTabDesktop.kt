@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.more_vert
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +41,7 @@ import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutcomeCard
 import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
+import com.tambapps.pokemon.alakastats.ui.model.ReplayListItem
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
@@ -54,7 +56,7 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: LazyListState) {
     val team = viewModel.team
-    LaunchedEffect(viewModel.useCase.filters, viewModel.sort) {
+    LaunchedEffect(viewModel.useCase.filters, viewModel.sort, viewModel.groupBySeries) {
         scrollState.scrollToItem(index = 0, scrollOffset = 0)
     }
     LazyColumnWithScrollbar(
@@ -65,14 +67,22 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: L
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            FiltersBar(viewModel, headerActions = { ReplaySortChip(viewModel.sort, viewModel::applySort) })
+            FiltersBar(viewModel, headerActions = {
+                GroupBySeriesChip(viewModel, Modifier.padding(end = 8.dp))
+                ReplaySortChip(viewModel.sort, viewModel::applySort)
+            })
             Spacer(Modifier.padding(16.dp))
         }
         item {
             Header(viewModel.useCase)
         }
-        itemsIndexed(viewModel.sortedReplays) { index, replay ->
-            DesktopReplay(viewModel, team, replay)
+        item {
+            ReloadUngroupedSeriesHint(viewModel, Modifier.padding(bottom = 16.dp))
+        }
+        itemsIndexed(viewModel.replayItems) { index, item ->
+            ReplayListItemView(team, item) { replay ->
+                DesktopReplay(viewModel, team, replay, bordered = item is ReplayListItem.Series)
+            }
             Spacer(Modifier.height(32.dp))
         }
         item {
@@ -112,13 +122,18 @@ fun ExpandableDesktopReplay(
     }
 }
 
+/**
+ * @param bordered e.g. for a game of a series, to tell it apart from the other games
+ */
 @Composable
-fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
+fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics, bordered: Boolean = false) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
     val gameOutput = team.getGameOutcome(replay)
     MyCard(
         modifier = Modifier.fillMaxWidth(),
-        gradientBackgroundColors = cardGradientColors
+        gradientBackgroundColors = cardGradientColors,
+        // as the expandable cards
+        border = if (bordered) BorderStroke(2.dp, MaterialTheme.colorScheme.outline) else null,
     ) {
         HeadRow(
             team,
