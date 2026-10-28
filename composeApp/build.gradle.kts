@@ -1,7 +1,9 @@
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
@@ -152,6 +154,45 @@ kotlin {
 dependencies {
     // for the previews in Android Studio
     "androidRuntimeClasspath"(libs.compose.uiTooling)
+}
+
+// The development and production executables are synced into the same directory, each sync copying only what changed
+// in its own executable: after a build of the other one, some of its files stay (e.g. the JS glue code) and the page
+// fails to load (LinkError: function import requires a callable). The directory is cleared when switching
+val wasmPackageDir = rootProject.layout.buildDirectory.dir("wasm/packages/${project.name}/kotlin")
+listOf("Development", "Production").forEach { mode ->
+    val clear = tasks.register<ClearOtherWasmExecutableTask>("wasmJsClearFor${mode}ExecutableSync") {
+        this.mode.set(mode)
+        syncDirectory.set(wasmPackageDir)
+        markerFile.set(rootProject.layout.buildDirectory.file("wasm/packages/${project.name}/synced-executable.txt"))
+    }
+    tasks.matching { it.name == "wasmJs${mode}ExecutableCompileSync" }.configureEach { dependsOn(clear) }
+}
+
+abstract class ClearOtherWasmExecutableTask : DefaultTask() {
+    @get:Input
+    abstract val mode: Property<String>
+
+    @get:Internal
+    abstract val syncDirectory: DirectoryProperty
+
+    @get:Internal
+    abstract val markerFile: RegularFileProperty
+
+    init {
+        // cheap, and what it checks isn't an input
+        outputs.upToDateWhen { false }
+    }
+
+    @TaskAction
+    fun clear() {
+        val marker = markerFile.get().asFile
+        if (marker.exists() && marker.readText() == mode.get()) return
+        // the sync then sees its outputs removed, and copies everything
+        syncDirectory.get().asFile.deleteRecursively()
+        marker.parentFile.mkdirs()
+        marker.writeText(mode.get())
+    }
 }
 
 abstract class GenerateBuildConfigTask : DefaultTask() {
