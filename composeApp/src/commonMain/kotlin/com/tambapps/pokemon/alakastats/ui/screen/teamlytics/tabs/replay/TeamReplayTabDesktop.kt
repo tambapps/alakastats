@@ -169,12 +169,16 @@ private fun HeadRow(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 8.dp)
+        // in a series, no team makes the row taller than its title
+        modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = if (inSeries) 12.dp else 0.dp)
     ) {
         GameOutcomeCard(gameOutcome)
         VsText(currentPlayer, opponentPlayer, gameOutcome, team.isInternalMatch(replay), replay.bestOf, inSeries = inSeries)
         Spacer(Modifier.width(16.dp))
-        if (gameOutcome != GameOutcome.UNKNOWN) {
+        if (inSeries) {
+            // the series' card shows the team and its sheet, and the game what was brought, just below
+            Spacer(Modifier.weight(1f))
+        } else if (gameOutcome != GameOutcome.UNKNOWN) {
             PokemonTeamPreview(opponentPlayer,
                 modifier = if (LocalIsCompact.current) Modifier else Modifier.weight(1f), fillWidth = true)
 

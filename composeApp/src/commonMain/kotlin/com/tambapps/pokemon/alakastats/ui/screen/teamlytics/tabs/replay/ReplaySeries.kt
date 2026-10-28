@@ -1,10 +1,5 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -66,6 +61,8 @@ internal fun ReplayListItemView(
 
 /**
  * Closed, the series takes the place of a replay: its score and the opponent's team. Opened, its games
+ *
+ * The opponent's team and sheet are the same for all the games of a series: the series' card shows them, not its games
  */
 @Composable
 private fun SeriesView(
@@ -74,24 +71,26 @@ private fun SeriesView(
     game: @Composable (ReplayAnalytics) -> Unit,
 ) {
     val opponent = team.getPlayers(series.games.first()).second
+    // usually in every game, when the format has open team sheets
+    val sheetOwner = series.games.map { team.getPlayers(it).second }.firstOrNull { it.ots != null }
     val isCompact = LocalIsCompact.current
     ExpansionTile(
-        title = { isExpanded ->
+        title = {
             GameOutcomeCard(series.outcome)
             SeriesTitle(series, opponent)
-            // on the same line when there is room, below otherwise. Opened, each game shows it
+            // on the same line when there is room, below otherwise
             if (!isCompact) {
                 Spacer(Modifier.width(16.dp))
-                AnimatedVisibility(visible = !isExpanded, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.weight(1f)) {
-                    PokemonTeamPreview(opponent, fillWidth = true)
+                PokemonTeamPreview(opponent, modifier = Modifier.weight(1f), fillWidth = true)
+                sheetOwner?.ots?.let { ots ->
+                    Spacer(Modifier.width(16.dp))
+                    OtsButton(team.format, sheetOwner, ots)
                 }
             }
         },
-        subtitle = { isExpanded ->
+        subtitle = {
             if (isCompact) {
-                AnimatedVisibility(visible = !isExpanded, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {
-                    PokemonTeamPreview(opponent, fillWidth = true)
-                }
+                PokemonTeamPreview(opponent, fillWidth = true)
             }
         },
         menu = null,
@@ -102,6 +101,13 @@ private fun SeriesView(
         disableWhenOpened = !isCompact,
     ) {
         Column(Modifier.padding(top = 16.dp)) {
+            // on mobile, opened only: the closed card stays light
+            if (isCompact) {
+                sheetOwner?.ots?.let { ots ->
+                    OtsButton(team.format, sheetOwner, ots, modifier = Modifier.align(Alignment.CenterHorizontally))
+                    Spacer(Modifier.height(16.dp))
+                }
+            }
             series.games.forEachIndexed { index, replay ->
                 game(replay)
                 if (index < series.games.lastIndex) {

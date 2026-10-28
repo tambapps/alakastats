@@ -128,7 +128,8 @@ fun ReplayCompact(
             VsText(currentPlayer, opponentPlayer, gameOutput, team.isInternalMatch(replay), replay.bestOf, inSeries = inSeries)
         },
         subtitle = {
-            if (gameOutput != GameOutcome.UNKNOWN) {
+            // in a series, its card shows the team
+            if (gameOutput != GameOutcome.UNKNOWN && !inSeries) {
                 PokemonTeamPreview(opponentPlayer, fillWidth = true)
             }
         },
@@ -141,17 +142,19 @@ fun ReplayCompact(
     ) {
         Column {
             Spacer(Modifier.height(8.dp))
-            if (gameOutput != GameOutcome.UNKNOWN && opponentPlayer.ots != null && replay.url != null) {
+            // in a series, its card has the sheet
+            val ots = opponentPlayer.ots?.takeIf { !inSeries }
+            if (gameOutput != GameOutcome.UNKNOWN && ots != null && replay.url != null) {
                 Row(Modifier.fillMaxWidth()
                     .padding(horizontal = 8.dp)) {
                     Spacer(Modifier.weight(1f))
-                    OtsButton(team.format, opponentPlayer, opponentPlayer.ots)
+                    OtsButton(team.format, opponentPlayer, ots)
                     Spacer(Modifier.width(32.dp))
                     ViewReplayButton(team, replay, replay.url)
                     Spacer(Modifier.weight(1f))
                 }
-            } else if (gameOutput != GameOutcome.UNKNOWN && opponentPlayer.ots != null) {
-                OtsButton(team.format, opponentPlayer, opponentPlayer.ots, modifier = Modifier.align(Alignment.CenterHorizontally))
+            } else if (gameOutput != GameOutcome.UNKNOWN && ots != null) {
+                OtsButton(team.format, opponentPlayer, ots, modifier = Modifier.align(Alignment.CenterHorizontally))
             } else if (replay.url != null) {
                 ViewReplayButton(team, replay, replay.url, modifier = Modifier.align(Alignment.CenterHorizontally))
             }
