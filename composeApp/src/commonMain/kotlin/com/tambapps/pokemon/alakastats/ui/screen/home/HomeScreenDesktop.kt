@@ -118,7 +118,7 @@ fun AlakastatsLabel(modifier: Modifier = Modifier, withVersion: Boolean = false)
 private fun ButtonBarContent(viewModel: HomeViewModel) {
     NewTeamButton()
     ImportTeamButton(viewModel)
-    JoinSharedTeamButton(viewModel)
+    JoinOrSampleButton(viewModel)
 }
 
 @OptIn(ExperimentalFoundationApi::class)

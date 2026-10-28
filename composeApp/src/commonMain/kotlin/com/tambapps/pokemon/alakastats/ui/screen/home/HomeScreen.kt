@@ -184,8 +184,7 @@ internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifie
     ) {
         val sharing by viewModel.sharing.collectAsState()
         val role = sharing[team.id]
-        val syncStatus by viewModel.syncStatus.collectAsState()
-        val isCloudConnected = syncStatus !is SyncStatus.Disconnected && syncStatus !is SyncStatus.Unavailable
+        val isCloudConnected = viewModel.isCloudConnected()
         Column(Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.Top
@@ -371,10 +370,40 @@ internal val buttonTextStyle  @Composable get() = MaterialTheme.typography.label
     fontWeight = FontWeight.Bold
 )
 
+/** Whether a Google Drive account is connected, even if its session expired */
+@Composable
+internal fun HomeViewModel.isCloudConnected(): Boolean {
+    val status by syncStatus.collectAsState()
+    return status !is SyncStatus.Disconnected && status !is SyncStatus.Unavailable
+}
+
+/**
+ * Connected, Import offers a sample team too, the Sample button giving its place to Join. Otherwise it imports a file
+ * right away
+ */
 @Composable
 internal fun ImportTeamButton(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
-    OutlinedButton(onClick = { viewModel.showImportChoiceDialog = true }, modifier = modifier) {
+    val snackBar = LocalSnackBar.current
+    val isCloudConnected = viewModel.isCloudConnected()
+    OutlinedButton(
+        onClick = { if (isCloudConnected) viewModel.showImportChoiceDialog = true else viewModel.importTeam(snackBar) },
+        modifier = modifier,
+    ) {
         Text("Import", style = buttonTextStyle)
+    }
+}
+
+/**
+ * Join a shared team when connected (and sharing is available), else start from a sample team
+ */
+@Composable
+internal fun JoinOrSampleButton(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
+    if (viewModel.isCloudConnected()) {
+        JoinSharedTeamButton(viewModel, modifier)
+    } else {
+        OutlinedButton(onClick = { viewModel.showSamplesDialog() }, modifier = modifier) {
+            Text("Sample", style = buttonTextStyle)
+        }
     }
 }
 

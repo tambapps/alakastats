@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -76,12 +77,12 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
 
             NewTeamButton(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))
             Spacer(Modifier.height(4.dp))
-            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 ImportTeamButton(viewModel, Modifier.weight(1f))
-                if (viewModel.isSharingAvailable) {
-                    Spacer(Modifier.width(8.dp))
-                    JoinSharedTeamButton(viewModel, Modifier.weight(1f))
-                }
+                JoinOrSampleButton(viewModel, Modifier.weight(1f))
             }
 
             Spacer(Modifier.height(16.dp))
