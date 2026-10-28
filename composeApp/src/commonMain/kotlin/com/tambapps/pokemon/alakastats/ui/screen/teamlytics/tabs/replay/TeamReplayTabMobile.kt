@@ -110,7 +110,7 @@ fun ReplayCompact(
     ExpansionTile(
         title = { isExpanded ->
             GameOutcomeCard(gameOutput)
-            VsText(currentPlayer, opponentPlayer, gameOutput, team.isInternalMatch(replay))
+            VsText(currentPlayer, opponentPlayer, gameOutput, team.isInternalMatch(replay), replay.bestOf)
         },
         subtitle = {
             if (gameOutput != GameOutcome.UNKNOWN) {

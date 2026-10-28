@@ -154,7 +154,7 @@ private fun HeadRow(
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
         GameOutcomeCard(gameOutcome)
-        VsText(currentPlayer, opponentPlayer, gameOutcome, team.isInternalMatch(replay))
+        VsText(currentPlayer, opponentPlayer, gameOutcome, team.isInternalMatch(replay), replay.bestOf)
         Spacer(Modifier.width(16.dp))
         if (gameOutcome != GameOutcome.UNKNOWN) {
             PokemonTeamPreview(opponentPlayer,

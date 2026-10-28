@@ -15,6 +15,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ReplayAnalyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamPreviewPokemonEntity
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.BestOfEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.MegaEvolutionEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TerastallizationEntity
 import com.tambapps.pokemon.sd.replay.log.visitor.OtsPokemon
@@ -49,6 +50,7 @@ class ReplayAnalyticsService(
                 url = jsonReplayUrl,
                 reference = reference,
                 notes = null,
+                bestOf = visitor.bestOf,
             ).toDomain().right()
         } catch (e: Exception) {
             // could have better error handling but MEH
@@ -114,6 +116,8 @@ internal class ReplayAnalyticsBuilderVisitor(
 
     var nextBattleRef: String? = null
         private set
+    var bestOf: BestOfEntity? = null
+        private set
     var winner = ""
         private set
 
@@ -148,6 +152,10 @@ internal class ReplayAnalyticsBuilderVisitor(
 
     override fun visitNextBattleUhtmlLog(name: String, content: String, nextBattleRef: String) {
         this.nextBattleRef = nextBattleRef
+    }
+
+    override fun visitBestOfUhtmlLog(name: String, content: String, gameNumber: Int, bestOf: Int, seriesRef: String) {
+        this.bestOf = BestOfEntity(gameNumber, bestOf, seriesRef)
     }
 
     override fun visitRatingUpdateRawLog(

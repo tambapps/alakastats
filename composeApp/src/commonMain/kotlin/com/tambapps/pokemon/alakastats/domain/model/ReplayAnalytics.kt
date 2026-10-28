@@ -83,6 +83,13 @@ fun isShowdownReplayUrl(url: String) = url.contains("replay.pokemonshowdown.com"
 private val LINK_REGEX = Regex("^https?://[^\\s/]+\\.[^\\s]+$")
 fun isValidLink(url: String) = LINK_REGEX.matches(url)
 
+/**
+ * The place of a game in its series, e.g. the 2nd of a best-of-3
+ *
+ * @param seriesRef the same for all the games of the series
+ */
+data class BestOf(val game: Int, val of: Int, val seriesRef: String)
+
 data class ReplayAnalytics(
     val players: List<Player>,
     val uploadTime: Long,
@@ -94,6 +101,8 @@ data class ReplayAnalytics(
     val reference: String,
     val nextBattleRef: String?,
     val notes: String?,
+    /** null when not a game of a series, or for the replays loaded before it was known */
+    val bestOf: BestOf? = null,
 ) {
     val looser get() = when (winner) {
         player1.name -> player2.name

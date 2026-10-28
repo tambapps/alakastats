@@ -22,6 +22,8 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamPreviewPokemonEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.OpenTeamSheetEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.OtsPokemonEntity
+import com.tambapps.pokemon.alakastats.domain.model.BestOf
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.BestOfEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.MegaEvolutionEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TerastallizationEntity
 
@@ -35,7 +37,8 @@ fun ReplayAnalytics.toEntity() = ReplayAnalyticsEntity(
     url = url,
     reference = reference,
     nextBattleRef = nextBattleRef,
-    notes = notes
+    notes = notes,
+    bestOf = bestOf?.let { BestOfEntity(it.game, it.of, it.seriesRef) },
 )
 
 fun ReplayAnalyticsEntity.toDomain() = ReplayAnalytics(
@@ -48,7 +51,8 @@ fun ReplayAnalyticsEntity.toDomain() = ReplayAnalytics(
     url = url,
     reference = reference,
     nextBattleRef = nextBattleRef,
-    notes = notes
+    notes = notes,
+    bestOf = bestOf?.let { BestOf(it.game, it.of, it.seriesRef) },
 )
 
 fun Player.toEntity() = PlayerEntity(

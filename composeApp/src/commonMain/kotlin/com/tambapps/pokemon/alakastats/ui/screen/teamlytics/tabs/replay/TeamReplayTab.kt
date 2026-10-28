@@ -55,6 +55,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.TeraType
+import com.tambapps.pokemon.alakastats.domain.model.BestOf
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
@@ -555,6 +556,7 @@ internal fun VsText(
     opponentPlayer: Player,
     gameOutcome: GameOutcome,
     isInternalMatch: Boolean,
+    bestOf: BestOf?,
     modifier: Modifier = Modifier
 ) {
     val text = when {
@@ -571,6 +573,14 @@ internal fun VsText(
                 textAlign = if (gameOutcome != GameOutcome.UNKNOWN) null else TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
+            )
+        }
+        bestOf?.let {
+            Text(
+                text = "Game ${it.game} of ${it.of}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
             )
         }
         if (isInternalMatch) {

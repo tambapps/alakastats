@@ -102,6 +102,14 @@ data class ReplayAnalyticsEntity(
     val nextBattleRef: String?,
     // need default values for fields added after having saved some entities in previous version
     val notes: String? = null,
+    val bestOf: BestOfEntity? = null,
+)
+
+@Serializable
+data class BestOfEntity(
+    val game: Int,
+    val of: Int,
+    val seriesRef: String,
 )
 
 @Serializable
