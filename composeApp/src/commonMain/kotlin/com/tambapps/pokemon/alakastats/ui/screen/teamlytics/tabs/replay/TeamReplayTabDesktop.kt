@@ -77,7 +77,7 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: L
             Header(viewModel.useCase)
         }
         item {
-            ReloadUngroupedSeriesHint(viewModel, Modifier.padding(bottom = 16.dp))
+            ReloadOutdatedReplaysHint(viewModel, Modifier.padding(bottom = 16.dp))
         }
         itemsIndexed(viewModel.replayItems) { index, item ->
             ReplayListItemView(team, item) { replay ->
@@ -173,7 +173,7 @@ private fun HeadRow(
         modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = if (inSeries) 12.dp else 0.dp)
     ) {
         GameOutcomeCard(gameOutcome)
-        VsText(currentPlayer, opponentPlayer, gameOutcome, team.isInternalMatch(replay), replay.bestOf, inSeries = inSeries)
+        VsText(currentPlayer, opponentPlayer, gameOutcome, team.isInternalMatch(replay), replay, inSeries = inSeries)
         Spacer(Modifier.width(16.dp))
         if (inSeries) {
             // the series' card shows the team and its sheet, and the game what was brought, just below

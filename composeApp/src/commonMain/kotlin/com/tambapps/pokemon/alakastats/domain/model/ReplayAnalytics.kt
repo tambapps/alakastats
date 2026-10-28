@@ -90,6 +90,13 @@ fun isValidLink(url: String) = LINK_REGEX.matches(url)
  */
 data class BestOf(val game: Int, val of: Int, val seriesRef: String)
 
+/**
+ * How a game ended before a side had no Pokémon left. The loser is the one who forfeited, or whose timer ran out
+ */
+enum class GameEndReason {
+    FORFEIT, TIMER
+}
+
 data class ReplayAnalytics(
     val players: List<Player>,
     val uploadTime: Long,
@@ -103,6 +110,12 @@ data class ReplayAnalytics(
     val notes: String?,
     /** null when not a game of a series, or for the replays loaded before it was known */
     val bestOf: BestOf? = null,
+    // null for the manual replays, and the ones loaded before they were known
+    val turns: Int? = null,
+    /** how many Pokémon each player brings, e.g. 4 of 6 in VGC */
+    val pickCount: Int? = null,
+    /** null when the game ended normally */
+    val endReason: GameEndReason? = null,
 ) {
     val looser get() = when (winner) {
         player1.name -> player2.name
@@ -119,6 +132,9 @@ data class ReplayAnalytics(
     val showdownUrl get() = url?.takeIf(::isShowdownReplayUrl)
 
     fun hasWon(player: Player) = winner == player.name
+
+    /** the Pokémon the player had left at the end of the game, null when unknown */
+    fun remainingPokemons(player: Player) = pickCount?.let { (it - player.fainted.size).coerceAtLeast(0) }
 
     // complete information of replay from another one. Useful when reloading replays
     fun completedWith(oldReplay: ReplayAnalytics) = copy(
@@ -233,7 +249,9 @@ data class Player(
     val terastallization: Terastallization?,
     val megaEvolution: MegaEvolution?,
     val ots: OpenTeamSheet?,
-    val movesUsage: Map<PokemonName, Map<MoveName, Int>>
+    val movesUsage: Map<PokemonName, Map<MoveName, Int>>,
+    // empty for the manual replays, and the ones loaded before it was known
+    val fainted: List<PokemonName> = emptyList(),
 ) {
     // sorted to always have the same order
     val lead get() = selection.take(2).sortedBy { it.baseNormalized.value }

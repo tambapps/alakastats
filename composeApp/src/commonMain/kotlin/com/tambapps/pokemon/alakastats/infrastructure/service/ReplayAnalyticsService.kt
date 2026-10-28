@@ -7,6 +7,7 @@ import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.PokemonNormalizer.normalize
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.error.NetworkError
+import com.tambapps.pokemon.alakastats.domain.model.GameEndReason
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.transformer.toDomain
 import com.tambapps.pokemon.alakastats.domain.transformer.toEntity
@@ -51,6 +52,9 @@ class ReplayAnalyticsService(
                 reference = reference,
                 notes = null,
                 bestOf = visitor.bestOf,
+                turns = visitor.turns,
+                pickCount = visitor.pickCount,
+                endReason = visitor.endReason?.name,
             ).toDomain().right()
         } catch (e: Exception) {
             // could have better error handling but MEH
@@ -109,8 +113,12 @@ internal class ReplayAnalyticsBuilderVisitor(
 
     private companion object {
         const val STRUGGLE = "struggle"
+        const val FORFEIT_MESSAGE_SUFFIX = " forfeited."
+        const val TIMER_MESSAGE_SUFFIX = " lost due to inactivity."
     }
     private val playerBuilders = mutableMapOf<String, PlayerBuilderEntityBuilder>()
+    // the Pokémon in each slot (e.g. p1a), as the faint logs give its nickname
+    private val activePokemons = mutableMapOf<String, String>()
 
     val players get() = playerBuilders.values.map { it.build() }
 
@@ -119,6 +127,12 @@ internal class ReplayAnalyticsBuilderVisitor(
     var bestOf: BestOfEntity? = null
         private set
     var winner = ""
+        private set
+    var turns = 0
+        private set
+    var pickCount: Int? = null
+        private set
+    var endReason: GameEndReason? = null
         private set
 
     override fun visitMoveLog(
@@ -171,7 +185,29 @@ internal class ReplayAnalyticsBuilderVisitor(
 
     override fun visitDragLog(pokemonSlot: String, pokemonName: String, hpPercentage: Int?) {
         val player = getPlayer(pokemonSlot)
-        player.selection(getActualPokemonName(player, pokemonName))
+        val actualPokemonName = getActualPokemonName(player, pokemonName)
+        player.selection(actualPokemonName)
+        activePokemons[pokemonSlot] = actualPokemonName
+    }
+
+    override fun visitFaintLog(pokemonSlot: String) {
+        val pokemonName = activePokemons[pokemonSlot] ?: return
+        getPlayer(pokemonSlot).faint(pokemonName)
+    }
+
+    override fun visitTurnLog(turnNumber: Int) {
+        turns = turnNumber
+    }
+
+    override fun visitTeamPreviewLog(teamSize: Int) {
+        pickCount = teamSize
+    }
+
+    override fun visitMessageLog(message: String) {
+        when {
+            message.endsWith(FORFEIT_MESSAGE_SUFFIX) -> endReason = GameEndReason.FORFEIT
+            message.endsWith(TIMER_MESSAGE_SUFFIX) -> endReason = GameEndReason.TIMER
+        }
     }
 
     override fun visitSwitchLog(pokemonSlot: String, pokemonName: String, hpPercentage: Int?) =
@@ -238,12 +274,20 @@ private data class PlayerBuilderEntityBuilder(
 ) {
 
     private val teamPreviewPokemons = mutableListOf<TeamPreviewPokemonEntity>()
+    private val fainted = mutableListOf<String>()
 
     fun teamPreviewPokemon(pokemon: TeamPreviewPokemonEntity) = teamPreviewPokemons.add(pokemon)
 
     fun selection(pokemon: String) {
         if (!selection.contains(pokemon)) {
             selection.add(pokemon)
+        }
+    }
+
+    // once, even when revived and fainted again
+    fun faint(pokemon: String) {
+        if (!fainted.contains(pokemon)) {
+            fainted.add(pokemon)
         }
     }
 
@@ -261,7 +305,8 @@ private data class PlayerBuilderEntityBuilder(
         terastallization = terastallization,
         megaEvolution = megaEvolution,
         ots = ots,
-        movesUsage = movesUsage.toMap()
+        movesUsage = movesUsage.toMap(),
+        fainted = fainted.toList(),
     )
 
 }

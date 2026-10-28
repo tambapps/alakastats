@@ -28,6 +28,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.GameOutcomeCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.model.ReplayListItem
+import com.tambapps.pokemon.alakastats.ui.model.formatReplayDate
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.rememberGuardedChange
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
@@ -136,10 +137,13 @@ private fun SeriesTitle(series: ReplayListItem.Series, opponent: Player) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+        // its games are played the same day: they don't repeat it
+        val date = series.games.map { it.uploadTime }.filter { it > 0 }.minOrNull()?.let { formatReplayDate(it) }
         Text(
             // the score of the whole series, whatever the filters
             text = "Best-of-${series.bestOf} · ${series.wins}–${series.losses}" +
-                    if (series.outcome == GameOutcome.UNKNOWN) " · incomplete" else "",
+                    (if (series.outcome == GameOutcome.UNKNOWN) " · incomplete" else "") +
+                    (date?.let { " · $it" } ?: ""),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
@@ -148,24 +152,26 @@ private fun SeriesTitle(series: ReplayListItem.Series, opponent: Player) {
 }
 
 /**
- * The best-of-3 replays loaded before their game number was known can't be grouped: they have to be reloaded
+ * The replays loaded with an older version of the app miss what it parses now (e.g. their score, or the game number
+ * a best-of-3 is grouped with): they have to be reloaded
  */
 @Composable
-internal fun ReloadUngroupedSeriesHint(viewModel: TeamReplayViewModel, modifier: Modifier = Modifier) {
-    val count = viewModel.ungroupedSeriesReplays.size
-    if (!viewModel.groupBySeries || count == 0 || viewModel.isReadOnly) return
+internal fun ReloadOutdatedReplaysHint(viewModel: TeamReplayViewModel, modifier: Modifier = Modifier) {
+    val count = viewModel.outdatedReplays.size
+    if (count == 0 || viewModel.isReadOnly) return
     val snackBar = LocalSnackBar.current
     val guardedChange = rememberGuardedChange()
+    val toGroup = if (viewModel.groupBySeries && viewModel.ungroupedSeriesReplays.isNotEmpty()) ", and to group the best-of-3s" else ""
     ElevatedCard(modifier.fillMaxWidth()) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = if (count == 1) "1 best-of-3 replay was added before its game number was known: reload it to group it"
-                else "$count best-of-3 replays were added before their game number was known: reload them to group them",
+                text = if (count == 1) "1 replay was added with an older version of the app: reload it to see its score, turns and KOs$toGroup"
+                else "$count replays were added with an older version of the app: reload them to see their score, turns and KOs$toGroup",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f),
             )
             TextButton(
-                onClick = { guardedChange { viewModel.reloadUngroupedSeriesReplays(snackBar) } },
+                onClick = { guardedChange { viewModel.reloadOutdatedReplays(snackBar) } },
                 enabled = !viewModel.isLoading,
             ) {
                 Text("Reload")

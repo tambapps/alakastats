@@ -103,6 +103,10 @@ data class ReplayAnalyticsEntity(
     // need default values for fields added after having saved some entities in previous version
     val notes: String? = null,
     val bestOf: BestOfEntity? = null,
+    val turns: Int? = null,
+    val pickCount: Int? = null,
+    // a GameEndReason
+    val endReason: String? = null,
 )
 
 @Serializable
@@ -150,5 +154,6 @@ data class PlayerEntity(
     val terastallization: TerastallizationEntity?,
     val megaEvolution: MegaEvolutionEntity? = null,
     val ots: OpenTeamSheetEntity?,
-    val movesUsage: Map<String, Map<String, Int>>
+    val movesUsage: Map<String, Map<String, Int>>,
+    val fainted: List<String> = emptyList(),
 )

@@ -67,7 +67,7 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: La
         }
 
         item {
-            ReloadUngroupedSeriesHint(viewModel, Modifier.padding(vertical = 8.dp))
+            ReloadOutdatedReplaysHint(viewModel, Modifier.padding(vertical = 8.dp))
         }
 
         itemsIndexed(items) { index, item ->
@@ -125,7 +125,8 @@ fun ReplayCompact(
     ExpansionTile(
         title = { isExpanded ->
             GameOutcomeCard(gameOutput)
-            VsText(currentPlayer, opponentPlayer, gameOutput, team.isInternalMatch(replay), replay.bestOf, inSeries = inSeries)
+            VsText(currentPlayer, opponentPlayer, gameOutput, team.isInternalMatch(replay), replay, inSeries = inSeries,
+                showNotesIcon = !isExpanded)
         },
         subtitle = {
             // in a series, its card shows the team

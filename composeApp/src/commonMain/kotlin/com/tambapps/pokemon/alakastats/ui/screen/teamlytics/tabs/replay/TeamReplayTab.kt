@@ -2,14 +2,15 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
-import alakastats.composeapp.generated.resources.arrow_forward
 import alakastats.composeapp.generated.resources.mega
+import alakastats.composeapp.generated.resources.notes
 import alakastats.composeapp.generated.resources.open_in_new
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,12 +44,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,7 +59,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.TeraType
-import com.tambapps.pokemon.alakastats.domain.model.BestOf
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
@@ -71,6 +73,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
+import com.tambapps.pokemon.alakastats.ui.model.replayDetails
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
 import com.tambapps.pokemon.alakastats.ui.screen.replayviewer.ReplayViewerDialog
@@ -269,26 +272,25 @@ internal fun ColumnScope.PlayerNameEloText(player: Player, playerName: String) {
     Spacer(Modifier.height(8.dp))
 
     if (player.beforeElo != null && player.afterElo != null) {
-        val iconSize = 28.dp
-        val won = player.beforeElo < player.afterElo
-        val outputColor = if (won) WIN_COLOR else LOOSE_COLOR
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(Res.drawable.arrow_forward),
-                contentDescription = "UP/DOWN",
-                modifier = Modifier.rotate(if (won) -90f else 90f).size(iconSize),
-                tint = outputColor
+        val change = player.afterElo - player.beforeElo
+        val outputColor = if (change > 0) WIN_COLOR else LOOSE_COLOR
+        // on one line, the change going below when there isn't the room
+        FlowRow(horizontalArrangement = Arrangement.Center) {
+            SelectionContainer(Modifier.alignByBaseline()) {
+                Text(
+                    buildAnnotatedString {
+                        append("${player.beforeElo} → ")
+                        withStyle(SpanStyle(color = outputColor)) { append(player.afterElo.toString()) }
+                    },
+                    style = playerNameTextStyle,
+                )
+            }
+            Text(
+                text = " (${if (change > 0) "+" else ""}$change)",
+                style = MaterialTheme.typography.bodyLarge,
+                color = outputColor,
+                modifier = Modifier.alignByBaseline(),
             )
-            Spacer(Modifier.width(4.dp))
-            SelectionContainer {
-                Text(player.beforeElo.toString(), style = playerNameTextStyle)
-            }
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(Modifier.width(iconSize + 4.dp))
-            SelectionContainer {
-                Text(player.afterElo.toString(), style = playerNameTextStyle, color = outputColor)
-            }
         }
     } else if (player.beforeElo != null) {
         SelectionContainer {
@@ -557,12 +559,14 @@ internal fun VsText(
     opponentPlayer: Player,
     gameOutcome: GameOutcome,
     isInternalMatch: Boolean,
-    bestOf: BestOf?,
+    replay: ReplayAnalytics,
     modifier: Modifier = Modifier,
     // in its series' card, which already tells the opponent: the game's number is enough
     inSeries: Boolean = false,
+    // the card is folded: its notes aren't shown
+    showNotesIcon: Boolean = false,
 ) {
-    val gameTitle = bestOf?.takeIf { inSeries }?.let { "Game ${it.game}" }
+    val gameTitle = replay.bestOf?.takeIf { inSeries }?.let { "Game ${it.game}" }
     val text = when {
         gameTitle != null -> gameTitle
         gameOutcome == GameOutcome.UNKNOWN -> "${currentPlayer.name.value}\nVS\n${opponentPlayer.name.value}"
@@ -581,13 +585,33 @@ internal fun VsText(
                 maxLines = 1
             )
         }
-        bestOf?.takeIf { gameTitle == null }?.let {
-            Text(
-                text = "Game ${it.game} of ${it.of}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-            )
+        val details = replayDetails(
+            replay,
+            youPlayer = currentPlayer,
+            opponentPlayer = opponentPlayer,
+            showScore = gameOutcome != GameOutcome.UNKNOWN,
+            inSeries = inSeries,
+        )
+        val hasNotesIcon = showNotesIcon && !replay.notes.isNullOrBlank()
+        if (details.isNotEmpty() || hasNotesIcon) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (hasNotesIcon) {
+                    Icon(
+                        painter = painterResource(Res.drawable.notes),
+                        contentDescription = "Has notes",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.width(4.dp))
+                }
+                Text(
+                    text = details,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
         if (isInternalMatch) {
             Text(

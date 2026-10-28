@@ -16,6 +16,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.preferences.AppPreferences
 import com.tambapps.pokemon.alakastats.ui.model.ReplayListItem
 import com.tambapps.pokemon.alakastats.ui.model.ReplaySort
 import com.tambapps.pokemon.alakastats.ui.model.groupedBySeries
+import com.tambapps.pokemon.alakastats.ui.model.outdatedReplays
 import com.tambapps.pokemon.alakastats.ui.model.sortedReplays
 import com.tambapps.pokemon.alakastats.ui.model.ungroupedSeriesReplays
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
@@ -84,6 +85,9 @@ class TeamReplayViewModel(
     /** the best-of-3 replays to reload for them to be grouped */
     val ungroupedSeriesReplays by derivedStateOf { useCase.originalTeam.ungroupedSeriesReplays }
 
+    /** the replays to reload for them to show all the app knows, the ungrouped best-of-3s included */
+    val outdatedReplays by derivedStateOf { (useCase.originalTeam.outdatedReplays + ungroupedSeriesReplays).distinct() }
+
     fun applySort(sort: ReplaySort) {
         this.sort = sort
     }
@@ -94,11 +98,11 @@ class TeamReplayViewModel(
     }
 
     /**
-     * Reloads the best-of-3 replays loaded before their game number was known, in a single change of the team
+     * Reloads the replays loaded with an older version of the app, in a single change of the team
      */
-    fun reloadUngroupedSeriesReplays(snackBar: SnackBar) {
+    fun reloadOutdatedReplays(snackBar: SnackBar) {
         if (isTabLoading) return
-        val replays = ungroupedSeriesReplays
+        val replays = outdatedReplays
         isTabLoading = true
         scope.launch {
             val reloaded = replays.map { replay ->

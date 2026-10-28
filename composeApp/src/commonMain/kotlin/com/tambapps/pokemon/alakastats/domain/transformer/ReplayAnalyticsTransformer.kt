@@ -23,6 +23,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.OpenTeamSheetEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.OtsPokemonEntity
 import com.tambapps.pokemon.alakastats.domain.model.BestOf
+import com.tambapps.pokemon.alakastats.domain.model.GameEndReason
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.BestOfEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.MegaEvolutionEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TerastallizationEntity
@@ -39,6 +40,9 @@ fun ReplayAnalytics.toEntity() = ReplayAnalyticsEntity(
     nextBattleRef = nextBattleRef,
     notes = notes,
     bestOf = bestOf?.let { BestOfEntity(it.game, it.of, it.seriesRef) },
+    turns = turns,
+    pickCount = pickCount,
+    endReason = endReason?.name,
 )
 
 fun ReplayAnalyticsEntity.toDomain() = ReplayAnalytics(
@@ -53,6 +57,10 @@ fun ReplayAnalyticsEntity.toDomain() = ReplayAnalytics(
     nextBattleRef = nextBattleRef,
     notes = notes,
     bestOf = bestOf?.let { BestOf(it.game, it.of, it.seriesRef) },
+    turns = turns,
+    pickCount = pickCount,
+    // ignores a reason a newer version of the app would know
+    endReason = GameEndReason.entries.find { it.name == endReason },
 )
 
 fun Player.toEntity() = PlayerEntity(
@@ -66,7 +74,8 @@ fun Player.toEntity() = PlayerEntity(
     ots = ots?.toEntity(),
     movesUsage = movesUsage.entries.associate { (pName, usages) ->
         pName.value to usages.mapKeys { (key, _) -> key.value }
-    }
+    },
+    fainted = fainted.map { it.value },
 )
 
 fun PlayerEntity.toDomain() = Player(
@@ -82,7 +91,8 @@ fun PlayerEntity.toDomain() = Player(
         PokemonName(pName) to usages.mapKeys { (key, _) ->
             MoveName(key)
         }
-    }
+    },
+    fainted = fainted.map(::PokemonName),
 )
 
 fun TeamPreview.toEntity() = TeamPreviewEntity(
