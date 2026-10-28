@@ -81,7 +81,7 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: L
         }
         itemsIndexed(viewModel.replayItems) { index, item ->
             ReplayListItemView(team, item) { replay ->
-                DesktopReplay(viewModel, team, replay, bordered = item is ReplayListItem.Series)
+                DesktopReplay(viewModel, team, replay, inSeries = item is ReplayListItem.Series)
             }
             Spacer(Modifier.height(32.dp))
         }
@@ -123,17 +123,18 @@ fun ExpandableDesktopReplay(
 }
 
 /**
- * @param bordered e.g. for a game of a series, to tell it apart from the other games
+ * @param inSeries shown in its series' card: bordered to tell it apart from the other games, and titled with its number
+ * rather than the opponent the series' card already tells
  */
 @Composable
-fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics, bordered: Boolean = false) {
+fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics, inSeries: Boolean = false) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
     val gameOutput = team.getGameOutcome(replay)
     MyCard(
         modifier = Modifier.fillMaxWidth(),
         gradientBackgroundColors = cardGradientColors,
         // as the expandable cards
-        border = if (bordered) BorderStroke(2.dp, MaterialTheme.colorScheme.outline) else null,
+        border = if (inSeries) BorderStroke(2.dp, MaterialTheme.colorScheme.outline) else null,
     ) {
         HeadRow(
             team,
@@ -141,7 +142,8 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
             gameOutput,
             currentPlayer = currentPlayer,
             opponentPlayer = opponentPlayer,
-            viewModel
+            viewModel,
+            inSeries = inSeries,
         )
         Spacer(Modifier.height(16.dp))
         ReplayContent(
@@ -162,14 +164,15 @@ private fun HeadRow(
     gameOutcome: GameOutcome,
     currentPlayer: Player,
     opponentPlayer: Player,
-    viewModel: TeamReplayViewModel?
+    viewModel: TeamReplayViewModel?,
+    inSeries: Boolean = false,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
         GameOutcomeCard(gameOutcome)
-        VsText(currentPlayer, opponentPlayer, gameOutcome, team.isInternalMatch(replay), replay.bestOf)
+        VsText(currentPlayer, opponentPlayer, gameOutcome, team.isInternalMatch(replay), replay.bestOf, inSeries = inSeries)
         Spacer(Modifier.width(16.dp))
         if (gameOutcome != GameOutcome.UNKNOWN) {
             PokemonTeamPreview(opponentPlayer,

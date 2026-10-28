@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -557,9 +558,13 @@ internal fun VsText(
     gameOutcome: GameOutcome,
     isInternalMatch: Boolean,
     bestOf: BestOf?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // in its series' card, which already tells the opponent: the game's number is enough
+    inSeries: Boolean = false,
 ) {
+    val gameTitle = bestOf?.takeIf { inSeries }?.let { "Game ${it.game}" }
     val text = when {
+        gameTitle != null -> gameTitle
         gameOutcome == GameOutcome.UNKNOWN -> "${currentPlayer.name.value}\nVS\n${opponentPlayer.name.value}"
         // both players are the user's: the outcome is the first one's
         isInternalMatch -> "${currentPlayer.name.value} VS ${opponentPlayer.name.value}"
@@ -570,12 +575,13 @@ internal fun VsText(
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleLarge,
-                textAlign = if (gameOutcome != GameOutcome.UNKNOWN) null else TextAlign.Center,
+                fontWeight = if (gameTitle != null) FontWeight.Bold else null,
+                textAlign = if (gameOutcome != GameOutcome.UNKNOWN || gameTitle != null) null else TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )
         }
-        bestOf?.let {
+        bestOf?.takeIf { gameTitle == null }?.let {
             Text(
                 text = "Game ${it.game} of ${it.of}",
                 style = MaterialTheme.typography.bodySmall,

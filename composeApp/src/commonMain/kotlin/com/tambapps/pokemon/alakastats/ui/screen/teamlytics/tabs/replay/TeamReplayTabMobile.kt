@@ -32,6 +32,7 @@ import com.tambapps.pokemon.alakastats.domain.model.getPlayers
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutcomeCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
+import com.tambapps.pokemon.alakastats.ui.model.ReplayListItem
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.Header
 import com.tambapps.pokemon.alakastats.ui.theme.tabReplaysTextMarginTopMobile
@@ -70,7 +71,9 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: La
         }
 
         itemsIndexed(items) { index, item ->
-            ReplayListItemView(team, item) { replay -> MobileReplay(viewModel, team, replay) }
+            ReplayListItemView(team, item) { replay ->
+                MobileReplay(viewModel, team, replay, inSeries = item is ReplayListItem.Series)
+            }
             if (index < items.size - 1) {
                 Spacer(Modifier.height(32.dp))
             }
@@ -99,10 +102,14 @@ private fun MobileSdNamesWarning(viewModel: TeamReplayViewModel) {
 }
 
 @Composable
-private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics) {
-    ReplayCompact(team, replay, viewModel)
+private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics, inSeries: Boolean) {
+    ReplayCompact(team, replay, viewModel, inSeries = inSeries)
 }
 
+/**
+ * @param inSeries shown in its series' card: titled with its number rather than the opponent the series' card
+ * already tells
+ */
 @Composable
 fun ReplayCompact(
     team: Teamlytics,
@@ -110,14 +117,15 @@ fun ReplayCompact(
     viewModel: TeamReplayViewModel? = null,
     onClick: (() -> Unit)? = null,
     gradientBackgroundColors: List<Color>? = null,
-    borderColor: Color? = null
+    borderColor: Color? = null,
+    inSeries: Boolean = false,
     ) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
     val gameOutput = team.getGameOutcome(replay)
     ExpansionTile(
         title = { isExpanded ->
             GameOutcomeCard(gameOutput)
-            VsText(currentPlayer, opponentPlayer, gameOutput, team.isInternalMatch(replay), replay.bestOf)
+            VsText(currentPlayer, opponentPlayer, gameOutput, team.isInternalMatch(replay), replay.bestOf, inSeries = inSeries)
         },
         subtitle = {
             if (gameOutput != GameOutcome.UNKNOWN) {
