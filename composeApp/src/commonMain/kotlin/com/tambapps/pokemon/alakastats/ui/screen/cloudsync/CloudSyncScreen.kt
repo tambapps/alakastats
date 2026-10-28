@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
@@ -17,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -24,6 +27,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -40,6 +44,7 @@ import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamMerge
 import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
+import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.IosSwipeBack
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlinx.datetime.TimeZone
@@ -69,69 +74,122 @@ object CloudSyncScreen : Screen {
                 Spacer(Modifier.width(8.dp))
                 Text("Google Drive sync", style = MaterialTheme.typography.headlineMedium)
             }
-            Column(
-                Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                SyncContent(viewModel, status)
+            if (isCompact) {
+                // the status and its buttons stay on top, the rest scrolls below
+                SyncStatusCard(viewModel, status, Modifier.fillMaxWidth())
+                Spacer(Modifier.height(16.dp))
+                Column(
+                    Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    SyncDetails(status)
+                    HowSyncWorks(status)
+                    Spacer(Modifier.height(8.dp))
+                }
+            } else {
+                // the status and its buttons on the left, the explanation on the right, each scrolling on its own
+                Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+                    Column(
+                        Modifier.width(400.dp).fillMaxHeight().verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        SyncStatusCard(viewModel, status, Modifier.fillMaxWidth())
+                        SyncDetails(status)
+                    }
+                    Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
+                        HowSyncWorks(status, Modifier.widthIn(max = 800.dp))
+                    }
+                }
             }
         }
     }
 }
 
+/**
+ * Where the sync stands, and what the user can do about it
+ */
 @Composable
-private fun SyncContent(viewModel: CloudSyncViewModel, status: SyncStatus) {
+private fun SyncStatusCard(viewModel: CloudSyncViewModel, status: SyncStatus, modifier: Modifier = Modifier) {
     val snackBar = LocalSnackBar.current
     val accountEmail by viewModel.accountEmail.collectAsState()
-    SyncExplanation()
-
-    when (status) {
-        SyncStatus.Unavailable -> Text("Not available on this platform", style = MaterialTheme.typography.bodyLarge)
-        SyncStatus.Disconnected -> ConnectButton(viewModel.isConnecting) { viewModel.connect(snackBar) }
-        is SyncStatus.Idle -> {
-            StatusText("Connected", status.lastSyncAt, accountEmail)
-            if (status.merges.isNotEmpty()) {
-                SyncMerges(status.merges)
-            }
-            if (status.failures.isNotEmpty()) {
-                SyncFailures(status.failures)
-            }
-            if (status.sharingNeedsConsent) {
-                Text(
-                    "Your shared teams can't be synced on this device until you allow it.",
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.widthIn(max = 600.dp),
-                )
-                Button(onClick = { viewModel.allowSharing(snackBar) }) { Text("Allow shared teams") }
-            }
-            ConnectedButtons(viewModel, isSyncing = false)
-        }
-        is SyncStatus.Syncing -> {
-            StatusText("Syncing…", status.lastSyncAt, accountEmail)
-            ConnectedButtons(viewModel, isSyncing = true)
-        }
-        is SyncStatus.Failed -> {
-            StatusText("Connected", status.lastSyncAt, accountEmail)
-            Text(
-                status.error.userMessage(),
-                color = MaterialTheme.colorScheme.error,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.widthIn(max = 600.dp),
-            )
-            if (status.needsReconnection) {
-                ConnectButton(viewModel.isConnecting, label = "Reconnect Google Drive") { viewModel.connect(snackBar) }
-                TextButton(onClick = { viewModel.disconnect(snackBar) }) { Text("Disconnect") }
-            } else {
-                ConnectedButtons(viewModel, isSyncing = false)
+    ElevatedCard(modifier) {
+        Column(
+            Modifier.fillMaxWidth().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            when (status) {
+                SyncStatus.Unavailable -> Text("Not available on this platform", style = MaterialTheme.typography.bodyLarge)
+                SyncStatus.Disconnected -> {
+                    Text("Not connected", style = MaterialTheme.typography.titleMedium)
+                    ConnectButton(viewModel.isConnecting) { viewModel.connect(snackBar) }
+                }
+                is SyncStatus.Idle -> {
+                    StatusText("Connected", status.lastSyncAt, accountEmail)
+                    if (status.sharingNeedsConsent) {
+                        ErrorText("Your shared teams can't be synced on this device until you allow it.")
+                        Button(onClick = { viewModel.allowSharing(snackBar) }) { Text("Allow shared teams") }
+                    }
+                    ConnectedButtons(viewModel, isSyncing = false)
+                }
+                is SyncStatus.Syncing -> {
+                    StatusText("Syncing…", status.lastSyncAt, accountEmail)
+                    ConnectedButtons(viewModel, isSyncing = true)
+                }
+                is SyncStatus.Failed -> {
+                    StatusText("Connected", status.lastSyncAt, accountEmail)
+                    ErrorText(status.error.userMessage())
+                    if (status.needsReconnection) {
+                        ConnectButton(viewModel.isConnecting, label = "Reconnect Google Drive") { viewModel.connect(snackBar) }
+                        TextButton(onClick = { viewModel.disconnect(snackBar) }) { Text("Disconnect") }
+                    } else {
+                        ConnectedButtons(viewModel, isSyncing = false)
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun SyncExplanation() {
+private fun ErrorText(text: String) {
+    Text(text, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+}
+
+/**
+ * What the last sync did, that can be long
+ */
+@Composable
+private fun SyncDetails(status: SyncStatus) {
+    if (status !is SyncStatus.Idle) return
+    if (status.merges.isNotEmpty()) {
+        SyncMerges(status.merges)
+    }
+    if (status.failures.isNotEmpty()) {
+        SyncFailures(status.failures)
+    }
+}
+
+/**
+ * Open when not connected, to decide whether to. Once connected, it's mostly known: closed at first
+ */
+@Composable
+private fun HowSyncWorks(status: SyncStatus, modifier: Modifier = Modifier) {
+    val isConnected = status !is SyncStatus.Disconnected && status !is SyncStatus.Unavailable
+    key(isConnected) {
+        ExpansionTile(
+            title = { Text("How sync works", style = MaterialTheme.typography.titleLarge) },
+            initiallyExpanded = !isConnected,
+            modifier = modifier,
+        ) {
+            SyncExplanation(Modifier.padding(top = 8.dp))
+        }
+    }
+}
+
+@Composable
+private fun SyncExplanation(modifier: Modifier = Modifier) {
     val points = buildList {
         add("Your teams are saved in a hidden folder of your own Google Drive, that only Alakastats can access. " +
                 "Connect the same Google account on your other devices to find your teams there.")
@@ -153,7 +211,7 @@ private fun SyncExplanation() {
             add("On the web, Google only gives access for about an hour: you'll be asked to reconnect after that.")
         }
     }
-    Column(Modifier.widthIn(max = 600.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         points.forEach { point ->
             Text("• $point", style = MaterialTheme.typography.bodyLarge)
         }
