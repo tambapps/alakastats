@@ -166,8 +166,8 @@ internal fun ReloadOutdatedReplaysHint(viewModel: TeamReplayViewModel, modifier:
     ElevatedCard(modifier.fillMaxWidth()) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = if (count == 1) "1 replay was added with an older version of the app: reload it to see its score, turns and KOs$toGroup"
-                else "$count replays were added with an older version of the app: reload them to see their score, turns and KOs$toGroup",
+                text = if (count == 1) "1 replay was added with an older version of the app: reload it to see its turns and how it ended$toGroup"
+                else "$count replays were added with an older version of the app: reload them to see their turns and how they ended$toGroup",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f),
             )

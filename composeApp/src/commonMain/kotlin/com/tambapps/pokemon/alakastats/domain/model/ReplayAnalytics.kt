@@ -133,9 +133,6 @@ data class ReplayAnalytics(
 
     fun hasWon(player: Player) = winner == player.name
 
-    /** the Pokémon the player had left at the end of the game, null when unknown */
-    fun remainingPokemons(player: Player) = pickCount?.let { (it - player.fainted.size).coerceAtLeast(0) }
-
     // complete information of replay from another one. Useful when reloading replays
     fun completedWith(oldReplay: ReplayAnalytics) = copy(
         notes = notes ?: oldReplay.notes,

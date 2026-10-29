@@ -585,13 +585,7 @@ internal fun VsText(
                 maxLines = 1
             )
         }
-        val details = replayDetails(
-            replay,
-            youPlayer = currentPlayer,
-            opponentPlayer = opponentPlayer,
-            showScore = gameOutcome != GameOutcome.UNKNOWN,
-            inSeries = inSeries,
-        )
+        val details = replayDetails(replay, inSeries = inSeries)
         val hasNotesIcon = showNotesIcon && !replay.notes.isNullOrBlank()
         if (details.isNotEmpty() || hasNotesIcon) {
             Row(verticalAlignment = Alignment.CenterVertically) {

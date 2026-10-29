@@ -97,8 +97,6 @@ class ReplayAnalyticsServiceTest {
         assertEquals(GameEndReason.FORFEIT, replay.endReason)
         assertEquals(listOf(PokemonName("pikachu"), PokemonName("incineroar")), replay.player1.fainted)
         assertEquals(listOf(PokemonName("garchomp")), replay.player2.fainted)
-        assertEquals(2, replay.remainingPokemons(replay.player1))
-        assertEquals(3, replay.remainingPokemons(replay.player2))
         val saved = json.decodeFromString<ReplayAnalyticsEntity>(json.encodeToString(replay.toEntity())).toDomain()
         assertEquals(replay, saved)
     }
