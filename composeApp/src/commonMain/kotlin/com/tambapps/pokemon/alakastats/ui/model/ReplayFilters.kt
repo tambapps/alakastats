@@ -8,17 +8,18 @@ import com.tambapps.pokemon.alakastats.domain.model.UserName
 data class ReplayFilters(
     val opponentTeam: List<PokemonFilter> = listOf(),
     val opponentSelection: List<PokemonFilter> = listOf(),
-    val opponentUsernames: Set<UserName> = setOf(),
+    val usernames: Set<UserName> = setOf(),
     val yourSelection: List<PokemonFilter> = listOf(),
     val gameOutcome: GameOutcome? = null,
 ) {
     fun hasAny() = opponentTeam.isNotEmpty() || opponentSelection.isNotEmpty() || yourSelection.isNotEmpty()
-            || opponentUsernames.isNotEmpty() || gameOutcome != null
+            || usernames.isNotEmpty() || gameOutcome != null
 
     fun matches(opponentPlayer: Player, youPlayer: Player, gameOutcome: GameOutcome): Boolean = when {
         opponentTeam.isNotEmpty() && !teamMatches(opponentPlayer, opponentTeam) -> false
         opponentSelection.isNotEmpty() && !selectionMatches(opponentPlayer, opponentSelection) -> false
-        opponentUsernames.isNotEmpty() && !opponentUsernames.any { it.matches(opponentPlayer.name) } -> false
+        // either player: e.g. to find the games of a teammate, played with the team
+        usernames.isNotEmpty() && usernames.none { it.matches(opponentPlayer.name) || it.matches(youPlayer.name) } -> false
         yourSelection.isNotEmpty() && !selectionMatches(youPlayer, yourSelection) -> false
         this.gameOutcome != null && this.gameOutcome != gameOutcome -> false
         else -> true

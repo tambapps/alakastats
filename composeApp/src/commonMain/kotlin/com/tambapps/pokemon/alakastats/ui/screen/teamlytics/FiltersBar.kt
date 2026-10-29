@@ -125,7 +125,7 @@ fun FiltersBar(
                     onClear = { viewModel.applyFilters(filters.copy(opponentSelection = emptyList())) }
                 )
 
-                OppUsernameButton(viewModel)
+                UsernameButton(viewModel)
 
                 PokemonFilterButton(
                     filter = yourSelectionFilter,
@@ -434,25 +434,25 @@ private fun CommonFiltersDialog(
 }
 
 @Composable
-private fun OppUsernameButton(viewModel: FiltersViewModel) {
-    val text = "Opp. Username"
+private fun UsernameButton(viewModel: FiltersViewModel) {
+    val text = "Username"
     var showDialog by remember { mutableStateOf(false) }
     FilterBarButton(onClick = { showDialog = true }) {
         val text = when {
-            viewModel.filters.opponentUsernames.isNotEmpty() -> "$text: " + viewModel.filters.opponentUsernames.joinToString(separator = ", ", transform = { it.value })
+            viewModel.filters.usernames.isNotEmpty() -> "$text: " + viewModel.filters.usernames.joinToString(separator = ", ", transform = { it.value })
             else -> text
         }
         Text(text)
-        if (viewModel.filters.opponentUsernames.isNotEmpty()) {
+        if (viewModel.filters.usernames.isNotEmpty()) {
             Spacer(Modifier.width(18.dp))
-            ClearIcon(onClick = { viewModel.applyFilters(viewModel.filters.copy(opponentUsernames = emptySet())) })
+            ClearIcon(onClick = { viewModel.applyFilters(viewModel.filters.copy(usernames = emptySet())) })
         }
     }
     if (showDialog) {
         ShowdownNameDialog(
             onDismissRequest = { showDialog = false },
-            initialValue = viewModel.filters.opponentUsernames.firstOrNull()?.value ?: "",
-            onAdd = { viewModel.applyFilters(viewModel.filters.copy(opponentUsernames = setOf(UserName(it)))) }
+            initialValue = viewModel.filters.usernames.firstOrNull()?.value ?: "",
+            onAdd = { viewModel.applyFilters(viewModel.filters.copy(usernames = setOf(UserName(it)))) }
         )
     }
 }
