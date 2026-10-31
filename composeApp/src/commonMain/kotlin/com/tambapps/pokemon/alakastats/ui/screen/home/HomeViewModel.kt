@@ -73,6 +73,9 @@ class HomeViewModel(
     /** importing a team: from a file, or a sample team */
     var showImportChoiceDialog by mutableStateOf(false)
 
+    /** the sync status, to reconnect without leaving the home screen */
+    var showSyncStatusDialog by mutableStateOf(false)
+
     val syncStatus = syncService.status
 
     /** asks the confirmation before removing the team from the cloud and the other devices */

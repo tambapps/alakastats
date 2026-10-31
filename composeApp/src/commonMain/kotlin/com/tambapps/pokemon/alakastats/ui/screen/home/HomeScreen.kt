@@ -73,6 +73,8 @@ import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import com.tambapps.pokemon.alakastats.ui.screen.about.AboutScreen
 import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.CloudSyncScreen
+import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.CloudSyncViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.SyncStatusDialog
 import com.tambapps.pokemon.alakastats.ui.screen.damagecalc.DamageCalcScreen
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizzesHomeScreen
@@ -160,6 +162,9 @@ object HomeScreen : Screen {
         KeepLocalDialog(viewModel)
         ShareTeamDialog(viewModel)
         JoinOnWebDialog(viewModel)
+        if (viewModel.showSyncStatusDialog) {
+            SyncStatusDialog(koinScreenModel<CloudSyncViewModel>()) { viewModel.showSyncStatusDialog = false }
+        }
     }
 }
 
@@ -523,7 +528,6 @@ internal fun SyncReconnectionWarning(viewModel: HomeViewModel, modifier: Modifie
     val status by viewModel.syncStatus.collectAsState()
     val failed = status as? SyncStatus.Failed ?: return
     if (!failed.needsReconnection) return
-    val navigator = LocalNavigator.currentOrThrow
     val message = if (failed.error is CloudError.AccessRevoked) "The access to your Google Drive was lost"
     else "Your Google Drive session expired"
 
@@ -532,7 +536,7 @@ internal fun SyncReconnectionWarning(viewModel: HomeViewModel, modifier: Modifie
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.errorContainer)
-            .clickable { navigator.push(CloudSyncScreen) }
+            .clickable { viewModel.showSyncStatusDialog = true }
             .padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
         Icon(

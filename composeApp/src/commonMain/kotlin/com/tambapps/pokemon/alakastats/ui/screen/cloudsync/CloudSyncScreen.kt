@@ -25,6 +25,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -103,6 +105,26 @@ object CloudSyncScreen : Screen {
                 }
             }
         }
+    }
+}
+
+/**
+ * The status card alone, to reconnect without leaving the current screen. Closes by itself once reconnected
+ */
+@Composable
+internal fun SyncStatusDialog(viewModel: CloudSyncViewModel, onDismiss: () -> Unit) {
+    val status by viewModel.status.collectAsState()
+    // still open while the shared teams wait for the user's consent, that the card asks for
+    val isReconnected = when (val current = status) {
+        is SyncStatus.Syncing -> true
+        is SyncStatus.Idle -> !current.sharingNeedsConsent
+        else -> false
+    }
+    LaunchedEffect(isReconnected) {
+        if (isReconnected) onDismiss()
+    }
+    Dialog(onDismissRequest = onDismiss) {
+        SyncStatusCard(viewModel, status, Modifier.widthIn(max = 400.dp))
     }
 }
 
