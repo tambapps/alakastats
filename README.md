@@ -8,7 +8,7 @@ It transforms your Showdown data into beautiful, interactive dashboards — help
 ## 🚀 Live demo
 
 Check out the live web version here:  
-👉 **[alakastats.app](https://tambapps.github.io/alakastats)** *(or your GitHub Pages URL)*
+👉 **[alakastats.com](https://alakastats.com/)**
 
 Android and iOS builds are coming soon.
 

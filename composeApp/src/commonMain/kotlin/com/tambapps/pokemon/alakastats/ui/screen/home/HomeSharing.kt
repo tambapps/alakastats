@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.ShareRole
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 
-private const val WEB_APP_URL = "https://tambapps.github.io/alakastats/"
+private const val WEB_APP_URL = "https://alakastats.com/"
 
 fun ShareRole.label() = when (this) {
     ShareRole.OWNER -> "Owner"

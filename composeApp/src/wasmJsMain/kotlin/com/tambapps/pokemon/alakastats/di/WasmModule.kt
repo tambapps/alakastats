@@ -16,7 +16,7 @@ private const val GOOGLE_WEB_CLIENT_ID = "737779642859-7a2gn9bfpkihf3a9npm3algdm
 // Google Picker's browser key. Not a secret, so it's fine that it's in this public repository (GitHub's secret
 // scanning flags it anyway): a browser key is sent by the browser to Google, so anyone can read it in the deployed
 // site whatever we do. What protects it are its restrictions in the Google Cloud console: only the app's origin
-// (tambapps.github.io) and only the Picker API. It gives access to no user data either: the Picker also needs the
+// (alakastats.com) and only the Picker API. It gives access to no user data either: the Picker also needs the
 // user's own OAuth token. At worst, someone forging the origin could use the Picker's free quota
 private const val GOOGLE_PICKER_API_KEY = "AIzaSyD6mnU4vbwIiLMNA4Vlp9acWbZme2xirxg"
 // the Google Cloud project number

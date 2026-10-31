@@ -362,7 +362,7 @@ internal class SharedTeamSync(
         const val INDEX_KIND = "sharedTeams"
         val INDEX_PROPERTIES = mapOf(PROPERTY_KIND to INDEX_KIND, TeamSyncService.PROPERTY_SCHEMA to TeamSyncService.SCHEMA_VERSION.toString())
         private const val MAX_UPLOAD_ROUNDS = 3
-        const val INVITATION_MESSAGE = "I shared an Alakastats team with you. To join it, open https://tambapps.github.io/alakastats/, " +
+        const val INVITATION_MESSAGE = "I shared an Alakastats team with you. To join it, open https://alakastats.com/, " +
                 "connect your Google Drive in the Sync screen, then use \"Join a shared team\" on the home screen. " +
                 "It will then sync on all your devices."
 

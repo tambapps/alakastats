@@ -479,7 +479,7 @@ internal fun AboutButton(modifier: Modifier = Modifier) {
     }
 }
 
-private const val PRIVACY_POLICY_URL = "https://tambapps.github.io/alakastats/privacy.html"
+private const val PRIVACY_POLICY_URL = "https://alakastats.com/privacy.html"
 
 /**
  * Google requires a link to the privacy policy on the home page
