@@ -12,6 +12,7 @@ import com.tambapps.pokemon.alakastats.ui.SnackBarContext
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeScreen
 import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
+import com.tambapps.pokemon.alakastats.ui.sitemove.SiteMoveBanner
 import com.tambapps.pokemon.alakastats.ui.theme.AppTheme
 import com.tambapps.pokemon.alakastats.ui.theme.ProvideIsCompact
 import org.koin.compose.koinInject
@@ -36,7 +37,9 @@ fun App(startScreen: Screen = HomeScreen) {
             SnackBarContext {
                 SyncMergeNotifier(syncService)
                 CompositionLocalProvider(LocalPokemonImageService provides koinInject<PokemonImageService>()) {
-                    Navigator(startScreen)
+                    SiteMoveBanner {
+                        Navigator(startScreen)
+                    }
                 }
             }
         }
