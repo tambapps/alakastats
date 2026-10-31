@@ -115,7 +115,11 @@ abstract class PokepasteEditingViewModel(
     }
 
     protected fun validPokepaste(): PokePaste? {
-        if (pokepaste.isBlank()) return null
+        if (pokepaste.isBlank()) {
+            // not the error of a paste that has since been cleared
+            pokepasteError = null
+            return null
+        }
         try {
             val p = pokepasteParser.parse(pokepaste)
             pokepasteError = null
