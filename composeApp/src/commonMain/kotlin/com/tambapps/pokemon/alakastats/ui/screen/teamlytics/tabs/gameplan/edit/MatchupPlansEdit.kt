@@ -4,6 +4,8 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
+import alakastats.composeapp.generated.resources.arrow_downward
+import alakastats.composeapp.generated.resources.arrow_upward
 import alakastats.composeapp.generated.resources.content_paste
 import alakastats.composeapp.generated.resources.delete
 import alakastats.composeapp.generated.resources.edit
@@ -155,9 +157,12 @@ fun MatchupPlansEdit(
                         VerticalSpacer()
                     }
 
-                    itemsIndexed(viewModel.gamePlanStates) { index, gamePlanState ->
-                        GamePlanCard(viewModel, team, gamePlanState, index)
-                        VerticalSpacer(24.dp)
+                    itemsIndexed(viewModel.gamePlanStates, key = { _, gamePlanState -> gamePlanState.key }) { index, gamePlanState ->
+                        // keyed and animated so that a moved plan slides to its new place
+                        Column(Modifier.animateItem()) {
+                            GamePlanCard(viewModel, team, gamePlanState, index)
+                            VerticalSpacer(24.dp)
+                        }
                     }
 
                     item {
@@ -351,6 +356,24 @@ private fun GamePlanCard(
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 SectionTitle("Game Plan ${index + 1}", modifier = Modifier.weight(1f))
+                IconButton(
+                    onClick = { viewModel.moveGamePlan(gamePlanState, -1) },
+                    enabled = index > 0
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.arrow_upward),
+                        contentDescription = "Move Game Plan ${index + 1} Up",
+                    )
+                }
+                IconButton(
+                    onClick = { viewModel.moveGamePlan(gamePlanState, 1) },
+                    enabled = index < viewModel.gamePlanStates.lastIndex
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.arrow_downward),
+                        contentDescription = "Move Game Plan ${index + 1} Down",
+                    )
+                }
                 IconButton(onClick = { viewModel.gamePlanToDelete = gamePlanState }) {
                     Icon(
                         painter = painterResource(Res.drawable.delete),

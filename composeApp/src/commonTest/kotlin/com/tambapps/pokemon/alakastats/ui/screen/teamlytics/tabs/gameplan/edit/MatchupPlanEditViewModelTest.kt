@@ -90,6 +90,36 @@ class MatchupPlanEditViewModelTest {
     }
 
     @Test
+    fun movingAGamePlanReordersTheMatchup() {
+        viewModel.prepareEdition(matchupPlan)
+        val (first, second) = viewModel.gamePlanStates.toList()
+
+        viewModel.moveGamePlan(second, -1)
+
+        assertEquals(listOf(second, first), viewModel.gamePlanStates.toList())
+        assertEquals(
+            listOf("Play around Trick Room", "Fake Out the sun setter"),
+            viewModel.generateMatchupPlan(matchupPlan).gamePlans.map { it.description }
+        )
+        assertTrue(viewModel.hasChanges)
+
+        viewModel.moveGamePlan(second, 1)
+        assertEquals(listOf(first, second), viewModel.gamePlanStates.toList())
+        assertFalse(viewModel.hasChanges)
+    }
+
+    @Test
+    fun aGamePlanCantMoveOutOfTheList() {
+        viewModel.prepareEdition(matchupPlan)
+        val (first, second) = viewModel.gamePlanStates.toList()
+
+        viewModel.moveGamePlan(first, -1)
+        viewModel.moveGamePlan(second, 1)
+
+        assertEquals(listOf(first, second), viewModel.gamePlanStates.toList())
+    }
+
+    @Test
     fun anUntouchedMatchupHasNoChanges() {
         viewModel.prepareEdition(matchupPlan)
 

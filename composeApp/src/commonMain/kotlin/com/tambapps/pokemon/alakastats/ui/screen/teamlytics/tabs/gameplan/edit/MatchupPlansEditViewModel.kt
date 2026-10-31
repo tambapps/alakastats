@@ -96,6 +96,16 @@ class MatchupPlanEditViewModel(
         if (gamePlanToDelete == gamePlanState) gamePlanToDelete = null
     }
 
+    /**
+     * Moves the game plan by the given number of places (negative is up). Does nothing if it would leave the list
+     */
+    fun moveGamePlan(gamePlanState: GamePlanState, offset: Int) {
+        val from = gamePlanStates.indexOf(gamePlanState)
+        val to = from + offset
+        if (from < 0 || to !in gamePlanStates.indices) return
+        gamePlanStates.add(to, gamePlanStates.removeAt(from))
+    }
+
     fun startPokepasteEdition() {
         pokepasteBeforeEdition = pokepaste
         isEditingPokepaste = true
@@ -131,6 +141,9 @@ fun PokePaste.asOtsIfNoStats(): PokePaste =
 private fun MatchupPlan.normalized() = copy(gamePlans = gamePlans.map { it.copy(composition = it.composition.orEmpty()) })
 
 class GamePlanState() {
+    // only identifies the plan's card in the list, e.g. while it moves
+    val key = Uuid.random().toString()
+
     var description by mutableStateOf("")
         private set
 
