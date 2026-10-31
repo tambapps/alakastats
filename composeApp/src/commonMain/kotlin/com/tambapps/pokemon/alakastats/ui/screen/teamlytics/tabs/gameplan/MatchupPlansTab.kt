@@ -2,6 +2,8 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
+import alakastats.composeapp.generated.resources.delete
+import alakastats.composeapp.generated.resources.edit
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,8 +19,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +43,7 @@ import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
+import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTileAction
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
@@ -137,6 +138,7 @@ internal fun MatchNotes(
     content: @Composable () -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val guardedChange = rememberGuardedChange()
 
     ExpansionTile(
         modifier = modifier,
@@ -157,24 +159,15 @@ internal fun MatchNotes(
                 )
             }
         },
-        menu = { isMenuExpandedState ->
-            DropdownMenu(
-                expanded = isMenuExpandedState.value,
-                onDismissRequest = { isMenuExpandedState.value = false }
-            ) {
-                if (!viewModel.isReadOnly) {
-                    val guardedChange = rememberGuardedChange()
-                    DropdownMenuItem(
-                        text = { Text("Edit") },
-                        onClick = { guardedChange { viewModel.editMatchupMode = EditMatchup(matchupPlan) } }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Delete") },
-                        onClick = { guardedChange { showDeleteDialog = true } }
-                    )
-                }
-            }
-        },
+        // two buttons rather than a menu holding only them
+        actions = if (viewModel.isReadOnly) emptyList() else listOf(
+            ExpansionTileAction(Res.drawable.edit, contentDescription = "Edit") {
+                guardedChange { viewModel.editMatchupMode = EditMatchup(matchupPlan) }
+            },
+            ExpansionTileAction(Res.drawable.delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error) {
+                guardedChange { showDeleteDialog = true }
+            },
+        ),
         disableWhenOpened = !LocalIsCompact.current, // useful to prevent color changing on hover which can be annoying
         content = content
     )

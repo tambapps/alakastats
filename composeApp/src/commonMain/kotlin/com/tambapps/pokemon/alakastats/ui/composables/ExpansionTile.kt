@@ -34,8 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -58,7 +60,7 @@ fun ExpansionTile(
         subtitle = subtitle,
         content = content,
         expandButton = { isCardExpandedState ->
-            ExpandButton(isCardExpandedState, translateX = false)
+            ExpandButton(isCardExpandedState, expandedOffset = 0.dp)
         },
         disableWhenOpened=disableWhenOpened,
         shrinkTitleWeightOnExpanded=false,
@@ -107,7 +109,7 @@ fun ExpansionTile(
                         )
                     }
                 }
-                ExpandButton(isCardExpandedState, translateX = menu != null)
+                ExpandButton(isCardExpandedState, expandedOffset = if (menu != null) (-48).dp else 0.dp)
                 menu?.invoke(isMenuExpanded)
             }
         },
@@ -115,6 +117,62 @@ fun ExpansionTile(
         borderColor=borderColor,
         bordered=bordered,
         shrinkTitleWeightOnExpanded=menu != null
+    )
+}
+
+/**
+ * An icon button shown next to the expand button of an opened [ExpansionTile]
+ */
+class ExpansionTileAction(
+    val icon: DrawableResource,
+    val contentDescription: String,
+    val tint: Color? = null,
+    val onClick: () -> Unit,
+)
+
+/**
+ * A tile whose actions appear as icon buttons when it opens, the expand button sliding to their left
+ */
+@Composable
+fun ExpansionTile(
+    title: @Composable RowScope.(Boolean) -> Unit,
+    actions: List<ExpansionTileAction>,
+    subtitle: @Composable (Boolean) -> Unit = {},
+    modifier: Modifier = Modifier,
+    gradientBackgroundColors: List<Color>? = null,
+    disableWhenOpened: Boolean = false,
+    content: @Composable () -> Unit,
+) {
+    AbstractExpansionTile(
+        modifier = modifier,
+        title = title,
+        subtitle = subtitle,
+        content = content,
+        gradientBackgroundColors = gradientBackgroundColors,
+        disableWhenOpened = disableWhenOpened,
+        expandButton = { isCardExpandedState ->
+            Box(contentAlignment = Alignment.CenterEnd) {
+                val actionsScale by animateFloatAsState(
+                    targetValue = if (isCardExpandedState.value) 1f else 0f
+                )
+                Row {
+                    actions.forEach { action ->
+                        IconButton(onClick = action.onClick, enabled = isCardExpandedState.value) {
+                            Icon(
+                                modifier = Modifier.scale(actionsScale),
+                                painter = painterResource(action.icon),
+                                contentDescription = action.contentDescription,
+                                tint = action.tint ?: MaterialTheme.colorScheme.defaultIconColor
+                            )
+                        }
+                    }
+                }
+                ExpandButton(isCardExpandedState, expandedOffset = (-48 * actions.size).dp)
+            }
+        },
+        shrinkTitleWeightOnExpanded = actions.isNotEmpty(),
+        // each icon button takes away some of the title's room
+        expandedTitleWeight = 0.85f - 0.15f * actions.size,
     )
 }
 
@@ -127,6 +185,7 @@ private fun AbstractExpansionTile(
     gradientBackgroundColors: List<Color>? = null,
     content: @Composable () -> Unit,
     shrinkTitleWeightOnExpanded: Boolean,
+    expandedTitleWeight: Float = 0.725f,
     disableWhenOpened: Boolean = false,
     onClick: (() -> Unit)? = null,
     borderColor: Color? = null,
@@ -154,7 +213,7 @@ private fun AbstractExpansionTile(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val titleWeight by animateFloatAsState(
-                    targetValue = if (shrinkTitleWeightOnExpanded && isCardExpandedState.value) 0.725f else 0.85f
+                    targetValue = if (shrinkTitleWeightOnExpanded && isCardExpandedState.value) expandedTitleWeight else 0.85f
                 )
                 Row(Modifier.weight(titleWeight), verticalAlignment = Alignment.CenterVertically) {
                     title(isCardExpandedState.value)
@@ -181,11 +240,12 @@ private fun AbstractExpansionTile(
 @Composable
 private fun ExpandButton(
     isCardExpandedState: MutableState<Boolean>,
-    translateX: Boolean
+    // where the button slides when the tile opens, to leave room for other buttons
+    expandedOffset: Dp
     ) {
-    val modifier = if (translateX) {
+    val modifier = if (expandedOffset != 0.dp) {
         val buttonOffset by animateDpAsState(
-            targetValue = if (isCardExpandedState.value) (-48).dp else 0.dp
+            targetValue = if (isCardExpandedState.value) expandedOffset else 0.dp
         )
         Modifier.offset(x = buttonOffset)
     } else Modifier
