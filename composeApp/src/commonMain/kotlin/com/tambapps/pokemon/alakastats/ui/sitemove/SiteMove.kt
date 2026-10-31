@@ -52,12 +52,14 @@ import kotlin.uuid.Uuid
 
 const val NEW_SITE_URL = "https://alakastats.com"
 private val NEW_SITE_HOSTS = setOf("alakastats.com", "www.alakastats.com")
+// the development server, where Google Drive has to keep working
+private val LOCAL_HOSTS = setOf("localhost", "127.0.0.1")
 
 /**
  * Whether the web app is served from an address it moved from (e.g. GitHub Pages). The browser keeps the data of each
  * address apart: the teams saved there don't follow by themselves
  */
-fun isOldWebAddress(host: String?) = host != null && host !in NEW_SITE_HOSTS
+fun isOldWebAddress(host: String?) = host != null && host !in NEW_SITE_HOSTS && host !in LOCAL_HOSTS
 
 /**
  * The teams that won't reach the new address through Google Drive, the ones the cloud doesn't have as they are here

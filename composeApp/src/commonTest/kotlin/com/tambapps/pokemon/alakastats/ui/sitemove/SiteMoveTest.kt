@@ -13,9 +13,11 @@ class SiteMoveTest {
     @Test
     fun onlyTheNewAddressIsNotAnOldOne() {
         assertTrue(isOldWebAddress("tambapps.github.io"))
-        assertTrue(isOldWebAddress("localhost"))
         assertFalse(isOldWebAddress("alakastats.com"))
         assertFalse(isOldWebAddress("www.alakastats.com"))
+        // the development server
+        assertFalse(isOldWebAddress("localhost"))
+        assertFalse(isOldWebAddress("127.0.0.1"))
         // the native apps
         assertFalse(isOldWebAddress(null))
     }
