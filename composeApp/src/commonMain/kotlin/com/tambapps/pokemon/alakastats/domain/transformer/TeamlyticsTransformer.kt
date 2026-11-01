@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.domain.transformer
 
+import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokeType
@@ -66,16 +67,20 @@ fun TeamlyticsEntity.toDomain(pokepasteParser: PokepasteParser): Teamlytics {
     )
 }
 
-fun TeamlyticsEntity.toPreview(pokepasteParser: PokepasteParser, winrate: Int) = TeamlyticsPreviewEntity(
-    id = id,
-    name = name,
-    sdNames = sdNames,
-    pokemons = pokepasteParser.tryParse(pokePaste)?.pokemons?.map { it.name.value } ?: emptyList(),
-    nbReplays = replays.size,
-    winrate = winrate,
-    lastUpdatedAt = lastUpdatedAt,
-    localOnly = localOnly,
-)
+fun TeamlyticsEntity.toPreview(pokepasteParser: PokepasteParser, winrate: Int): TeamlyticsPreviewEntity {
+    val pokemons = pokepasteParser.tryParse(pokePaste)?.pokemons ?: emptyList()
+    return TeamlyticsPreviewEntity(
+        id = id,
+        name = name,
+        sdNames = sdNames,
+        pokemons = pokemons.map { it.name.value },
+        nbReplays = replays.size,
+        winrate = winrate,
+        lastUpdatedAt = lastUpdatedAt,
+        localOnly = localOnly,
+        items = pokemons.map { it.item?.value },
+    )
+}
 
 fun TeamlyticsPreview.toEntity() = TeamlyticsPreviewEntity(
     id = id,
@@ -86,6 +91,7 @@ fun TeamlyticsPreview.toEntity() = TeamlyticsPreviewEntity(
     winrate = winrate,
     lastUpdatedAt = lastUpdatedAt,
     localOnly = localOnly,
+    items = items.map { it?.value },
 )
 
 fun TeamlyticsPreviewEntity.toDomain() = TeamlyticsPreview(
@@ -97,6 +103,7 @@ fun TeamlyticsPreviewEntity.toDomain() = TeamlyticsPreview(
     winrate = winrate,
     lastUpdatedAt = lastUpdatedAt ?: Clock.System.now(),
     localOnly = localOnly,
+    items = items?.map { it?.let(::ItemName) } ?: emptyList(),
 )
 
 fun TeamlyticsNotes.toEntity() = TeamlyticsNotesEntity(

@@ -60,6 +60,9 @@ data class TeamlyticsPreviewEntity(
     val winrate: Int,
     val lastUpdatedAt: Instant?,
     val localOnly: Boolean = false,
+    // the item of each of the pokemons, in the same order. Null for a preview saved before it was stored, shown without
+    // the items until its team is saved again
+    val items: List<String?>? = null,
 ): Identifiable<Uuid>
 
 @Serializable

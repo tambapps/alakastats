@@ -9,8 +9,10 @@ import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamWriteLock
 import com.tambapps.pokemon.alakastats.infrastructure.sync.replay
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -62,6 +64,36 @@ class KStoreTeamlyticsRepositoryTest {
         // a deletion stays a deletion
         assertEquals(emptyList(), saved.replays)
         assertEquals(clock.now(), teams.get(stored.id)!!.lastUpdatedAt)
+    }
+
+    private val paste = """
+        Incineroar @ Sitrus Berry
+        Ability: Intimidate
+        - Fake Out
+
+        Garchomp
+        Ability: Rough Skin
+        - Earthquake
+    """.trimIndent()
+
+    @Test
+    fun theSavedPreviewHasTheItems() = runTest {
+        repository.save(stored.copy(pokePaste = paste).toDomain(parser))
+
+        val preview = previews.get(stored.id)!!
+        assertEquals(listOf("Incineroar", "Garchomp"), preview.pokemons)
+        assertEquals(listOf("Sitrus Berry", null), preview.items)
+    }
+
+    @Test
+    fun aPreviewSavedBeforeTheItemsIsStillRead() {
+        val json = Json { ignoreUnknownKeys = true }
+        val old = """{"id":"${stored.id}","name":"Rain","sdNames":["me"],"pokemons":["Incineroar"],"nbReplays":1,"winrate":100,"lastUpdatedAt":null}"""
+
+        val preview = json.decodeFromString<TeamlyticsPreviewEntity>(old)
+
+        assertNull(preview.items)
+        assertEquals(emptyList(), preview.toDomain().items)
     }
 
     @Test

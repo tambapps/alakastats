@@ -261,7 +261,7 @@ private fun OpponentTeam(viewModel: MatchupPlanEditViewModel, team: Teamlytics) 
                 }
             } else {
                 PokemonTeamPreview(
-                    pokePaste.pokemons.map { it.name },
+                    pokePaste,
                     fillWidth = true,
                     facingDirection = FacingDirection.LEFT
                 )

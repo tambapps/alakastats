@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.domain.model
 
+import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.Mechanic
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeStats
@@ -111,6 +112,8 @@ data class TeamlyticsPreview(
     val winrate: Int,
     val lastUpdatedAt: Instant,
     val localOnly: Boolean = false,
+    /** the item of each of the [pokemons], in the same order. Empty when not known */
+    val items: List<ItemName?> = emptyList(),
 )
 
 fun Teamlytics.computeWinRatePercentage() = computeWinRatePercentage(sdNames, replays)
