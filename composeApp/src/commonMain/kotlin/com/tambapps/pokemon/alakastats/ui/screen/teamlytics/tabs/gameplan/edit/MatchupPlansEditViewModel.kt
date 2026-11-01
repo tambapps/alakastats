@@ -5,13 +5,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
-import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
 import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.ui.viewmodels.PokepasteEditingViewModel
-import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import io.ktor.client.HttpClient
 import kotlin.uuid.Uuid
@@ -38,18 +36,6 @@ class MatchupPlanEditViewModel(
         private set
     val gamePlanStates = mutableStateListOf<GamePlanState>()
 
-    /**
-     * The opponent team, as last applied from the paste dialog
-     */
-    var opponentPokepaste by mutableStateOf<PokePaste?>(null)
-        private set
-
-    var isEditingPokepaste by mutableStateOf(false)
-        private set
-    private var pokepasteBeforeEdition = ""
-
-    val canApplyPokepaste: Boolean get() = pokepaste.isBlank() || pokepasteError == null
-
     var compositionDialogFor by mutableStateOf<GamePlanState?>(null)
     var addReplayDialogFor by mutableStateOf<GamePlanState?>(null)
     var gamePlanToDelete by mutableStateOf<GamePlanState?>(null)
@@ -62,7 +48,8 @@ class MatchupPlanEditViewModel(
     fun generateMatchupPlan(matchupPlan: MatchupPlan?) = MatchupPlan(
         id = matchupPlan?.id ?: Uuid.random(),
         name = name,
-        pokePaste = opponentPokepaste,
+        // the opponent team
+        pokePaste = appliedPokepaste,
         gamePlans = gamePlanStates.map { it.toGamePlan() }
     )
 
@@ -74,10 +61,7 @@ class MatchupPlanEditViewModel(
 
     fun prepareEdition(matchupPlan: MatchupPlan) {
         name = matchupPlan.name
-        // the parsed paste is kept as is, so that a matchup saved without touching it keeps the same paste
-        opponentPokepaste = matchupPlan.pokePaste
-        pokepaste = matchupPlan.pokePaste?.toPokePasteString() ?: ""
-        validPokepaste()
+        loadPokepaste(matchupPlan.pokePaste)
         gamePlanStates.clear()
         gamePlanStates.addAll(matchupPlan.gamePlans.map { GamePlanState.from(it) })
         original = matchupPlan
@@ -105,37 +89,7 @@ class MatchupPlanEditViewModel(
         if (from < 0 || to !in gamePlanStates.indices) return
         gamePlanStates.add(to, gamePlanStates.removeAt(from))
     }
-
-    fun startPokepasteEdition() {
-        pokepasteBeforeEdition = pokepaste
-        isEditingPokepaste = true
-    }
-
-    fun cancelPokepasteEdition() {
-        updatePokepaste(pokepasteBeforeEdition)
-        isEditingPokepaste = false
-    }
-
-    /**
-     * Applies the paste being edited as the opponent team. Does nothing if it doesn't parse
-     */
-    fun applyPokepasteEdition() {
-        if (pokepaste.isBlank()) {
-            opponentPokepaste = null
-        } else {
-            opponentPokepaste = validPokepaste() ?: return
-        }
-        isEditingPokepaste = false
-    }
 }
-
-/**
- * The paste shown as an OTS if none of its Pokémon has EVs. The parser only sees an OTS in a paste without any
- * EVs, IVs or Nature line, so e.g. an OTS copied from a replay (whose IVs are all 0) would show stats all at 0
- */
-fun PokePaste.asOtsIfNoStats(): PokePaste =
-    if (!isOts && pokemons.all { it.evs == PokeStats.default(PokepasteParser.DEFAULT_EV_VALUE) }) copy(isOts = true)
-    else this
 
 // a game plan without composition is stored as null or as an empty list: both are the same plan
 private fun MatchupPlan.normalized() = copy(gamePlans = gamePlans.map { it.copy(composition = it.composition.orEmpty()) })

@@ -47,8 +47,7 @@ class EditTeamViewModel(
         private set
 
     val isFormValid: Boolean
-        get() = teamName.isNotBlank() && pokepaste.isNotBlank() && pokepasteError == null
-                && sdNames.isNotEmpty()
+        get() = teamName.isNotBlank() && appliedPokepaste != null && sdNames.isNotEmpty()
 
     fun updateTeamName(name: String) {
         teamName = name
@@ -81,7 +80,7 @@ class EditTeamViewModel(
 
     fun saveTeam(onSuccess: () -> Unit) {
         if (isFormValid) {
-            val pokepaste = pokepasteParser.tryParse(pokepaste) ?: return
+            val pokepaste = appliedPokepaste ?: return
             scope.launch {
                 if (editingTeam != null) {
                     editTeamlyticsUseCase.edit(
@@ -116,9 +115,8 @@ class EditTeamViewModel(
                 }
                 editingTeam = teamlytics
                 teamName = teamlytics.name
-                pokepaste = teamlytics.pokePaste.toPokePasteString()
+                loadPokepaste(teamlytics.pokePaste)
                 format = teamlytics.format
-                validPokepaste()
                 sdNames.clear()
                 sdNames.addAll(teamlytics.sdNames.map { it.value })
             }

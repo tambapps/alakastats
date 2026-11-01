@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import arrow.core.Either
+import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.error.NetworkError
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
@@ -35,6 +36,14 @@ suspend fun HttpClient.fetchPokepaste(url: String): Either<DomainError, String> 
     response.bodyAsText()
 }.mapLeft { error -> NetworkError(error.message ?: "unknown error", error) }
 
+/**
+ * The paste shown as an OTS if none of its Pokémon has EVs. The parser only sees an OTS in a paste without any
+ * EVs, IVs or Nature line, so e.g. an OTS copied from a replay (whose IVs are all 0) would show stats all at 0
+ */
+fun PokePaste.asOtsIfNoStats(): PokePaste =
+    if (!isOts && pokemons.all { it.evs == PokeStats.default(PokepasteParser.DEFAULT_EV_VALUE) }) copy(isOts = true)
+    else this
+
 abstract class PokepasteEditingViewModel(
     protected val pokepasteParser: PokepasteParser,
     private val httpClient: HttpClient
@@ -57,6 +66,18 @@ abstract class PokepasteEditingViewModel(
 
     val isPokepasteUrlValid: Boolean
         get() = isValidUrl(pokePasteUrlInput)
+
+    /**
+     * The paste as last applied from the paste dialog, the one shown and saved
+     */
+    var appliedPokepaste by mutableStateOf<PokePaste?>(null)
+        private set
+
+    var isEditingPokepaste by mutableStateOf(false)
+        private set
+    private var pokepasteBeforeEdition = ""
+
+    val canApplyPokepaste: Boolean get() = pokepaste.isBlank() || pokepasteError == null
 
     protected val scope = CoroutineScope(Dispatchers.Default)
 
@@ -112,6 +133,38 @@ abstract class PokepasteEditingViewModel(
     fun updatePokepaste(paste: String) {
         pokepaste = paste
         validPokepaste()
+    }
+
+    /**
+     * Shows the given paste, e.g. the one of what is edited. It is kept as is, so that it's saved unchanged if the
+     * user doesn't touch it
+     */
+    protected fun loadPokepaste(paste: PokePaste?) {
+        appliedPokepaste = paste
+        pokepaste = paste?.toPokePasteString() ?: ""
+        validPokepaste()
+    }
+
+    fun startPokepasteEdition() {
+        pokepasteBeforeEdition = pokepaste
+        isEditingPokepaste = true
+    }
+
+    fun cancelPokepasteEdition() {
+        updatePokepaste(pokepasteBeforeEdition)
+        isEditingPokepaste = false
+    }
+
+    /**
+     * Applies the paste being edited. Does nothing if it doesn't parse
+     */
+    fun applyPokepasteEdition() {
+        if (pokepaste.isBlank()) {
+            appliedPokepaste = null
+        } else {
+            appliedPokepaste = validPokepaste() ?: return
+        }
+        isEditingPokepaste = false
     }
 
     protected fun validPokepaste(): PokePaste? {

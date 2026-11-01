@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.edit
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
 import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
+import com.tambapps.pokemon.alakastats.ui.viewmodels.asOtsIfNoStats
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -140,7 +141,7 @@ class MatchupPlanEditViewModelTest {
         assertFalse(viewModel.isEditingPokepaste)
         assertEquals(pasteBefore, viewModel.pokepaste)
         assertNull(viewModel.pokepasteError)
-        assertSame(matchupPlan.pokePaste, viewModel.opponentPokepaste)
+        assertSame(matchupPlan.pokePaste, viewModel.appliedPokepaste)
         assertFalse(viewModel.hasChanges)
     }
 
@@ -154,7 +155,7 @@ class MatchupPlanEditViewModelTest {
         viewModel.applyPokepasteEdition()
 
         assertFalse(viewModel.isEditingPokepaste)
-        assertEquals(pokepasteParser.parse(paste), viewModel.opponentPokepaste)
+        assertEquals(pokepasteParser.parse(paste), viewModel.appliedPokepaste)
         assertTrue(viewModel.hasChanges)
     }
 
@@ -169,7 +170,7 @@ class MatchupPlanEditViewModelTest {
         viewModel.applyPokepasteEdition()
 
         assertTrue(viewModel.isEditingPokepaste)
-        assertSame(matchupPlan.pokePaste, viewModel.opponentPokepaste)
+        assertSame(matchupPlan.pokePaste, viewModel.appliedPokepaste)
     }
 
     @Test
@@ -181,7 +182,7 @@ class MatchupPlanEditViewModelTest {
         assertTrue(viewModel.canApplyPokepaste)
         viewModel.applyPokepasteEdition()
 
-        assertNull(viewModel.opponentPokepaste)
+        assertNull(viewModel.appliedPokepaste)
         assertNull(viewModel.generateMatchupPlan(matchupPlan).pokePaste)
     }
 

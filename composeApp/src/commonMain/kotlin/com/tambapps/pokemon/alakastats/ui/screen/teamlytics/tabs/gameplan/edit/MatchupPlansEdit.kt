@@ -6,10 +6,8 @@ import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
 import alakastats.composeapp.generated.resources.arrow_downward
 import alakastats.composeapp.generated.resources.arrow_upward
-import alakastats.composeapp.generated.resources.content_paste
 import alakastats.composeapp.generated.resources.delete
 import alakastats.composeapp.generated.resources.edit
-import alakastats.composeapp.generated.resources.visibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,8 +28,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,37 +46,29 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogProperties
 import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.withContext
-import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
-import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
+import com.tambapps.pokemon.alakastats.ui.composables.PokepasteCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
-import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
-import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.gameplan.Composition
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay.ReplayCompact
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
-import com.tambapps.pokemon.alakastats.util.copyToClipboard
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
@@ -149,7 +137,13 @@ fun MatchupPlansEdit(
                         VerticalSpacer(8.dp)
                         NameInput(viewModel)
                         VerticalSpacer()
-                        OpponentTeam(viewModel, team)
+                        PokepasteCard(
+                            viewModel,
+                            team.format,
+                            title = "Opponent Team",
+                            emptyText = "Add your opponent's PokéPaste to see their team here",
+                            teamName = viewModel.name,
+                        )
                         VerticalSpacer(32.dp)
                     }
                     item {
@@ -194,9 +188,6 @@ fun MatchupPlansEdit(
     viewModel.compositionDialogFor?.let { AddToCompositionDialog(viewModel, team, it) }
     viewModel.addReplayDialogFor?.let { SelectReplayExampleDialog(viewModel, team, it) }
     viewModel.gamePlanToDelete?.let { DeleteGamePlanDialog(viewModel, it) }
-    if (viewModel.isEditingPokepaste) {
-        EditPokepasteDialog(viewModel)
-    }
     if (showDiscardDialog) {
         DiscardChangesDialog(onDismiss = { showDiscardDialog = false }, onDiscard = onCancel)
     }
@@ -239,110 +230,6 @@ private fun ButtonsBar(
             }
         }
     }
-}
-
-@Composable
-private fun OpponentTeam(viewModel: MatchupPlanEditViewModel, team: Teamlytics) {
-    var showDetails by remember { mutableStateOf(false) }
-    MyCard(gradientBackgroundColors = cardGradientColors, modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp)) {
-            SectionSubTitle("Opponent Team")
-            VerticalSpacer()
-            val pokePaste = viewModel.opponentPokepaste
-            if (pokePaste == null) {
-                Text(
-                    "Add your opponent's PokéPaste to see their team here",
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                VerticalSpacer()
-                OutlinedButton(onClick = viewModel::startPokepasteEdition) {
-                    ButtonIcon(painterResource(Res.drawable.content_paste))
-                    Text("Add PokéPaste")
-                }
-            } else {
-                PokemonTeamPreview(
-                    pokePaste,
-                    fillWidth = true,
-                    facingDirection = FacingDirection.LEFT
-                )
-                VerticalSpacer()
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedButton(onClick = { showDetails = true }) {
-                        ButtonIcon(painterResource(Res.drawable.visibility))
-                        Text("Details")
-                    }
-                    OutlinedButton(onClick = viewModel::startPokepasteEdition) {
-                        ButtonIcon(painterResource(Res.drawable.edit))
-                        Text("Edit")
-                    }
-                }
-            }
-        }
-    }
-    val pokePaste = viewModel.opponentPokepaste
-    if (showDetails && pokePaste != null) {
-        val snackbar = LocalSnackBar.current
-        val clipboard = LocalClipboard.current
-        val scope = rememberCoroutineScope()
-        AlertDialog(
-            onDismissRequest = { showDetails = false },
-            title = { Text(viewModel.name.ifBlank { "Opponent team" }) },
-            text = {
-                Column(Modifier.verticalScroll(rememberScrollState())) {
-                    // vertical on desktop too, as a dialog doesn't take the whole screen width
-                    VerticalPokepaste(remember(pokePaste) { pokePaste.asOtsIfNoStats() }, team.format)
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showDetails = false }) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showDetails = false
-                    scope.launch {
-                        val label = "${viewModel.name.ifBlank { "Opponent" }}'s team"
-                        if (copyToClipboard(clipboard, label = label, text = pokePaste.toPokePasteString())) {
-                            snackbar.show("Copied to clipboard")
-                        } else {
-                            snackbar.show("Copy to clipboard not supported")
-                        }
-                    }
-                }) {
-                    Text("COPY")
-                }
-            }
-        )
-    }
-}
-
-@Composable
-private fun EditPokepasteDialog(viewModel: MatchupPlanEditViewModel) {
-    AlertDialog(
-        onDismissRequest = viewModel::cancelPokepasteEdition,
-        // a click next to the dialog shouldn't lose a paste being typed
-        properties = DialogProperties(dismissOnClickOutside = false),
-        title = { Text(if (viewModel.opponentPokepaste == null) "Add Opponent Team" else "Edit Opponent Team") },
-        text = {
-            Column(Modifier.verticalScroll(rememberScrollState())) {
-                PokePasteInput(viewModel)
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = viewModel::applyPokepasteEdition,
-                enabled = viewModel.canApplyPokepaste
-            ) {
-                Text("Apply")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = viewModel::cancelPokepasteEdition) {
-                Text("Cancel")
-            }
-        }
-    )
 }
 
 @Composable

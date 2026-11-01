@@ -49,7 +49,7 @@ import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.FormatSelector
-import com.tambapps.pokemon.alakastats.ui.composables.PokePasteInput
+import com.tambapps.pokemon.alakastats.ui.composables.PokepasteCard
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
@@ -99,7 +99,13 @@ data class EditTeamScreen(
 
                 ShowdownNamesInput(viewModel)
 
-                PokePasteInput(viewModel)
+                PokepasteCard(
+                    viewModel,
+                    viewModel.format,
+                    title = "PokéPaste",
+                    emptyText = "Add your team's PokéPaste to see your Pokémon here",
+                    teamName = viewModel.teamName,
+                )
 
                 if (viewModel.canChooseSync) {
                     SyncInput(viewModel)
