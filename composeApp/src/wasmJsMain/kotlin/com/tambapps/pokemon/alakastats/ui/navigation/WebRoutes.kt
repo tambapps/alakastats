@@ -1,8 +1,11 @@
 package com.tambapps.pokemon.alakastats.ui.navigation
 
 import androidx.navigation3.runtime.NavKey
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTab
+import kotlin.uuid.Uuid
 
 private const val POKEDEX_PATH = "pokedex"
+private const val TEAMS_PATH = "teams"
 
 /**
  * The screens to open for each fixed path, the last one being shown. The screens below are there for the back button of
@@ -33,8 +36,19 @@ internal object WebRoutes {
         return when {
             segments.singleOrNull() == POKEDEX_PATH -> listOf(AppRoute.Home, AppRoute.Pokedex())
             segments.size == 2 && segments[0] == POKEDEX_PATH -> listOf(AppRoute.Home, AppRoute.Pokedex(segments[1]))
+            segments.size in 2..3 && segments[0] == TEAMS_PATH -> teamBackStackOf(segments[1], segments.getOrNull(2))
             else -> listOf(AppRoute.Home)
         }
+    }
+
+    /**
+     * A tab that isn't known opens the team's first one. Whether the team exists is only known once it's loaded: its
+     * screen goes back to the home screen if it doesn't
+     */
+    private fun teamBackStackOf(teamId: String, tabPath: String?): List<AppRoute> {
+        val id = Uuid.parseOrNull(teamId) ?: return listOf(AppRoute.Home)
+        val tab = TeamlyticsTab.entries.find { it.path == tabPath } ?: TeamlyticsTab.OVERVIEW
+        return listOf(AppRoute.Home, AppRoute.Teamlytics(id, tab))
     }
 
     /**
@@ -46,6 +60,11 @@ internal object WebRoutes {
 
     private fun pathOfRoute(route: NavKey): String? = when (route) {
         is AppRoute.Pokedex -> if (route.form != null) "$POKEDEX_PATH/${route.form}" else POKEDEX_PATH
+        is AppRoute.Teamlytics -> {
+            val teamPath = "$TEAMS_PATH/${route.teamId}"
+            // the first tab is the team's own URL
+            if (route.tab == TeamlyticsTab.OVERVIEW) teamPath else "$teamPath/${route.tab.path}"
+        }
         else -> BACK_STACK_BY_PATH.entries.find { it.value.last() == route }?.key
     }
 }

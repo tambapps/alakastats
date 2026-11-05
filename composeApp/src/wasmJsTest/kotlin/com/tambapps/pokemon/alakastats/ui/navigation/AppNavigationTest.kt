@@ -9,9 +9,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
@@ -32,9 +36,24 @@ import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.alakastats.App
 import com.tambapps.pokemon.alakastats.di.appModules
 import com.tambapps.pokemon.alakastats.di.wasmModule
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
+import com.tambapps.pokemon.alakastats.domain.error.GetTeamlyticsError
+import com.tambapps.pokemon.alakastats.domain.error.TeamlyticsNotFound
 import com.tambapps.pokemon.alakastats.domain.model.Format
+import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsData
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
+import com.tambapps.pokemon.alakastats.domain.model.UserName
+import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizDirection
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsMode
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTab
+import com.tambapps.pokemon.pokepaste.parser.PokePaste
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.PolymorphicSerializer
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
@@ -46,7 +65,41 @@ import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Instant
+import kotlin.time.TimeSource
 import kotlin.uuid.Uuid
+
+/**
+ * Waits for what the app does in the background. waitUntil can't: it blocks the browser's only thread, whose event loop
+ * runs the coroutines of the view models
+ */
+@OptIn(ExperimentalTestApi::class)
+private suspend fun ComposeUiTest.awaitUntil(description: String, timeoutMillis: Long = 20_000, condition: () -> Boolean) {
+    val start = TimeSource.Monotonic.markNow()
+    while (!condition()) {
+        if (start.elapsedNow().inWholeMilliseconds > timeoutMillis) throw AssertionError("Timeout: $description")
+        withContext(Dispatchers.Default) { delay(20) }
+        mainClock.advanceTimeByFrame()
+    }
+}
+
+// no need to write teams in the browser's storage
+private class InMemoryTeamlyticsRepository(teams: List<Teamlytics>) : TeamlyticsRepository {
+    private val teamsById = teams.associateBy { it.id }
+
+    override suspend fun get(id: Uuid): Either<GetTeamlyticsError, Teamlytics> =
+        teamsById[id]?.right() ?: TeamlyticsNotFound(id).left()
+
+    override suspend fun list() = teamsById.values.toList()
+    override suspend fun listPreviews() = emptyList<TeamlyticsPreview>()
+    override suspend fun save(teamlytics: Teamlytics, base: Teamlytics?): Either<GetTeamlyticsError, Teamlytics> = teamlytics.right()
+    override suspend fun delete(teamlytics: Teamlytics) = Unit
+    override suspend fun delete(id: Uuid) = Unit
+}
+
+private fun appModulesWithTeams(vararg teams: Teamlytics) = appModules + wasmModule + module {
+    single<TeamlyticsRepository> { InMemoryTeamlyticsRepository(teams.toList()) }
+}
 
 private class RecordingViewModel(val id: Uuid) : ViewModel() {
     var clicks by mutableStateOf(0)
@@ -80,7 +133,7 @@ class AppNavigationTest {
             AppRoute.DamageCalc,
             AppRoute.StandaloneDamageCalc,
             AppRoute.Teamlytics(teamId),
-            AppRoute.Teamlytics(Uuid.random()),
+            AppRoute.Teamlytics(Uuid.random(), TeamlyticsTab.GAME_PLANS),
             AppRoute.EditTeam(),
             AppRoute.EditTeam(teamId, redirectToTeamlytics = true),
             AppRoute.PokemonDetails(teamId, "metagross-mega"),
@@ -245,6 +298,68 @@ class AppNavigationTest {
         waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Pokédex")).fetchSemanticsNodes().isNotEmpty() }
     }
 
+    @Test
+    fun anUnknownTeamGoesToTheHomeScreen() = runComposeUiTest {
+        var backStack: List<NavKey> = emptyList()
+        setContent {
+            KoinApplication(
+                configuration = koinConfiguration { modules(appModulesWithTeams()) },
+                logLevel = Level.NONE,
+            ) {
+                App(
+                    startRoutes = listOf(AppRoute.Home, AppRoute.Teamlytics(Uuid.random())),
+                    backStackEffect = { backStack = it },
+                )
+            }
+        }
+        awaitUntil("the back stack is the home screen") { backStack.toList() == listOf<NavKey>(AppRoute.Home) }
+        awaitUntil("the home screen is shown") { onAllNodes(hasText("Pokédex")).fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    @Test
+    fun theTabsOfATeamFollowTheRouteAndTheRouteTheTabs() = runComposeUiTest {
+        val team = Teamlytics(
+            id = Uuid.random(),
+            name = "Team",
+            pokePaste = PokePaste(emptyList()),
+            replays = emptyList(),
+            sdNames = listOf(UserName("me")),
+            lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+            data = TeamlyticsData(emptyMap()),
+            notes = null,
+            matchupPlans = emptyList(),
+            format = Format.NONE,
+        )
+        var backStack: MutableList<NavKey>? = null
+        setContent {
+            KoinApplication(
+                configuration = koinConfiguration { modules(appModulesWithTeams(team)) },
+                logLevel = Level.NONE,
+            ) {
+                App(
+                    // opened on a tab
+                    startRoutes = listOf(AppRoute.Home, AppRoute.Teamlytics(team.id, TeamlyticsTab.LEAD_STATS)),
+                    backStackEffect = { backStack = it },
+                )
+            }
+        }
+        val tab = { title: String -> hasText(title) and hasClickAction() }
+        awaitUntil("the team is loaded") { onAllNodes(tab("Lead Stats")).fetchSemanticsNodes().isNotEmpty() }
+        onNode(tab("Lead Stats")).assertIsSelected()
+
+        // the tabs change the route
+        onNode(tab("Usages")).performClick()
+        awaitUntil("the route follows the tab") { backStack?.lastOrNull() == AppRoute.Teamlytics(team.id, TeamlyticsTab.USAGES) }
+        onNode(tab("Usages")).assertIsSelected()
+
+        // the route changes the tab, as the browser's buttons do
+        backStack!![backStack!!.lastIndex] = AppRoute.Teamlytics(team.id, TeamlyticsTab.REPLAYS)
+        awaitUntil("the tab follows the route") {
+            onAllNodes(tab("Replays") and isSelected()).fetchSemanticsNodes().isNotEmpty()
+        }
+        assertEquals<NavKey?>(AppRoute.Teamlytics(team.id, TeamlyticsTab.REPLAYS), backStack?.lastOrNull())
+    }
+
     // each screen in the real app: its view model must be resolved by Koin, with its parameters
     private fun screenOpens(route: AppRoute) = runComposeUiTest {
         // the loading indicators animate forever: it would never be idle
@@ -267,6 +382,7 @@ class AppNavigationTest {
     @Test fun damageCalcOpens() = screenOpens(AppRoute.DamageCalc)
     @Test fun standaloneDamageCalcOpens() = screenOpens(AppRoute.StandaloneDamageCalc)
     @Test fun teamlyticsOpens() = screenOpens(AppRoute.Teamlytics(Uuid.random()))
+    @Test fun teamlyticsOpensOnATab() = screenOpens(AppRoute.Teamlytics(Uuid.random(), TeamlyticsTab.REPLAYS))
     @Test fun createTeamOpens() = screenOpens(AppRoute.EditTeam())
     @Test fun editTeamOpens() = screenOpens(AppRoute.EditTeam(Uuid.random(), redirectToTeamlytics = true))
     @Test fun pokemonDetailsOpens() = screenOpens(AppRoute.PokemonDetails(Uuid.random(), "metagross"))

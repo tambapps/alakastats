@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.navigation
 
 import com.tambapps.pokemon.alakastats.domain.model.Format
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTab
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.uuid.Uuid
@@ -73,10 +74,52 @@ class WebRoutesTest {
         assertEquals("quizzes/speed-stat", WebRoutes.pathOf(setup + quiz))
     }
 
+    private val teamId = Uuid.parse("0190a6f4-1234-7abc-8def-0123456789ab")
+
     @Test
-    fun aTeamsQuizHasNoUrlOfItsOwn() {
-        val backStack = listOf(AppRoute.Home, AppRoute.Teamlytics(Uuid.random()), AppRoute.SpeedInteractionsTeamSetup(Uuid.random()))
-        assertEquals("", WebRoutes.pathOf(backStack))
+    fun aTeamIsAboveTheHomeScreenOnItsFirstTab() {
+        assertEquals(listOf(AppRoute.Home, AppRoute.Teamlytics(teamId)), WebRoutes.backStackOf("teams/$teamId"))
+    }
+
+    @Test
+    fun eachTabOfATeamHasItsUrl() {
+        for (tab in TeamlyticsTab.entries) {
+            val backStack = WebRoutes.backStackOf("teams/$teamId/${tab.path}")
+            assertEquals(listOf(AppRoute.Home, AppRoute.Teamlytics(teamId, tab)), backStack)
+        }
+    }
+
+    @Test
+    fun theFirstTabIsTheTeamsOwnUrl() {
+        assertEquals("teams/$teamId", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.Teamlytics(teamId))))
+        assertEquals(
+            listOf(AppRoute.Home, AppRoute.Teamlytics(teamId)),
+            WebRoutes.backStackOf("teams/$teamId/overview"),
+        )
+    }
+
+    @Test
+    fun theOtherTabsAreInTheUrl() {
+        val backStack = listOf(AppRoute.Home, AppRoute.Teamlytics(teamId, TeamlyticsTab.GAME_PLANS))
+        assertEquals("teams/$teamId/game-plans", WebRoutes.pathOf(backStack))
+    }
+
+    @Test
+    fun anUnknownTabOpensTheTeam() {
+        assertEquals(listOf(AppRoute.Home, AppRoute.Teamlytics(teamId)), WebRoutes.backStackOf("teams/$teamId/unknown"))
+    }
+
+    @Test
+    fun anInvalidTeamIdOpensTheHomeScreen() {
+        assertEquals(listOf(AppRoute.Home), WebRoutes.backStackOf("teams/not-an-id"))
+        assertEquals(listOf(AppRoute.Home), WebRoutes.backStackOf("teams"))
+        assertEquals(listOf(AppRoute.Home), WebRoutes.backStackOf("teams/$teamId/replays/more"))
+    }
+
+    @Test
+    fun aTeamsScreensAreAtTheUrlOfItsTab() {
+        val backStack = listOf(AppRoute.Home, AppRoute.Teamlytics(teamId, TeamlyticsTab.QUIZZES), AppRoute.SpeedInteractionsTeamSetup(teamId))
+        assertEquals("teams/$teamId/quizzes", WebRoutes.pathOf(backStack))
     }
 
     @Test

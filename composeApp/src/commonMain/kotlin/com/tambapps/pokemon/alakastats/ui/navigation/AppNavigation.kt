@@ -37,6 +37,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsTeamSe
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedStatQuizScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedStatQuizSetupScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailsScreen
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -72,7 +73,7 @@ sealed interface AppRoute : NavKey {
     data object StandaloneDamageCalc : AppRoute
 
     @Serializable
-    data class Teamlytics(val teamId: Uuid) : AppRoute
+    data class Teamlytics(val teamId: Uuid, val tab: TeamlyticsTab = TeamlyticsTab.OVERVIEW) : AppRoute
 
     /** @param teamId null to create a team */
     @Serializable
@@ -128,6 +129,11 @@ class AppNavigator(private val backStack: MutableList<NavKey>) {
     fun replace(route: AppRoute) {
         backStack[backStack.lastIndex] = route
     }
+
+    /** Replaces the last screen if it still is the given one: another one may just have been pushed above it */
+    fun replaceIfCurrent(current: AppRoute, route: AppRoute) {
+        if (backStack.lastOrNull() == current) replace(route)
+    }
 }
 
 val LocalAppNavigator = staticCompositionLocalOf<AppNavigator> { error("No AppNavigator provided") }
@@ -172,7 +178,10 @@ fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (Nav
                 entry<AppRoute.About> { AboutScreen() }
                 entry<AppRoute.DamageCalc> { DamageCalcScreen(showBackButton = true) }
                 entry<AppRoute.StandaloneDamageCalc> { DamageCalcScreen(showBackButton = false) }
-                entry<AppRoute.Teamlytics> { TeamlyticsScreen(it.teamId) }
+                // the same content whatever the tab: changing it keeps the screen and its view model
+                entry<AppRoute.Teamlytics>(clazzContentKey = { "teamlytics-${it.teamId}" }) {
+                    TeamlyticsScreen(it.teamId, it.tab)
+                }
                 entry<AppRoute.EditTeam> { EditTeamScreen(it.teamId, it.redirectToTeamlytics) }
                 entry<AppRoute.PokemonDetails> { PokemonDetailsScreen(it.teamId, PokemonName(it.pokemonName)) }
                 entry<AppRoute.ManualReplay> { ManualReplayScreen(it.teamId, it.replayReference) }

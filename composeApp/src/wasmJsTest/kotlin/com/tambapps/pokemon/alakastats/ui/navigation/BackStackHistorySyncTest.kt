@@ -1,8 +1,10 @@
 package com.tambapps.pokemon.alakastats.ui.navigation
 
 import androidx.navigation3.runtime.NavKey
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTab
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.uuid.Uuid
 
 /**
  * A browser history, whose back is asynchronous as in a real one: [deliverPendingBack] tells when it happens
@@ -151,6 +153,30 @@ class BackStackHistorySyncTest {
 
         history.pressForward(sync)
         assertEquals(listOf<NavKey>(home, cloudSync), backStack)
+    }
+
+    @Test
+    fun anUnknownTeamOpenedFromItsUrlEndsOnTheHomeUrl() {
+        val teamId = Uuid.random()
+        val history = FakeHistory("teams/$teamId")
+        val (sync, backStack) = sync(history, home, AppRoute.Teamlytics(teamId))
+        assertEquals("teams/$teamId", history.path)
+        // what the team's screen does when it can't load the team
+        sync.navigate(backStack) { removeLast() }
+        assertEquals(0, history.pendingBacks)
+        assertEquals("", history.path)
+        assertEquals(listOf<NavKey>(home), backStack)
+    }
+
+    @Test
+    fun changingOfTabReplacesTheEntry() {
+        val teamId = Uuid.random()
+        val history = FakeHistory()
+        val (sync, backStack) = sync(history, home)
+        sync.navigate(backStack) { add(AppRoute.Teamlytics(teamId)) }
+        sync.navigate(backStack) { this[lastIndex] = AppRoute.Teamlytics(teamId, TeamlyticsTab.REPLAYS) }
+        assertEquals("teams/$teamId/replays", history.path)
+        assertEquals(2, history.entries.size)
     }
 
     @Test

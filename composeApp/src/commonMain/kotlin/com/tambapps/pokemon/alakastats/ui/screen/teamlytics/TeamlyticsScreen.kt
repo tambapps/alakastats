@@ -23,10 +23,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
 import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import org.koin.compose.viewmodel.koinViewModel
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
@@ -60,15 +63,32 @@ import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import kotlin.uuid.Uuid
 
-private val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Opponent Trends", "Game Plans", "Damage Calc", "Quizzes")
+private val TABS = TeamlyticsTab.entries.map { it.title }
 
+/**
+ * @param tab the tab shown. It's in the route, for it to be restored and to be in the web app's URL
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TeamlyticsScreen(teamId: Uuid) {
+fun TeamlyticsScreen(teamId: Uuid, tab: TeamlyticsTab) {
     val viewModel = koinViewModel<TeamlyticsViewModel> { parametersOf(teamId) }
     val isCompact = LocalIsCompact.current
-    val pagerState = rememberPagerState(pageCount = { TABS.size })
+    val pagerState = rememberPagerState(initialPage = tab.ordinal, pageCount = { TABS.size })
     val reconnectionGuard = rememberReconnectionGuard(teamId)
+    val navigator = LocalAppNavigator.current
+    val currentTab by rememberUpdatedState(tab)
+    // the route can change from outside the pager, e.g. with the browser's buttons
+    LaunchedEffect(tab) {
+        if (pagerState.settledPage != tab.ordinal) pagerState.scrollToPage(tab.ordinal)
+    }
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }.collect { page ->
+            val newTab = TeamlyticsTab.entries[page]
+            if (newTab != currentTab) {
+                navigator.replaceIfCurrent(AppRoute.Teamlytics(teamId, currentTab), AppRoute.Teamlytics(teamId, newTab))
+            }
+        }
+    }
 
     CompositionLocalProvider(LocalReconnectionGuard provides reconnectionGuard) {
         TeamlyticsContent(viewModel, isCompact, pagerState)
