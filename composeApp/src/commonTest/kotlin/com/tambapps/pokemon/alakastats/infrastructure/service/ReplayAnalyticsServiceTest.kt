@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.infrastructure.service
 
+import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.BestOf
 import com.tambapps.pokemon.alakastats.domain.model.GameEndReason
@@ -141,6 +142,110 @@ class ReplayAnalyticsServiceTest {
 
         assertEquals(GameEndReason.TIMER, replay.endReason)
         assertEquals(7, replay.turns)
+    }
+
+    private suspend fun fetchReplay(log: String) =
+        serviceReturning(log.trimIndent()).fetch("https://replay.pokemonshowdown.com/gen9vgc-1").getOrNull()!!
+
+    private fun moves(vararg moves: Pair<String, Int>) = moves.associate { (move, count) -> MoveName(move) to count }
+
+    @Test
+    fun movesOfANicknamedPokemonAreItsOwn() = runTest {
+        val replay = fetchReplay("""
+            |player|p1|me||
+            |player|p2|opponent||
+            |switch|p1a: Florence|Floette-Eternal, L50, F|100/100
+            |switch|p1b: Rex|Incineroar, L50, M|100/100
+            |switch|p2a: Garchomp|Garchomp, L50, M|100/100
+            |move|p1a: Florence|Moonblast|p2a: Garchomp
+            |move|p1a: Florence|Moonblast|p2a: Garchomp
+            |move|p1b: Rex|Fake Out|p2a: Garchomp
+            |move|p2a: Garchomp|Earthquake|p1a: Florence
+        """)
+
+        assertEquals(
+            mapOf(
+                PokemonName("floette-eternal") to moves("moonblast" to 2),
+                PokemonName("incineroar") to moves("fake-out" to 1),
+            ),
+            replay.player1.movesUsage,
+        )
+        assertEquals(mapOf(PokemonName("garchomp") to moves("earthquake" to 1)), replay.player2.movesUsage)
+    }
+
+    @Test
+    fun megaAndTeraOfANicknamedPokemonAreItsOwn() = runTest {
+        val replay = fetchReplay("""
+            |player|p1|me||
+            |player|p2|opponent||
+            |switch|p1a: Florence|Floette-Eternal, L50, F|100/100
+            |switch|p2a: Rex|Incineroar, L50, M|100/100
+            |-mega|p1a: Florence|Floette|Floettite
+            |-terastallize|p2a: Rex|Water
+        """)
+
+        assertEquals(PokemonName("floette-eternal"), replay.player1.megaEvolution?.pokemon)
+        assertEquals(PokemonName("incineroar"), replay.player2.terastallization?.pokemon)
+    }
+
+    @Test
+    fun allySwitchMovesEachPokemonToTheOtherSlot() = runTest {
+        val replay = fetchReplay("""
+            |player|p1|me||
+            |player|p2|opponent||
+            |switch|p1a: Yami|Pikachu, L50|100/100
+            |switch|p1b: Rex|Incineroar, L50, M|100/100
+            |swap|p1a: Yami|1|[from] move: Ally Switch
+            |move|p1a: Rex|Fake Out|p2a: Garchomp
+            |move|p1b: Yami|Thunderbolt|p2a: Garchomp
+            |swap|p1b: Yami|0|[from] move: Ally Switch
+            |move|p1a: Yami|Protect|p1a: Yami
+            |faint|p1b: Rex
+        """)
+
+        assertEquals(
+            mapOf(
+                PokemonName("incineroar") to moves("fake-out" to 1),
+                PokemonName("pikachu") to moves("thunderbolt" to 1, "protect" to 1),
+            ),
+            replay.player1.movesUsage,
+        )
+        assertEquals(listOf(PokemonName("incineroar")), replay.player1.fainted)
+    }
+
+    @Test
+    fun allySwitchWithoutAnAllyFreesTheSlot() = runTest {
+        val replay = fetchReplay("""
+            |player|p1|me||
+            |player|p2|opponent||
+            |switch|p1a: Yami|Pikachu, L50|100/100
+            |swap|p1a: Yami|1|[from] move: Ally Switch
+            |move|p1b: Yami|Protect|p1b: Yami
+        """)
+
+        assertEquals(mapOf(PokemonName("pikachu") to moves("protect" to 1)), replay.player1.movesUsage)
+    }
+
+    @Test
+    fun movesAfterAnIllusionEndsAreTheOnesOfTheRealPokemon() = runTest {
+        val replay = fetchReplay("""
+            |player|p1|me||
+            |player|p2|opponent||
+            |switch|p1a: Incineroar|Incineroar, L50, M|100/100
+            |move|p1a: Incineroar|Flamethrower|p2a: Garchomp
+            |replace|p1a: Zoroark|Zoroark-Hisui, L50, M
+            |move|p1a: Zoroark|Bitter Malice|p2a: Garchomp
+            |faint|p1a: Zoroark
+        """)
+
+        assertEquals(
+            mapOf(
+                PokemonName("incineroar") to moves("flamethrower" to 1),
+                PokemonName("zoroark-hisui") to moves("bitter-malice" to 1),
+            ),
+            replay.player1.movesUsage,
+        )
+        assertEquals(listOf(PokemonName("zoroark-hisui")), replay.player1.fainted)
     }
 
     @Test

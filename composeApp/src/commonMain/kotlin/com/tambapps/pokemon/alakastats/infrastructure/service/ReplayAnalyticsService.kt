@@ -114,7 +114,7 @@ internal class ReplayAnalyticsBuilderVisitor(
         const val TIMER_MESSAGE_SUFFIX = " lost due to inactivity."
     }
     private val playerBuilders = mutableMapOf<String, PlayerBuilderEntityBuilder>()
-    // the Pokémon in each slot (e.g. p1a), as the faint logs give its nickname
+    // the Pokémon in each slot (e.g. p1a), as many logs only give its nickname
     private val activePokemons = mutableMapOf<String, String>()
 
     val players get() = playerBuilders.values.map { it.build() }
@@ -132,6 +132,20 @@ internal class ReplayAnalyticsBuilderVisitor(
     var endReason: GameEndReason? = null
         private set
 
+    override fun visitSwapLog(pokemonSlot: String, targetPokemonSlot: String) {
+        val pokemon = activePokemons.remove(pokemonSlot)
+        val otherPokemon = activePokemons.remove(targetPokemonSlot)
+        pokemon?.let { activePokemons[targetPokemonSlot] = it }
+        otherPokemon?.let { activePokemons[pokemonSlot] = it }
+    }
+
+    override fun visitReplaceLog(pokemonSlot: String, pokemonName: String) {
+        activePokemons[pokemonSlot] = getActualPokemonName(getPlayer(pokemonSlot), pokemonName)
+    }
+
+    private fun pokemonNameAt(slot: String, loggedName: String) =
+        activePokemons[slot] ?: getActualPokemonName(getPlayer(slot), loggedName)
+
     override fun visitMoveLog(
         sourcePokemonSlot: String,
         sourcePokemonName: String,
@@ -144,7 +158,7 @@ internal class ReplayAnalyticsBuilderVisitor(
     ) {
         val builder = getPlayer(sourcePokemonSlot)
         if (moveName != STRUGGLE) {
-            builder.moveUsage(sourcePokemonName, moveName)
+            builder.moveUsage(pokemonNameAt(sourcePokemonSlot, sourcePokemonName), moveName)
         }
     }
 
@@ -213,7 +227,7 @@ internal class ReplayAnalyticsBuilderVisitor(
     override fun visitTerastallizeLog(pokemonSlot: String, pokemonName: String, teraType: String) {
         val player = getPlayer(pokemonSlot)
         player.terastallization = TerastallizationEntity(
-            pokemon = getActualPokemonName(player, pokemonName),
+            pokemon = pokemonNameAt(pokemonSlot, pokemonName),
             type = teraType.uppercase()
         )
     }
@@ -221,7 +235,7 @@ internal class ReplayAnalyticsBuilderVisitor(
     override fun visitMegaLog(pokemonSlot: String, pokemonName: String, item: String) {
         val player = getPlayer(pokemonSlot)
         player.megaEvolution = MegaEvolutionEntity(
-            pokemon = getActualPokemonName(player, pokemonName),
+            pokemon = pokemonNameAt(pokemonSlot, pokemonName),
             item = formatPokemonTrait(item)
         )
     }
@@ -289,7 +303,7 @@ private data class PlayerBuilderEntityBuilder(
     }
 
     fun moveUsage(pokemonName: String, moveName: String) {
-        val movesCount = movesUsage.getOrPut(getActualPokemonName(this, pokemonName)) { mutableMapOf() }
+        val movesCount = movesUsage.getOrPut(pokemonName) { mutableMapOf() }
         movesCount[moveName] = movesCount.getOrPut(moveName) { 0 } + 1
     }
 
