@@ -9,7 +9,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.SyncMergeNotifier
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.ui.SnackBarContext
-import com.tambapps.pokemon.alakastats.ui.screen.home.HomeScreen
+import com.tambapps.pokemon.alakastats.ui.navigation.AppNavDisplay
 import com.tambapps.pokemon.alakastats.ui.service.LocalPokemonImageService
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.sitemove.SiteMoveBanner
@@ -18,10 +18,11 @@ import com.tambapps.pokemon.alakastats.ui.theme.ProvideIsCompact
 import org.koin.compose.koinInject
 
 /**
- * @param startScreen the first screen, e.g. the damage calc alone on the web app's damage-calc page
+ * @param voyagerScreen SPIKE: a screen that isn't migrated to open instead, the damage calc alone on the web app's
+ * damage-calc page
  */
 @Composable
-fun App(startScreen: Screen = HomeScreen) {
+fun App(voyagerScreen: Screen? = null) {
     val syncService = koinInject<TeamSyncService>()
     LaunchedEffect(Unit) {
         // syncs only if the user connected a cloud storage
@@ -38,7 +39,7 @@ fun App(startScreen: Screen = HomeScreen) {
                 SyncMergeNotifier(syncService)
                 CompositionLocalProvider(LocalPokemonImageService provides koinInject<PokemonImageService>()) {
                     SiteMoveBanner {
-                        Navigator(startScreen)
+                        if (voyagerScreen != null) Navigator(voyagerScreen) else AppNavDisplay()
                     }
                 }
             }

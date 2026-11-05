@@ -9,8 +9,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import arrow.core.Either
 import arrow.core.getOrElse
 import arrow.core.raise.either
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.navigator.Navigator
+import androidx.lifecycle.ViewModel
+import com.tambapps.pokemon.alakastats.ui.navigation.AppNavigator
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
 import com.tambapps.pokemon.alakastats.domain.error.ReadOnlyTeamError
 import com.tambapps.pokemon.alakastats.domain.error.StorageError
 import com.tambapps.pokemon.alakastats.domain.error.TeamlyticsNotFound
@@ -27,8 +28,6 @@ import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.userMessage
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.getFilePickerSettings
-import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
 import io.github.vinceglb.filekit.dialogs.FileKitType
@@ -50,7 +49,7 @@ class HomeViewModel(
     private val useCase: ManageTeamlyticsListUseCase,
     private val syncService: TeamSyncService,
     private val teamFilePicker: TeamFilePicker?,
-): ScreenModel {
+): ViewModel() {
 
     val teamsChangedBySync = syncService.teamsChanged
 
@@ -268,8 +267,8 @@ class HomeViewModel(
         expandedMenuTeamId = null
     }
 
-    fun consultTeam(team: TeamlyticsPreview, navigator: Navigator) {
-        navigator.push(TeamlyticsScreen(team.id))
+    fun consultTeam(team: TeamlyticsPreview, navigator: AppNavigator) {
+        navigator.push(AppRoute.Team(team.id))
     }
 
     fun reloadReplays(preview: TeamlyticsPreview, snackBar: SnackBar) {
@@ -340,7 +339,7 @@ class HomeViewModel(
         hideMenu()
     }
 
-    fun editTeam(team: TeamlyticsPreview, navigator: Navigator, snackBar: SnackBar) {
+    fun editTeam(team: TeamlyticsPreview, navigator: AppNavigator, snackBar: SnackBar) {
         scope.launch {
             useCase.get(team.id).fold(
                 ifLeft =  { error ->
@@ -352,7 +351,7 @@ class HomeViewModel(
                 },
                 ifRight = { fullTeam ->
                     withContext(Dispatchers.Main) {
-                        navigator.push(EditTeamScreen(fullTeam.id))
+                        navigator.push(AppRoute.NotMigrated("Edit Team"))
                     }
                 }
             )

@@ -62,10 +62,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
+import org.koin.compose.viewmodel.koinViewModel
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
@@ -73,23 +72,16 @@ import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
-import com.tambapps.pokemon.alakastats.ui.screen.about.AboutScreen
-import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.CloudSyncScreen
 import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.CloudSyncViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.SyncStatusDialog
-import com.tambapps.pokemon.alakastats.ui.screen.damagecalc.DamageCalcScreen
-import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
-import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexScreen
-import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizzesHomeScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
-object HomeScreen : Screen {
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<HomeViewModel>()
+@Composable
+fun HomeScreen() {
+        val viewModel = koinViewModel<HomeViewModel>()
         LaunchedEffect(Unit) {
             viewModel.loadTeams()
         }
@@ -167,9 +159,8 @@ object HomeScreen : Screen {
         ShareTeamDialog(viewModel)
         JoinOnWebDialog(viewModel)
         if (viewModel.showSyncStatusDialog) {
-            SyncStatusDialog(koinScreenModel<CloudSyncViewModel>()) { viewModel.showSyncStatusDialog = false }
+            SyncStatusDialog(koinViewModel<CloudSyncViewModel>()) { viewModel.showSyncStatusDialog = false }
         }
-    }
 }
 
 @Composable
@@ -184,7 +175,7 @@ internal fun CatchPhrase(skipLine: Boolean = false, textAlign: TextAlign = TextA
 
 @Composable
 internal fun TeamCard(viewModel: HomeViewModel, team: TeamlyticsPreview, modifier: Modifier = Modifier) {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalAppNavigator.current
 
     MyCard(
         modifier = modifier,
@@ -289,7 +280,7 @@ private fun TeamStatusIcons(viewModel: HomeViewModel, team: TeamlyticsPreview, r
     // disconnected: still shared in the cloud, but not synced on this device
     val sharedRole = role ?: formerSharing[team.id]
     if (sharedRole == null && cloudState == null) return
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalAppNavigator.current
     val iconSize = 20.dp
     val sharingTint = if (role != null) MaterialTheme.colorScheme.primary
     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
@@ -330,7 +321,7 @@ private fun TeamStatusIcons(viewModel: HomeViewModel, team: TeamlyticsPreview, r
                 contentDescription = "Google Drive disconnected: its copy there isn't kept up to date",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 // the Sync screen reconnects
-                modifier = Modifier.size(iconSize).clickable { navigator.push(CloudSyncScreen) },
+                modifier = Modifier.size(iconSize).clickable { navigator.push(AppRoute.CloudSync) },
             )
             TeamCloudState.SYNCED -> Icon(
                 painter = painterResource(Res.drawable.cloud_done),
@@ -350,7 +341,7 @@ private fun TeamStatusIcons(viewModel: HomeViewModel, team: TeamlyticsPreview, r
                 contentDescription = "Couldn't be synced",
                 tint = MaterialTheme.colorScheme.error,
                 // the Sync screen tells why
-                modifier = Modifier.size(iconSize).clickable { navigator.push(CloudSyncScreen) },
+                modifier = Modifier.size(iconSize).clickable { navigator.push(AppRoute.CloudSync) },
             )
             null -> Unit
         }
@@ -359,10 +350,10 @@ private fun TeamStatusIcons(viewModel: HomeViewModel, team: TeamlyticsPreview, r
 
 @Composable
 internal fun NewTeamButton(modifier: Modifier = Modifier) {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalAppNavigator.current
     Button(
         modifier = modifier,
-        onClick = { navigator.push(EditTeamScreen()) }
+        onClick = { navigator.push(AppRoute.NotMigrated("Create Team")) }
     ) {
         Icon(
             painter = painterResource(Res.drawable.add),
@@ -482,8 +473,8 @@ private fun ImportChoice(title: String, description: String, onClick: () -> Unit
 
 @Composable
 internal fun AboutButton(modifier: Modifier = Modifier) {
-    val navigator = LocalNavigator.currentOrThrow
-    TextButton(onClick = { navigator.push(AboutScreen) }, modifier = modifier) {
+    val navigator = LocalAppNavigator.current
+    TextButton(onClick = { navigator.push(AppRoute.NotMigrated("About")) }, modifier = modifier) {
         Text("About", style = buttonTextStyle)
     }
 }
@@ -512,10 +503,10 @@ internal fun PrivacyPolicyLink(modifier: Modifier = Modifier) {
 internal fun CloudSyncButton(modifier: Modifier = Modifier) {
     val syncService = koinInject<TeamSyncService>()
     if (!syncService.isAvailable) return
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalAppNavigator.current
     val status by syncService.status.collectAsState()
     val needsReconnection = (status as? SyncStatus.Failed)?.needsReconnection == true
-    TextButton(onClick = { navigator.push(CloudSyncScreen) }, modifier = modifier) {
+    TextButton(onClick = { navigator.push(AppRoute.CloudSync) }, modifier = modifier) {
         Text(
             "Sync",
             style = buttonTextStyle,
@@ -560,20 +551,20 @@ internal fun SyncReconnectionWarning(viewModel: HomeViewModel, modifier: Modifie
 
 @Composable
 internal fun QuizzesButton(modifier: Modifier = Modifier, stacked: Boolean = false) {
-    val navigator = LocalNavigator.currentOrThrow
-    HomeToolButton(Res.drawable.quiz, "Quizzes", stacked, modifier) { navigator.push(QuizzesHomeScreen) }
+    val navigator = LocalAppNavigator.current
+    HomeToolButton(Res.drawable.quiz, "Quizzes", stacked, modifier) { navigator.push(AppRoute.NotMigrated("Quizzes")) }
 }
 
 @Composable
 internal fun DamageCalcButton(modifier: Modifier = Modifier, stacked: Boolean = false) {
-    val navigator = LocalNavigator.currentOrThrow
-    HomeToolButton(Res.drawable.calculate, "Damage Calc", stacked, modifier) { navigator.push(DamageCalcScreen) }
+    val navigator = LocalAppNavigator.current
+    HomeToolButton(Res.drawable.calculate, "Damage Calc", stacked, modifier) { navigator.push(AppRoute.NotMigrated("Damage Calc")) }
 }
 
 @Composable
 internal fun PokedexButton(modifier: Modifier = Modifier, stacked: Boolean = false) {
-    val navigator = LocalNavigator.currentOrThrow
-    HomeToolButton(Res.drawable.pokedex, "Pokédex", stacked, modifier) { navigator.push(PokedexScreen) }
+    val navigator = LocalAppNavigator.current
+    HomeToolButton(Res.drawable.pokedex, "Pokédex", stacked, modifier) { navigator.push(AppRoute.Pokedex) }
 }
 
 /**

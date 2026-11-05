@@ -3,8 +3,8 @@ package com.tambapps.pokemon.alakastats.ui.screen.cloudsync
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.CloudError
 import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncStatus
 import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class CloudSyncViewModel(
     private val syncService: TeamSyncService,
-) : ScreenModel {
+) : ViewModel() {
 
     val status = syncService.status
     val accountEmail = syncService.accountEmail
@@ -24,7 +24,7 @@ class CloudSyncViewModel(
     fun connect(snackBar: SnackBar) {
         if (isConnecting) return
         isConnecting = true
-        screenModelScope.launch {
+        viewModelScope.launch {
             syncService.connect()
                 .onLeft { error ->
                     if (error !is CloudError.Cancelled) snackBar.show(error.userMessage(), SnackBar.Severity.ERROR)
@@ -35,7 +35,7 @@ class CloudSyncViewModel(
     }
 
     fun disconnect(snackBar: SnackBar) {
-        screenModelScope.launch {
+        viewModelScope.launch {
             syncService.disconnect()
             snackBar.show("Google Drive disconnected. Your teams are still on this device")
         }
@@ -45,7 +45,7 @@ class CloudSyncViewModel(
      * Asks the user the access to the shared teams' files on this device, then syncs them
      */
     fun allowSharing(snackBar: SnackBar) {
-        screenModelScope.launch {
+        viewModelScope.launch {
             syncService.allowSharing()
                 .onLeft { error ->
                     if (error !is CloudError.Cancelled) snackBar.show(error.userMessage(), SnackBar.Severity.ERROR)
@@ -54,7 +54,7 @@ class CloudSyncViewModel(
     }
 
     fun syncNow(snackBar: SnackBar) {
-        screenModelScope.launch {
+        viewModelScope.launch {
             when (val status = syncService.sync()) {
                 is SyncStatus.Failed -> snackBar.show(status.error.userMessage(), SnackBar.Severity.ERROR)
                 is SyncStatus.Idle -> if (status.failures.isNotEmpty()) {

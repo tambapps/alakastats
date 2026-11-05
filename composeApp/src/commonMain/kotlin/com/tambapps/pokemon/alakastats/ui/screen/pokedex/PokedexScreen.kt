@@ -38,10 +38,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
+import org.koin.compose.viewmodel.koinViewModel
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
@@ -72,11 +70,10 @@ private val DISPLAYED_STATS = listOf(
     Stat.SPEED to "Spe",
 )
 
-object PokedexScreen : Screen {
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<PokedexViewModel>()
-        val navigator = LocalNavigator.currentOrThrow
+@Composable
+fun PokedexScreen() {
+        val viewModel = koinViewModel<PokedexViewModel>()
+        val navigator = LocalAppNavigator.current
         val isCompact = LocalIsCompact.current
         val focusManager = LocalFocusManager.current
         val availableNames = availablePokemonNames()
@@ -88,7 +85,7 @@ object PokedexScreen : Screen {
                 .then(if (isCompact) Modifier.safeContentPadding() else Modifier.padding(all = 16.dp))
         ) {
             Box(Modifier.fillMaxWidth()) {
-                BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
+                BackIconButton(Modifier.align(Alignment.CenterStart)) { navigator.pop() }
                 Text(
                     "Pokédex",
                     style = MaterialTheme.typography.headlineMedium,
@@ -125,7 +122,6 @@ object PokedexScreen : Screen {
                 PokemonSheet(viewModel, pokemon, isCompact)
             }
         }
-    }
 }
 
 @Composable

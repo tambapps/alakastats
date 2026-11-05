@@ -124,6 +124,9 @@ kotlin {
             // kstore-file brings an older one, compiled against an older kotlinx-serialization-json: it crashes at launch
             // on iOS (IrLinkageError) when reading the teams
             implementation(libs.serialization.json.io)
+            implementation(libs.navigation3.ui)
+            implementation(libs.androidx.lifecycle.viewmodelNavigation3)
+            implementation(libs.koin.compose.viewmodel)
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.screenmodel)
             implementation(libs.voyager.koin)
@@ -147,6 +150,9 @@ kotlin {
         wasmJsMain.dependencies {
             implementation(libs.ktor.client.js)
             implementation(libs.kotlinx.browser)
+        }
+        wasmJsTest.dependencies {
+            implementation(libs.compose.uiTest)
         }
     }
 }

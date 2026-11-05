@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import com.tambapps.pokemon.alakastats.di.appModules
 import com.tambapps.pokemon.alakastats.di.wasmModule
 import com.tambapps.pokemon.alakastats.ui.screen.damagecalc.StandaloneDamageCalcScreen
-import com.tambapps.pokemon.alakastats.ui.screen.home.HomeScreen
 import kotlinx.browser.window
 import org.koin.compose.KoinApplication
 import org.koin.core.logger.Level
@@ -24,6 +23,6 @@ fun WasmApp() {
     ) {
         val isDamageCalcPage = window.location.pathname.removeSuffix("/").removeSuffix("/index.html")
             .endsWith(DAMAGE_CALC_PATH)
-        App(startScreen = if (isDamageCalcPage) StandaloneDamageCalcScreen else HomeScreen)
+        App(voyagerScreen = if (isDamageCalcPage) StandaloneDamageCalcScreen else null)
     }
 }

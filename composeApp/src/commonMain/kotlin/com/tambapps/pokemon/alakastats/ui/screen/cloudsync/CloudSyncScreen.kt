@@ -35,10 +35,8 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
+import org.koin.compose.viewmodel.koinViewModel
 import com.tambapps.pokemon.alakastats.PlatformType
 import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncFailure
 import com.tambapps.pokemon.alakastats.infrastructure.sync.SyncStatus
@@ -47,20 +45,17 @@ import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
-import com.tambapps.pokemon.alakastats.ui.composables.IosSwipeBack
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
-object CloudSyncScreen : Screen {
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<CloudSyncViewModel>()
+@Composable
+fun CloudSyncScreen() {
+        val viewModel = koinViewModel<CloudSyncViewModel>()
         val status by viewModel.status.collectAsState()
-        val navigator = LocalNavigator.currentOrThrow
+        val navigator = LocalAppNavigator.current
         val isCompact = LocalIsCompact.current
-        IosSwipeBack { navigator.pop() }
 
         Column(
             Modifier.fillMaxSize()
@@ -72,7 +67,7 @@ object CloudSyncScreen : Screen {
         ) {
             // out of the scrolled content: always visible
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
-                BackIconButton(navigator)
+                BackIconButton { navigator.pop() }
                 Spacer(Modifier.width(8.dp))
                 Text("Google Drive sync", style = MaterialTheme.typography.headlineMedium)
             }
@@ -105,7 +100,6 @@ object CloudSyncScreen : Screen {
                 }
             }
         }
-    }
 }
 
 /**

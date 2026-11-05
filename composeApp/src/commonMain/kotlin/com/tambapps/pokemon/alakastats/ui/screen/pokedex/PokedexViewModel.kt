@@ -3,8 +3,8 @@ package com.tambapps.pokemon.alakastats.ui.screen.pokedex
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
@@ -16,7 +16,7 @@ private val MEGA_SUFFIXES = listOf("-mega", "-mega-x", "-mega-y", "-mega-z")
 
 class PokedexViewModel(
     private val pokemonBaseStatsRepository: PokemonBaseStatsRepository,
-) : ScreenModel {
+) : ViewModel() {
 
     var query by mutableStateOf("")
     // the form shown, null until a pokemon is searched
@@ -42,7 +42,7 @@ class PokedexViewModel(
         statsByForm = emptyMap()
         isLoading = true
         loadJob?.cancel()
-        loadJob = screenModelScope.launch {
+        loadJob = viewModelScope.launch {
             val megaCandidates = MEGA_SUFFIXES.map { PokemonName(pokemon.normalized.value + it) }
             pokemonBaseStatsRepository.getBaseStats(listOf(pokemon) + megaCandidates).onRight { stats ->
                 // the repository gives zeros for a pokemon it doesn't know

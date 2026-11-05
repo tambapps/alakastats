@@ -156,6 +156,7 @@ val appModules = listOf(module {
     // the file picker only exists on some platforms
     factory { HomeViewModel(get(), get(), get(), getOrNull()) }
     factoryOf(::CloudSyncViewModel)
+    factory { (teamId: kotlin.uuid.Uuid) -> com.tambapps.pokemon.alakastats.ui.navigation.TeamSpikeViewModel(teamId) }
     factoryOf(::EditTeamViewModel)
     factoryOf(::MatchupPlanEditViewModel)
     factoryOf(::QuizzesViewModel)
