@@ -5,11 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.navigator.Navigator
+import androidx.lifecycle.ViewModel
 import com.tambapps.pokemon.Nature
+import com.tambapps.pokemon.alakastats.ui.navigation.AppNavigator
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
 
-class NatureQuizSetupViewModel : ScreenModel {
+class NatureQuizSetupViewModel : ViewModel() {
     val natures: List<Nature> = Nature.entries
 
     val ignoredNatures: SnapshotStateList<Nature> = mutableStateListOf(
@@ -43,10 +44,10 @@ class NatureQuizSetupViewModel : ScreenModel {
         }
     }
 
-    fun startQuiz(navigator: Navigator) {
+    fun startQuiz(navigator: AppNavigator) {
         val activeNatures = natures.filterNot { it in ignoredNatures }
         if (activeNatures.isNotEmpty()) {
-            navigator.push(NatureQuizScreen(activeNatures, direction))
+            navigator.push(AppRoute.NatureQuiz(activeNatures, direction))
         }
     }
 }

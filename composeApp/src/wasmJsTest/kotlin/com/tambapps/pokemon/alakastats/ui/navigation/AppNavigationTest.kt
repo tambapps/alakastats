@@ -61,7 +61,7 @@ private class RecordingViewModel(val id: Uuid) : ViewModel() {
 }
 
 @OptIn(ExperimentalTestApi::class)
-class AppNavigationSpikeTest {
+class AppNavigationTest {
 
     // Koin's context is global: the next test would reuse this one's modules
     @AfterTest
@@ -77,6 +77,7 @@ class AppNavigationSpikeTest {
             AppRoute.CloudSync,
             AppRoute.About,
             AppRoute.DamageCalc,
+            AppRoute.StandaloneDamageCalc,
             AppRoute.Teamlytics(teamId),
             AppRoute.Teamlytics(Uuid.random()),
             AppRoute.EditTeam(),
@@ -93,8 +94,6 @@ class AppNavigationSpikeTest {
             AppRoute.SpeedInteractionsTeamSetup(teamId),
             AppRoute.SpeedInteractionsQuiz(SpeedInteractionsMode.Home(Format.REGULATION_I)),
             AppRoute.SpeedInteractionsQuiz(SpeedInteractionsMode.Team(teamId, allowTailwind = true)),
-            AppRoute.Team(Uuid.random()),
-            AppRoute.NotMigrated("Quizzes"),
         )
         val saved = encodeToSavedState(serializer, NavBackStack<NavKey>(*routes.toTypedArray()), appRouteSavedStateConfiguration)
         val restored = decodeFromSavedState(serializer, saved, appRouteSavedStateConfiguration)
@@ -106,7 +105,7 @@ class AppNavigationSpikeTest {
         RecordingViewModel.cleared.clear()
         val first = Uuid.random()
         val second = Uuid.random()
-        val backStack = NavBackStack<NavKey>(AppRoute.Team(first))
+        val backStack = NavBackStack<NavKey>(AppRoute.Teamlytics(first))
         setContent {
             KoinApplication(
                 configuration = koinConfiguration {
@@ -121,7 +120,7 @@ class AppNavigationSpikeTest {
                         rememberViewModelStoreNavEntryDecorator(),
                     ),
                     entryProvider = entryProvider {
-                        entry<AppRoute.Team> { route ->
+                        entry<AppRoute.Teamlytics> { route ->
                             val viewModel = koinViewModel<RecordingViewModel> { parametersOf(route.teamId) }
                             var saved by rememberSaveable { mutableIntStateOf(0) }
                             Column {
@@ -140,8 +139,8 @@ class AppNavigationSpikeTest {
         onNodeWithText("click").performClick()
         onNodeWithText("vm=$first vmClicks=1 saved=1").assertExists()
 
-        // the same type of screen twice in the stack, which Voyager's default key doesn't tell apart
-        backStack.add(AppRoute.Team(second))
+        // the same screen twice in the stack, with different teams
+        backStack.add(AppRoute.Teamlytics(second))
         waitForIdle()
         onNodeWithText("vm=$second vmClicks=0 saved=0").assertExists()
         assertEquals(emptyList(), RecordingViewModel.cleared)
@@ -205,4 +204,37 @@ class AppNavigationSpikeTest {
         waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Search a Pokémon")).fetchSemanticsNodes().isEmpty() }
         waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Pokédex")).fetchSemanticsNodes().isNotEmpty() }
     }
+
+    // each screen in the real app: its view model must be resolved by Koin, with its parameters
+    private fun screenOpens(route: AppRoute) = runComposeUiTest {
+        // the loading indicators animate forever: it would never be idle
+        mainClock.autoAdvance = false
+        setContent {
+            KoinApplication(
+                configuration = koinConfiguration { modules(appModules + wasmModule) },
+                logLevel = Level.NONE,
+            ) {
+                App(startRoute = route)
+            }
+        }
+        mainClock.advanceTimeBy(1_000)
+    }
+
+    @Test fun aboutOpens() = screenOpens(AppRoute.About)
+    @Test fun cloudSyncOpens() = screenOpens(AppRoute.CloudSync)
+    @Test fun damageCalcOpens() = screenOpens(AppRoute.DamageCalc)
+    @Test fun standaloneDamageCalcOpens() = screenOpens(AppRoute.StandaloneDamageCalc)
+    @Test fun teamlyticsOpens() = screenOpens(AppRoute.Teamlytics(Uuid.random()))
+    @Test fun createTeamOpens() = screenOpens(AppRoute.EditTeam())
+    @Test fun editTeamOpens() = screenOpens(AppRoute.EditTeam(Uuid.random(), redirectToTeamlytics = true))
+    @Test fun pokemonDetailsOpens() = screenOpens(AppRoute.PokemonDetails(Uuid.random(), "metagross"))
+    @Test fun manualReplayOpens() = screenOpens(AppRoute.ManualReplay(Uuid.random()))
+    @Test fun quizzesOpens() = screenOpens(AppRoute.Quizzes)
+    @Test fun natureQuizSetupOpens() = screenOpens(AppRoute.NatureQuizSetup)
+    @Test fun natureQuizOpens() = screenOpens(AppRoute.NatureQuiz(listOf(Nature.ADAMANT), QuizDirection.NAME_TO_STATS))
+    @Test fun speedStatQuizSetupOpens() = screenOpens(AppRoute.SpeedStatQuizSetup)
+    @Test fun speedStatQuizOpens() = screenOpens(AppRoute.SpeedStatQuiz(Format.REGULATION_MC, false, false, false))
+    @Test fun speedInteractionsHomeSetupOpens() = screenOpens(AppRoute.SpeedInteractionsHomeSetup)
+    @Test fun speedInteractionsTeamSetupOpens() = screenOpens(AppRoute.SpeedInteractionsTeamSetup(Uuid.random()))
+    @Test fun speedInteractionsQuizOpens() = screenOpens(AppRoute.SpeedInteractionsQuiz(SpeedInteractionsMode.Home(Format.REGULATION_MC)))
 }

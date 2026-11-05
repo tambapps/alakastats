@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import cafe.adriel.voyager.core.model.ScreenModel
+import androidx.lifecycle.ViewModel
 import com.tambapps.pokemon.Gender
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.champions.data.Ability
@@ -20,7 +20,7 @@ import com.tambapps.pokemon.champions.engine.effectiveTypeOf
 import com.tambapps.pokemon.champions.engine.terrainSetOnField
 import com.tambapps.pokemon.champions.engine.weatherSetOnField
 
-class DamageCalcViewModel : ScreenModel {
+class DamageCalcViewModel : ViewModel() {
 
     var attacker by mutableStateOf(
         DamageCalcPokemonState(

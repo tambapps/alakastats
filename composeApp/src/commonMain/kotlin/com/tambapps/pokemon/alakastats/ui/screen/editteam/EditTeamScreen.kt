@@ -39,130 +39,125 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
+import org.koin.compose.viewmodel.koinViewModel
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.FormatSelector
 import com.tambapps.pokemon.alakastats.ui.composables.PokepasteCard
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import com.tambapps.pokemon.alakastats.util.isSdNameValid
 import org.jetbrains.compose.resources.painterResource
 import kotlin.uuid.Uuid
 
-data class EditTeamScreen(
-    val teamlyticsId: Uuid? = null,
-    val redirectToTeamlyticsScreen: Boolean = false
-) : Screen {
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<EditTeamViewModel>()
-        val navigator = LocalNavigator.currentOrThrow
-        LaunchedEffect(Unit) {
-            if (teamlyticsId != null) {
-                viewModel.prepareEdition(teamlyticsId, onFailure = { exitScreen(navigator) })
-            }
-        }
-        val isCompact = LocalIsCompact.current
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(if (teamlyticsId != null) "Edit Team" else "Create Team") },
-                    navigationIcon = {
-                        BackIconButton(onClick = { exitScreen(navigator) })
-                    }
-                )
-            }
-        ) { scaffoldPadding ->
-            val paddingValues = if (isCompact) PaddingValues(start = 16.dp, end = 16.dp)
-            else PaddingValues(16.dp)
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(scaffoldPadding)
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                TeamNameInput(viewModel)
-
-                FormatNameInput(viewModel)
-
-                ShowdownNamesInput(viewModel)
-
-                PokepasteCard(
-                    viewModel,
-                    viewModel.format,
-                    title = "PokéPaste",
-                    emptyText = "Add your team's PokéPaste to see your Pokémon here",
-                    teamName = viewModel.teamName,
-                )
-
-                if (viewModel.canChooseSync) {
-                    SyncInput(viewModel)
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                ButtonBar(navigator, viewModel, teamlyticsId != null)
-            }
-        }
-
-        if (viewModel.showNewSdNameDialog) {
-            ShowdownNameDialog(viewModel)
-        }
-    }
-
-    @Composable
-    private fun ButtonBar(
-        navigator: Navigator,
-        viewModel: EditTeamViewModel,
-        isEditing: Boolean = false
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            OutlinedButton(
-                onClick = { exitScreen(navigator) },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Cancel")
-            }
-
-            val snackBar = LocalSnackBar.current
-            Button(
-                onClick = { viewModel.saveTeam(onSuccess = {
-                    exitScreen(navigator)
-                    snackBar.show(
-                        if (isEditing) "Updated team successfully"
-                        else "Created team successfully", SnackBar.Severity.SUCCESS
-                    )
-                }) },
-                modifier = Modifier.weight(1f),
-                enabled = viewModel.isFormValid,
-            ) {
-                Text(
-                    if (isEditing) "Update Team" else "Create Team",
-                )
-            }
-        }
-    }
-
-    private fun exitScreen(navigator: Navigator) {
-        if (teamlyticsId != null && redirectToTeamlyticsScreen) {
-            navigator.replace(TeamlyticsScreen(teamlyticsId))
+/**
+ * @param teamId the team to edit, null to create one
+ * @param redirectToTeamlytics whether to go to the team's screen when leaving this one, rather than to the previous one
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun EditTeamScreen(teamId: Uuid?, redirectToTeamlytics: Boolean) {
+    val viewModel = koinViewModel<EditTeamViewModel>()
+    val navigator = LocalAppNavigator.current
+    val exitScreen = {
+        if (teamId != null && redirectToTeamlytics) {
+            navigator.replace(AppRoute.Teamlytics(teamId))
         } else {
             navigator.pop()
+        }
+    }
+    LaunchedEffect(Unit) {
+        if (teamId != null) {
+            viewModel.prepareEdition(teamId, onFailure = exitScreen)
+        }
+    }
+    val isCompact = LocalIsCompact.current
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(if (teamId != null) "Edit Team" else "Create Team") },
+                navigationIcon = {
+                    BackIconButton(onClick = exitScreen)
+                }
+            )
+        }
+    ) { scaffoldPadding ->
+        val paddingValues = if (isCompact) PaddingValues(start = 16.dp, end = 16.dp)
+        else PaddingValues(16.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(scaffoldPadding)
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            TeamNameInput(viewModel)
+
+            FormatNameInput(viewModel)
+
+            ShowdownNamesInput(viewModel)
+
+            PokepasteCard(
+                viewModel,
+                viewModel.format,
+                title = "PokéPaste",
+                emptyText = "Add your team's PokéPaste to see your Pokémon here",
+                teamName = viewModel.teamName,
+            )
+
+            if (viewModel.canChooseSync) {
+                SyncInput(viewModel)
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            ButtonBar(viewModel, teamId != null, exitScreen)
+        }
+    }
+
+    if (viewModel.showNewSdNameDialog) {
+        ShowdownNameDialog(viewModel)
+    }
+}
+
+@Composable
+private fun ButtonBar(
+    viewModel: EditTeamViewModel,
+    isEditing: Boolean,
+    exitScreen: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        OutlinedButton(
+            onClick = exitScreen,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text("Cancel")
+        }
+
+        val snackBar = LocalSnackBar.current
+        Button(
+            onClick = { viewModel.saveTeam(onSuccess = {
+                exitScreen()
+                snackBar.show(
+                    if (isEditing) "Updated team successfully"
+                    else "Created team successfully", SnackBar.Severity.SUCCESS
+                )
+            }) },
+            modifier = Modifier.weight(1f),
+            enabled = viewModel.isFormValid,
+        ) {
+            Text(
+                if (isEditing) "Update Team" else "Create Team",
+            )
         }
     }
 }

@@ -3,11 +3,12 @@ package com.tambapps.pokemon.alakastats.ui.screen.quizzes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.navigator.Navigator
+import androidx.lifecycle.ViewModel
 import com.tambapps.pokemon.alakastats.domain.model.Format
+import com.tambapps.pokemon.alakastats.ui.navigation.AppNavigator
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
 
-class SpeedStatQuizSetupViewModel : ScreenModel {
+class SpeedStatQuizSetupViewModel : ViewModel() {
     var format by mutableStateOf(Format.NONE)
 
     var allowChoiceScarf by mutableStateOf(false)
@@ -30,7 +31,7 @@ class SpeedStatQuizSetupViewModel : ScreenModel {
         useSpeedBoostingNature = !useSpeedBoostingNature
     }
 
-    fun startQuiz(navigator: Navigator) {
-        navigator.push(SpeedStatQuizScreen(format, allowChoiceScarf, useMaxStatPoints, useSpeedBoostingNature))
+    fun startQuiz(navigator: AppNavigator) {
+        navigator.push(AppRoute.SpeedStatQuiz(format, allowChoiceScarf, useMaxStatPoints, useSpeedBoostingNature))
     }
 }

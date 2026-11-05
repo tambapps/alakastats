@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.navigator.Navigator
+import com.tambapps.pokemon.alakastats.ui.navigation.AppNavigator
 import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
@@ -27,7 +27,7 @@ import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun BackIconButton(navigator: Navigator, modifier: Modifier = Modifier) = BackIconButton(modifier=modifier) { navigator.pop() }
+fun BackIconButton(navigator: AppNavigator, modifier: Modifier = Modifier) = BackIconButton(modifier=modifier) { navigator.pop() }
 
 @Composable
 fun BackIconButton(modifier: Modifier = Modifier, onClick: () -> Unit) {

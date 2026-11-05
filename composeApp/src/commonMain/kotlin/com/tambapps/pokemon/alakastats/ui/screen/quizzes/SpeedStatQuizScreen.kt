@@ -44,11 +44,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.AppNavigator
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
+import org.koin.compose.viewmodel.koinViewModel
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.LOOSE_COLOR
@@ -57,46 +55,44 @@ import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.koin.core.parameter.parametersOf
 
-data class SpeedStatQuizScreen(
-    val format: Format,
-    val allowChoiceScarf: Boolean,
-    val useMaxStatPoints: Boolean,
-    val useSpeedBoostingNature: Boolean
-) : Screen {
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<SpeedStatQuizViewModel> {
-            parametersOf(format, allowChoiceScarf, useMaxStatPoints, useSpeedBoostingNature)
+@Composable
+fun SpeedStatQuizScreen(
+    format: Format,
+    allowChoiceScarf: Boolean,
+    useMaxStatPoints: Boolean,
+    useSpeedBoostingNature: Boolean
+) {
+    val viewModel = koinViewModel<SpeedStatQuizViewModel> {
+        parametersOf(format, allowChoiceScarf, useMaxStatPoints, useSpeedBoostingNature)
+    }
+    val navigator = LocalAppNavigator.current
+    val isCompact = LocalIsCompact.current
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .safeContentPadding()
+            .padding(horizontal = if (isCompact) 16.dp else 24.dp, vertical = 16.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(Modifier.fillMaxWidth()) {
+            BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
+            Text(
+                "Speed Stat Quiz",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
-        val navigator = LocalNavigator.currentOrThrow
-        val isCompact = LocalIsCompact.current
+        Spacer(Modifier.height(24.dp))
 
-        Column(
-            modifier = Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .safeContentPadding()
-                .padding(horizontal = if (isCompact) 16.dp else 24.dp, vertical = 16.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(Modifier.fillMaxWidth()) {
-                BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
-                Text(
-                    "Speed Stat Quiz",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            Spacer(Modifier.height(24.dp))
-
-            val contentModifier = if (isCompact) Modifier.fillMaxWidth() else Modifier.widthIn(max = 480.dp)
-            when {
-                viewModel.isLoading -> LoadingContent(contentModifier)
-                viewModel.loadFailed -> LoadFailedContent(navigator, contentModifier)
-                viewModel.isFinished -> SpeedResultsContent(viewModel, navigator, contentModifier)
-                else -> SpeedQuestionContent(viewModel, contentModifier)
-            }
+        val contentModifier = if (isCompact) Modifier.fillMaxWidth() else Modifier.widthIn(max = 480.dp)
+        when {
+            viewModel.isLoading -> LoadingContent(contentModifier)
+            viewModel.loadFailed -> LoadFailedContent(navigator, contentModifier)
+            viewModel.isFinished -> SpeedResultsContent(viewModel, navigator, contentModifier)
+            else -> SpeedQuestionContent(viewModel, contentModifier)
         }
     }
 }
@@ -116,7 +112,7 @@ private fun LoadingContent(modifier: Modifier) {
 }
 
 @Composable
-private fun LoadFailedContent(navigator: Navigator, modifier: Modifier) {
+private fun LoadFailedContent(navigator: AppNavigator, modifier: Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.height(48.dp))
         Text(
@@ -288,7 +284,7 @@ private fun SpeedAnswerFeedback(question: SpeedQuestion, outcome: AnswerOutcome,
 }
 
 @Composable
-private fun SpeedResultsContent(viewModel: SpeedStatQuizViewModel, navigator: Navigator, modifier: Modifier) {
+private fun SpeedResultsContent(viewModel: SpeedStatQuizViewModel, navigator: AppNavigator, modifier: Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Quiz complete!", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))

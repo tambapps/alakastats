@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.right
-import cafe.adriel.voyager.core.model.ScreenModel
+import androidx.lifecycle.ViewModel
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.FormatData
@@ -46,7 +46,7 @@ class TeamlyticsViewModel(
     private val useCase: ManageTeamlyticsUseCase,
     val formatDataRepository: FormatDataRepository,
     private val syncService: TeamSyncService,
-) : ScreenModel, ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase,
+) : ViewModel(), ConsultTeamlyticsUseCase, ManageTeamReplaysUseCase, ManageTeamOverviewUseCase,
     ManageMatchupPlansUseCase, PagerViewModel {
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -95,7 +95,7 @@ class TeamlyticsViewModel(
         }
     }
 
-    override fun onDispose() {
+    override fun onCleared() {
         syncChangesJob.cancel()
     }
 

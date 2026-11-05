@@ -6,26 +6,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import kotlin.uuid.Uuid
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-data class SpeedInteractionsTeamSetupScreen(val teamId: Uuid) : Screen {
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<SpeedInteractionsTeamSetupViewModel> { parametersOf(teamId) }
-        val isCompact = LocalIsCompact.current
+@Composable
+fun SpeedInteractionsTeamSetupScreen(teamId: Uuid) {
+    val viewModel = koinViewModel<SpeedInteractionsTeamSetupViewModel> { parametersOf(teamId) }
+    val isCompact = LocalIsCompact.current
 
-        if (isCompact) {
-            SpeedInteractionsTeamSetupScreenMobile(viewModel)
-        } else {
-            SpeedInteractionsTeamSetupScreenDesktop(viewModel)
-        }
+    if (isCompact) {
+        SpeedInteractionsTeamSetupScreenMobile(viewModel)
+    } else {
+        SpeedInteractionsTeamSetupScreenDesktop(viewModel)
     }
 }
 
@@ -71,7 +67,7 @@ internal fun SpeedInteractionsTeamSetupOptions(viewModel: SpeedInteractionsTeamS
 
 @Composable
 internal fun StartSpeedInteractionsTeamQuizButton(viewModel: SpeedInteractionsTeamSetupViewModel, modifier: Modifier = Modifier) {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalAppNavigator.current
     Button(
         onClick = { viewModel.startQuiz(navigator) },
         colors = ButtonDefaults.buttonColors(

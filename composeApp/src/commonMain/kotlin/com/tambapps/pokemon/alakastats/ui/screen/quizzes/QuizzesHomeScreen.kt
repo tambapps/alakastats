@@ -6,40 +6,37 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.QuizType
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import org.koin.compose.viewmodel.koinViewModel
 
-object QuizzesHomeScreen : Screen {
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<QuizzesViewModel>()
-        val isCompact = LocalIsCompact.current
+@Composable
+fun QuizzesHomeScreen() {
+    val viewModel = koinViewModel<QuizzesViewModel>()
+    val isCompact = LocalIsCompact.current
 
-        if (isCompact) {
-            QuizzesHomeScreenMobile(viewModel)
-        } else {
-            QuizzesHomeScreenDesktop(viewModel)
-        }
+    if (isCompact) {
+        QuizzesHomeScreenMobile(viewModel)
+    } else {
+        QuizzesHomeScreenDesktop(viewModel)
     }
 }
 
 @Composable
 internal fun QuizCard(quiz: QuizType, modifier: Modifier = Modifier) {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalAppNavigator.current
     MyCard(
         modifier = modifier,
         onClick = {
             navigator.push(
                 when (quiz) {
-                    QuizType.NATURES -> NatureQuizSetupScreen
-                    QuizType.SPEED_STAT -> SpeedStatQuizSetupScreen
-                    QuizType.SPEED_INTERACTIONS -> SpeedInteractionsHomeSetupScreen
+                    QuizType.NATURES -> AppRoute.NatureQuizSetup
+                    QuizType.SPEED_STAT -> AppRoute.SpeedStatQuizSetup
+                    QuizType.SPEED_INTERACTIONS -> AppRoute.SpeedInteractionsHomeSetup
                 }
             )
         },

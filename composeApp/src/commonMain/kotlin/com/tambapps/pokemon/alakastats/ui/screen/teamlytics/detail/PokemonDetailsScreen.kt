@@ -36,10 +36,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
+import org.koin.compose.viewmodel.koinViewModel
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
@@ -61,52 +59,41 @@ import kotlin.uuid.Uuid
 
 val TABS = listOf("Overview", "Speed Scale")
 
-data class PokemonDetailsScreen(
-    val teamId: Uuid,
-    val pokemonNameStr: String
-) : Screen {
+@Composable
+fun PokemonDetailsScreen(teamId: Uuid, pokemonName: PokemonName) {
+    val viewModel = koinViewModel<PokemonDetailViewModel> { parametersOf(teamId, pokemonName) }
+    Box(
+        modifier = Modifier
+            .background(Brush.verticalGradient(elevatedCardGradientColors))
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars)
+    ) {
+        when (val state = viewModel.state) {
+            is TeamPokemonStateState.Loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(48.dp).align(Alignment.Center)
+                )
+            }
 
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<PokemonDetailViewModel> {
-            parametersOf(
-                teamId,
-                PokemonName(pokemonNameStr)
-            )
-        }
-        Box(
-            modifier = Modifier
-                .background(Brush.verticalGradient(elevatedCardGradientColors))
-                .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.systemBars)
-        ) {
-            when (val state = viewModel.state) {
-                is TeamPokemonStateState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(48.dp).align(Alignment.Center)
-                    )
+            is TeamPokemonStateState.Error -> {
+                val navigator = LocalAppNavigator.current
+                val snackBar = LocalSnackBar.current
+                LaunchedEffect(Unit) {
+                    snackBar.show("Error: ${state.error.message}", SnackBar.Severity.ERROR)
+                    navigator.pop()
                 }
+            }
 
-                is TeamPokemonStateState.Error -> {
-                    val navigator = LocalNavigator.currentOrThrow
-                    val snackBar = LocalSnackBar.current
-                    LaunchedEffect(Unit) {
-                        snackBar.show("Error: ${state.error.message}", SnackBar.Severity.ERROR)
-                        navigator.pop()
-                    }
+            is TeamPokemonStateState.Loaded -> {
+                var visible by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    visible = true
                 }
-
-                is TeamPokemonStateState.Loaded -> {
-                    var visible by remember { mutableStateOf(false) }
-                    LaunchedEffect(Unit) {
-                        visible = true
-                    }
-                    AnimatedVisibility(
-                        visible = visible,
-                        enter = fadeIn(animationSpec = tween(durationMillis = 1000))
-                    ) {
-                        PokemonDetails(viewModel, state)
-                    }
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 1000))
+                ) {
+                    PokemonDetails(viewModel, state)
                 }
             }
         }

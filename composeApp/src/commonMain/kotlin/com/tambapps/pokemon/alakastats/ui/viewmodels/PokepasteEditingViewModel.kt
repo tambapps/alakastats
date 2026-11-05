@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.viewmodels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
 import arrow.core.Either
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
@@ -47,7 +48,7 @@ fun PokePaste.asOtsIfNoStats(): PokePaste =
 abstract class PokepasteEditingViewModel(
     protected val pokepasteParser: PokepasteParser,
     private val httpClient: HttpClient
-) {
+) : ViewModel() {
 
     var pokepaste by mutableStateOf("")
         protected set

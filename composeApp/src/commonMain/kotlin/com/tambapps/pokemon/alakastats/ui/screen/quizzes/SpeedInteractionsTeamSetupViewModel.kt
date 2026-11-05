@@ -3,10 +3,11 @@ package com.tambapps.pokemon.alakastats.ui.screen.quizzes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.navigator.Navigator
+import androidx.lifecycle.ViewModel
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
+import com.tambapps.pokemon.alakastats.ui.navigation.AppNavigator
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,7 +18,7 @@ private val TAILWIND_MOVE = MoveName("tailwind")
 class SpeedInteractionsTeamSetupViewModel(
     private val teamId: Uuid,
     private val teamlyticsRepository: TeamlyticsRepository
-) : ScreenModel {
+) : ViewModel() {
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
@@ -71,9 +72,9 @@ class SpeedInteractionsTeamSetupViewModel(
         allowReducingNature = !allowReducingNature
     }
 
-    fun startQuiz(navigator: Navigator) {
+    fun startQuiz(navigator: AppNavigator) {
         navigator.push(
-            SpeedInteractionsQuizScreen(
+            AppRoute.SpeedInteractionsQuiz(
                 SpeedInteractionsMode.Team(
                     teamId = teamId,
                     allowOpponentScarf = allowOpponentScarf,

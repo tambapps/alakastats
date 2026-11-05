@@ -56,8 +56,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.result.ResultEffect
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
 import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.PokemonName
@@ -77,7 +75,6 @@ import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.model.replayDetails
-import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.replayviewer.ReplayViewerDialog
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.rememberGuardedChange
@@ -341,18 +338,13 @@ internal fun ViewReplayButton(
 
 @Composable
 internal fun EditSdNamesButton(viewModel: TeamReplayViewModel) {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalAppNavigator.current
     val guardedChange = rememberGuardedChange()
 
     // don't push because when coming to the screen, this screen doesn't recompose and take into account the updated team
     OutlinedButton(onClick = {
         guardedChange {
-            navigator.replace(
-                EditTeamScreen(
-                    viewModel.team.id,
-                    redirectToTeamlyticsScreen = true
-                )
-            )
+            navigator.replace(AppRoute.EditTeam(viewModel.team.id, redirectToTeamlytics = true))
         }
     }) {
         Text("Edit Showdown Names")

@@ -3,7 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import cafe.adriel.voyager.core.model.ScreenModel
+import androidx.lifecycle.ViewModel
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
@@ -39,7 +39,7 @@ class PokemonDetailViewModel(
     private val teamId: Uuid,
     private val pokemonName: PokemonName,
     private val useCase: ConsultPokemonDetailUseCase,
-): ScreenModel, PagerViewModel {
+): ViewModel(), PagerViewModel {
 
     var state by mutableStateOf<TeamPokemonStateState>(TeamPokemonStateState.Loading)
         private set

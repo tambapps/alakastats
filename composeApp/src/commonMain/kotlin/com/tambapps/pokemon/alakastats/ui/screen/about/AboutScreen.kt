@@ -37,13 +37,10 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.alakastats.DeviceType
 import com.tambapps.pokemon.alakastats.platform
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
-import com.tambapps.pokemon.alakastats.ui.composables.IosSwipeBack
 import com.tambapps.pokemon.alakastats.ui.screen.home.AlakastatsLabel
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
@@ -52,38 +49,35 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
 
-object AboutScreen : Screen {
-    @Composable
-    override fun Content() {
-        val isCompact = LocalIsCompact.current
-        Column(
-            Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .then(
-                    if (isCompact) Modifier.safeContentPadding().padding(horizontal = 4.dp)
-                    else Modifier.padding(all = 32.dp)
-                )
-                .verticalScroll(rememberScrollState()),
-        ) {
-            val navigator = LocalNavigator.currentOrThrow
-            IosSwipeBack { navigator.pop() }
-            Box(Modifier.fillMaxWidth()) {
-                if (!isCompact) {
-                    BackIconButton(navigator, Modifier.scale(2f).align(Alignment.CenterStart))
-                }
-                AlakastatsLabel(Modifier.align(Alignment.TopCenter), withVersion = true)
+@Composable
+fun AboutScreen() {
+    val isCompact = LocalIsCompact.current
+    Column(
+        Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .then(
+                if (isCompact) Modifier.safeContentPadding().padding(horizontal = 4.dp)
+                else Modifier.padding(all = 32.dp)
+            )
+            .verticalScroll(rememberScrollState()),
+    ) {
+        val navigator = LocalAppNavigator.current
+        Box(Modifier.fillMaxWidth()) {
+            if (!isCompact) {
+                BackIconButton(navigator, Modifier.scale(2f).align(Alignment.CenterStart))
             }
-            VerticalSpacer(8.dp)
-            AboutAlakastats()
-            VerticalSpacer()
-            AboutMe()
-            VerticalSpacer()
-            Credits()
-            VerticalSpacer()
-            if (isCompact) {
-                OutlinedButton(onClick = { navigator.pop() }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text("OK")
-                }
+            AlakastatsLabel(Modifier.align(Alignment.TopCenter), withVersion = true)
+        }
+        VerticalSpacer(8.dp)
+        AboutAlakastats()
+        VerticalSpacer()
+        AboutMe()
+        VerticalSpacer()
+        Credits()
+        VerticalSpacer()
+        if (isCompact) {
+            OutlinedButton(onClick = { navigator.pop() }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Text("OK")
             }
         }
     }

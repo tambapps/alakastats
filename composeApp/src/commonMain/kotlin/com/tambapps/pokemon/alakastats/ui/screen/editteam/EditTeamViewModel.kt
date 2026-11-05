@@ -4,8 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.navigator.Navigator
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.UserName
@@ -26,7 +24,7 @@ class EditTeamViewModel(
     private val editTeamlyticsUseCase: EditTeamlyticsUseCase,
     httpClient: HttpClient,
     private val syncService: TeamSyncService,
-) : PokepasteEditingViewModel(pokepasteParser, httpClient), ScreenModel {
+) : PokepasteEditingViewModel(pokepasteParser, httpClient) {
 
     private var editingTeam: Teamlytics? = null
     val isEditing get() = editingTeam != null

@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import cafe.adriel.voyager.core.model.ScreenModel
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.GamePlan
 import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
@@ -17,7 +16,7 @@ import kotlin.uuid.Uuid
 class MatchupPlanEditViewModel(
     pokepasteParser: PokepasteParser,
     httpClient: HttpClient,
-) : PokepasteEditingViewModel(pokepasteParser, httpClient), ScreenModel {
+) : PokepasteEditingViewModel(pokepasteParser, httpClient) {
 
     /**
      * Why the matchup can't be saved yet, or null if it can

@@ -6,31 +6,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.domain.model.Format
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import org.koin.compose.viewmodel.koinViewModel
 
-object SpeedInteractionsHomeSetupScreen : Screen {
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<SpeedInteractionsHomeSetupViewModel>()
-        val isCompact = LocalIsCompact.current
+@Composable
+fun SpeedInteractionsHomeSetupScreen() {
+    val viewModel = koinViewModel<SpeedInteractionsHomeSetupViewModel>()
+    val isCompact = LocalIsCompact.current
 
-        if (isCompact) {
-            SpeedInteractionsHomeSetupScreenMobile(viewModel)
-        } else {
-            SpeedInteractionsHomeSetupScreenDesktop(viewModel)
-        }
+    if (isCompact) {
+        SpeedInteractionsHomeSetupScreenMobile(viewModel)
+    } else {
+        SpeedInteractionsHomeSetupScreenDesktop(viewModel)
     }
 }
 
 @Composable
 internal fun StartSpeedInteractionsQuizButton(viewModel: SpeedInteractionsHomeSetupViewModel, modifier: Modifier = Modifier) {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalAppNavigator.current
     Button(
         onClick = { viewModel.startQuiz(navigator) },
         enabled = viewModel.format != Format.NONE,

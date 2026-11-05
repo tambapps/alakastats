@@ -16,13 +16,27 @@ import androidx.navigation3.runtime.result.rememberResultEventBusNavEntryDecorat
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
 import com.tambapps.pokemon.Nature
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Format
+import com.tambapps.pokemon.alakastats.ui.screen.about.AboutScreen
 import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.CloudSyncScreen
+import com.tambapps.pokemon.alakastats.ui.screen.damagecalc.DamageCalcScreen
+import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeScreen
 import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexScreen
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizScreen
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizSetupScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizDirection
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizzesHomeScreen
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsHomeSetupScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsMode
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsQuizScreen
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsTeamSetupScreen
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedStatQuizScreen
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedStatQuizSetupScreen
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailsScreen
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
@@ -30,6 +44,10 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclassesOfSealed
 import kotlin.uuid.Uuid
 
+/**
+ * The app's screens. They're saved with the back stack (e.g. when the Android activity is recreated): they must only
+ * hold what identifies what they show, not the data itself
+ */
 @Serializable
 sealed interface AppRoute : NavKey {
     @Serializable
@@ -46,6 +64,10 @@ sealed interface AppRoute : NavKey {
 
     @Serializable
     data object DamageCalc : AppRoute
+
+    /** The damage calc alone, on the web app's damage-calc page */
+    @Serializable
+    data object StandaloneDamageCalc : AppRoute
 
     @Serializable
     data class Teamlytics(val teamId: Uuid) : AppRoute
@@ -89,14 +111,6 @@ sealed interface AppRoute : NavKey {
 
     @Serializable
     data class SpeedInteractionsQuiz(val mode: SpeedInteractionsMode) : AppRoute
-
-    // SPIKE: stands for TeamlyticsScreen, to check that two teams in the stack don't share their view model
-    @Serializable
-    data class Team(val teamId: Uuid) : AppRoute
-
-    // SPIKE: the screens that aren't migrated
-    @Serializable
-    data class NotMigrated(val name: String) : AppRoute
 }
 
 class AppNavigator(private val backStack: MutableList<NavKey>) {
@@ -127,8 +141,8 @@ val appRouteSavedStateConfiguration = SavedStateConfiguration {
 }
 
 @Composable
-fun AppNavDisplay() {
-    val backStack = rememberNavBackStack(appRouteSavedStateConfiguration, AppRoute.Home)
+fun AppNavDisplay(startRoute: AppRoute) {
+    val backStack = rememberNavBackStack(appRouteSavedStateConfiguration, startRoute)
     val navigator = remember(backStack) { AppNavigator(backStack) }
     CompositionLocalProvider(LocalAppNavigator provides navigator) {
         NavDisplay(
@@ -139,7 +153,7 @@ fun AppNavDisplay() {
                 rememberViewModelStoreNavEntryDecorator(),
                 rememberResultEventBusNavEntryDecorator(),
             ),
-            // as with Voyager, the screens aren't animated
+            // the screens aren't animated
             transitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
             popTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
             predictivePopTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
@@ -147,9 +161,23 @@ fun AppNavDisplay() {
                 entry<AppRoute.Home> { HomeScreen() }
                 entry<AppRoute.Pokedex> { PokedexScreen() }
                 entry<AppRoute.CloudSync> { CloudSyncScreen() }
+                entry<AppRoute.About> { AboutScreen() }
+                entry<AppRoute.DamageCalc> { DamageCalcScreen(showBackButton = true) }
+                entry<AppRoute.StandaloneDamageCalc> { DamageCalcScreen(showBackButton = false) }
+                entry<AppRoute.Teamlytics> { TeamlyticsScreen(it.teamId) }
+                entry<AppRoute.EditTeam> { EditTeamScreen(it.teamId, it.redirectToTeamlytics) }
+                entry<AppRoute.PokemonDetails> { PokemonDetailsScreen(it.teamId, PokemonName(it.pokemonName)) }
                 entry<AppRoute.ManualReplay> { ManualReplayScreen(it.teamId, it.replayReference) }
-                entry<AppRoute.Team> { TeamSpikeScreen(it.teamId) }
-                entry<AppRoute.NotMigrated> { NotMigratedSpikeScreen(it.name) }
+                entry<AppRoute.Quizzes> { QuizzesHomeScreen() }
+                entry<AppRoute.NatureQuizSetup> { NatureQuizSetupScreen() }
+                entry<AppRoute.NatureQuiz> { NatureQuizScreen(it.natures, it.direction) }
+                entry<AppRoute.SpeedStatQuizSetup> { SpeedStatQuizSetupScreen() }
+                entry<AppRoute.SpeedStatQuiz> {
+                    SpeedStatQuizScreen(it.format, it.allowChoiceScarf, it.useMaxStatPoints, it.useSpeedBoostingNature)
+                }
+                entry<AppRoute.SpeedInteractionsHomeSetup> { SpeedInteractionsHomeSetupScreen() }
+                entry<AppRoute.SpeedInteractionsTeamSetup> { SpeedInteractionsTeamSetupScreen(it.teamId) }
+                entry<AppRoute.SpeedInteractionsQuiz> { SpeedInteractionsQuizScreen(it.mode) }
             },
         )
     }

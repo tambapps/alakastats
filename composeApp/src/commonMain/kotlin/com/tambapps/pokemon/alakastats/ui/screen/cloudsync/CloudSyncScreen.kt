@@ -52,54 +52,54 @@ import kotlin.time.Instant
 
 @Composable
 fun CloudSyncScreen() {
-        val viewModel = koinViewModel<CloudSyncViewModel>()
-        val status by viewModel.status.collectAsState()
-        val navigator = LocalAppNavigator.current
-        val isCompact = LocalIsCompact.current
+    val viewModel = koinViewModel<CloudSyncViewModel>()
+    val status by viewModel.status.collectAsState()
+    val navigator = LocalAppNavigator.current
+    val isCompact = LocalIsCompact.current
 
-        Column(
-            Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .then(
-                    if (isCompact) Modifier.safeContentPadding().padding(horizontal = 8.dp)
-                    else Modifier.padding(all = 32.dp)
-                ),
-        ) {
-            // out of the scrolled content: always visible
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
-                BackIconButton { navigator.pop() }
-                Spacer(Modifier.width(8.dp))
-                Text("Google Drive sync", style = MaterialTheme.typography.headlineMedium)
+    Column(
+        Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .then(
+                if (isCompact) Modifier.safeContentPadding().padding(horizontal = 8.dp)
+                else Modifier.padding(all = 32.dp)
+            ),
+    ) {
+        // out of the scrolled content: always visible
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+            BackIconButton(navigator)
+            Spacer(Modifier.width(8.dp))
+            Text("Google Drive sync", style = MaterialTheme.typography.headlineMedium)
+        }
+        if (isCompact) {
+            // the status and its buttons stay on top, the rest scrolls below
+            SyncStatusCard(viewModel, status, Modifier.fillMaxWidth())
+            Spacer(Modifier.height(16.dp))
+            Column(
+                Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                SyncDetails(status)
+                HowSyncWorks(status)
+                Spacer(Modifier.height(8.dp))
             }
-            if (isCompact) {
-                // the status and its buttons stay on top, the rest scrolls below
-                SyncStatusCard(viewModel, status, Modifier.fillMaxWidth())
-                Spacer(Modifier.height(16.dp))
+        } else {
+            // the status and its buttons on the left, the explanation on the right, each scrolling on its own
+            Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
                 Column(
-                    Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    Modifier.width(400.dp).fillMaxHeight().verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
+                    SyncStatusCard(viewModel, status, Modifier.fillMaxWidth())
                     SyncDetails(status)
-                    HowSyncWorks(status)
-                    Spacer(Modifier.height(8.dp))
                 }
-            } else {
-                // the status and its buttons on the left, the explanation on the right, each scrolling on its own
-                Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                    Column(
-                        Modifier.width(400.dp).fillMaxHeight().verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        SyncStatusCard(viewModel, status, Modifier.fillMaxWidth())
-                        SyncDetails(status)
-                    }
-                    Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
-                        HowSyncWorks(status, Modifier.widthIn(max = 800.dp))
-                    }
+                Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
+                    HowSyncWorks(status, Modifier.widthIn(max = 800.dp))
                 }
             }
         }
+    }
 }
 
 /**

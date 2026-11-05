@@ -17,8 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.util.VoidSignal
 import kotlinx.coroutines.launch
@@ -43,7 +42,7 @@ fun TabRowWithBackButton(
     modifier: Modifier = Modifier
 ) {
     Row(Modifier.fillMaxWidth().background(TabRowDefaults.secondaryContainerColor)) {
-        val navigator = LocalNavigator.currentOrThrow
+        val navigator = LocalAppNavigator.current
         BackIconButton(navigator)
         if (scrollable) {
             SecondaryScrollableTabRow(

@@ -72,56 +72,56 @@ private val DISPLAYED_STATS = listOf(
 
 @Composable
 fun PokedexScreen() {
-        val viewModel = koinViewModel<PokedexViewModel>()
-        val navigator = LocalAppNavigator.current
-        val isCompact = LocalIsCompact.current
-        val focusManager = LocalFocusManager.current
-        val availableNames = availablePokemonNames()
-        // the names load in one go. The megas are reached from their base form, with the form selector
-        val searchablePokemons = remember(availableNames.size) { availableNames.filterNot { it.isMega } }
-        Column(
-            Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .then(if (isCompact) Modifier.safeContentPadding() else Modifier.padding(all = 16.dp))
-        ) {
-            Box(Modifier.fillMaxWidth()) {
-                BackIconButton(Modifier.align(Alignment.CenterStart)) { navigator.pop() }
-                Text(
-                    "Pokédex",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-            SuggestionTextField(
-                value = viewModel.query,
-                onValueChange = { viewModel.query = it },
-                suggestions = searchablePokemons,
-                suggestionText = { it.pretty },
-                label = "Search a Pokémon",
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                suggestionLeadingContent = { PokemonSprite(it, Modifier.size(32.dp)) },
-                onSuggestionPicked = {
-                    // on a phone, the keyboard would hide the sheet
-                    focusManager.clearFocus()
-                    viewModel.selectPokemon(it)
-                },
+    val viewModel = koinViewModel<PokedexViewModel>()
+    val navigator = LocalAppNavigator.current
+    val isCompact = LocalIsCompact.current
+    val focusManager = LocalFocusManager.current
+    val availableNames = availablePokemonNames()
+    // the names load in one go. The megas are reached from their base form, with the form selector
+    val searchablePokemons = remember(availableNames.size) { availableNames.filterNot { it.isMega } }
+    Column(
+        Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .then(if (isCompact) Modifier.safeContentPadding() else Modifier.padding(all = 16.dp))
+    ) {
+        Box(Modifier.fillMaxWidth()) {
+            BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
+            Text(
+                "Pokédex",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Center)
             )
-            Spacer(Modifier.height(16.dp))
-            val pokemon = viewModel.selectedForm
-            if (pokemon == null) {
-                Text(
-                    "Search a Pokémon to see its stats",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                )
-            } else {
-                PokemonSheet(viewModel, pokemon, isCompact)
-            }
         }
+        Spacer(Modifier.height(8.dp))
+        SuggestionTextField(
+            value = viewModel.query,
+            onValueChange = { viewModel.query = it },
+            suggestions = searchablePokemons,
+            suggestionText = { it.pretty },
+            label = "Search a Pokémon",
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            suggestionLeadingContent = { PokemonSprite(it, Modifier.size(32.dp)) },
+            onSuggestionPicked = {
+                // on a phone, the keyboard would hide the sheet
+                focusManager.clearFocus()
+                viewModel.selectPokemon(it)
+            },
+        )
+        Spacer(Modifier.height(16.dp))
+        val pokemon = viewModel.selectedForm
+        if (pokemon == null) {
+            Text(
+                "Search a Pokémon to see its stats",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+            )
+        } else {
+            PokemonSheet(viewModel, pokemon, isCompact)
+        }
+    }
 }
 
 @Composable

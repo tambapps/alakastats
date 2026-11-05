@@ -115,7 +115,7 @@ private fun ManualReplayForm(viewModel: ManualReplayViewModel, replayToEdit: Rep
         topBar = {
             TopAppBar(
                 title = { Text(if (replayToEdit != null) "Edit Replay" else "Add Replay Manually") },
-                navigationIcon = { BackIconButton { navigator.pop() } }
+                navigationIcon = { BackIconButton(navigator) }
             )
         }
     ) { scaffoldPadding ->

@@ -4,7 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import arrow.core.flatMap
-import cafe.adriel.voyager.core.model.ScreenModel
+import androidx.lifecycle.ViewModel
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
@@ -37,7 +37,7 @@ class SpeedStatQuizViewModel(
     val useSpeedBoostingNature: Boolean,
     private val formatRepository: FormatDataRepository,
     private val pokemonBaseStatsRepository: PokemonBaseStatsRepository
-) : ScreenModel {
+) : ViewModel() {
 
     var isLoading by mutableStateOf(true)
         private set

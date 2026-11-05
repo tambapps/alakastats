@@ -35,31 +35,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
+import org.koin.compose.viewmodel.koinViewModel
 
-object NatureQuizSetupScreen : Screen {
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<NatureQuizSetupViewModel>()
-        val isCompact = LocalIsCompact.current
+@Composable
+fun NatureQuizSetupScreen() {
+    val viewModel = koinViewModel<NatureQuizSetupViewModel>()
+    val isCompact = LocalIsCompact.current
 
-        if (isCompact) {
-            NatureQuizSetupScreenMobile(viewModel)
-        } else {
-            NatureQuizSetupScreenDesktop(viewModel)
-        }
+    if (isCompact) {
+        NatureQuizSetupScreenMobile(viewModel)
+    } else {
+        NatureQuizSetupScreenDesktop(viewModel)
+    }
 
-        if (viewModel.showIgnoredNaturesDialog) {
-            IgnoredNaturesDialog(viewModel)
-        }
+    if (viewModel.showIgnoredNaturesDialog) {
+        IgnoredNaturesDialog(viewModel)
     }
 }
 
@@ -209,7 +205,7 @@ internal fun IgnoreNaturesButton(viewModel: NatureQuizSetupViewModel, modifier: 
 
 @Composable
 internal fun StartQuizButton(viewModel: NatureQuizSetupViewModel, modifier: Modifier = Modifier) {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalAppNavigator.current
     Button(
         onClick = { viewModel.startQuiz(navigator) },
         enabled = viewModel.ignoredNatures.size < viewModel.natures.size,

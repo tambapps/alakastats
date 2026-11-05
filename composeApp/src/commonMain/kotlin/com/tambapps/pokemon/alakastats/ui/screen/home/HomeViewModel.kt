@@ -268,7 +268,7 @@ class HomeViewModel(
     }
 
     fun consultTeam(team: TeamlyticsPreview, navigator: AppNavigator) {
-        navigator.push(AppRoute.Team(team.id))
+        navigator.push(AppRoute.Teamlytics(team.id))
     }
 
     fun reloadReplays(preview: TeamlyticsPreview, snackBar: SnackBar) {
@@ -351,7 +351,7 @@ class HomeViewModel(
                 },
                 ifRight = { fullTeam ->
                     withContext(Dispatchers.Main) {
-                        navigator.push(AppRoute.NotMigrated("Edit Team"))
+                        navigator.push(AppRoute.EditTeam(fullTeam.id))
                     }
                 }
             )

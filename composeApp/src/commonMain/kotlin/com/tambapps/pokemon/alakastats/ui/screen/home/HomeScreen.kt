@@ -81,86 +81,86 @@ import org.koin.compose.koinInject
 
 @Composable
 fun HomeScreen() {
-        val viewModel = koinViewModel<HomeViewModel>()
-        LaunchedEffect(Unit) {
-            viewModel.loadTeams()
-        }
-        LaunchedEffect(Unit) {
-            // a sync can add, change or delete local teams
-            viewModel.teamsChangedBySync.collect { viewModel.loadTeams() }
-        }
-        val isCompact = LocalIsCompact.current
+    val viewModel = koinViewModel<HomeViewModel>()
+    LaunchedEffect(Unit) {
+        viewModel.loadTeams()
+    }
+    LaunchedEffect(Unit) {
+        // a sync can add, change or delete local teams
+        viewModel.teamsChangedBySync.collect { viewModel.loadTeams() }
+    }
+    val isCompact = LocalIsCompact.current
 
-        if (isCompact) {
-            HomeScreenMobile(viewModel)
-        } else {
-            HomeScreenDesktop(viewModel)
-        }
+    if (isCompact) {
+        HomeScreenMobile(viewModel)
+    } else {
+        HomeScreenDesktop(viewModel)
+    }
 
-        if (viewModel.isLoading) {
-            Dialog(
-                onDismissRequest = {},
-                content = {
-                    CircularProgressIndicator()
+    if (viewModel.isLoading) {
+        Dialog(
+            onDismissRequest = {},
+            content = {
+                CircularProgressIndicator()
+            }
+        )
+    }
+    viewModel.teamToImport?.let { teamToImport ->
+        TeamActionDialog(
+            viewModel = viewModel,
+            teamName = teamToImport.name,
+            pokemons = teamToImport.pokePaste.pokemons.map { it.name },
+            winRatePercentage = teamToImport.winRate,
+            nbReplays = teamToImport.replays.size,
+            title = "Load Team",
+            onDismissRequest = { viewModel.dismissImportTeamDialog() },
+            confirmButton = {
+                val snackBar = LocalSnackBar.current
+                TextButton(
+                    onClick = { viewModel.confirmImport(snackBar) }
+                ) {
+                    Text("Load")
                 }
-            )
-        }
-        viewModel.teamToImport?.let { teamToImport ->
-            TeamActionDialog(
-                viewModel = viewModel,
-                teamName = teamToImport.name,
-                pokemons = teamToImport.pokePaste.pokemons.map { it.name },
-                winRatePercentage = teamToImport.winRate,
-                nbReplays = teamToImport.replays.size,
-                title = "Load Team",
-                onDismissRequest = { viewModel.dismissImportTeamDialog() },
-                confirmButton = {
-                    val snackBar = LocalSnackBar.current
-                    TextButton(
-                        onClick = { viewModel.confirmImport(snackBar) }
-                    ) {
-                        Text("Load")
-                    }
-                }
-            )
+            }
+        )
 
-        }
-        val sharing by viewModel.sharing.collectAsState()
-        viewModel.teamToDelete?.let { teamToDelete ->
-            val role = sharing[teamToDelete.id]
-            val isLeaving = role != null && role != ShareRole.OWNER
-            TeamActionDialog(
-                viewModel = viewModel,
-                teamName = teamToDelete.name,
-                pokemons = teamToDelete.pokemons,
-                winRatePercentage = teamToDelete.winrate,
-                nbReplays = teamToDelete.nbReplays,
-                title = if (isLeaving) "Leave Team" else "Delete Team",
-                text = when {
-                    isLeaving -> "The team will be removed from your devices. You can join it again while it's shared with you."
-                    role == ShareRole.OWNER -> "The team will be deleted for everyone it's shared with. This action cannot be undone."
-                    else -> "This action cannot be undone."
-                },
-                onDismissRequest = { viewModel.dismissDeleteDialog() },
-                confirmButton = {
-                    TextButton(
-                        onClick = { viewModel.confirmDelete() }
-                    ) {
-                        Text(if (isLeaving) "Leave" else "Delete", color = Color.Red)
-                    }
+    }
+    val sharing by viewModel.sharing.collectAsState()
+    viewModel.teamToDelete?.let { teamToDelete ->
+        val role = sharing[teamToDelete.id]
+        val isLeaving = role != null && role != ShareRole.OWNER
+        TeamActionDialog(
+            viewModel = viewModel,
+            teamName = teamToDelete.name,
+            pokemons = teamToDelete.pokemons,
+            winRatePercentage = teamToDelete.winrate,
+            nbReplays = teamToDelete.nbReplays,
+            title = if (isLeaving) "Leave Team" else "Delete Team",
+            text = when {
+                isLeaving -> "The team will be removed from your devices. You can join it again while it's shared with you."
+                role == ShareRole.OWNER -> "The team will be deleted for everyone it's shared with. This action cannot be undone."
+                else -> "This action cannot be undone."
+            },
+            onDismissRequest = { viewModel.dismissDeleteDialog() },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.confirmDelete() }
+                ) {
+                    Text(if (isLeaving) "Leave" else "Delete", color = Color.Red)
                 }
-            )
-        }
-        viewModel.samplesToShow?.let { samples ->
-            SamplesDialog(viewModel, samples)
-        }
-        ImportChoiceDialog(viewModel)
-        KeepLocalDialog(viewModel)
-        ShareTeamDialog(viewModel)
-        JoinOnWebDialog(viewModel)
-        if (viewModel.showSyncStatusDialog) {
-            SyncStatusDialog(koinViewModel<CloudSyncViewModel>()) { viewModel.showSyncStatusDialog = false }
-        }
+            }
+        )
+    }
+    viewModel.samplesToShow?.let { samples ->
+        SamplesDialog(viewModel, samples)
+    }
+    ImportChoiceDialog(viewModel)
+    KeepLocalDialog(viewModel)
+    ShareTeamDialog(viewModel)
+    JoinOnWebDialog(viewModel)
+    if (viewModel.showSyncStatusDialog) {
+        SyncStatusDialog(koinViewModel<CloudSyncViewModel>()) { viewModel.showSyncStatusDialog = false }
+    }
 }
 
 @Composable
@@ -353,7 +353,7 @@ internal fun NewTeamButton(modifier: Modifier = Modifier) {
     val navigator = LocalAppNavigator.current
     Button(
         modifier = modifier,
-        onClick = { navigator.push(AppRoute.NotMigrated("Create Team")) }
+        onClick = { navigator.push(AppRoute.EditTeam()) }
     ) {
         Icon(
             painter = painterResource(Res.drawable.add),
@@ -474,7 +474,7 @@ private fun ImportChoice(title: String, description: String, onClick: () -> Unit
 @Composable
 internal fun AboutButton(modifier: Modifier = Modifier) {
     val navigator = LocalAppNavigator.current
-    TextButton(onClick = { navigator.push(AppRoute.NotMigrated("About")) }, modifier = modifier) {
+    TextButton(onClick = { navigator.push(AppRoute.About) }, modifier = modifier) {
         Text("About", style = buttonTextStyle)
     }
 }
@@ -552,13 +552,13 @@ internal fun SyncReconnectionWarning(viewModel: HomeViewModel, modifier: Modifie
 @Composable
 internal fun QuizzesButton(modifier: Modifier = Modifier, stacked: Boolean = false) {
     val navigator = LocalAppNavigator.current
-    HomeToolButton(Res.drawable.quiz, "Quizzes", stacked, modifier) { navigator.push(AppRoute.NotMigrated("Quizzes")) }
+    HomeToolButton(Res.drawable.quiz, "Quizzes", stacked, modifier) { navigator.push(AppRoute.Quizzes) }
 }
 
 @Composable
 internal fun DamageCalcButton(modifier: Modifier = Modifier, stacked: Boolean = false) {
     val navigator = LocalAppNavigator.current
-    HomeToolButton(Res.drawable.calculate, "Damage Calc", stacked, modifier) { navigator.push(AppRoute.NotMigrated("Damage Calc")) }
+    HomeToolButton(Res.drawable.calculate, "Damage Calc", stacked, modifier) { navigator.push(AppRoute.DamageCalc) }
 }
 
 @Composable

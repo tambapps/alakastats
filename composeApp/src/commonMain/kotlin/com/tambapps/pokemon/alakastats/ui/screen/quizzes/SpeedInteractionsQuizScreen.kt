@@ -38,11 +38,9 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.AppNavigator
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
+import org.koin.compose.viewmodel.koinViewModel
 import com.tambapps.pokemon.alakastats.domain.model.OpponentSpeedRange
 import com.tambapps.pokemon.alakastats.domain.model.RevealedNature
 import com.tambapps.pokemon.alakastats.domain.model.SpeedComparisonResult
@@ -57,48 +55,46 @@ import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.koin.core.parameter.parametersOf
 
-data class SpeedInteractionsQuizScreen(val mode: SpeedInteractionsMode) : Screen {
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<SpeedInteractionsViewModel> { parametersOf(mode) }
-        val navigator = LocalNavigator.currentOrThrow
-        val isCompact = LocalIsCompact.current
+@Composable
+fun SpeedInteractionsQuizScreen(mode: SpeedInteractionsMode) {
+    val viewModel = koinViewModel<SpeedInteractionsViewModel> { parametersOf(mode) }
+    val navigator = LocalAppNavigator.current
+    val isCompact = LocalIsCompact.current
 
-        Column(
-            modifier = Modifier.fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .safeContentPadding()
-                .padding(horizontal = if (isCompact) 16.dp else 24.dp, vertical = 16.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(Modifier.fillMaxWidth()) {
-                BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
-                Text(
-                    "Speed Interactions",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            Spacer(Modifier.height(24.dp))
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .safeContentPadding()
+            .padding(horizontal = if (isCompact) 16.dp else 24.dp, vertical = 16.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(Modifier.fillMaxWidth()) {
+            BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
+            Text(
+                "Speed Interactions",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+        Spacer(Modifier.height(24.dp))
 
-            val contentModifier = if (isCompact) Modifier.fillMaxWidth() else Modifier.widthIn(max = 480.dp)
-            when {
-                viewModel.isLoading -> LoadingContent(contentModifier)
-                viewModel.noFormatSet -> MessageContent(
-                    "This team doesn't have a format set, so a meta pool of opponents can't be loaded.",
-                    navigator,
-                    contentModifier
-                )
-                viewModel.loadFailed -> MessageContent(
-                    "Couldn't load Pokemon for this quiz. Please try again.",
-                    navigator,
-                    contentModifier
-                )
-                viewModel.isFinished -> SpeedInteractionsResultsContent(viewModel, navigator, contentModifier)
-                else -> SpeedInteractionsQuestionContent(viewModel, contentModifier)
-            }
+        val contentModifier = if (isCompact) Modifier.fillMaxWidth() else Modifier.widthIn(max = 480.dp)
+        when {
+            viewModel.isLoading -> LoadingContent(contentModifier)
+            viewModel.noFormatSet -> MessageContent(
+                "This team doesn't have a format set, so a meta pool of opponents can't be loaded.",
+                navigator,
+                contentModifier
+            )
+            viewModel.loadFailed -> MessageContent(
+                "Couldn't load Pokemon for this quiz. Please try again.",
+                navigator,
+                contentModifier
+            )
+            viewModel.isFinished -> SpeedInteractionsResultsContent(viewModel, navigator, contentModifier)
+            else -> SpeedInteractionsQuestionContent(viewModel, contentModifier)
         }
     }
 }
@@ -118,7 +114,7 @@ private fun LoadingContent(modifier: Modifier) {
 }
 
 @Composable
-private fun MessageContent(message: String, navigator: Navigator, modifier: Modifier) {
+private fun MessageContent(message: String, navigator: AppNavigator, modifier: Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.height(48.dp))
         Text(message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
@@ -345,7 +341,7 @@ private fun SpeedInteractionsAnswerFeedback(question: SpeedInteractionQuestion, 
 }
 
 @Composable
-private fun SpeedInteractionsResultsContent(viewModel: SpeedInteractionsViewModel, navigator: Navigator, modifier: Modifier) {
+private fun SpeedInteractionsResultsContent(viewModel: SpeedInteractionsViewModel, navigator: AppNavigator, modifier: Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Quiz complete!", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))

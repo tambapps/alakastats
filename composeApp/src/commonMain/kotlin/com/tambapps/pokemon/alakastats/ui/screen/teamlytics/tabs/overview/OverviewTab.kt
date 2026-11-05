@@ -28,8 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.PokemonData
@@ -38,12 +38,10 @@ import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemon
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
-import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.WinRateText
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.rememberGuardedChange
-import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailsScreen
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
 import org.jetbrains.compose.resources.painterResource
@@ -154,7 +152,7 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
             )
             // a viewer of a shared team can only export it
             if (viewModel.isReadOnly) return@DropdownMenu
-            val navigator = LocalNavigator.currentOrThrow
+            val navigator = LocalAppNavigator.current
             val guardedChange = rememberGuardedChange()
             DropdownMenuItem(
                 text = { Text("Edit team") },
@@ -162,12 +160,7 @@ internal fun MoreActionsButton(viewModel: OverviewViewModel) {
                     isMenuExpanded = false
                     guardedChange {
                         // don't push because when coming to the screen, this screen doesn't recompose and take into account the updated team
-                        navigator.replace(
-                            EditTeamScreen(
-                                viewModel.team.id,
-                                redirectToTeamlyticsScreen = true
-                            )
-                        )
+                        navigator.replace(AppRoute.EditTeam(viewModel.team.id, redirectToTeamlytics = true))
                     }
                 }
             )
@@ -217,7 +210,7 @@ internal fun NotedPokepastePokemon(
             notes = notes
         )
     } else {
-        val navigator = LocalNavigator.currentOrThrow
+        val navigator = LocalAppNavigator.current
         PokepastePokemon(
             format = team.format,
             isOts = team.pokePaste.isOts,
@@ -226,12 +219,7 @@ internal fun NotedPokepastePokemon(
             modifier = modifier,
             notes = notes,
             onClick = {
-                navigator.push(
-                    PokemonDetailsScreen(
-                        team.id,
-                        pokemon.name.normalized.value
-                    )
-                )
+                navigator.push(AppRoute.PokemonDetails(team.id, pokemon.name.normalized.value))
             }
         )
     }

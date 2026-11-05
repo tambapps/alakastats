@@ -11,19 +11,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
-import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsTeamSetupScreen
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 
 @Composable
 fun QuizzesTab(viewModel: QuizzesTabViewModel) {
     Column(Modifier.fillMaxWidth().safeContentPadding().padding(16.dp)) {
-        val navigator = LocalNavigator.currentOrThrow
+        val navigator = LocalAppNavigator.current
         MyCard(
             modifier = Modifier.fillMaxWidth().height(120.dp),
-            onClick = { navigator.push(SpeedInteractionsTeamSetupScreen(viewModel.team.id)) },
+            onClick = { navigator.push(AppRoute.SpeedInteractionsTeamSetup(viewModel.team.id)) },
             gradientBackgroundColors = elevatedCardGradientColors
         ) {
             Column(Modifier.padding(16.dp)) {

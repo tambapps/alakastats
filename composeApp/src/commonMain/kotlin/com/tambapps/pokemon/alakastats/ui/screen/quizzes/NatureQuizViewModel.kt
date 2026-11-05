@@ -3,7 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.quizzes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import cafe.adriel.voyager.core.model.ScreenModel
+import androidx.lifecycle.ViewModel
 import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.Stat
 
@@ -18,7 +18,7 @@ enum class QuizDirection(val displayName: String) {
 
 data class NatureQuizResult(val nature: Nature, val outcome: AnswerOutcome)
 
-class NatureQuizViewModel(natures: List<Nature>, val direction: QuizDirection) : ScreenModel {
+class NatureQuizViewModel(natures: List<Nature>, val direction: QuizDirection) : ViewModel() {
     val questions: List<Nature> = natures.shuffled()
 
     var currentIndex by mutableStateOf(0)

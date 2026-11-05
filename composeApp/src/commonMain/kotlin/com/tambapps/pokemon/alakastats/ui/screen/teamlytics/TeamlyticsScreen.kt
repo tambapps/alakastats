@@ -27,10 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
+import org.koin.compose.viewmodel.koinViewModel
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultTeamlyticsUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageMatchupPlansUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
@@ -62,63 +60,59 @@ import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import kotlin.uuid.Uuid
 
-data class TeamlyticsScreen(val teamId: Uuid) : Screen {
-    private companion object {
-        val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Opponent Trends", "Game Plans", "Damage Calc", "Quizzes")
+private val TABS = listOf("Overview", "Replays", "Usages", "Lead Stats", "Opponent Trends", "Game Plans", "Damage Calc", "Quizzes")
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TeamlyticsScreen(teamId: Uuid) {
+    val viewModel = koinViewModel<TeamlyticsViewModel> { parametersOf(teamId) }
+    val isCompact = LocalIsCompact.current
+    val pagerState = rememberPagerState(pageCount = { TABS.size })
+    val reconnectionGuard = rememberReconnectionGuard(teamId)
+
+    CompositionLocalProvider(LocalReconnectionGuard provides reconnectionGuard) {
+        TeamlyticsContent(viewModel, isCompact, pagerState)
     }
+    ReconnectionDialog(reconnectionGuard)
+}
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<TeamlyticsViewModel> { parametersOf(teamId) }
-        val isCompact = LocalIsCompact.current
-        val pagerState = rememberPagerState(pageCount = { TABS.size })
-        val reconnectionGuard = rememberReconnectionGuard(teamId)
+@Composable
+private fun TeamlyticsContent(viewModel: TeamlyticsViewModel, isCompact: Boolean, pagerState: PagerState) {
+    Box(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars)
+    ) {
+        when (val state = viewModel.teamState) {
+            is TeamState.Loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(48.dp).align(Alignment.Center)
+                )
 
-        CompositionLocalProvider(LocalReconnectionGuard provides reconnectionGuard) {
-            TeamlyticsContent(viewModel, isCompact, pagerState)
-        }
-        ReconnectionDialog(reconnectionGuard)
-    }
-
-    @Composable
-    private fun TeamlyticsContent(viewModel: TeamlyticsViewModel, isCompact: Boolean, pagerState: PagerState) {
-        Box(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.systemBars)
-        ) {
-            when (val state = viewModel.teamState) {
-                is TeamState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(48.dp).align(Alignment.Center)
-                    )
-
+            }
+            is TeamState.Error -> {
+                val navigator = LocalAppNavigator.current
+                val snackBar = LocalSnackBar.current
+                LaunchedEffect(Unit) {
+                    snackBar.show("Error: ${state.error.message}", SnackBar.Severity.ERROR)
+                    navigator.pop()
                 }
-                is TeamState.Error -> {
-                    val navigator = LocalNavigator.currentOrThrow
-                    val snackBar = LocalSnackBar.current
-                    LaunchedEffect(Unit) {
-                        snackBar.show("Error: ${state.error.message}", SnackBar.Severity.ERROR)
-                        navigator.pop()
-                    }
+            }
+            is TeamState.Loaded -> {
+                var visible by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    visible = true
                 }
-                is TeamState.Loaded -> {
-                    var visible by remember { mutableStateOf(false) }
-                    LaunchedEffect(Unit) {
-                        visible = true
-                    }
-                    AnimatedVisibility(
-                        visible = visible,
-                        enter = fadeIn(animationSpec = tween(durationMillis = 1000))
-                    ) {
-                        Column(Modifier.fillMaxSize()) {
-                            if (isCompact) {
-                                TeamlyticsScreenMobile(viewModel, TABS, pagerState)
-                            } else {
-                                TeamlyticsScreenDesktop(viewModel, TABS, pagerState)
-                            }
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 1000))
+                ) {
+                    Column(Modifier.fillMaxSize()) {
+                        if (isCompact) {
+                            TeamlyticsScreenMobile(viewModel, TABS, pagerState)
+                        } else {
+                            TeamlyticsScreenDesktop(viewModel, TABS, pagerState)
                         }
                     }
                 }
