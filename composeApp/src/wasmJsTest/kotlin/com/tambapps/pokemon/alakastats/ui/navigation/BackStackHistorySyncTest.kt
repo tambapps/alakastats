@@ -52,7 +52,8 @@ class BackStackHistorySyncTest {
     private val home = AppRoute.Home
     private val pokedex = AppRoute.Pokedex()
     private val metagross = AppRoute.Pokedex("metagross")
-    private val quizzes = AppRoute.Quizzes
+    // a screen without URL
+    private val cloudSync = AppRoute.CloudSync
 
     private fun sync(history: WebHistory, vararg routes: NavKey): Pair<BackStackHistorySync, MutableList<NavKey>> {
         val backStack = routes.toMutableList()
@@ -108,7 +109,7 @@ class BackStackHistorySyncTest {
     fun twoQuickPopsDontBringTheScreensBack() {
         val history = FakeHistory()
         val (sync, backStack) = sync(history, home)
-        sync.navigate(backStack) { add(quizzes) }
+        sync.navigate(backStack) { add(cloudSync) }
         sync.navigate(backStack) { add(pokedex) }
         sync.navigate(backStack) { removeLast() }
         sync.navigate(backStack) { removeLast() }
@@ -141,7 +142,7 @@ class BackStackHistorySyncTest {
     fun aScreenWithoutUrlIsAnEntryWithItsParentsUrlAndComesBackForward() {
         val history = FakeHistory()
         val (sync, backStack) = sync(history, home)
-        sync.navigate(backStack) { add(quizzes) }
+        sync.navigate(backStack) { add(cloudSync) }
         assertEquals("", history.path)
         assertEquals(2, history.entries.size)
 
@@ -149,7 +150,20 @@ class BackStackHistorySyncTest {
         assertEquals(listOf<NavKey>(home), backStack)
 
         history.pressForward(sync)
-        assertEquals(listOf<NavKey>(home, quizzes), backStack)
+        assertEquals(listOf<NavKey>(home, cloudSync), backStack)
+    }
+
+    @Test
+    fun poppingASetupOpenedFromItsUrlGoesToTheQuizzes() {
+        val history = FakeHistory("quizzes/natures")
+        val (sync, backStack) = sync(history, home, AppRoute.Quizzes, AppRoute.NatureQuizSetup)
+        sync.navigate(backStack) { removeLast() }
+        assertEquals(0, history.pendingBacks)
+        assertEquals("quizzes", history.path)
+        sync.navigate(backStack) { removeLast() }
+        assertEquals(0, history.pendingBacks)
+        assertEquals("", history.path)
+        assertEquals(listOf<NavKey>(home), backStack)
     }
 
     @Test
@@ -171,9 +185,9 @@ class BackStackHistorySyncTest {
         history.pressBack(sync)
         sync.onBackStackChanged(backStack.toList())
 
-        sync.navigate(backStack) { add(quizzes) }
+        sync.navigate(backStack) { add(cloudSync) }
         assertEquals(2, history.entries.size)
-        assertEquals(listOf<NavKey>(home, quizzes), backStack)
+        assertEquals(listOf<NavKey>(home, cloudSync), backStack)
     }
 
     @Test
