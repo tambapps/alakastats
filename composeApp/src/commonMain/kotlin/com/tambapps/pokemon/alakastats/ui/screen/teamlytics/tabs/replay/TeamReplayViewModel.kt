@@ -201,11 +201,13 @@ class TeamReplayViewModel(
     }
 
     // manually entered replays are already built, they just have to be saved
-    fun saveManualReplay(snackBar: SnackBar, replay: ReplayAnalytics, replacing: ReplayAnalytics? = null) {
+    fun saveManualReplay(snackBar: SnackBar, replay: ReplayAnalytics) {
         if (isLoading) {
             return
         }
         isTabLoading = true
+        // an edited replay keeps its reference
+        val replacing = useCase.originalTeam.replays.find { it.reference == replay.reference }
         scope.launch {
             val error =
                 if (replacing != null) useCase.replaceReplay(replacing, replay).leftOrNull()

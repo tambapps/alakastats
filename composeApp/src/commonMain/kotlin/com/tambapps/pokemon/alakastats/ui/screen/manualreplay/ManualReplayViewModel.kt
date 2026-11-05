@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import arrow.core.Either
 import arrow.core.flatMap
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.launch
 import com.tambapps.pokemon.ItemName
@@ -59,7 +59,7 @@ class ManualReplayViewModel(
     private val httpClient: HttpClient,
     // on the web, the browser blocks the request to pokepast.es (CORS)
     val canLoadPokepasteLinks: Boolean = platform.type != PlatformType.Web,
-) : ScreenModel {
+) : ViewModel() {
 
     val popularTeams = formatData?.popularTeams.orEmpty()
 
@@ -248,7 +248,7 @@ class ManualReplayViewModel(
     fun loadOpponentPokepaste() {
         if (pokepasteInput.isBlank() || isLoadingPokepaste) return
         isLoadingPokepaste = true
-        screenModelScope.launch { doLoadOpponentPokepaste() }
+        viewModelScope.launch { doLoadOpponentPokepaste() }
     }
 
     internal suspend fun doLoadOpponentPokepaste() {

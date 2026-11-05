@@ -24,6 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -48,14 +49,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import com.tambapps.pokemon.alakastats.domain.model.FormatData
+import androidx.navigation3.runtime.result.LocalResultEventBus
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
-import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
@@ -66,89 +63,114 @@ import com.tambapps.pokemon.alakastats.ui.service.availablePokemonNames
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.util.MegaUtils
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import kotlin.uuid.Uuid
 
-data class ManualReplayScreen(
-    val team: Teamlytics,
-    val formatData: FormatData?,
-    val replayToEdit: ReplayAnalytics? = null,
-    val onReplaySaved: (ReplayAnalytics) -> Unit
-) : Screen {
-    @Composable
-    override fun Content() {
-        val viewModel = koinScreenModel<ManualReplayViewModel> { parametersOf(team, formatData) }
-        val navigator = LocalNavigator.currentOrThrow
-        val snackBar = LocalSnackBar.current
-        val scope = rememberCoroutineScope()
-        val pages = ManualReplayPage.entries
-        val pagerState = rememberPagerState(pageCount = { pages.size })
-        LaunchedEffect(Unit) {
-            if (replayToEdit != null) {
-                viewModel.prepareEdition(replayToEdit)
+/**
+ * The replay is sent as a result to the previous screen, which saves it
+ *
+ * @param replayReference the manual replay to edit, null to create one
+ */
+@Composable
+fun ManualReplayScreen(teamId: Uuid, replayReference: String?) {
+    val loader = koinViewModel<ManualReplayLoaderViewModel> { parametersOf(teamId, replayReference) }
+    LaunchedEffect(Unit) {
+        loader.load()
+    }
+    when (val state = loader.state) {
+        ManualReplayLoadState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        is ManualReplayLoadState.Failed -> {
+            val navigator = LocalAppNavigator.current
+            val snackBar = LocalSnackBar.current
+            LaunchedEffect(Unit) {
+                snackBar.show(state.message, SnackBar.Severity.ERROR)
+                navigator.pop()
             }
         }
+        is ManualReplayLoadState.Loaded -> {
+            val viewModel = koinViewModel<ManualReplayViewModel> { parametersOf(state.team, state.formatData) }
+            ManualReplayForm(viewModel, state.replayToEdit)
+        }
+    }
+}
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(if (replayToEdit != null) "Edit Replay" else "Add Replay Manually") },
-                    navigationIcon = { BackIconButton(navigator) }
-                )
-            }
-        ) { scaffoldPadding ->
-            Box(modifier = Modifier.fillMaxSize().padding(scaffoldPadding)) {
-                FabLayout(
-                    fab = {
-                        DoneButton(enabled = viewModel.canBuildReplayAnalytics) {
-                            val error = viewModel.validationError
-                            if (error == null) {
-                                onReplaySaved(viewModel.buildReplayAnalytics())
-                                navigator.pop()
-                            } else {
-                                // bring the user where the missing information is asked
-                                scope.launch { pagerState.animateScrollToPage(error.page.ordinal) }
-                                snackBar.show(error.message, SnackBar.Severity.ERROR)
-                            }
+@Composable
+private fun ManualReplayForm(viewModel: ManualReplayViewModel, replayToEdit: ReplayAnalytics?) {
+    val navigator = LocalAppNavigator.current
+    val resultEventBus = LocalResultEventBus.current
+    val snackBar = LocalSnackBar.current
+    val scope = rememberCoroutineScope()
+    val pages = ManualReplayPage.entries
+    val pagerState = rememberPagerState(pageCount = { pages.size })
+    LaunchedEffect(Unit) {
+        if (replayToEdit != null) {
+            viewModel.prepareEdition(replayToEdit)
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(if (replayToEdit != null) "Edit Replay" else "Add Replay Manually") },
+                navigationIcon = { BackIconButton { navigator.pop() } }
+            )
+        }
+    ) { scaffoldPadding ->
+        Box(modifier = Modifier.fillMaxSize().padding(scaffoldPadding)) {
+            FabLayout(
+                fab = {
+                    DoneButton(enabled = viewModel.canBuildReplayAnalytics) {
+                        val error = viewModel.validationError
+                        if (error == null) {
+                            resultEventBus.sendResult(viewModel.buildReplayAnalytics())
+                            navigator.pop()
+                        } else {
+                            // bring the user where the missing information is asked
+                            scope.launch { pagerState.animateScrollToPage(error.page.ordinal) }
+                            snackBar.show(error.message, SnackBar.Severity.ERROR)
                         }
                     }
-                ) {
-                    Column(Modifier.fillMaxSize()) {
-                        SecondaryTabRow(selectedTabIndex = pagerState.currentPage) {
-                            pages.forEachIndexed { index, page ->
-                                Tab(
-                                    selected = pagerState.currentPage == index,
-                                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                                    text = { Text(page.title) }
-                                )
-                            }
+                }
+            ) {
+                Column(Modifier.fillMaxSize()) {
+                    SecondaryTabRow(selectedTabIndex = pagerState.currentPage) {
+                        pages.forEachIndexed { index, page ->
+                            Tab(
+                                selected = pagerState.currentPage == index,
+                                onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                                text = { Text(page.title) }
+                            )
                         }
-                        HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
-                            // so that no page starts stuck to the tabs
-                            Box(Modifier.fillMaxSize().padding(top = 16.dp)) {
-                                when (pages[page]) {
-                                    ManualReplayPage.YOU -> YouPage(viewModel)
-                                    ManualReplayPage.OPPONENT -> OpponentPage(viewModel)
-                                    ManualReplayPage.NOTES -> NotesPage(viewModel)
-                                }
+                    }
+                    HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
+                        // so that no page starts stuck to the tabs
+                        Box(Modifier.fillMaxSize().padding(top = 16.dp)) {
+                            when (pages[page]) {
+                                ManualReplayPage.YOU -> YouPage(viewModel)
+                                ManualReplayPage.OPPONENT -> OpponentPage(viewModel)
+                                ManualReplayPage.NOTES -> NotesPage(viewModel)
                             }
                         }
                     }
                 }
             }
         }
+    }
 
-        if (viewModel.showSelectPokemonDialog) {
-            SelectPokemonDialog(viewModel)
-        }
-        if (viewModel.showPopularTeamsDialog) {
-            SelectPopularTeamDialog(viewModel)
-        }
-        if (viewModel.showPokepasteDialog) {
-            OpponentPokepasteDialog(viewModel)
-        }
-        viewModel.megaStoneSelectionFor?.let {
-            SelectMegaStoneDialog(viewModel, it)
-        }
+    if (viewModel.showSelectPokemonDialog) {
+        SelectPokemonDialog(viewModel)
+    }
+    if (viewModel.showPopularTeamsDialog) {
+        SelectPopularTeamDialog(viewModel)
+    }
+    if (viewModel.showPokepasteDialog) {
+        OpponentPokepasteDialog(viewModel)
+    }
+    viewModel.megaStoneSelectionFor?.let {
+        SelectMegaStoneDialog(viewModel, it)
     }
 }
 

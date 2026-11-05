@@ -55,8 +55,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.result.ResultEffect
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
+import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.TeraType
 import com.tambapps.pokemon.alakastats.domain.model.Format
@@ -75,7 +78,6 @@ import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
 import com.tambapps.pokemon.alakastats.ui.model.replayDetails
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
-import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
 import com.tambapps.pokemon.alakastats.ui.screen.replayviewer.ReplayViewerDialog
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.rememberGuardedChange
@@ -92,6 +94,9 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun TeamReplayTab(viewModel: TeamReplayViewModel) {
     val isCompact = LocalIsCompact.current
+    val snackBar = LocalSnackBar.current
+    // what the manual replay screen sends when coming back from it
+    ResultEffect<ReplayAnalytics> { viewModel.saveManualReplay(snackBar, it) }
     FabLayout(
         fab = {
             AddReplayButton(viewModel)
@@ -141,7 +146,7 @@ private fun AddReplayButton(viewModel: TeamReplayViewModel, modifier: Modifier =
 
 @Composable
 private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalAppNavigator.current
     AlertDialog(
         onDismissRequest = { viewModel.hideAddReplayDialog() },
         title = { Text("Add Replay(s)") },
@@ -176,11 +181,7 @@ private fun AddReplayDialog(viewModel: TeamReplayViewModel) {
             TextButton(
                 onClick = {
                     viewModel.hideAddReplayDialog()
-                    navigator.push(
-                        ManualReplayScreen(viewModel.team, viewModel.formatData) { replay ->
-                            viewModel.saveManualReplay(snackBar, replay)
-                        }
-                    )
+                    navigator.push(AppRoute.ManualReplay(viewModel.team.id))
                 },
                 modifier = Modifier.padding(top = 4.dp)
             ) {
@@ -491,17 +492,13 @@ internal fun ReplayDropDownMenu(
         val guardedChange = rememberGuardedChange()
         // only manual replays can be edited, the others are what showdown says they are
         if (replay.isManual) {
-            val navigator = LocalNavigator.currentOrThrow
+            val navigator = LocalAppNavigator.current
             DropdownMenuItem(
                 text = { Text("Edit") },
                 onClick = {
                     isMenuExpandedState.value = false
                     guardedChange {
-                        navigator.push(
-                            ManualReplayScreen(viewModel.team, viewModel.formatData, replayToEdit = replay) { editedReplay ->
-                                viewModel.saveManualReplay(snackBar, editedReplay, replacing = replay)
-                            }
-                        )
+                        navigator.push(AppRoute.ManualReplay(viewModel.team.id, replay.reference))
                     }
                 }
             )

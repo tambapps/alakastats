@@ -21,13 +21,20 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.runtime.result.LocalResultEventBus
+import androidx.navigation3.runtime.result.ResultEffect
+import androidx.navigation3.runtime.result.rememberResultEventBusNavEntryDecorator
 import androidx.navigation3.runtime.serialization.NavBackStackSerializer
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.decodeFromSavedState
 import androidx.savedstate.serialization.encodeToSavedState
+import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.alakastats.App
 import com.tambapps.pokemon.alakastats.di.appModules
 import com.tambapps.pokemon.alakastats.di.wasmModule
+import com.tambapps.pokemon.alakastats.domain.model.Format
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizDirection
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsMode
 import kotlinx.serialization.PolymorphicSerializer
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
@@ -63,10 +70,29 @@ class AppNavigationSpikeTest {
     @Test
     fun theBackStackIsSavedAndRestored() {
         val serializer = NavBackStackSerializer(PolymorphicSerializer(NavKey::class))
+        val teamId = Uuid.random()
         val routes = listOf(
             AppRoute.Home,
             AppRoute.Pokedex,
-            AppRoute.Team(Uuid.random()),
+            AppRoute.CloudSync,
+            AppRoute.About,
+            AppRoute.DamageCalc,
+            AppRoute.Teamlytics(teamId),
+            AppRoute.Teamlytics(Uuid.random()),
+            AppRoute.EditTeam(),
+            AppRoute.EditTeam(teamId, redirectToTeamlytics = true),
+            AppRoute.PokemonDetails(teamId, "metagross-mega"),
+            AppRoute.ManualReplay(teamId),
+            AppRoute.ManualReplay(teamId, "manual-abc"),
+            AppRoute.Quizzes,
+            AppRoute.NatureQuizSetup,
+            AppRoute.NatureQuiz(listOf(Nature.ADAMANT, Nature.TIMID), QuizDirection.STATS_TO_NAME),
+            AppRoute.SpeedStatQuizSetup,
+            AppRoute.SpeedStatQuiz(Format.REGULATION_MC, true, false, true),
+            AppRoute.SpeedInteractionsHomeSetup,
+            AppRoute.SpeedInteractionsTeamSetup(teamId),
+            AppRoute.SpeedInteractionsQuiz(SpeedInteractionsMode.Home(Format.REGULATION_I)),
+            AppRoute.SpeedInteractionsQuiz(SpeedInteractionsMode.Team(teamId, allowTailwind = true)),
             AppRoute.Team(Uuid.random()),
             AppRoute.NotMigrated("Quizzes"),
         )
@@ -124,6 +150,42 @@ class AppNavigationSpikeTest {
         waitForIdle()
         onNodeWithText("vm=$first vmClicks=1 saved=1").assertExists()
         assertEquals(listOf(second), RecordingViewModel.cleared)
+    }
+
+    @Test
+    fun aResultReachesThePreviousScreenOnceBackToIt() = runComposeUiTest {
+        val backStack = NavBackStack<NavKey>(AppRoute.Home)
+        val received = mutableListOf<String>()
+        setContent {
+            NavDisplay(
+                backStack = backStack,
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberResultEventBusNavEntryDecorator(),
+                ),
+                entryProvider = entryProvider {
+                    entry<AppRoute.Home> {
+                        ResultEffect<String> { received += it }
+                        Text("previous")
+                    }
+                    entry<AppRoute.About> {
+                        val resultEventBus = LocalResultEventBus.current
+                        Text("send", Modifier.clickable {
+                            resultEventBus.sendResult("the result")
+                            backStack.removeLastOrNull()
+                        })
+                    }
+                },
+            )
+        }
+        backStack.add(AppRoute.About)
+        waitForIdle()
+        assertEquals(emptyList(), received)
+
+        onNodeWithText("send").performClick()
+        waitForIdle()
+        onNodeWithText("previous").assertExists()
+        assertEquals(listOf("the result"), received)
     }
 
     @Test

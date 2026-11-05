@@ -34,11 +34,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import kotlin.random.Random
 import kotlin.uuid.Uuid
 
+@Serializable
 sealed interface SpeedInteractionsMode {
+    @Serializable
     data class Home(val format: Format) : SpeedInteractionsMode
+
+    @Serializable
     data class Team(
         val teamId: Uuid,
         val allowOpponentScarf: Boolean = false,
