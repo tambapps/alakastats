@@ -182,20 +182,8 @@ private fun PokemonStatColumn(
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val txt = when(stat) {
-            Stat.ATTACK -> "Atk"
-            Stat.DEFENSE -> "Def"
-            Stat.SPECIAL_ATTACK -> "SpA"
-            Stat.SPECIAL_DEFENSE -> "SpD"
-            Stat.SPEED -> "Spe"
-            Stat.HP -> "HP"
-        }
-        val textColor = when {
-            pokemon.nature?.bonusStat == stat -> if (isDarkThemeEnabled()) Color(0xFFE57373) else Color.Red
-            pokemon.nature?.malusStat == stat -> if (isDarkThemeEnabled()) Color.Cyan else Color.Blue
-            else -> Color.Unspecified
-        }
-        Text(txt, color = textColor, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
+        val textColor = natureStatColor(pokemon.nature, stat)
+        Text(stat.shortName, color = textColor, textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
         val usesLegacySystem = remember(evs) { format.usesLegacySystem(evs) }
         if (baseStats != null) {
             val stats = remember(baseStats) {
@@ -216,6 +204,22 @@ private fun PokemonStatColumn(
             }
         }
     }
+}
+
+internal val Stat.shortName get() = when(this) {
+    Stat.ATTACK -> "Atk"
+    Stat.DEFENSE -> "Def"
+    Stat.SPECIAL_ATTACK -> "SpA"
+    Stat.SPECIAL_DEFENSE -> "SpD"
+    Stat.SPEED -> "Spe"
+    Stat.HP -> "HP"
+}
+
+@Composable
+internal fun natureStatColor(nature: Nature?, stat: Stat) = when {
+    nature?.bonusStat == stat -> if (isDarkThemeEnabled()) Color(0xFFE57373) else Color.Red
+    nature?.malusStat == stat -> if (isDarkThemeEnabled()) Color.Cyan else Color.Blue
+    else -> Color.Unspecified
 }
 
 @Composable
