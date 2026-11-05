@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.MegaSwitch
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemonHeader
+import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.usage.PokemonUsagesCard
 import com.tambapps.pokemon.util.MegaUtils
 
 @Composable
@@ -39,6 +41,19 @@ fun PokemonDetailsOverviewMobile(
         Spacer(Modifier.height(16.dp))
 
         PokemonDetailsOverview(viewModel, pokemon=viewModel.pokemon, Modifier.fillMaxWidth())
+        viewModel.usages?.let {
+            Spacer(Modifier.height(16.dp))
+            PokemonUsagesCard(
+                team = viewModel.team,
+                replays = viewModel.team.replays,
+                name = viewModel.pokemon.name,
+                usages = it,
+                title = "Usage",
+                // need to have 2 colors
+                gradientBackgroundColors = listOf(MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.surfaceContainerHighest),
+                spriteName = viewModel.pokemon.name,
+            )
+        }
         Spacer(Modifier.height(64.dp))
     }
 }
