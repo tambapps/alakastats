@@ -8,6 +8,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -53,8 +54,9 @@ sealed interface AppRoute : NavKey {
     @Serializable
     data object Home : AppRoute
 
+    /** @param form the form shown, null for none */
     @Serializable
-    data object Pokedex : AppRoute
+    data class Pokedex(val form: String? = null) : AppRoute
 
     @Serializable
     data object CloudSync : AppRoute
@@ -140,10 +142,15 @@ val appRouteSavedStateConfiguration = SavedStateConfiguration {
     }
 }
 
+/**
+ * @param startRoutes the screens at start, the last one being shown
+ * @param backStackEffect what follows the back stack, e.g. the web app's URL
+ */
 @Composable
-fun AppNavDisplay(startRoute: AppRoute) {
-    val backStack = rememberNavBackStack(appRouteSavedStateConfiguration, startRoute)
+fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (NavBackStack<NavKey>) -> Unit) {
+    val backStack = rememberNavBackStack(appRouteSavedStateConfiguration, *startRoutes.toTypedArray())
     val navigator = remember(backStack) { AppNavigator(backStack) }
+    backStackEffect(backStack)
     CompositionLocalProvider(LocalAppNavigator provides navigator) {
         NavDisplay(
             backStack = backStack,
@@ -159,7 +166,8 @@ fun AppNavDisplay(startRoute: AppRoute) {
             predictivePopTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
             entryProvider = entryProvider {
                 entry<AppRoute.Home> { HomeScreen() }
-                entry<AppRoute.Pokedex> { PokedexScreen() }
+                // the same content whatever the form: changing it keeps the screen, its view model and its animations
+                entry<AppRoute.Pokedex>(clazzContentKey = { "pokedex" }) { PokedexScreen(it.form) }
                 entry<AppRoute.CloudSync> { CloudSyncScreen() }
                 entry<AppRoute.About> { AboutScreen() }
                 entry<AppRoute.DamageCalc> { DamageCalcScreen(showBackButton = true) }

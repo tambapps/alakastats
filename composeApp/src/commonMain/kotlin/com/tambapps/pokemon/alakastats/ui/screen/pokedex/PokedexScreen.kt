@@ -38,6 +38,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.LaunchedEffect
+import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.SnackBar
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
 import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import org.koin.compose.viewmodel.koinViewModel
 import com.tambapps.pokemon.Nature
@@ -70,15 +74,34 @@ private val DISPLAYED_STATS = listOf(
     Stat.SPEED to "Spe",
 )
 
+/**
+ * @param form the form shown, null for none. It's in the route, for it to be restored and to be in the web app's URL
+ */
 @Composable
-fun PokedexScreen() {
+fun PokedexScreen(form: String?) {
     val viewModel = koinViewModel<PokedexViewModel>()
     val navigator = LocalAppNavigator.current
+    val snackBar = LocalSnackBar.current
     val isCompact = LocalIsCompact.current
     val focusManager = LocalFocusManager.current
     val availableNames = availablePokemonNames()
     // the names load in one go. The megas are reached from their base form, with the form selector
     val searchablePokemons = remember(availableNames.size) { availableNames.filterNot { it.isMega } }
+    LaunchedEffect(form) {
+        viewModel.show(form?.let(::PokemonName))
+    }
+    // a form can come from an URL, so it may not exist
+    LaunchedEffect(form, availableNames.size) {
+        if (form != null && availableNames.isNotEmpty() && baseFormOf(PokemonName(form)) !in availableNames) {
+            snackBar.show("Unknown Pokémon: $form", SnackBar.Severity.ERROR)
+            navigator.replace(AppRoute.Pokedex())
+        }
+    }
+    viewModel.formToShowInstead?.let { replacement ->
+        LaunchedEffect(replacement) {
+            navigator.replace(AppRoute.Pokedex(replacement.value))
+        }
+    }
     Column(
         Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -105,7 +128,9 @@ fun PokedexScreen() {
             onSuggestionPicked = {
                 // on a phone, the keyboard would hide the sheet
                 focusManager.clearFocus()
-                viewModel.selectPokemon(it)
+                // emptied, ready for the next search, the sheet telling which pokemon is shown
+                viewModel.query = ""
+                navigator.replace(AppRoute.Pokedex(it.value))
             },
         )
         Spacer(Modifier.height(16.dp))
@@ -165,6 +190,7 @@ private fun CrossfadingArtwork(pokemon: PokemonName, modifier: Modifier = Modifi
 @Composable
 private fun FormSelector(viewModel: PokedexViewModel) {
     if (viewModel.forms.size < 2) return
+    val navigator = LocalAppNavigator.current
     Row(
         Modifier.padding(top = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -175,7 +201,7 @@ private fun FormSelector(viewModel: PokedexViewModel) {
                 Modifier.size(FORM_SIZE)
                     .clip(RoundedCornerShape(12.dp))
                     .background(background)
-                    .clickable { viewModel.selectForm(form) }
+                    .clickable { navigator.replace(AppRoute.Pokedex(form.value)) }
                     .padding(4.dp),
                 contentAlignment = Alignment.Center,
             ) {

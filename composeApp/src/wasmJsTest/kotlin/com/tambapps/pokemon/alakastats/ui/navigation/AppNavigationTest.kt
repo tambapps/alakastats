@@ -73,7 +73,8 @@ class AppNavigationTest {
         val teamId = Uuid.random()
         val routes = listOf(
             AppRoute.Home,
-            AppRoute.Pokedex,
+            AppRoute.Pokedex(),
+            AppRoute.Pokedex("metagross-mega"),
             AppRoute.CloudSync,
             AppRoute.About,
             AppRoute.DamageCalc,
@@ -152,6 +153,45 @@ class AppNavigationTest {
     }
 
     @Test
+    fun replacingARouteOfTheSameContentKeepsItsViewModelAndUpdatesTheScreen() = runComposeUiTest {
+        RecordingViewModel.cleared.clear()
+        val id = Uuid.random()
+        val backStack = NavBackStack<NavKey>(AppRoute.Pokedex("first"))
+        setContent {
+            KoinApplication(
+                configuration = koinConfiguration {
+                    modules(module { factory { (id: Uuid) -> RecordingViewModel(id) } })
+                },
+                logLevel = Level.NONE,
+            ) {
+                NavDisplay(
+                    backStack = backStack,
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator(),
+                    ),
+                    entryProvider = entryProvider {
+                        entry<AppRoute.Pokedex>(clazzContentKey = { "pokedex" }) { route ->
+                            val viewModel = koinViewModel<RecordingViewModel> { parametersOf(id) }
+                            Column {
+                                Text("form=${route.form} clicks=${viewModel.clicks}")
+                                Text("click", Modifier.clickable { viewModel.clicks++ })
+                            }
+                        }
+                    },
+                )
+            }
+        }
+        onNodeWithText("click").performClick()
+        onNodeWithText("form=first clicks=1").assertExists()
+
+        backStack[0] = AppRoute.Pokedex("second")
+        waitForIdle()
+        onNodeWithText("form=second clicks=1").assertExists()
+        assertEquals(emptyList(), RecordingViewModel.cleared)
+    }
+
+    @Test
     fun aResultReachesThePreviousScreenOnceBackToIt() = runComposeUiTest {
         val backStack = NavBackStack<NavKey>(AppRoute.Home)
         val received = mutableListOf<String>()
@@ -214,12 +254,14 @@ class AppNavigationTest {
                 configuration = koinConfiguration { modules(appModules + wasmModule) },
                 logLevel = Level.NONE,
             ) {
-                App(startRoute = route)
+                App(startRoutes = listOf(route))
             }
         }
         mainClock.advanceTimeBy(1_000)
     }
 
+    @Test fun pokedexOpens() = screenOpens(AppRoute.Pokedex())
+    @Test fun pokedexOpensOnAPokemon() = screenOpens(AppRoute.Pokedex("metagross-mega"))
     @Test fun aboutOpens() = screenOpens(AppRoute.About)
     @Test fun cloudSyncOpens() = screenOpens(AppRoute.CloudSync)
     @Test fun damageCalcOpens() = screenOpens(AppRoute.DamageCalc)

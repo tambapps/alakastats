@@ -4,15 +4,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
-// a pokemon's megas are named after it, e.g. charizard-mega-x
-private val MEGA_SUFFIXES = listOf("-mega", "-mega-x", "-mega-y", "-mega-z")
+// a pokemon's megas are named after it, e.g. charizard-mega-x. The longest first, for baseFormOf
+private val MEGA_SUFFIXES = listOf("-mega-x", "-mega-y", "-mega-z", "-mega")
+
+/**
+ * The pokemon a form is the form of, e.g. metagross for metagross-mega
+ */
+internal fun baseFormOf(form: PokemonName): PokemonName {
+    val suffix = MEGA_SUFFIXES.find { form.value.endsWith(it) } ?: return form
+    return PokemonName(form.value.removeSuffix(suffix))
+}
 
 class PokedexViewModel(
     private val pokemonBaseStatsRepository: PokemonBaseStatsRepository,
@@ -27,34 +32,50 @@ class PokedexViewModel(
         private set
     var isLoading by mutableStateOf(false)
         private set
+    // the form to show instead of the one asked, which doesn't exist (e.g. in an URL)
+    var formToShowInstead by mutableStateOf<PokemonName?>(null)
+        private set
     private var statsByForm by mutableStateOf(emptyMap<PokemonName, PokeStats>())
 
     // null if they're still loading or couldn't be found
     val baseStats get() = selectedForm?.let { statsByForm[it.normalized] }
 
-    private var loadJob: Job? = null
+    // the pokemon whose forms are loaded
+    private var loadedPokemon: PokemonName? = null
 
-    fun selectPokemon(pokemon: PokemonName) {
-        // the field is emptied, ready for the next search, the sheet telling which pokemon is shown
-        query = ""
-        selectedForm = pokemon
+    /**
+     * Shows a form, loading what its pokemon needs unless it already is
+     *
+     * @param form the form, null for none
+     */
+    suspend fun show(form: PokemonName?) {
+        formToShowInstead = null
+        selectedForm = form
+        if (form == null) {
+            loadedPokemon = null
+            forms = emptyList()
+            statsByForm = emptyMap()
+            isLoading = false
+            return
+        }
+        val pokemon = baseFormOf(form)
+        if (pokemon != loadedPokemon) load(pokemon)
+        if (loadedPokemon == pokemon && form !in forms) formToShowInstead = pokemon
+    }
+
+    private suspend fun load(pokemon: PokemonName) {
+        loadedPokemon = null
         forms = emptyList()
         statsByForm = emptyMap()
         isLoading = true
-        loadJob?.cancel()
-        loadJob = viewModelScope.launch {
-            val megaCandidates = MEGA_SUFFIXES.map { PokemonName(pokemon.normalized.value + it) }
-            pokemonBaseStatsRepository.getBaseStats(listOf(pokemon) + megaCandidates).onRight { stats ->
-                // the repository gives zeros for a pokemon it doesn't know
-                val knownStats = stats.filterValues { it.hp > 0 }
-                statsByForm = knownStats
-                forms = listOf(pokemon) + megaCandidates.filter { it.normalized in knownStats }
-            }
-            isLoading = false
+        val megaCandidates = MEGA_SUFFIXES.map { PokemonName(pokemon.normalized.value + it) }
+        pokemonBaseStatsRepository.getBaseStats(listOf(pokemon) + megaCandidates).onRight { stats ->
+            // the repository gives zeros for a pokemon it doesn't know
+            val knownStats = stats.filterValues { it.hp > 0 }
+            statsByForm = knownStats
+            forms = listOf(pokemon) + megaCandidates.filter { it.normalized in knownStats }
+            loadedPokemon = pokemon
         }
-    }
-
-    fun selectForm(form: PokemonName) {
-        selectedForm = form
+        isLoading = false
     }
 }

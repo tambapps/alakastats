@@ -564,7 +564,7 @@ internal fun DamageCalcButton(modifier: Modifier = Modifier, stacked: Boolean = 
 @Composable
 internal fun PokedexButton(modifier: Modifier = Modifier, stacked: Boolean = false) {
     val navigator = LocalAppNavigator.current
-    HomeToolButton(Res.drawable.pokedex, "Pokédex", stacked, modifier) { navigator.push(AppRoute.Pokedex) }
+    HomeToolButton(Res.drawable.pokedex, "Pokédex", stacked, modifier) { navigator.push(AppRoute.Pokedex()) }
 }
 
 /**
