@@ -122,8 +122,6 @@ fun computeWinRatePercentage(sdNames: List<UserName>, allReplays: List<ReplayAna
     val replays = allReplays.filterNot { it.isInternalMatch(sdNames) }
     if (replays.isEmpty()) return 0
     val nbGames = replays.size
-    val wonGames = replays.count { replay ->
-        replay.winner?.let(sdNames::contains) ?: false
-    }
+    val wonGames = replays.count { replay -> sdNames.containsName(replay.winner) }
     return wonGames * 100 / nbGames
 }

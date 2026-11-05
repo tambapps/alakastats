@@ -66,6 +66,7 @@ import com.tambapps.pokemon.alakastats.domain.model.OpenTeamSheet
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
+import com.tambapps.pokemon.alakastats.domain.model.containsName
 import com.tambapps.pokemon.alakastats.domain.model.isShowdownReplayUrl
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
@@ -333,7 +334,7 @@ internal fun ViewReplayButton(
         }
         return
     }
-    val asP2 = !team.sdNames.contains(replay.player1.name)
+    val asP2 = !team.sdNames.containsName(replay.player1.name)
     var browserUrl = url.removeSuffix(".json")
     if (asP2) {
         browserUrl += "?p2"

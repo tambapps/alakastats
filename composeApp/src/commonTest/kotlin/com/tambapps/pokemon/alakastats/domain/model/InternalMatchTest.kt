@@ -56,6 +56,25 @@ class InternalMatchTest {
         assertEquals(0, computeWinRatePercentage(team.sdNames, replays.takeLast(1)))
     }
 
+    @Test
+    fun sdNamesIgnoreTheCase() {
+        val replay = replay("stranger", "MAIN", winner = "MAIN")
+        assertEquals("MAIN", team.getYouPlayer(replay).name.value)
+        assertEquals("stranger", team.getOpponentPlayer(replay).name.value)
+        assertEquals(GameOutcome.WIN, team.getGameOutcome(replay))
+        assertEquals(GameOutcome.WIN, team.getGameOutcome(replay("Main", "stranger", winner = "main")))
+        assertEquals(GameOutcome.LOOSE, team.getGameOutcome(replay("MAIN", "stranger", winner = "STRANGER")))
+        assertEquals(100, computeWinRatePercentage(team.sdNames, listOf(replay)))
+    }
+
+    @Test
+    fun internalMatchIgnoresTheCase() {
+        val replay = replay("MAIN", "Alt", winner = "alt")
+        assertTrue(team.isInternalMatch(replay))
+        assertEquals(GameOutcome.LOOSE, team.getGameOutcome(replay))
+        assertEquals("MAIN", replay.looser?.value)
+    }
+
     private fun replay(player1: String, player2: String, winner: String) = ReplayAnalytics(
         players = listOf(player(player1), player(player2)),
         uploadTime = 0,

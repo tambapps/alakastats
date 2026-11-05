@@ -12,32 +12,35 @@ import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import kotlin.jvm.JvmInline
 
+// showdown names aren't case-sensitive, and the replays of a same player can have different cases
+fun List<UserName>.containsName(name: UserName?) = name != null && any { it.matches(name) }
+
 fun Teamlytics.getOpponentPlayer(replay: ReplayAnalytics) =
-    if (sdNames.contains(replay.player1.name)) replay.player2
+    if (sdNames.containsName(replay.player1.name)) replay.player2
     else replay.player1
 
 fun Teamlytics.getYouPlayer(replay: ReplayAnalytics) =
-    if (sdNames.contains(replay.player1.name)) replay.player1
+    if (sdNames.containsName(replay.player1.name)) replay.player1
     else replay.player2
 
 fun Teamlytics.getPlayers(replay: ReplayAnalytics): Pair<Player, Player> =
-    if (sdNames.contains(replay.player1.name)) replay.player1 to replay.player2
+    if (sdNames.containsName(replay.player1.name)) replay.player1 to replay.player2
     else replay.player2 to replay.player1
 
 // a match between two of the team's sdNames: it tells nothing about the team, so it isn't counted in the stats
-fun ReplayAnalytics.isInternalMatch(sdNames: List<UserName>) = players.all { sdNames.contains(it.name) }
+fun ReplayAnalytics.isInternalMatch(sdNames: List<UserName>) = players.all { sdNames.containsName(it.name) }
 
 fun Teamlytics.isInternalMatch(replay: ReplayAnalytics) = replay.isInternalMatch(sdNames)
 
 fun Teamlytics.getGameOutcome(replay: ReplayAnalytics) = when {
     // the player 1 is the "you" player
-    isInternalMatch(replay) -> when (replay.winner) {
-        replay.player1.name -> GameOutcome.WIN
-        replay.player2.name -> GameOutcome.LOOSE
+    isInternalMatch(replay) -> when {
+        replay.hasWon(replay.player1) -> GameOutcome.WIN
+        replay.hasWon(replay.player2) -> GameOutcome.LOOSE
         else -> GameOutcome.UNKNOWN
     }
-    sdNames.contains(replay.winner) -> GameOutcome.WIN
-    sdNames.contains(replay.looser) -> GameOutcome.LOOSE
+    sdNames.containsName(replay.winner) -> GameOutcome.WIN
+    sdNames.containsName(replay.looser) -> GameOutcome.LOOSE
     else -> GameOutcome.UNKNOWN
 }
 
@@ -117,9 +120,9 @@ data class ReplayAnalytics(
     /** null when the game ended normally */
     val endReason: GameEndReason? = null,
 ) {
-    val looser get() = when (winner) {
-        player1.name -> player2.name
-        player2.name -> player1.name
+    val looser get() = when {
+        hasWon(player1) -> player2.name
+        hasWon(player2) -> player1.name
         else -> null
     }
 
@@ -131,7 +134,7 @@ data class ReplayAnalytics(
     /** the showdown replay to fetch it again from, null if the replay has no link or another one */
     val showdownUrl get() = url?.takeIf(::isShowdownReplayUrl)
 
-    fun hasWon(player: Player) = winner == player.name
+    fun hasWon(player: Player) = winner?.matches(player.name) == true
 
     // complete information of replay from another one. Useful when reloading replays
     fun completedWith(oldReplay: ReplayAnalytics) = copy(
