@@ -71,8 +71,15 @@ class TeamReplayViewModel(
     var groupBySeries by mutableStateOf(false)
         private set
 
+    // the list changes with it, and goes back to its top
+    var isGroupBySeriesLoaded by mutableStateOf(false)
+        private set
+
     init {
-        scope.launch { groupBySeries = preferences.get().groupReplaysBySeries }
+        scope.launch {
+            groupBySeries = preferences.get().groupReplaysBySeries
+            isGroupBySeriesLoaded = true
+        }
     }
 
     val hasSeries get() = useCase.originalTeam.replays.any { it.bestOf != null }

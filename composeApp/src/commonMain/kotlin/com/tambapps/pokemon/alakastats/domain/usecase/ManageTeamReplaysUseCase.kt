@@ -6,6 +6,11 @@ import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 
 interface ManageTeamReplaysUseCase: ManageReplayFiltersUseCase, ConsultTeamlyticsUseCase {
 
+    /** The reference of the replay to scroll to, null for none */
+    val replayRefToShow: String?
+
+    fun onReplayShown()
+
     suspend fun addReplays(replays: List<ReplayAnalytics>): Either<DomainError, Unit>
 
     suspend fun removeReplay(replay: ReplayAnalytics): Either<DomainError, Unit>

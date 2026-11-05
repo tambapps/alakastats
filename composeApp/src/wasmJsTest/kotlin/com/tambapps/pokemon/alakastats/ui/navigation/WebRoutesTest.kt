@@ -105,6 +105,33 @@ class WebRoutesTest {
     }
 
     @Test
+    fun aReplayCanBeAskedOnTheReplaysTab() {
+        val backStack = WebRoutes.backStackOf("teams/$teamId/replays?replayRef=gen9vgc2026-123")
+        assertEquals(listOf(AppRoute.Home, AppRoute.Teamlytics(teamId, TeamlyticsTab.REPLAYS, "gen9vgc2026-123")), backStack)
+        assertEquals("teams/$teamId/replays?replayRef=gen9vgc2026-123", WebRoutes.pathOf(backStack))
+    }
+
+    @Test
+    fun theReferenceOfAReplayKeepsItsCaseAndIsEncoded() {
+        val route = AppRoute.Teamlytics(teamId, TeamlyticsTab.REPLAYS, "Gen9 VGC&x=1")
+        val path = WebRoutes.pathOf(listOf(AppRoute.Home, route))
+        assertEquals(false, ' ' in path || '&' in path)
+        assertEquals(listOf(AppRoute.Home, route), WebRoutes.backStackOf(path))
+    }
+
+    @Test
+    fun theQueryIsOptionalAndIgnoredOnTheOtherTabs() {
+        val onReplays = listOf(AppRoute.Home, AppRoute.Teamlytics(teamId, TeamlyticsTab.REPLAYS))
+        assertEquals(onReplays, WebRoutes.backStackOf("teams/$teamId/replays"))
+        assertEquals(onReplays, WebRoutes.backStackOf("teams/$teamId/replays?replayRef="))
+        assertEquals(onReplays, WebRoutes.backStackOf("teams/$teamId/replays?other=1"))
+        assertEquals(
+            listOf(AppRoute.Home, AppRoute.Teamlytics(teamId, TeamlyticsTab.USAGES)),
+            WebRoutes.backStackOf("teams/$teamId/usages?replayRef=abc"),
+        )
+    }
+
+    @Test
     fun anUnknownTabOpensTheTeam() {
         assertEquals(listOf(AppRoute.Home, AppRoute.Teamlytics(teamId)), WebRoutes.backStackOf("teams/$teamId/unknown"))
     }

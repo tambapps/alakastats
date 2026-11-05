@@ -72,8 +72,13 @@ sealed interface AppRoute : NavKey {
     @Serializable
     data object StandaloneDamageCalc : AppRoute
 
+    /** @param replayRef the replay to scroll to in the replays tab, null for none */
     @Serializable
-    data class Teamlytics(val teamId: Uuid, val tab: TeamlyticsTab = TeamlyticsTab.OVERVIEW) : AppRoute
+    data class Teamlytics(
+        val teamId: Uuid,
+        val tab: TeamlyticsTab = TeamlyticsTab.OVERVIEW,
+        val replayRef: String? = null,
+    ) : AppRoute
 
     /** @param teamId null to create a team */
     @Serializable
@@ -180,7 +185,7 @@ fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (Nav
                 entry<AppRoute.StandaloneDamageCalc> { DamageCalcScreen(showBackButton = false) }
                 // the same content whatever the tab: changing it keeps the screen and its view model
                 entry<AppRoute.Teamlytics>(clazzContentKey = { "teamlytics-${it.teamId}" }) {
-                    TeamlyticsScreen(it.teamId, it.tab)
+                    TeamlyticsScreen(it.teamId, it.tab, it.replayRef)
                 }
                 entry<AppRoute.EditTeam> { EditTeamScreen(it.teamId, it.redirectToTeamlytics) }
                 entry<AppRoute.PokemonDetails> { PokemonDetailsScreen(it.teamId, PokemonName(it.pokemonName)) }

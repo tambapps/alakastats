@@ -19,7 +19,7 @@ internal interface WebHistory {
     /** The current entry's index, null if it isn't one of ours */
     val index: Int?
 
-    /** The current URL's path, relative to the app's root */
+    /** The current URL's path relative to the app's root, with its query */
     val path: String
 
     fun push(index: Int, path: String)
@@ -35,7 +35,7 @@ internal class BrowserHistory : WebHistory {
 
     override val index get() = (window.history.state as? JsNumber)?.toInt()
 
-    override val path get() = window.location.pathname.removePrefix(rootPath)
+    override val path get() = window.location.pathname.removePrefix(rootPath) + window.location.search
 
     override fun push(index: Int, path: String) = window.history.pushState(index.toJsNumber(), "", rootPath + path)
 

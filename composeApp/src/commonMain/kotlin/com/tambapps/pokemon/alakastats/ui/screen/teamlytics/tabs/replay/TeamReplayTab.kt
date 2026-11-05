@@ -74,8 +74,11 @@ import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
 import com.tambapps.pokemon.alakastats.ui.composables.VerticalPokepaste
 import com.tambapps.pokemon.alakastats.ui.composables.WIN_COLOR
+import androidx.compose.runtime.LaunchedEffect
+import com.tambapps.pokemon.alakastats.ui.model.indexOfReplay
 import com.tambapps.pokemon.alakastats.ui.model.replayDetails
 import com.tambapps.pokemon.alakastats.ui.screen.replayviewer.ReplayViewerDialog
+import com.tambapps.pokemon.alakastats.ui.screen.replayviewer.textToCopy
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.FiltersBar
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.rememberGuardedChange
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
@@ -87,6 +90,9 @@ import com.tambapps.pokemon.alakastats.util.copyToClipboard
 import com.tambapps.pokemon.alakastats.util.titlecase
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+
+// the filters bar, the header and the hint about outdated replays, on mobile and on desktop
+private const val REPLAY_LIST_ITEMS_BEFORE_REPLAYS = 3
 
 @Composable
 fun TeamReplayTab(viewModel: TeamReplayViewModel) {
@@ -108,6 +114,15 @@ fun TeamReplayTab(viewModel: TeamReplayViewModel) {
             TeamReplayTabDesktop(viewModel, scrollState)
         }
         ScrollToTopIfNeeded(viewModel, scrollState)
+        val replayRefToShow = viewModel.useCase.replayRefToShow
+        LaunchedEffect(replayRefToShow, viewModel.isGroupBySeriesLoaded) {
+            if (replayRefToShow != null && viewModel.isGroupBySeriesLoaded) {
+                val index = viewModel.replayItems.indexOfReplay(replayRefToShow)
+                // nothing to do for a replay that isn't there
+                if (index >= 0) scrollState.scrollToItem(REPLAY_LIST_ITEMS_BEFORE_REPLAYS + index)
+                viewModel.useCase.onReplayShown()
+            }
+        }
 
         if (viewModel.showAddReplayDialog) {
             AddReplayDialog(viewModel)
@@ -332,7 +347,7 @@ internal fun ViewReplayButton(
         Text("Replay")
     }
     if (showViewer) {
-        ReplayViewerDialog(url, browserUrl, asP2, onDismissRequest = { showViewer = false })
+        ReplayViewerDialog(url, browserUrl, replay.textToCopy(), asP2, onDismissRequest = { showViewer = false })
     }
 }
 

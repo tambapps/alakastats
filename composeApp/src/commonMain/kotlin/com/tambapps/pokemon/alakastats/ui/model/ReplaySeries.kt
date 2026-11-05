@@ -44,6 +44,16 @@ sealed interface ReplayListItem {
 }
 
 /**
+ * The position of the item showing a replay: the replay itself or its series, -1 if it isn't listed
+ */
+fun List<ReplayListItem>.indexOfReplay(reference: String) = indexOfFirst { item ->
+    when (item) {
+        is ReplayListItem.Single -> item.replay.reference == reference
+        is ReplayListItem.Series -> item.games.any { it.reference == reference }
+    }
+}
+
+/**
  * Groups the games of a same series, each series taking the place of its first game in [sortedReplays]
  *
  * @param sortedReplays the replays to show, filtered and sorted

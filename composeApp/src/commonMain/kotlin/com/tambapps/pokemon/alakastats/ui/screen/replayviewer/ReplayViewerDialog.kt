@@ -1,7 +1,9 @@
 package com.tambapps.pokemon.alakastats.ui.screen.replayviewer
 
 import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.check
 import alakastats.composeapp.generated.resources.close
+import alakastats.composeapp.generated.resources.content_copy
 import alakastats.composeapp.generated.resources.open_in_new
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +30,7 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -36,6 +39,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,12 +47,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import arrow.core.Either
 import com.tambapps.pokemon.alakastats.domain.error.DomainError
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
 import com.tambapps.pokemon.alakastats.infrastructure.preferences.AppPreferencesRepository
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.ui.composables.HtmlView
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import com.tambapps.pokemon.alakastats.ui.theme.defaultIconColor
+import com.tambapps.pokemon.alakastats.util.copyToClipboard
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -60,17 +67,25 @@ private val LOADING_HEIGHT = 200.dp
 private val BATTLE_WIDTH = 642.dp
 // the battle and its log on its right
 private val BATTLE_WITH_LOG_WIDTH = 1200.dp
+private const val COPIED_FEEDBACK_MILLIS = 2_000L
+
+/**
+ * What to share of a replay: the link of its page when it has one, otherwise its reference
+ */
+internal fun ReplayAnalytics.textToCopy() = url?.removeSuffix(".json") ?: reference
 
 /**
  * Plays a Showdown replay back in the app
  * @param replayUrl the replay's URL, as stored
  * @param browserUrl the replay's page on Showdown, to open it in the browser instead
+ * @param textToCopy what the copy button copies
  * @param asP2 whether to show the battle from the second player's side
  */
 @Composable
 fun ReplayViewerDialog(
     replayUrl: String,
     browserUrl: String,
+    textToCopy: String,
     asP2: Boolean,
     onDismissRequest: () -> Unit,
 ) {
@@ -111,6 +126,7 @@ fun ReplayViewerDialog(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text("Replay", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                        CopyIconButton(textToCopy)
                         HeaderIconButton(Res.drawable.open_in_new, "Open in browser") { uriHandler.openUri(browserUrl) }
                         HeaderIconButton(Res.drawable.close, "Close", onClick = onDismissRequest)
                     }
@@ -157,6 +173,26 @@ fun ReplayViewerDialog(
                 }
             }
         }
+    }
+}
+
+// its icon tells it worked, as a snackbar would be behind the dialog
+@Composable
+private fun CopyIconButton(text: String) {
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+    var copied by remember { mutableStateOf(false) }
+    LaunchedEffect(copied) {
+        if (copied) {
+            delay(COPIED_FEEDBACK_MILLIS)
+            copied = false
+        }
+    }
+    HeaderIconButton(
+        icon = if (copied) Res.drawable.check else Res.drawable.content_copy,
+        label = if (copied) "Copied" else "Copy",
+    ) {
+        scope.launch { copied = copyToClipboard(clipboard, label = "Replay", text = text) }
     }
 }
 

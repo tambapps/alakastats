@@ -58,6 +58,24 @@ class TeamlyticsViewModel(
 
     override var scrollToTopIndex by mutableStateOf<Int?>(null)
 
+    override var replayRefToShow by mutableStateOf<String?>(null)
+        private set
+    private var requestedReplayRef: String? = null
+
+    /**
+     * Asks the replays tab to scroll to a replay. Only once per replay: coming back to this screen from another one
+     * shouldn't move the list the user scrolled
+     */
+    fun showReplay(replayRef: String?) {
+        if (replayRef == requestedReplayRef) return
+        requestedReplayRef = replayRef
+        replayRefToShow = replayRef
+    }
+
+    override fun onReplayShown() {
+        replayRefToShow = null
+    }
+
     override val originalTeam: Teamlytics
         get() = (teamState as TeamState.Loaded).team
 

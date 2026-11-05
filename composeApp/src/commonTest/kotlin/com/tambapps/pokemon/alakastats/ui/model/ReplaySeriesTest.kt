@@ -59,6 +59,22 @@ class ReplaySeriesTest {
     )
 
     @Test
+    fun aReplayIsFoundInTheList() {
+        val items = listOf(game("a", won = true), game("b", won = true)).map(ReplayListItem::Single)
+        assertEquals(1, items.indexOfReplay("b"))
+        assertEquals(-1, items.indexOfReplay("unknown"))
+    }
+
+    @Test
+    fun aGameIsFoundAtItsSeries() {
+        val bo1 = game("bo1", won = true)
+        val g1 = game("g1", won = true, series = "s", game = 1)
+        val g2 = game("g2", won = true, series = "s", game = 2)
+        val items = team(listOf(bo1, g1, g2)).groupedBySeries(listOf(bo1, g1, g2))
+        assertEquals(1, items.indexOfReplay("g2"))
+    }
+
+    @Test
     fun seriesTakesThePlaceOfItsFirstListedGame() {
         val bo1 = game("bo1", won = true)
         val g1 = game("g1", won = false, series = "s", game = 1)

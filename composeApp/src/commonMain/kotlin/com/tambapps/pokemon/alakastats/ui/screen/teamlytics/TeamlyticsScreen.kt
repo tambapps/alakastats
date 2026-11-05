@@ -67,16 +67,17 @@ private val TABS = TeamlyticsTab.entries.map { it.title }
 
 /**
  * @param tab the tab shown. It's in the route, for it to be restored and to be in the web app's URL
+ * @param replayRef the replay to scroll to in the replays tab, null for none
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TeamlyticsScreen(teamId: Uuid, tab: TeamlyticsTab) {
+fun TeamlyticsScreen(teamId: Uuid, tab: TeamlyticsTab, replayRef: String?) {
     val viewModel = koinViewModel<TeamlyticsViewModel> { parametersOf(teamId) }
     val isCompact = LocalIsCompact.current
     val pagerState = rememberPagerState(initialPage = tab.ordinal, pageCount = { TABS.size })
     val reconnectionGuard = rememberReconnectionGuard(teamId)
     val navigator = LocalAppNavigator.current
-    val currentTab by rememberUpdatedState(tab)
+    val currentRoute by rememberUpdatedState(AppRoute.Teamlytics(teamId, tab, replayRef))
     // the route can change from outside the pager, e.g. with the browser's buttons
     LaunchedEffect(tab) {
         if (pagerState.settledPage != tab.ordinal) pagerState.scrollToPage(tab.ordinal)
@@ -84,10 +85,13 @@ fun TeamlyticsScreen(teamId: Uuid, tab: TeamlyticsTab) {
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.settledPage }.collect { page ->
             val newTab = TeamlyticsTab.entries[page]
-            if (newTab != currentTab) {
-                navigator.replaceIfCurrent(AppRoute.Teamlytics(teamId, currentTab), AppRoute.Teamlytics(teamId, newTab))
+            if (newTab != currentRoute.tab) {
+                navigator.replaceIfCurrent(currentRoute, AppRoute.Teamlytics(teamId, newTab))
             }
         }
+    }
+    LaunchedEffect(replayRef) {
+        viewModel.showReplay(replayRef)
     }
 
     CompositionLocalProvider(LocalReconnectionGuard provides reconnectionGuard) {

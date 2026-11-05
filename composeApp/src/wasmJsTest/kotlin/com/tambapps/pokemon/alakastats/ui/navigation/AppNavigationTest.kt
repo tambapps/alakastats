@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsSelected
@@ -19,6 +20,7 @@ import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
@@ -42,6 +44,9 @@ import arrow.core.right
 import com.tambapps.pokemon.alakastats.domain.error.GetTeamlyticsError
 import com.tambapps.pokemon.alakastats.domain.error.TeamlyticsNotFound
 import com.tambapps.pokemon.alakastats.domain.model.Format
+import com.tambapps.pokemon.alakastats.domain.model.Player
+import com.tambapps.pokemon.alakastats.domain.model.ReplayAnalytics
+import com.tambapps.pokemon.alakastats.domain.model.TeamPreview
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsData
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
@@ -134,6 +139,7 @@ class AppNavigationTest {
             AppRoute.StandaloneDamageCalc,
             AppRoute.Teamlytics(teamId),
             AppRoute.Teamlytics(Uuid.random(), TeamlyticsTab.GAME_PLANS),
+            AppRoute.Teamlytics(Uuid.random(), TeamlyticsTab.REPLAYS, "gen9vgc2026-123"),
             AppRoute.EditTeam(),
             AppRoute.EditTeam(teamId, redirectToTeamlytics = true),
             AppRoute.PokemonDetails(teamId, "metagross-mega"),
@@ -358,6 +364,75 @@ class AppNavigationTest {
             onAllNodes(tab("Replays") and isSelected()).fetchSemanticsNodes().isNotEmpty()
         }
         assertEquals<NavKey?>(AppRoute.Teamlytics(team.id, TeamlyticsTab.REPLAYS), backStack?.lastOrNull())
+    }
+
+    @Test
+    fun onDesktopTheReplaysTabScrollsToTheAskedReplay() = theReplaysTabScrollsToTheAskedReplay(Size(1920f, 1080f))
+
+    @Test
+    fun onMobileTheReplaysTabScrollsToTheAskedReplay() = theReplaysTabScrollsToTheAskedReplay(Size(800f, 1200f))
+
+    private fun theReplaysTabScrollsToTheAskedReplay(windowSize: Size) = runSkikoComposeUiTest(windowSize) {
+        fun player(name: String) = Player(
+            name = UserName(name),
+            teamPreview = TeamPreview(emptyList()),
+            selection = emptyList(),
+            beforeElo = null,
+            afterElo = null,
+            terastallization = null,
+            megaEvolution = null,
+            ots = null,
+            movesUsage = emptyMap(),
+        )
+        val replays = (0 until 60).map { index ->
+            ReplayAnalytics(
+                players = listOf(player("me"), player("opponent-$index")),
+                uploadTime = index.toLong(),
+                format = "",
+                rating = null,
+                version = "1",
+                winner = UserName("me"),
+                url = null,
+                reference = "ref-$index",
+                nextBattleRef = null,
+                notes = null,
+            )
+        }
+        val team = Teamlytics(
+            id = Uuid.random(),
+            name = "Team",
+            pokePaste = PokePaste(emptyList()),
+            replays = replays,
+            sdNames = listOf(UserName("me")),
+            lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+            data = TeamlyticsData(emptyMap()),
+            notes = null,
+            matchupPlans = emptyList(),
+            format = Format.NONE,
+        )
+        var backStack: MutableList<NavKey>? = null
+        setContent {
+            KoinApplication(
+                configuration = koinConfiguration { modules(appModulesWithTeams(team)) },
+                logLevel = Level.NONE,
+            ) {
+                App(
+                    startRoutes = listOf(AppRoute.Home, AppRoute.Teamlytics(team.id, TeamlyticsTab.REPLAYS, "ref-30")),
+                    backStackEffect = { backStack = it },
+                )
+            }
+        }
+        awaitUntil("the replay is shown") {
+            onAllNodes(hasText("opponent-30", substring = true)).fetchSemanticsNodes().isNotEmpty()
+        }
+        // the list did move: the replays at its ends aren't laid out
+        assertEquals(0, onAllNodes(hasText("opponent-59", substring = true)).fetchSemanticsNodes().size)
+        assertEquals(0, onAllNodes(hasText("opponent-0", substring = true)).fetchSemanticsNodes().size)
+
+        onNode(hasText("Usages") and hasClickAction()).performClick()
+        awaitUntil("the replay isn't in the route anymore") {
+            backStack?.lastOrNull() == AppRoute.Teamlytics(team.id, TeamlyticsTab.USAGES)
+        }
     }
 
     // each screen in the real app: its view model must be resolved by Koin, with its parameters
