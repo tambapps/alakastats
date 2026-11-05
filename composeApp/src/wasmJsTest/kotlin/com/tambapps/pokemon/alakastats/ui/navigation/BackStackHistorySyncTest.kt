@@ -55,7 +55,7 @@ class BackStackHistorySyncTest {
     private val pokedex = AppRoute.Pokedex()
     private val metagross = AppRoute.Pokedex("metagross")
     // a screen without URL
-    private val cloudSync = AppRoute.CloudSync
+    private val createTeam = AppRoute.EditTeam()
 
     private fun sync(history: WebHistory, vararg routes: NavKey): Pair<BackStackHistorySync, MutableList<NavKey>> {
         val backStack = routes.toMutableList()
@@ -111,7 +111,7 @@ class BackStackHistorySyncTest {
     fun twoQuickPopsDontBringTheScreensBack() {
         val history = FakeHistory()
         val (sync, backStack) = sync(history, home)
-        sync.navigate(backStack) { add(cloudSync) }
+        sync.navigate(backStack) { add(createTeam) }
         sync.navigate(backStack) { add(pokedex) }
         sync.navigate(backStack) { removeLast() }
         sync.navigate(backStack) { removeLast() }
@@ -144,7 +144,7 @@ class BackStackHistorySyncTest {
     fun aScreenWithoutUrlIsAnEntryWithItsParentsUrlAndComesBackForward() {
         val history = FakeHistory()
         val (sync, backStack) = sync(history, home)
-        sync.navigate(backStack) { add(cloudSync) }
+        sync.navigate(backStack) { add(createTeam) }
         assertEquals("", history.path)
         assertEquals(2, history.entries.size)
 
@@ -152,7 +152,7 @@ class BackStackHistorySyncTest {
         assertEquals(listOf<NavKey>(home), backStack)
 
         history.pressForward(sync)
-        assertEquals(listOf<NavKey>(home, cloudSync), backStack)
+        assertEquals(listOf<NavKey>(home, createTeam), backStack)
     }
 
     @Test
@@ -211,9 +211,9 @@ class BackStackHistorySyncTest {
         history.pressBack(sync)
         sync.onBackStackChanged(backStack.toList())
 
-        sync.navigate(backStack) { add(cloudSync) }
+        sync.navigate(backStack) { add(createTeam) }
         assertEquals(2, history.entries.size)
-        assertEquals(listOf<NavKey>(home, cloudSync), backStack)
+        assertEquals(listOf<NavKey>(home, createTeam), backStack)
     }
 
     @Test

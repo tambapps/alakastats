@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import org.koin.compose.viewmodel.koinViewModel
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.error.GetTeamlyticsError
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.EmitScrollEffect
@@ -79,7 +80,10 @@ fun PokemonDetailsScreen(teamId: Uuid, pokemonName: PokemonName) {
                 val navigator = LocalAppNavigator.current
                 val snackBar = LocalSnackBar.current
                 LaunchedEffect(Unit) {
-                    snackBar.show("Error: ${state.error.message}", SnackBar.Severity.ERROR)
+                    // when it's the team that can't be loaded, the team's screen below tells it
+                    if (state.error !is GetTeamlyticsError) {
+                        snackBar.show("Error: ${state.error.message}", SnackBar.Severity.ERROR)
+                    }
                     navigator.pop()
                 }
             }

@@ -5,6 +5,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
@@ -18,6 +19,11 @@ fun SpeedInteractionsTeamSetupScreen(teamId: Uuid) {
     val viewModel = koinViewModel<SpeedInteractionsTeamSetupViewModel> { parametersOf(teamId) }
     val isCompact = LocalIsCompact.current
 
+    if (viewModel.isTeamLoadFailed) {
+        val navigator = LocalAppNavigator.current
+        // the team's screen below tells it, and goes back to the home screen
+        LaunchedEffect(Unit) { navigator.pop() }
+    }
     if (isCompact) {
         SpeedInteractionsTeamSetupScreenMobile(viewModel)
     } else {

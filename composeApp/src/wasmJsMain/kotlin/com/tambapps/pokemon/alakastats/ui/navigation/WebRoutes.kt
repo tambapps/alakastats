@@ -1,13 +1,18 @@
 package com.tambapps.pokemon.alakastats.ui.navigation
 
 import androidx.navigation3.runtime.NavKey
+import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTab
+import io.ktor.http.decodeURLPart
 import io.ktor.http.encodeURLParameter
+import io.ktor.http.encodeURLPathPart
 import io.ktor.http.parseQueryString
 import kotlin.uuid.Uuid
 
 private const val POKEDEX_PATH = "pokedex"
 private const val TEAMS_PATH = "teams"
+private const val TEAM_POKEMON_PATH = "pokemon"
+private const val SPEED_INTERACTIONS_PATH = "speed-interactions"
 private const val REPLAY_REF_PARAM = "replayRef"
 
 /**
@@ -17,11 +22,12 @@ private const val REPLAY_REF_PARAM = "replayRef"
 private val BACK_STACK_BY_PATH: Map<String, List<AppRoute>> = mapOf(
     "" to listOf(AppRoute.Home),
     "about" to listOf(AppRoute.Home, AppRoute.About),
+    "cloud-sync" to listOf(AppRoute.Home, AppRoute.CloudSync),
     "damage-calc" to listOf(AppRoute.Home, AppRoute.DamageCalc),
     "quizzes" to listOf(AppRoute.Home, AppRoute.Quizzes),
     "quizzes/natures" to listOf(AppRoute.Home, AppRoute.Quizzes, AppRoute.NatureQuizSetup),
     "quizzes/speed-stat" to listOf(AppRoute.Home, AppRoute.Quizzes, AppRoute.SpeedStatQuizSetup),
-    "quizzes/speed-interactions" to listOf(AppRoute.Home, AppRoute.Quizzes, AppRoute.SpeedInteractionsHomeSetup),
+    "quizzes/$SPEED_INTERACTIONS_PATH" to listOf(AppRoute.Home, AppRoute.Quizzes, AppRoute.SpeedInteractionsHomeSetup),
 )
 
 /**
@@ -42,6 +48,7 @@ internal object WebRoutes {
             segments.singleOrNull() == POKEDEX_PATH -> listOf(AppRoute.Home, AppRoute.Pokedex())
             segments.size == 2 && segments[0] == POKEDEX_PATH -> listOf(AppRoute.Home, AppRoute.Pokedex(segments[1]))
             segments.size in 2..3 && segments[0] == TEAMS_PATH -> teamBackStackOf(segments[1], segments.getOrNull(2), query)
+            segments.size == 4 && segments[0] == TEAMS_PATH -> teamScreenBackStackOf(segments[1], segments[2], segments[3])
             else -> listOf(AppRoute.Home)
         }
     }
@@ -59,6 +66,25 @@ internal object WebRoutes {
     }
 
     /**
+     * A screen above a team's tab. Whether the team and its pokemon exist is only known once loaded: these screens go
+     * back to the team's one if they don't, which goes back to the home screen if the team doesn't
+     */
+    private fun teamScreenBackStackOf(teamId: String, screenPath: String, screenParam: String): List<AppRoute> {
+        val id = Uuid.parseOrNull(teamId) ?: return listOf(AppRoute.Home)
+        return when {
+            screenPath == TEAM_POKEMON_PATH -> {
+                // a badly encoded name throws
+                val pokemonName = runCatching { PokemonName(screenParam.decodeURLPart()).normalized.value }.getOrNull()
+                    ?: return listOf(AppRoute.Home)
+                listOf(AppRoute.Home, AppRoute.Teamlytics(id), AppRoute.PokemonDetails(id, pokemonName))
+            }
+            screenPath == TeamlyticsTab.QUIZZES.path && screenParam == SPEED_INTERACTIONS_PATH ->
+                listOf(AppRoute.Home, AppRoute.Teamlytics(id, TeamlyticsTab.QUIZZES), AppRoute.SpeedInteractionsTeamSetup(id))
+            else -> listOf(AppRoute.Home)
+        }
+    }
+
+    /**
      * The path of a back stack: the one of its last screen having one, as not all screens have an URL (e.g. a running
      * quiz is at the URL of its setup)
      */
@@ -73,6 +99,9 @@ internal object WebRoutes {
             // the first tab is the team's own URL
             if (route.tab == TeamlyticsTab.OVERVIEW) teamPath else "$teamPath/${route.tab.path}$query"
         }
+        // names aren't always URL safe, e.g. Flabébé
+        is AppRoute.PokemonDetails -> "$TEAMS_PATH/${route.teamId}/$TEAM_POKEMON_PATH/${route.pokemonName.encodeURLPathPart()}"
+        is AppRoute.SpeedInteractionsTeamSetup -> "$TEAMS_PATH/${route.teamId}/${TeamlyticsTab.QUIZZES.path}/$SPEED_INTERACTIONS_PATH"
         else -> BACK_STACK_BY_PATH.entries.find { it.value.last() == route }?.key
     }
 }

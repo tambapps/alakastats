@@ -26,6 +26,8 @@ class SpeedInteractionsTeamSetupViewModel(
         private set
     var hasTailwindUser by mutableStateOf(false)
         private set
+    var isTeamLoadFailed by mutableStateOf(false)
+        private set
 
     var allowOpponentScarf by mutableStateOf(false)
         private set
@@ -41,7 +43,7 @@ class SpeedInteractionsTeamSetupViewModel(
     init {
         scope.launch {
             teamlyticsRepository.get(teamId).fold(
-                ifLeft = {},
+                ifLeft = { isTeamLoadFailed = true },
                 ifRight = { team ->
                     hasTailwindUser = team.pokePaste.pokemons.any { pokemon ->
                         pokemon.moves.any { it.matches(TAILWIND_MOVE) }

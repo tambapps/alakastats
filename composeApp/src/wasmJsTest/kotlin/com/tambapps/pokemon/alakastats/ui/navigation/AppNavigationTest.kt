@@ -322,20 +322,60 @@ class AppNavigationTest {
         awaitUntil("the home screen is shown") { onAllNodes(hasText("Pokédex")).fetchSemanticsNodes().isNotEmpty() }
     }
 
+    private fun emptyTeam() = Teamlytics(
+        id = Uuid.random(),
+        name = "Team",
+        pokePaste = PokePaste(emptyList()),
+        replays = emptyList(),
+        sdNames = listOf(UserName("me")),
+        lastUpdatedAt = Instant.fromEpochMilliseconds(0),
+        data = TeamlyticsData(emptyMap()),
+        notes = null,
+        matchupPlans = emptyList(),
+        format = Format.NONE,
+    )
+
+    private val aTeam = emptyTeam()
+    private val unknownTeamId = Uuid.random()
+
+    private fun goesBackTo(expected: List<AppRoute>, teams: List<Teamlytics>, startRoutes: List<AppRoute>) = runComposeUiTest {
+        var backStack: List<NavKey> = emptyList()
+        setContent {
+            KoinApplication(
+                configuration = koinConfiguration { modules(appModulesWithTeams(*teams.toTypedArray())) },
+                logLevel = Level.NONE,
+            ) {
+                App(startRoutes = startRoutes, backStackEffect = { backStack = it })
+            }
+        }
+        awaitUntil("the back stack is $expected") { backStack.toList() == expected }
+    }
+
+    // these tests must return goesBackTo's promise: without it, they'd end at once and go on during the next test
+    @Test
+    fun aPokemonOfAnUnknownTeamGoesToTheHomeScreen() = goesBackTo(
+        expected = listOf(AppRoute.Home),
+        teams = emptyList(),
+        startRoutes = listOf(AppRoute.Home, AppRoute.Teamlytics(unknownTeamId), AppRoute.PokemonDetails(unknownTeamId, "metagross")),
+    )
+
+    @Test
+    fun aPokemonThatIsntOnTheTeamGoesToTheTeam() = goesBackTo(
+        expected = listOf(AppRoute.Home, AppRoute.Teamlytics(aTeam.id)),
+        teams = listOf(aTeam),
+        startRoutes = listOf(AppRoute.Home, AppRoute.Teamlytics(aTeam.id), AppRoute.PokemonDetails(aTeam.id, "metagross")),
+    )
+
+    @Test
+    fun theQuizOfAnUnknownTeamGoesToTheHomeScreen() = goesBackTo(
+        expected = listOf(AppRoute.Home),
+        teams = emptyList(),
+        startRoutes = listOf(AppRoute.Home, AppRoute.Teamlytics(unknownTeamId, TeamlyticsTab.QUIZZES), AppRoute.SpeedInteractionsTeamSetup(unknownTeamId)),
+    )
+
     @Test
     fun theTabsOfATeamFollowTheRouteAndTheRouteTheTabs() = runComposeUiTest {
-        val team = Teamlytics(
-            id = Uuid.random(),
-            name = "Team",
-            pokePaste = PokePaste(emptyList()),
-            replays = emptyList(),
-            sdNames = listOf(UserName("me")),
-            lastUpdatedAt = Instant.fromEpochMilliseconds(0),
-            data = TeamlyticsData(emptyMap()),
-            notes = null,
-            matchupPlans = emptyList(),
-            format = Format.NONE,
-        )
+        val team = emptyTeam()
         var backStack: MutableList<NavKey>? = null
         setContent {
             KoinApplication(

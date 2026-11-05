@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.navigation
 
 import com.tambapps.pokemon.alakastats.domain.model.Format
+import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedInteractionsMode
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTab
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -40,6 +41,11 @@ class WebRoutesTest {
     }
 
     @Test
+    fun theCloudSyncIsAboveTheHomeScreen() {
+        assertEquals(listOf(AppRoute.Home, AppRoute.CloudSync), WebRoutes.backStackOf("cloud-sync"))
+    }
+
+    @Test
     fun theDamageCalcIsAboveTheHomeScreen() {
         assertEquals(listOf(AppRoute.Home, AppRoute.DamageCalc), WebRoutes.backStackOf("damage-calc"))
     }
@@ -62,7 +68,7 @@ class WebRoutesTest {
 
     @Test
     fun eachFixedPathIsTheOneOfItsBackStack() {
-        for (path in listOf("", "about", "damage-calc", "quizzes", "quizzes/natures", "quizzes/speed-stat", "quizzes/speed-interactions")) {
+        for (path in listOf("", "about", "cloud-sync", "damage-calc", "quizzes", "quizzes/natures", "quizzes/speed-stat", "quizzes/speed-interactions")) {
             assertEquals(path, WebRoutes.pathOf(WebRoutes.backStackOf(path)))
         }
     }
@@ -144,9 +150,65 @@ class WebRoutesTest {
     }
 
     @Test
-    fun aTeamsScreensAreAtTheUrlOfItsTab() {
+    fun aPokemonOfATeamIsAboveTheTeamsFirstTab() {
+        val backStack = listOf(AppRoute.Home, AppRoute.Teamlytics(teamId), AppRoute.PokemonDetails(teamId, "metagross-mega"))
+        assertEquals(backStack, WebRoutes.backStackOf("teams/$teamId/pokemon/metagross-mega"))
+        assertEquals("teams/$teamId/pokemon/metagross-mega", WebRoutes.pathOf(backStack))
+    }
+
+    @Test
+    fun aPokemonOfATeamIsNormalizedAsTheAppDoes() {
+        val expected = listOf(AppRoute.Home, AppRoute.Teamlytics(teamId), AppRoute.PokemonDetails(teamId, "iron-hands"))
+        assertEquals(expected, WebRoutes.backStackOf("teams/$teamId/pokemon/Iron%20Hands"))
+    }
+
+    @Test
+    fun aPokemonOfATeamWithANameThatIsntUrlSafeIsEncoded() {
+        for (name in listOf("flabébé", "mr.-mime", "type:-null", "farfetch’d")) {
+            val backStack = listOf(AppRoute.Home, AppRoute.Teamlytics(teamId), AppRoute.PokemonDetails(teamId, name))
+            assertEquals(backStack, WebRoutes.backStackOf(WebRoutes.pathOf(backStack)))
+        }
+        assertEquals(
+            "teams/$teamId/pokemon/flab%C3%A9b%C3%A9",
+            WebRoutes.pathOf(listOf(AppRoute.PokemonDetails(teamId, "flabébé"))),
+        )
+    }
+
+    @Test
+    fun aBadlyEncodedPokemonOpensTheHomeScreen() {
+        assertEquals(listOf(AppRoute.Home), WebRoutes.backStackOf("teams/$teamId/pokemon/%zz"))
+    }
+
+    @Test
+    fun theQuizOfATeamIsAboveItsQuizzesTab() {
         val backStack = listOf(AppRoute.Home, AppRoute.Teamlytics(teamId, TeamlyticsTab.QUIZZES), AppRoute.SpeedInteractionsTeamSetup(teamId))
-        assertEquals("teams/$teamId/quizzes", WebRoutes.pathOf(backStack))
+        assertEquals(backStack, WebRoutes.backStackOf("teams/$teamId/quizzes/speed-interactions"))
+        assertEquals("teams/$teamId/quizzes/speed-interactions", WebRoutes.pathOf(backStack))
+    }
+
+    @Test
+    fun aRunningQuizOfATeamIsAtTheUrlOfItsSetup() {
+        val backStack = listOf(
+            AppRoute.Home,
+            AppRoute.Teamlytics(teamId, TeamlyticsTab.QUIZZES),
+            AppRoute.SpeedInteractionsTeamSetup(teamId),
+            AppRoute.SpeedInteractionsQuiz(SpeedInteractionsMode.Team(teamId)),
+        )
+        assertEquals("teams/$teamId/quizzes/speed-interactions", WebRoutes.pathOf(backStack))
+    }
+
+    @Test
+    fun anUnknownScreenOfATeamOpensTheHomeScreen() {
+        assertEquals(listOf(AppRoute.Home), WebRoutes.backStackOf("teams/$teamId/quizzes/unknown"))
+        assertEquals(listOf(AppRoute.Home), WebRoutes.backStackOf("teams/$teamId/usages/speed-interactions"))
+        assertEquals(listOf(AppRoute.Home), WebRoutes.backStackOf("teams/not-an-id/pokemon/metagross"))
+        assertEquals(listOf(AppRoute.Home), WebRoutes.backStackOf("teams/$teamId/pokemon/metagross/more"))
+    }
+
+    @Test
+    fun aTeamsScreensWithoutUrlAreAtTheUrlOfItsTab() {
+        val backStack = listOf(AppRoute.Home, AppRoute.Teamlytics(teamId, TeamlyticsTab.REPLAYS), AppRoute.ManualReplay(teamId))
+        assertEquals("teams/$teamId/replays", WebRoutes.pathOf(backStack))
     }
 
     @Test
@@ -155,6 +217,6 @@ class WebRoutesTest {
         assertEquals("pokedex", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.Pokedex())))
         assertEquals("pokedex/metagross", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.Pokedex("metagross"))))
         // no URL for this screen yet
-        assertEquals("", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.CloudSync)))
+        assertEquals("", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.EditTeam())))
     }
 }
