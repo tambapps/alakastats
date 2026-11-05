@@ -99,7 +99,9 @@ data class PokemonData(
     val baseStatsPerForms: Map<PokemonName, PokeStats>,
 ) {
     fun baseStatsOf(pokemon: PokemonName) = baseStatsPerForms[pokemon.normalized]
+    // a paste with the mega form also needs its base form, which the mega switch shows
     fun shouldReload() = !baseStatsPerForms.containsKey(name.normalized)
+            || name.isMega && !baseStatsPerForms.containsKey(name.baseNormalized)
 }
 
 

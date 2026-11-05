@@ -19,7 +19,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ReplayAnalyticsServiceTest {
 
@@ -246,6 +248,47 @@ class ReplayAnalyticsServiceTest {
             replay.player1.movesUsage,
         )
         assertEquals(listOf(PokemonName("zoroark-hisui")), replay.player1.fainted)
+    }
+
+    @Test
+    fun megaFloetteIsAlwaysFloetteEternal() = runTest {
+        // what Showdown logs: only the switch logs have the form, and it is the mega one after a switch out
+        val replay = fetchReplay("""
+            |player|p1|me||
+            |player|p2|opponent||
+            |poke|p1|Floette-Eternal, L50, F|
+            |switch|p1a: Floette|Floette-Eternal, L50, F|100/100
+            |detailschange|p1a: Floette|Floette-Mega, L50, F
+            |-mega|p1a: Floette|Floette|Floettite
+            |move|p1a: Floette|Moonblast|p2a: Espathra
+            |switch|p1a: Rex|Incineroar, L50, M|100/100
+            |switch|p1a: Floette|Floette-Mega, L50, F|100/100
+            |move|p1a: Floette|Calm Mind|p1a: Floette
+            |faint|p1a: Floette
+        """)
+
+        val floetteEternal = PokemonName("floette-eternal")
+        assertEquals(listOf(floetteEternal, PokemonName("incineroar")), replay.player1.selection)
+        assertEquals(floetteEternal, replay.player1.megaEvolution?.pokemon)
+        assertEquals(mapOf(floetteEternal to moves("moonblast" to 1, "calm-mind" to 1)), replay.player1.movesUsage)
+        assertEquals(listOf(floetteEternal), replay.player1.fainted)
+        assertTrue(replay.player1.hasSelected(floetteEternal))
+        assertTrue(replay.player1.hasMegaEvolved(floetteEternal))
+        assertTrue(replay.player1.isLead(floetteEternal))
+        assertFalse(replay.player1.hasSelected(PokemonName("floette")))
+    }
+
+    @Test
+    fun actualFloetteStaysFloette() = runTest {
+        val replay = fetchReplay("""
+            |player|p1|me||
+            |player|p2|opponent||
+            |switch|p1a: Floette|Floette, L50, F|100/100
+            |move|p1a: Floette|Moonblast|p2a: Espathra
+        """)
+
+        assertEquals(listOf(PokemonName("floette")), replay.player1.selection)
+        assertEquals(mapOf(PokemonName("floette") to moves("moonblast" to 1)), replay.player1.movesUsage)
     }
 
     @Test
