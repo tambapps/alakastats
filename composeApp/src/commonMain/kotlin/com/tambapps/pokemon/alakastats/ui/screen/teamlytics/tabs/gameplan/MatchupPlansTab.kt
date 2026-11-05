@@ -155,7 +155,8 @@ internal fun MatchNotes(
                 PokemonTeamPreview(
                     pokePaste,
                     fillWidth = true,
-                    facingDirection = FacingDirection.LEFT
+                    facingDirection = FacingDirection.LEFT,
+                    largeArtworks = true
                 )
             }
         },

@@ -2,7 +2,9 @@ package com.tambapps.pokemon.alakastats.ui.composables
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -15,6 +17,7 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.Player
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.ItemImage
+import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.pokepaste.parser.PokePaste
@@ -69,8 +72,9 @@ fun PokemonTeamPreview(
     pokePaste: PokePaste,
     modifier: Modifier = Modifier,
     fillWidth: Boolean = false,
-    facingDirection: FacingDirection = FacingDirection.LEFT) {
-    PokemonTeamPreview(pokePaste.pokemons.map { it.name }, pokePaste.pokemons.map { it.item }, modifier, fillWidth, facingDirection)
+    facingDirection: FacingDirection = FacingDirection.LEFT,
+    largeArtworks: Boolean = false) {
+    PokemonTeamPreview(pokePaste.pokemons.map { it.name }, pokePaste.pokemons.map { it.item }, modifier, fillWidth, facingDirection, largeArtworks)
 }
 
 /**
@@ -78,6 +82,8 @@ fun PokemonTeamPreview(
  * shows as its Mega Evolution instead, without the stone, on a phone too
  *
  * @param items the item of each of the pokemons, in the same order. A missing or null one isn't shown
+ * @param largeArtworks whether, on desktop, each Pokémon shows as its artwork taking all of its share of the width,
+ * rather than as a sprite of a fixed size. To use with fillWidth
  */
 @Composable
 fun PokemonTeamPreview(
@@ -85,7 +91,8 @@ fun PokemonTeamPreview(
     items: List<ItemName?>,
     modifier: Modifier = Modifier,
     fillWidth: Boolean = false,
-    facingDirection: FacingDirection = FacingDirection.LEFT) {
+    facingDirection: FacingDirection = FacingDirection.LEFT,
+    largeArtworks: Boolean = false) {
     val shown = remember(pokemons, items) { withMegaForms(pokemons, items) }
     if (LocalIsCompact.current) {
         // no room for the items on a phone
@@ -93,13 +100,21 @@ fun PokemonTeamPreview(
         return
     }
     Row(
-        modifier = modifier.heightIn(max = 80.dp),
+        modifier = if (largeArtworks) modifier else modifier.heightIn(max = 80.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         for ((name, item) in shown) {
             // centered in its share of the width, so that the item stays on the sprite
             Box(if (fillWidth) Modifier.weight(1f) else Modifier, contentAlignment = Alignment.Center) {
-                PokemonSpriteWithItem(name, item, facingDirection)
+                if (largeArtworks) {
+                    PokemonImageWithItem(item, Modifier.fillMaxWidth().aspectRatio(1f)) {
+                        PokemonArtwork(name = name, modifier = Modifier.fillMaxSize(), facingDirection = facingDirection)
+                    }
+                } else {
+                    PokemonImageWithItem(item, Modifier.size(80.dp)) {
+                        PokemonSprite(name = name, modifier = Modifier.fillMaxSize(), facingDirection = facingDirection)
+                    }
+                }
             }
         }
     }
@@ -116,12 +131,12 @@ internal fun withMegaForms(pokemons: List<PokemonName>, items: List<ItemName?>):
     }
 
 @Composable
-private fun PokemonSpriteWithItem(name: PokemonName, item: ItemName?, facingDirection: FacingDirection) {
-    Box(Modifier.size(80.dp)) {
-        PokemonSprite(name = name, modifier = Modifier.fillMaxSize(), facingDirection = facingDirection)
+private fun PokemonImageWithItem(item: ItemName?, modifier: Modifier, image: @Composable () -> Unit) {
+    Box(modifier) {
+        image()
         item?.let { item ->
             // overlapping the sprite a bit
-            ItemImage(item, Modifier.align(Alignment.BottomEnd).size(32.dp))
+            ItemImage(item, Modifier.align(Alignment.BottomEnd).fillMaxSize(0.4f))
         }
     }
 }
