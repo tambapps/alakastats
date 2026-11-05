@@ -50,6 +50,7 @@ fun PokemonDetailsOverviewDesktop(
                         name = viewModel.pokemon.name,
                         usages = it,
                         title = "Usage",
+                        spriteName = viewModel.pokemon.name,
                         // need to have 2 colors
                         gradientBackgroundColors = listOf(MaterialTheme.colorScheme.surfaceContainerHighest, MaterialTheme.colorScheme.surfaceContainerHighest)
 

@@ -93,6 +93,8 @@ fun PokemonUsagesCard(
     usages: PokemonUsages,
     title: String? = null,
     gradientBackgroundColors: List<Color>? = cardGradientColors,
+    // the form to show in the donut, when it isn't the one of the team's pokepaste
+    spriteName: PokemonName? = null,
     modifier: Modifier = Modifier,
     ) {
     MyCard(
@@ -119,7 +121,7 @@ fun PokemonUsagesCard(
             }
             Spacer(Modifier.height(8.dp))
         }
-        PokemonUsagesDonut(displayedPokemonName, usages, Modifier.fillMaxWidth())
+        PokemonUsagesDonut(spriteName ?: displayedPokemonName, usages, Modifier.fillMaxWidth())
         Spacer(Modifier.height(8.dp))
         HorizontalDivider(Modifier.fillMaxWidth().padding(horizontal = 16.dp))
         Spacer(Modifier.height(8.dp))
