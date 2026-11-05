@@ -24,13 +24,39 @@ class ReplayAnalyticsServiceTest {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    private fun serviceReturning(log: String) = ReplayAnalyticsService(HttpClient(MockEngine {
+    private fun serviceReturning(log: String, requestedUrls: MutableList<String> = mutableListOf()) = ReplayAnalyticsService(HttpClient(MockEngine { request ->
+        requestedUrls.add(request.url.toString())
         val body = """{"formatid":"gen9championsvgc2026regmabo3","players":["me","opponent"],"uploadtime":1788930485,""" +
                 """"rating":null,"log":${JsonPrimitive(log)}}"""
         respond(body, headers = headersOf(HttpHeaders.ContentType, "application/json"))
     }) {
         install(ContentNegotiation) { json(json) }
     })
+
+    @Test
+    fun replayIsFetchedFromItsJsonWhateverFollowsItsName() = runTest {
+        val replayUrl = "https://replay.pokemonshowdown.com/gen9championsvgc2026regmabo3-101-abcpw"
+        val urls = listOf(replayUrl, "$replayUrl?p2", "$replayUrl.json", "$replayUrl.json?p2")
+        for (url in urls) {
+            val requestedUrls = mutableListOf<String>()
+
+            val replay = serviceReturning("|player|p1|me|", requestedUrls).fetch(url).getOrNull()!!
+
+            assertEquals(listOf("$replayUrl.json"), requestedUrls, url)
+            assertEquals("$replayUrl.json", replay.url, url)
+            assertEquals("gen9championsvgc2026regmabo3-101-abcpw", replay.reference, url)
+        }
+    }
+
+    @Test
+    fun replayLogIsFetchedFromItsJsonWhateverFollowsItsName() = runTest {
+        val replayUrl = "https://replay.pokemonshowdown.com/gen9championsvgc2026regmabo3-101-abcpw"
+        val requestedUrls = mutableListOf<String>()
+
+        serviceReturning("|player|p1|me|", requestedUrls).fetchLog("$replayUrl?p2")
+
+        assertEquals(listOf("$replayUrl.json"), requestedUrls)
+    }
 
     @Test
     fun gameOfASeriesKnowsItsPlaceAndItsNextGame() = runTest {

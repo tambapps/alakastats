@@ -80,11 +80,8 @@ class ReplayAnalyticsService(
     }
 
     private fun jsonReplayUrl(originUrl: String): String {
-        var result = originUrl
-        val qpBeginningIndex = originUrl.indexOf(',')
-        if (qpBeginningIndex > 0) {
-            result = result.substring(0, qpBeginningIndex)
-        }
+        // without what follows the replay's name, e.g. the ?p2 of the link of a replay seen as the player 2
+        val result = originUrl.substringBefore('?')
         return if (result.endsWith(".json")) result
         else "$result.json"
     }
