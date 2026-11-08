@@ -32,7 +32,6 @@ private inline fun <reified ID: @Serializable Any, reified T: @Serializable Iden
     }
 }
 
-// the keys are the ones used when the stores were in the localStorage, see IndexedDb's migration
 private inline fun <reified T : @Serializable Any> indexedDbStoreOf(key: String): KStore<T> =
     storeOf(codec = IndexedDbCodec(key, serializer<T>()), enableCache = false)
 

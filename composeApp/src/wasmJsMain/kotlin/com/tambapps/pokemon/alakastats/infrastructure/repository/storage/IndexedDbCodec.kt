@@ -2,7 +2,6 @@ package com.tambapps.pokemon.alakastats.infrastructure.repository.storage
 
 import io.github.xxfast.kstore.Codec
 import io.github.xxfast.kstore.DefaultJson
-import kotlinx.browser.localStorage
 import kotlinx.coroutines.await
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -36,8 +35,6 @@ class IndexedDbCodec<T : @Serializable Any>(
  */
 object IndexedDb {
 
-    private const val LOCAL_STORAGE_PREFIX = "repositories/"
-
     private val mutex = Mutex()
     private var database: JsAny? = null
 
@@ -56,38 +53,13 @@ object IndexedDb {
     }
 
     private suspend fun database(): JsAny = mutex.withLock {
-        database ?: openDatabase().also {
-            migrateFromLocalStorage(it)
-            database = it
-        }
+        database ?: openDatabase().also { database = it }
     }
-
-    // runs by itself at the first access, exposed for the tests
-    internal suspend fun migrateFromLocalStorage() = migrateFromLocalStorage(database())
 
     private suspend fun openDatabase(): JsAny {
         val result = idbOpen().await<JsAny>()
         errorOf(result)?.let { throw IndexedDbException("Couldn't open the database: $it") }
         return databaseOf(result)
-    }
-
-    /**
-     * The teams used to be stored in the localStorage, with the same keys. A key is removed from the localStorage
-     * only once saved in IndexedDB: if interrupted, the migration goes on at the next launch
-     */
-    private suspend fun migrateFromLocalStorage(database: JsAny) {
-        val keys = (0 until localStorage.length)
-            .mapNotNull { localStorage.key(it) }
-            .filter { it.startsWith(LOCAL_STORAGE_PREFIX) }
-        for (key in keys) {
-            val value = localStorage.getItem(key) ?: continue
-            val error = idbPut(database, key, value).await<JsString?>()
-            if (error != null) {
-                println("Couldn't migrate $key to IndexedDB: $error")
-                continue
-            }
-            localStorage.removeItem(key)
-        }
     }
 }
 

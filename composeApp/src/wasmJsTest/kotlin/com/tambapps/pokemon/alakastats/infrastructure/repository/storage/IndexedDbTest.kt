@@ -1,7 +1,6 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository.storage
 
 import io.github.xxfast.kstore.storeOf
-import kotlinx.browser.localStorage
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
@@ -56,25 +55,5 @@ class IndexedDbTest {
 
         store.delete()
         assertNull(store.get())
-    }
-
-    @Test
-    fun migratesTheLocalStorageKeys() = runTest {
-        val migrated = "repositories/test-migration/${Uuid.random()}.kstore"
-        val other = "other-app-key-${Uuid.random()}"
-        localStorage.setItem(migrated, """{"name":"Rain","values":[1]}""")
-        localStorage.setItem(other, "kept")
-
-        IndexedDb.migrateFromLocalStorage()
-
-        // same key, same content: readable by the codec as is
-        val store = storeOf(codec = IndexedDbCodec(migrated, serializer<Item>()), enableCache = false)
-        assertEquals(Item("Rain", listOf(1)), store.get())
-        assertNull(localStorage.getItem(migrated))
-        // keys of other apps on the same origin are left alone
-        assertEquals("kept", localStorage.getItem(other))
-
-        localStorage.removeItem(other)
-        IndexedDb.delete(migrated)
     }
 }

@@ -41,7 +41,7 @@ Built entirely with **Kotlin Multiplatform**, Alakastats delivers a native-feeli
 | 🖥️ **Web**           | Kotlin/Wasm + Compose Multiplatform                      |
 | 📱 **Mobile**         | Android & iOS via Compose Multiplatform                  |
 | ⚙️ **Shared core**    | Kotlin common module (replay parsing, stats computation) |
-| 💾 **Storage**        | `SharedPreferences` (mobile) / `localStorage` (web)      |
+| 💾 **Storage**        | `SharedPreferences` (mobile) / `IndexedDB` (web)         |
 | 🚀 **Build & deploy** | Gradle Multiplatform + GitHub Pages (web)                |
 
 ## 🖼️ Screenshots
