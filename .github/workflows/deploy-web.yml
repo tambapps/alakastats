@@ -31,11 +31,17 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+      # their Gradle version, installed by setup-gradle (with retries and a cache) rather than by their old wrapper,
+      # whose download fails after 10 seconds without a response
+      - id: libraries-gradle
+        run: echo "version=$(sed -n 's/.*gradle-\(.*\)-bin\.zip/\1/p' pokemon-libraries/gradle/wrapper/gradle-wrapper.properties)" >> $GITHUB_OUTPUT
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ steps.libraries-gradle.outputs.version }}
       - name: Publish the Pokémon libraries
         working-directory: pokemon-libraries
         # only what the web app needs: the iOS ones can't be built on Linux
-        run: ./gradlew publishKotlinMultiplatformPublicationToMavenLocal publishWasmJsPublicationToMavenLocal
+        run: gradle publishKotlinMultiplatformPublicationToMavenLocal publishWasmJsPublicationToMavenLocal
       - name: Build the web app
         run: ./gradlew :composeApp:wasmJsBrowserDistribution
       - name: Prepare the site
