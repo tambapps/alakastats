@@ -43,16 +43,27 @@ fun BackIconButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
 val WIN_COLOR = Color(0xFF4CAF50)
 val LOOSE_COLOR = Color(0xFFF44336)
 
+/** the color telling the outcome, e.g. of a replay's card */
+val GameOutcome.color: Color
+    @Composable get() = when (this) {
+        GameOutcome.WIN -> WIN_COLOR
+        GameOutcome.LOOSE -> LOOSE_COLOR
+        GameOutcome.UNKNOWN -> if (isDarkThemeEnabled()) Color.LightGray else Color.DarkGray
+    }
+
+val GameOutcome.displayName: String
+    get() = when (this) {
+        GameOutcome.WIN -> "Win"
+        GameOutcome.LOOSE -> "Loss"
+        GameOutcome.UNKNOWN -> "Unknown"
+    }
+
 /**
  * @param letter what the card tells, the outcome's initial by default
  */
 @Composable
 fun GameOutcomeCard(output: GameOutcome, letter: Char = output.name[0]) {
-    val color = when (output) {
-        GameOutcome.WIN -> WIN_COLOR
-        GameOutcome.LOOSE -> LOOSE_COLOR
-        GameOutcome.UNKNOWN -> if (isDarkThemeEnabled()) Color.LightGray else Color.DarkGray
-    }
+    val color = output.color
     val isCompact = LocalIsCompact.current
 
     val (size, textSize) = if (isCompact) 42.dp to 22.sp else 52.dp to 30.sp

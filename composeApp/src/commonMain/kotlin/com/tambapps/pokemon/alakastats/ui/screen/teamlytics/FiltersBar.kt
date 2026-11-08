@@ -55,7 +55,12 @@ import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonWheelPicker
 import com.tambapps.pokemon.alakastats.ui.composables.wheelPickerKeys
-import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
+import com.tambapps.pokemon.alakastats.ui.composables.color
+import com.tambapps.pokemon.alakastats.ui.composables.displayName
+import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.Button
+import androidx.compose.ui.text.font.FontWeight
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.TeamlyticsFiltersTabViewModel
@@ -336,23 +341,95 @@ private fun GameOutcomeButton(viewModel: FiltersViewModel) {
     val text = "Game Outcome"
     var showDialog by remember { mutableStateOf(false) }
     FilterBarButton(onClick = { showDialog = true }) {
-        Text(
-            when(val outcome = viewModel.filters.gameOutcome) {
-                null -> text
-                else -> "$text: $outcome"
+        when (val outcome = viewModel.filters.gameOutcome) {
+            null -> Text(text)
+            else -> {
+                Text("$text: ")
+                Text(outcome.displayName, color = outcome.color, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.width(18.dp))
+                ClearIcon(onClick = { viewModel.applyFilters(viewModel.filters.copy(gameOutcome = null)) })
             }
-        )
-        if (viewModel.filters.gameOutcome != null) {
-            Spacer(Modifier.width(18.dp))
-            ClearIcon(onClick = { viewModel.applyFilters(viewModel.filters.copy(gameOutcome = null)) })
         }
     }
     if (showDialog) {
-        WheelPickerDialog(
-            title = "Game Outcome",
-            items = GameOutcome.entries,
+        GameOutcomeDialog(
+            selected = viewModel.filters.gameOutcome,
             onPicked = { viewModel.applyFilters(viewModel.filters.copy(gameOutcome = it)) },
             onDismissRequest = { showDialog = false }
+        )
+    }
+}
+
+/**
+ * A button per outcome, in its color, picked in one click: a wheel would be too much for 3 outcomes.
+ * In a row on desktop, stacked on a phone
+ */
+@Composable
+private fun GameOutcomeDialog(
+    selected: GameOutcome?,
+    onPicked: (GameOutcome) -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    val isCompact = LocalIsCompact.current
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text("Game Outcome") },
+        text = {
+            val buttons: @Composable (Modifier) -> Unit = { modifier ->
+                GameOutcome.entries.forEach { outcome ->
+                    GameOutcomeChoiceButton(outcome, isSelected = outcome == selected, modifier) {
+                        onPicked(outcome)
+                        onDismissRequest()
+                    }
+                }
+            }
+            if (isCompact) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) { buttons(Modifier.fillMaxWidth()) }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { buttons(Modifier.weight(1f)) }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+/**
+ * Filled with the outcome's color when it's the one filtered, outlined with it otherwise
+ */
+@Composable
+private fun GameOutcomeChoiceButton(
+    outcome: GameOutcome,
+    isSelected: Boolean,
+    modifier: Modifier,
+    onClick: () -> Unit,
+) {
+    val color = outcome.color
+    val label: @Composable RowScope.() -> Unit = {
+        Text(outcome.displayName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+    }
+    if (isSelected) {
+        Button(
+            onClick = onClick,
+            modifier = modifier,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = color,
+                // as on the outcome's card
+                contentColor = if (isDarkThemeEnabled()) Color(0xFF222222) else Color.White
+            ),
+            content = label
+        )
+    } else {
+        OutlinedButton(
+            onClick = onClick,
+            modifier = modifier,
+            border = BorderStroke(2.dp, color),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = color),
+            content = label
         )
     }
 }
