@@ -1,5 +1,9 @@
 # Builds the web app and deploys it on GitHub Pages, at alakastats.com.
 # The repository's Pages source must be "GitHub Actions", with alakastats.com as custom domain
+#
+# Gradle is installed by setup-gradle (with retries and a cache) at the version of each project's wrapper, rather than
+# by the wrappers: their downloads from GitHub time out on the runners. setup-gradle being once per job, the libraries
+# and the app are built in two jobs
 name: Deploy the web app
 
 on:
@@ -15,35 +19,58 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+env:
+  # a Maven repository with the Pokémon libraries, from the first job to the second
+  MAVEN_REPO: ${{ github.workspace }}/maven-repo
+
 jobs:
+  # the Pokémon libraries are snapshots, not on Maven Central: built from their repository's main branch
+  libraries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          repository: tambapps/pokemon
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - id: gradle
+        run: echo "version=$(sed -n 's/.*gradle-\(.*\)-bin\.zip/\1/p' gradle/wrapper/gradle-wrapper.properties)" >> $GITHUB_OUTPUT
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ steps.gradle.outputs.version }}
+      - name: Publish the Pokémon libraries
+        # only what the web app needs: the iOS ones can't be built on Linux
+        run: gradle publishKotlinMultiplatformPublicationToMavenLocal publishWasmJsPublicationToMavenLocal -Dmaven.repo.local=$MAVEN_REPO
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pokemon-libraries
+          path: ${{ env.MAVEN_REPO }}
+          retention-days: 1
+
   build:
+    needs: libraries
     runs-on: ubuntu-latest
     env:
       SITE: composeApp/build/dist/wasmJs/productionExecutable
     steps:
       - uses: actions/checkout@v5
-      # the Pokémon libraries are snapshots, only in the local Maven repository: built from their repository's main branch
-      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v8
         with:
-          repository: tambapps/pokemon
-          path: pokemon-libraries
+          name: pokemon-libraries
+          path: ${{ env.MAVEN_REPO }}
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
-      # their Gradle version, installed by setup-gradle (with retries and a cache) rather than by their old wrapper,
-      # whose download fails after 10 seconds without a response
-      - id: libraries-gradle
-        run: echo "version=$(sed -n 's/.*gradle-\(.*\)-bin\.zip/\1/p' pokemon-libraries/gradle/wrapper/gradle-wrapper.properties)" >> $GITHUB_OUTPUT
+      - id: gradle
+        run: echo "version=$(sed -n 's/.*gradle-\(.*\)-bin\.zip/\1/p' gradle/wrapper/gradle-wrapper.properties)" >> $GITHUB_OUTPUT
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: ${{ steps.libraries-gradle.outputs.version }}
-      - name: Publish the Pokémon libraries
-        working-directory: pokemon-libraries
-        # only what the web app needs: the iOS ones can't be built on Linux
-        run: gradle publishKotlinMultiplatformPublicationToMavenLocal publishWasmJsPublicationToMavenLocal
+          gradle-version: ${{ steps.gradle.outputs.version }}
       - name: Build the web app
-        run: ./gradlew :composeApp:wasmJsBrowserDistribution
+        run: gradle :composeApp:wasmJsBrowserDistribution -Dmaven.repo.local=$MAVEN_REPO
       - name: Prepare the site
         run: |
           # data files of the native apps, not used by the web app
