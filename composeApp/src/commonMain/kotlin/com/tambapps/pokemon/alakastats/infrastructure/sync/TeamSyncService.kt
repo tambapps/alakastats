@@ -191,23 +191,6 @@ class TeamSyncService(
     }
 
     /**
-     * The local teams whose current version is in the cloud, as of the last sync. Read from the saved sync state, so it
-     * works without the cloud, e.g. on an address where the sync is turned off. Empty when the user was disconnected
-     */
-    suspend fun teamsUpToDateInCloud(): Set<Uuid> {
-        val state = currentState()
-        if (!state.connected) return emptySet()
-        return localTeams.versions()
-            .filter { version ->
-                val syncedAt = state.sharedEntries[version.id]?.synced?.syncedUpdatedAt
-                    ?: state.entries[version.id]?.syncedUpdatedAt?.takeIf { !version.localOnly }
-                syncedAt != null && version.updatedAt.sameMillisAs(syncedAt)
-            }
-            .map { it.id }
-            .toSet()
-    }
-
-    /**
      * Loads the sync state and syncs if connected. To call once, at launch
      */
     suspend fun start() {

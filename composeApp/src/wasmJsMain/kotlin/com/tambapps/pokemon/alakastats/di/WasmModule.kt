@@ -4,8 +4,6 @@ import com.tambapps.pokemon.alakastats.infrastructure.cloud.GisTokenProvider
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.GooglePicker
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.TeamFilePicker
 import com.tambapps.pokemon.alakastats.infrastructure.cloud.auth.OAuthTokenProvider
-import com.tambapps.pokemon.alakastats.platform
-import com.tambapps.pokemon.alakastats.ui.sitemove.isOldWebAddress
 import com.tambapps.pokemon.alakastats.ui.service.PokemonImageService
 import com.tambapps.pokemon.alakastats.ui.service.PokemonLocalUrlImageService
 import com.tambapps.pokemon.alakastats.util.getCurrentBaseUrl
@@ -24,9 +22,6 @@ private const val GOOGLE_APP_ID = "737779642859"
 
 val wasmModule = module {
     single<PokemonImageService> { PokemonLocalUrlImageService(get(), getCurrentBaseUrl()) }
-    // an old address doesn't use Google Drive anymore: the teams synced there are found on the new one
-    if (!isOldWebAddress(platform.webHost)) {
-        single<OAuthTokenProvider> { GisTokenProvider(GOOGLE_WEB_CLIENT_ID) }
-        single<TeamFilePicker> { GooglePicker(GOOGLE_PICKER_API_KEY, GOOGLE_APP_ID) }
-    }
+    single<OAuthTokenProvider> { GisTokenProvider(GOOGLE_WEB_CLIENT_ID) }
+    single<TeamFilePicker> { GooglePicker(GOOGLE_PICKER_API_KEY, GOOGLE_APP_ID) }
 }

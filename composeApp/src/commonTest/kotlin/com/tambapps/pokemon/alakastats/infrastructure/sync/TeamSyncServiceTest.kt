@@ -139,23 +139,6 @@ class TeamSyncServiceTest {
     }
 
     @Test
-    fun onlyTheTeamsSyncedAsTheyAreHereAreUpToDateInTheCloud() = runTest {
-        val a = device()
-        val synced = team("synced")
-        val localOnly = team("local only").copy(localOnly = true)
-        val changedSince = team("changed since")
-        listOf(synced, localOnly, changedSince).forEach { a.save(it) }
-        a.service.connect()
-        a.edit(changedSince.id) { it.copy(name = "changed") }
-
-        assertEquals(setOf(synced.id), a.service.teamsUpToDateInCloud())
-
-        // its copy in the cloud may not be the one here anymore
-        a.service.disconnect()
-        assertEquals(emptySet(), a.service.teamsUpToDateInCloud())
-    }
-
-    @Test
     fun syncWithoutChangesUploadsNothing() = runTest {
         val a = device()
         a.save(team())

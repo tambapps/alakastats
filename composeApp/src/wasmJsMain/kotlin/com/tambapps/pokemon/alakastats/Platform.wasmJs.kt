@@ -6,7 +6,6 @@ object WasmPlatform: Platform {
     override val name: String = "Web with Kotlin/Wasm"
     override val type: PlatformType = PlatformType.Web
     override val deviceType: DeviceType = detectDeviceCategory()
-    override val webHost: String = window.location.hostname
 }
 
 private fun detectDeviceCategory(): DeviceType {

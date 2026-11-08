@@ -1,0 +1,60 @@
+# Builds the web app and deploys it on GitHub Pages, at alakastats.com.
+# The repository's Pages source must be "GitHub Actions", with alakastats.com as custom domain
+name: Deploy the web app
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# one deployment at a time, without cancelling the one in progress
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      SITE: composeApp/build/dist/wasmJs/productionExecutable
+    steps:
+      - uses: actions/checkout@v5
+      # the Pokémon libraries are snapshots, only in the local Maven repository: built from their repository's main branch
+      - uses: actions/checkout@v5
+        with:
+          repository: tambapps/pokemon
+          path: pokemon-libraries
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Publish the Pokémon libraries
+        working-directory: pokemon-libraries
+        # only what the web app needs: the iOS ones can't be built on Linux
+        run: ./gradlew publishKotlinMultiplatformPublicationToMavenLocal publishWasmJsPublicationToMavenLocal
+      - name: Build the web app
+        run: ./gradlew :composeApp:wasmJsBrowserDistribution
+      - name: Prepare the site
+        run: |
+          # data files of the native apps, not used by the web app
+          rm -f $SITE/composeResources/alakastats.composeapp.generated.resources/files/*.yaml
+          rm -f $SITE/composeResources/alakastats.composeapp.generated.resources/files/*.mcl
+          # GitHub Pages serves it for the URLs of the screens, e.g. a team's: the app then shows the right screen
+          cp $SITE/index.html $SITE/404.html
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ env.SITE }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
