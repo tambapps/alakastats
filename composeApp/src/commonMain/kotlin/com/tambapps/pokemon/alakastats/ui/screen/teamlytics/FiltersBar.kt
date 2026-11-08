@@ -54,6 +54,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.SelectPokemonDialog
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonWheelPicker
+import com.tambapps.pokemon.alakastats.ui.composables.wheelPickerKeys
 import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ReplayFilters
@@ -467,30 +468,30 @@ private fun AddMyPokemonNameDialog(
     pickOtherState: MutableState<Boolean>
 ) {
     val wheelState = rememberWheelPickerState(myPokemons.size, initialIndex = myPokemons.size / 2)
+    val snackBar = LocalSnackBar.current
+    val confirm = {
+        val pokemonName = myPokemons.getOrNull(wheelState.index)
+        if (pokemonName == null) {
+            snackBar.show("No Pokemon was selected", SnackBar.Severity.ERROR)
+        } else if (containsValidator.invoke(pokemonName)) {
+            snackBar.show("${pokemonName.pretty} was already selected", SnackBar.Severity.ERROR)
+        } else {
+            onAdd.invoke(PokemonFilter(pokemonName, asLead))
+        }
+        onDismissRequest.invoke()
+    }
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text("Add Pokemon Filter") },
         text = {
             PokemonWheelPicker(
                 pokemons = myPokemons,
-                state = wheelState
+                state = wheelState,
+                modifier = Modifier.wheelPickerKeys(wheelState, confirm)
             )
         },
         confirmButton = {
-            val snackBar = LocalSnackBar.current
-            TextButton(
-                onClick = {
-                    val pokemonName = myPokemons.getOrNull(wheelState.index)
-                    if (pokemonName == null) {
-                        snackBar.show("No Pokemon was selected", SnackBar.Severity.ERROR)
-                    } else if (containsValidator.invoke(pokemonName)) {
-                        snackBar.show("${pokemonName.pretty} was already selected", SnackBar.Severity.ERROR)
-                    } else {
-                        onAdd.invoke(PokemonFilter(pokemonName, asLead))
-                    }
-                    onDismissRequest.invoke()
-                },
-            ) {
+            TextButton(onClick = confirm) {
                 Text("Add")
             }
         },

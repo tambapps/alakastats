@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import com.swmansion.kmpwheelpicker.rememberWheelPickerState
@@ -73,10 +75,37 @@ fun SelectPokemonDialog(
     val pokepasteParser = koinInject<PokepasteParser>()
     var error: String? by remember { mutableStateOf(null) }
     val wheelState = rememberWheelPickerState(itemCount = pokemons.size, initialIndex = 0)
-    val limit = if (LocalIsCompact.current) 3 else 10
+    val isCompact = LocalIsCompact.current
+    val limit = if (isCompact) 3 else 10
     val showWheel = remember(pokemons) { pokemons.isNotEmpty() && pokemons.size <= limit }
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+    val confirm: () -> Unit = confirm@{
+        if (isPokepaste) {
+            try {
+                onPokepasteSelect?.invoke(pokepasteParser.parse(text).pokemons.first())
+                onDismissRequest.invoke()
+            } catch (e: PokePasteParseException) {
+                error = "Invalid pokepaste: ${e.message}"
+            }
+            return@confirm
+        }
+        val pokemonName = pokemons.getOrNull(wheelState.index)
+        if (!showWheel || pokemonName == null) {
+            error = "No Pokemon was selected"
+            return@confirm
+        }
+        if (containsValidator.invoke(pokemonName)) {
+            error = "${pokemonName.pretty} was already selected"
+            return@confirm
+        }
+        onSelect.invoke(pokemonName)
+        onDismissRequest.invoke()
+    }
+    // on desktop, Enter confirms the highlighted pokemon and Up/Down move the wheel, the text field keeping the focus
+    val wheelKeyHandler = wheelPickerKeyHandler(wheelState, confirm)
+    val onKeyEvent: (KeyEvent) -> Boolean = { event -> showWheel && wheelKeyHandler(event) }
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -84,7 +113,7 @@ fun SelectPokemonDialog(
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                    modifier = Modifier.fillMaxWidth().focusRequester(focusRequester).onPreviewKeyEvent(onKeyEvent),
                     value = text,
                     onValueChange = {
                         text = it
@@ -101,7 +130,9 @@ fun SelectPokemonDialog(
                 if (showWheel) {
                     val keyboardController = LocalSoftwareKeyboardController.current
                     LaunchedEffect(text) {
-                        keyboardController?.hide()
+                        // to see the wheel on a phone. Not on desktop, where on the web it takes the focus away from
+                        // the text field, which then gets neither the typing nor the wheel's keys
+                        if (isCompact) keyboardController?.hide()
                         wheelState.scrollTo(0)
                     }
                     Spacer(Modifier.height(16.dp))
@@ -114,30 +145,7 @@ fun SelectPokemonDialog(
             }
         },
         confirmButton = {
-            TextButton(
-                onClick = {
-                    if (isPokepaste) {
-                        try {
-                            onPokepasteSelect?.invoke(pokepasteParser.parse(text).pokemons.first())
-                            onDismissRequest.invoke()
-                        } catch (e: PokePasteParseException) {
-                            error = "Invalid pokepaste: ${e.message}"
-                        }
-                        return@TextButton
-                    }
-                    val pokemonName = pokemons.getOrNull(wheelState.index)
-                    if (!showWheel || pokemonName == null) {
-                        error = "No Pokemon was selected"
-                        return@TextButton
-                    }
-                    if (containsValidator.invoke(pokemonName)) {
-                        error = "${pokemonName.pretty} was already selected"
-                        return@TextButton
-                    }
-                    onSelect.invoke(pokemonName)
-                    onDismissRequest.invoke()
-                },
-            ) {
+            TextButton(onClick = confirm) {
                 Text(confirmButtonText)
             }
         },
