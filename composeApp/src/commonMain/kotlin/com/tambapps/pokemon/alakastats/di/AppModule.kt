@@ -62,6 +62,12 @@ import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.CloudSyncViewModel
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
+import com.tambapps.pokemon.alakastats.infrastructure.service.ShowdownReplayService
+import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreShowdownReplayRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createShowdownReplayDayKStore
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createShowdownReplayDaysKStore
+import com.tambapps.pokemon.alakastats.domain.repository.ShowdownReplayRepository
+import com.tambapps.pokemon.alakastats.ui.screen.showdownreplays.ShowdownReplaysViewModel
 import com.tambapps.pokemon.alakastats.infrastructure.service.TeamlyticsSerializer
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.TeamPokemonStateState
@@ -106,6 +112,10 @@ val appModules = listOf(module {
     single<PokepasteParser> { PokepasteParser() }
     single { AppPreferencesRepository(createAppPreferencesKStore()) }
     single<ReplayAnalyticsService> { ReplayAnalyticsService(get()) }
+    singleOf(::ShowdownReplayService)
+    single<ShowdownReplayRepository> {
+        KStoreShowdownReplayRepository(::createShowdownReplayDaysKStore, ::createShowdownReplayDayKStore)
+    }
     single { PokeApiGqlClient(get()) }
     singleOf(::LocalPokemonBaseStatsRepository).bind(PokemonBaseStatsRepository::class)
     singleOf(::PokeApiPokemonMovesRepository).bind(PokemonMovesRepository::class)
@@ -165,6 +175,7 @@ val appModules = listOf(module {
     factoryOf(::NatureQuizSetupViewModel)
     factoryOf(::SpeedStatQuizSetupViewModel)
     factoryOf(::SpeedInteractionsHomeSetupViewModel)
+    factoryOf(::ShowdownReplaysViewModel)
 
     factory { (natures: List<Nature>, direction: QuizDirection) ->
         NatureQuizViewModel(natures, direction)

@@ -22,18 +22,21 @@ fun FormatSelector(
     format: Format,
     onFormatChange: (Format) -> Unit,
     modifier: Modifier = Modifier,
-    label: String = "Format"
+    label: String = "Format",
+    formats: List<Format> = Format.entries,
+    enabled: Boolean = true,
 ) {
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = it },
+        onExpandedChange = { expanded = it && enabled },
         modifier = modifier
     ) {
         OutlinedTextField(
             value = format.displayedName,
             onValueChange = {},
             readOnly = true,
+            enabled = enabled,
             label = { Text(label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
@@ -43,7 +46,7 @@ fun FormatSelector(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            Format.entries.forEach { entry ->
+            formats.forEach { entry ->
                 DropdownMenuItem(
                     text = { Text(entry.displayedName) },
                     onClick = {

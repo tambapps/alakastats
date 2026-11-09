@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository.storage
 
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ShowdownReplaySummaryEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.preferences.AppPreferences
@@ -30,6 +31,12 @@ actual fun createSyncStateKStore(): KStore<SyncState> =
 
 actual fun createAppPreferencesKStore(): KStore<AppPreferences> =
     storeOf(file = Path(getRepositoryDir("preferences"), "preferences.kstore"), enableCache = false, version = 0)
+
+actual fun createShowdownReplayDaysKStore(formatId: String): KStore<List<Long>> =
+    storeOf(file = Path(getRepositoryDir("showdown-replays/$formatId"), "days.kstore"), enableCache = false, version = 0)
+
+actual fun createShowdownReplayDayKStore(formatId: String, day: Long): KStore<List<ShowdownReplaySummaryEntity>> =
+    storeOf(file = Path(getRepositoryDir("showdown-replays/$formatId"), "$day.kstore"), enableCache = false, version = 0)
 
 actual suspend fun downloadToFile(fileName: String, extension: String, bytes: ByteArray): Boolean {
     val file = FileKit.openFileSaver(suggestedName = fileName, extension = extension) ?: return false

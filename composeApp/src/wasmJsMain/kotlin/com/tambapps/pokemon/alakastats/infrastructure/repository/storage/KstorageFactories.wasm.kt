@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository.storage
 
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ShowdownReplaySummaryEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.preferences.AppPreferences
@@ -20,6 +21,12 @@ actual fun createTeamlyticsPreviewKStorage() = createKStorage<Uuid, TeamlyticsPr
 actual fun createSyncStateKStore(): KStore<SyncState> = indexedDbStoreOf("repositories/sync/state.kstore")
 
 actual fun createAppPreferencesKStore(): KStore<AppPreferences> = indexedDbStoreOf("repositories/preferences/preferences.kstore")
+
+actual fun createShowdownReplayDaysKStore(formatId: String): KStore<List<Long>> =
+    indexedDbStoreOf("repositories/showdown-replays/$formatId/days.kstore")
+
+actual fun createShowdownReplayDayKStore(formatId: String, day: Long): KStore<List<ShowdownReplaySummaryEntity>> =
+    indexedDbStoreOf("repositories/showdown-replays/$formatId/$day.kstore")
 
 actual suspend fun downloadToFile(fileName: String, extension: String, bytes: ByteArray): Boolean {
     FileKit.download(bytes, "$fileName.$extension")

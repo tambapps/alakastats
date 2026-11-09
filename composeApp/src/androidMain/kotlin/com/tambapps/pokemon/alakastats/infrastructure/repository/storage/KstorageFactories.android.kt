@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository.storage
 
 import android.content.Context
+import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ShowdownReplaySummaryEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.TeamlyticsPreviewEntity
 import com.tambapps.pokemon.alakastats.infrastructure.preferences.AppPreferences
@@ -33,6 +34,18 @@ actual fun createAppPreferencesKStore(): KStore<AppPreferences> = object : KoinC
     val context: Context by inject()
 }.let { koinComponent ->
     storeOf(file = Path(getRepositoryDir(koinComponent.context, "preferences").absolutePath, "preferences.kstore"), enableCache = false, version = 0)
+}
+
+actual fun createShowdownReplayDaysKStore(formatId: String): KStore<List<Long>> =
+    storeOf(file = showdownReplaysPath(formatId, "days.kstore"), enableCache = false, version = 0)
+
+actual fun createShowdownReplayDayKStore(formatId: String, day: Long): KStore<List<ShowdownReplaySummaryEntity>> =
+    storeOf(file = showdownReplaysPath(formatId, "$day.kstore"), enableCache = false, version = 0)
+
+private fun showdownReplaysPath(formatId: String, fileName: String) = object : KoinComponent {
+    val context: Context by inject()
+}.let { koinComponent ->
+    Path(getRepositoryDir(koinComponent.context, "showdown-replays/$formatId").absolutePath, fileName)
 }
 
 actual suspend fun downloadToFile(fileName: String, extension: String, bytes: ByteArray): Boolean {
