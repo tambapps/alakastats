@@ -81,7 +81,7 @@ private class FiltersViewModel(
 @JvmInline
 private value class AddPokemonDialogState(val asLead: Boolean)
 
-private data class PokemonsFilter(
+internal data class PokemonsFilter(
     val shortTitle: String,
     val title: String,
     val pokemons: List<PokemonFilter>,
@@ -170,7 +170,7 @@ fun FiltersBar(
 }
 
 @Composable
-private fun SetPokemonFilterDialog(
+internal fun SetPokemonFilterDialog(
     filter: PokemonsFilter,
     onComplete: (List<PokemonFilter>) -> Unit,
     onDismiss: () -> Unit,
@@ -298,7 +298,7 @@ fun FilterBarButton(
 }
 
 @Composable
-private fun PokemonFilterButton(
+internal fun PokemonFilterButton(
     onClear: () -> Unit,
     dialogState: MutableState<PokemonsFilter?>,
     filter: PokemonsFilter,
@@ -586,7 +586,7 @@ private fun AddMyPokemonNameDialog(
 }
 
 @Composable
-private fun ShowdownNameDialog(
+internal fun ShowdownNameDialog(
     onDismissRequest: () -> Unit,
     initialValue: String,
     onAdd: (String) -> Unit
@@ -638,7 +638,7 @@ private fun ShowdownNameDialog(
 }
 
 @Composable
-private fun ClearIcon(onClick: (() -> Unit)? = null) {
+internal fun ClearIcon(onClick: (() -> Unit)? = null) {
     Icon(
         modifier = Modifier.size(if (LocalIsCompact.current) 25.dp else 25.dp)
             .rotate(45f)

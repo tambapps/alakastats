@@ -6,8 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,16 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,14 +29,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayPlayer
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplaySummary
 import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
-import com.tambapps.pokemon.alakastats.ui.composables.FormatSelector
 import com.tambapps.pokemon.alakastats.ui.composables.cardGradientColors
 import com.tambapps.pokemon.alakastats.ui.composables.withMegaForms
 import com.tambapps.pokemon.alakastats.ui.composables.GameOutcomeCard
@@ -58,7 +47,6 @@ import com.tambapps.pokemon.alakastats.ui.screen.replayviewer.HeaderIconButton
 import com.tambapps.pokemon.alakastats.ui.screen.replayviewer.ReplayViewerDialog
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
-import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
 // the cards don't stretch on wide screens
@@ -71,11 +59,13 @@ private val MAX_CONTENT_WIDTH = 900.dp
 fun ShowdownReplaysScreen() {
     val viewModel = koinViewModel<ShowdownReplaysViewModel>()
     val isCompact = LocalIsCompact.current
+    val shown = viewModel.shownReplays
     val grouped = viewModel.bestOf3 && viewModel.groupBySeries
-    val listItems = remember(viewModel.savedReplays, grouped) {
-        if (grouped) groupedBySeries(viewModel.savedReplays)
-        else viewModel.savedReplays.map(ShowdownReplayListItem::Single)
+    val listItems = remember(shown, viewModel.savedReplays, grouped) {
+        if (grouped) groupedBySeries(shown, viewModel.savedReplays)
+        else shown.map(ShowdownReplayListItem::Single)
     }
+    val contentModifier = Modifier.widthIn(max = MAX_CONTENT_WIDTH).fillMaxWidth()
     LazyColumn(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -94,39 +84,47 @@ fun ShowdownReplaysScreen() {
                 )
             }
         }
-        item { LoadReplaysCard(viewModel, Modifier.widthIn(max = MAX_CONTENT_WIDTH).fillMaxWidth()) }
-        item {
-            Row(Modifier.widthIn(max = MAX_CONTENT_WIDTH).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    when {
-                        viewModel.isLoadingSaved -> "Loading the saved replays…"
-                        viewModel.savedReplays.isEmpty() -> "No replay saved for this format yet"
-                        else -> "${viewModel.savedReplays.size} saved replays"
-                    },
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
-                )
-                if (viewModel.bestOf3) {
-                    FilterChip(
-                        selected = viewModel.groupBySeries,
-                        onClick = { viewModel.groupBySeries = !viewModel.groupBySeries },
-                        label = { Text("Group by Bo3", maxLines = 1) },
-                    )
+        item { ShowdownReplaysToolbar(viewModel, contentModifier) }
+        when {
+            viewModel.isLoadingSaved -> item { Text("Loading the saved replays…", modifier = contentModifier) }
+            viewModel.savedReplays.isEmpty() -> item { NoSavedReplays(viewModel, contentModifier) }
+            else -> {
+                item { ShowdownReplayFiltersCard(viewModel, contentModifier) }
+                item { ResultsHeader(viewModel, shown.size, contentModifier) }
+                items(listItems, key = { it.key }) { item ->
+                    when (item) {
+                        is ShowdownReplayListItem.Single -> ShowdownReplayCard(item.replay, { viewModel.viewedReplay = item.replay }, contentModifier)
+                        is ShowdownReplayListItem.Series -> ShowdownReplaySeriesCard(item, { viewModel.viewedReplay = it }, contentModifier)
+                    }
                 }
             }
         }
-        items(listItems, key = { it.key }) { item ->
-            val itemModifier = Modifier.widthIn(max = MAX_CONTENT_WIDTH).fillMaxWidth()
-            when (item) {
-                is ShowdownReplayListItem.Single -> ShowdownReplayCard(item.replay, { viewModel.viewedReplay = item.replay }, itemModifier)
-                is ShowdownReplayListItem.Series -> ShowdownReplaySeriesCard(item, { viewModel.viewedReplay = it }, itemModifier)
-            }
-        }
     }
+    LoadDialog(viewModel)
     LoadConfirmationDialog(viewModel)
     DeletionConfirmationDialog(viewModel)
     viewModel.viewedReplay?.let { replay -> ShowdownReplayViewer(viewModel, replay) }
     ReplayDeletionConfirmationDialog(viewModel)
+}
+
+/** How many replays the filters keep, and the grouping of the best-of-3s */
+@Composable
+private fun ResultsHeader(viewModel: ShowdownReplaysViewModel, shownCount: Int, modifier: Modifier = Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        val savedCount = viewModel.savedReplays.size
+        Text(
+            if (shownCount == savedCount) "$savedCount replays" else "$shownCount of $savedCount replays",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f),
+        )
+        if (viewModel.bestOf3) {
+            FilterChip(
+                selected = viewModel.groupBySeries,
+                onClick = { viewModel.groupBySeries = !viewModel.groupBySeries },
+                label = { Text("Group by Bo3", maxLines = 1) },
+            )
+        }
+    }
 }
 
 /**
@@ -174,167 +172,6 @@ private fun ReplayDeletionConfirmationDialog(viewModel: ShowdownReplaysViewModel
             }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
         },
         dismissButton = { TextButton(onClick = dismiss) { Text("Cancel") } },
-    )
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun LoadReplaysCard(viewModel: ShowdownReplaysViewModel, modifier: Modifier = Modifier) {
-    val enabled = !viewModel.isBusy
-    MyCard(modifier = modifier) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "Load public replays",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                )
-                IconButton(
-                    onClick = { viewModel.askDeletion() },
-                    enabled = enabled && viewModel.savedReplays.isNotEmpty(),
-                ) {
-                    Icon(painterResource(Res.drawable.delete), contentDescription = "Delete the saved replays")
-                }
-            }
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                itemVerticalAlignment = Alignment.CenterVertically,
-            ) {
-                FormatSelector(
-                    format = viewModel.format,
-                    onFormatChange = viewModel::selectFormat,
-                    formats = viewModel.formats,
-                    enabled = enabled,
-                    modifier = Modifier.width(240.dp),
-                )
-                FilterChip(selected = !viewModel.bestOf3, onClick = { viewModel.selectBestOf3(false) }, label = { Text("Bo1") }, enabled = enabled)
-                FilterChip(selected = viewModel.bestOf3, onClick = { viewModel.selectBestOf3(true) }, label = { Text("Bo3") }, enabled = enabled)
-            }
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                itemVerticalAlignment = Alignment.CenterVertically,
-            ) {
-                for (days in SHOWDOWN_REPLAYS_PERIODS) {
-                    FilterChip(
-                        selected = viewModel.days == days,
-                        onClick = { viewModel.days = days },
-                        label = { Text(if (days == 1) "Last day" else "Last $days days") },
-                        enabled = enabled,
-                    )
-                }
-                OutlinedTextField(
-                    value = viewModel.minRatingText,
-                    onValueChange = { text -> viewModel.minRatingText = text.filter(Char::isDigit).take(4) },
-                    label = { Text("Minimum Elo (optional)") },
-                    singleLine = true,
-                    enabled = enabled,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(220.dp),
-                )
-            }
-            Button(onClick = { viewModel.listReplays() }, enabled = enabled) {
-                Text("Find replays")
-            }
-            LoadStatus(viewModel)
-        }
-    }
-}
-
-@Composable
-private fun LoadStatus(viewModel: ShowdownReplaysViewModel) {
-    when (val load = viewModel.load) {
-        ShowdownReplaysLoad.Idle, is ShowdownReplaysLoad.Listed -> Unit
-        is ShowdownReplaysLoad.Listing -> Row(verticalAlignment = Alignment.CenterVertically) {
-            CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-            Spacer(Modifier.width(12.dp))
-            Text("Listing the replays… ${load.found} found", Modifier.weight(1f, fill = false))
-            TextButton(onClick = viewModel::cancel) { Text("Cancel") }
-        }
-        is ShowdownReplaysLoad.Downloading -> Column {
-            LinearProgressIndicator(
-                progress = { if (load.total == 0) 0f else load.done.toFloat() / load.total },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "Downloading ${load.done} / ${load.total}" + if (load.failed > 0) " (${load.failed} failed)" else "",
-                    Modifier.weight(1f),
-                )
-                TextButton(onClick = viewModel::cancel) { Text("Cancel") }
-            }
-        }
-        is ShowdownReplaysLoad.Done -> Text(
-            buildString {
-                append(if (load.saved == 1) "1 replay saved" else "${load.saved} replays saved")
-                if (load.failed > 0) append(", ${load.failed} couldn't be downloaded")
-            }
-        )
-        is ShowdownReplaysLoad.Failed -> Text(load.message, color = MaterialTheme.colorScheme.error)
-    }
-}
-
-@Composable
-private fun LoadConfirmationDialog(viewModel: ShowdownReplaysViewModel) {
-    val listed = viewModel.load as? ShowdownReplaysLoad.Listed ?: return
-    val count = listed.toDownload.size
-    val skipped = if (listed.alreadySaved > 0) " ${listed.alreadySaved} already saved are skipped." else ""
-    if (count == 0) {
-        AlertDialog(
-            onDismissRequest = viewModel::dismissResult,
-            title = { Text("No new replay") },
-            text = { Text("There's no replay to download for this period.$skipped") },
-            confirmButton = { TextButton(onClick = viewModel::dismissResult) { Text("OK") } },
-        )
-        return
-    }
-    AlertDialog(
-        onDismissRequest = viewModel::cancel,
-        title = { Text("Download replays") },
-        text = {
-            Text(
-                (if (count == 1) "1 replay" else "$count replays") +
-                    " will be downloaded and saved on this device.$skipped"
-            )
-        },
-        confirmButton = { TextButton(onClick = viewModel::download) { Text("Download") } },
-        dismissButton = { TextButton(onClick = viewModel::cancel) { Text("Cancel") } },
-    )
-}
-
-@Composable
-private fun DeletionConfirmationDialog(viewModel: ShowdownReplaysViewModel) {
-    val replays = viewModel.replaysToDelete ?: return
-    val selection = buildString {
-        append(viewModel.format.displayedName)
-        append(if (viewModel.bestOf3) " Bo3" else " Bo1")
-        append(if (viewModel.days == 1) ", last day" else ", last ${viewModel.days} days")
-        viewModel.minRating?.let { append(", Elo $it or more") }
-    }
-    if (replays.isEmpty()) {
-        AlertDialog(
-            onDismissRequest = viewModel::dismissDeletion,
-            title = { Text("No replay to delete") },
-            text = { Text("No saved replay matches $selection.") },
-            confirmButton = { TextButton(onClick = viewModel::dismissDeletion) { Text("OK") } },
-        )
-        return
-    }
-    AlertDialog(
-        onDismissRequest = viewModel::dismissDeletion,
-        title = { Text("Delete replays") },
-        text = {
-            Text(
-                (if (replays.size == 1) "1 saved replay" else "${replays.size} saved replays") +
-                    " of $selection will be deleted from this device. They can be downloaded again."
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = viewModel::confirmDeletion) { Text("Delete", color = MaterialTheme.colorScheme.error) }
-        },
-        dismissButton = { TextButton(onClick = viewModel::dismissDeletion) { Text("Cancel") } },
     )
 }
 
@@ -408,6 +245,14 @@ private fun ShowdownReplaySeriesCard(
         Column(Modifier.padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             for (game in series.games) {
                 ShowdownReplayCard(game, { onGameClick(game) }, Modifier.fillMaxWidth(), showSelection = true)
+            }
+            if (series.hiddenGames > 0) {
+                Text(
+                    text = if (series.hiddenGames == 1) "1 game hidden by the filters" else "${series.hiddenGames} games hidden by the filters",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 8.dp),
+                )
             }
         }
     }

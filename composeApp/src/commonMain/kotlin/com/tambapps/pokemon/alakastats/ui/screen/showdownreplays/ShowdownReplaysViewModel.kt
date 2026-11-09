@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.showdownreplays
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -7,10 +8,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tambapps.pokemon.alakastats.domain.model.Format
+import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayFilters
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplaySummary
 import com.tambapps.pokemon.alakastats.domain.repository.ShowdownReplayRepository
 import com.tambapps.pokemon.alakastats.infrastructure.service.ShowdownReplayListing
 import com.tambapps.pokemon.alakastats.infrastructure.service.ShowdownReplayService
+import com.tambapps.pokemon.alakastats.ui.model.ShowdownReplaySort
+import com.tambapps.pokemon.alakastats.ui.model.sortedBy
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -66,9 +70,16 @@ class ShowdownReplaysViewModel(
         private set
     var bestOf3 by mutableStateOf(false)
         private set
+    /** The period to load the replays of, in days */
     var days by mutableIntStateOf(SHOWDOWN_REPLAYS_PERIODS.first())
-    /** Empty for no minimum */
+    /** The minimum Elo of the replays to load, empty for no minimum */
     var minRatingText by mutableStateOf("")
+
+    /** Whether the dialog choosing what to load is shown */
+    var showLoadDialog by mutableStateOf(false)
+
+    var filters by mutableStateOf(ShowdownReplayFilters())
+    var sort by mutableStateOf(ShowdownReplaySort())
 
     var savedReplays by mutableStateOf<List<ShowdownReplaySummary>>(emptyList())
         private set
@@ -90,6 +101,9 @@ class ShowdownReplaysViewModel(
     /** The saved replays the user is asked to confirm the deletion of, null when not asked */
     var replaysToDelete by mutableStateOf<List<ShowdownReplaySummary>?>(null)
         private set
+
+    /** The saved replays the filters keep, in the sort's order */
+    val shownReplays by derivedStateOf { savedReplays.filter(filters::matches).sortedBy(sort) }
 
     val isBusy get() = load is ShowdownReplaysLoad.Listing || load is ShowdownReplaysLoad.Downloading
 
@@ -133,6 +147,7 @@ class ShowdownReplaysViewModel(
 
     /** Lists the replays of the chosen period, for the user to know how many will be downloaded */
     fun listReplays(now: Long = Clock.System.now().epochSeconds) {
+        showLoadDialog = false
         if (isBusy) return
         val formatId = formatId
         val since = now - days * SECONDS_PER_DAY
@@ -195,14 +210,10 @@ class ShowdownReplaysViewModel(
         load = ShowdownReplaysLoad.Idle
     }
 
-    /** Asks to delete the saved replays of the selected period, above the minimum Elo if any */
-    fun askDeletion(now: Long = Clock.System.now().epochSeconds) {
+    /** Asks to delete the saved replays the filters show */
+    fun askDeletion() {
         if (isBusy) return
-        val since = now - days * SECONDS_PER_DAY
-        val minRating = minRating
-        replaysToDelete = savedReplays.filter { replay ->
-            replay.uploadTime >= since && (minRating == null || (replay.rating ?: 0) >= minRating)
-        }
+        replaysToDelete = shownReplays
     }
 
     fun confirmDeletion() {

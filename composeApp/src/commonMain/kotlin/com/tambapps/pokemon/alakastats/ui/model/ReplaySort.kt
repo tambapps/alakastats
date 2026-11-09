@@ -6,11 +6,11 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 
 enum class ReplaySortCriterion(
-    val label: String,
-    val descendingLabel: String,
-    val ascendingLabel: String,
-    val defaultDescending: Boolean,
-) {
+    override val label: String,
+    override val descendingLabel: String,
+    override val ascendingLabel: String,
+    override val defaultDescending: Boolean,
+) : SortCriterion {
     DATE("Date", "Newest first", "Oldest first", defaultDescending = true),
     OUTCOME("Outcome", "Wins first", "Losses first", defaultDescending = true),
     OPPONENT("Opponent", "Z → A", "A → Z", defaultDescending = false),

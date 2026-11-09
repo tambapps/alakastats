@@ -61,6 +61,20 @@ class ShowdownReplaySeriesTest {
     }
 
     @Test
+    fun theScoreCountsTheGamesTheFiltersHide() {
+        val all = listOf(
+            game("g1", "opponent", BestOf(1, 3, "s")),
+            game("g2", "alaka", BestOf(2, 3, "s")),
+            game("g3", "alaka", BestOf(3, 3, "s")),
+        )
+        val series = assertIs<ShowdownReplayListItem.Series>(groupedBySeries(listOf(all[1]), all).single())
+        assertEquals(listOf("g2"), series.games.map { it.id })
+        assertEquals(2, series.hiddenGames)
+        assertEquals(listOf(2, 1), series.wins)
+        assertEquals(UserName("alaka"), series.winner)
+    }
+
+    @Test
     fun aSeriesMissingGamesHasNoWinner() {
         val items = groupedBySeries(listOf(
             game("g2", "alaka", BestOf(2, 3, "s")),

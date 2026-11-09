@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.domain.model
 
 import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 
 /**
  * What the app keeps of a public Showdown replay: enough to show and filter it, the whole log being fetched again from
@@ -52,27 +53,35 @@ data class ShowdownReplayPlayer(
  * in the team" and "the username contains alaka" keeps the replays where alaka played Whimsicott
  *
  * @param teamPokemons Pokémon all in a player's team
- * @param broughtPokemons Pokémon all brought by a player
+ * @param broughtPokemons Pokémon all brought by a player, those as lead among the first 2 that went on the field
  * @param userName a part of a player's name, whatever its case
  * @param minRating the battle's minimum rating: the replays without one are left out
+ * @param winnerOnly whether the player meeting the criteria must be the winner, e.g. to see what won
  */
 data class ShowdownReplayFilters(
     val teamPokemons: List<PokemonName> = emptyList(),
-    val broughtPokemons: List<PokemonName> = emptyList(),
+    val broughtPokemons: List<PokemonFilter> = emptyList(),
     val userName: String? = null,
     val minRating: Int? = null,
+    val winnerOnly: Boolean = false,
 ) {
-    val isEmpty get() = teamPokemons.isEmpty() && broughtPokemons.isEmpty() && userName.isNullOrBlank() && minRating == null
+    private val hasPlayerCriteria get() =
+        teamPokemons.isNotEmpty() || broughtPokemons.isNotEmpty() || !userName.isNullOrBlank() || winnerOnly
 
-    private val hasPlayerCriteria get() = teamPokemons.isNotEmpty() || broughtPokemons.isNotEmpty() || !userName.isNullOrBlank()
+    val isEmpty get() = !hasPlayerCriteria && minRating == null
 
     fun matches(replay: ShowdownReplaySummary): Boolean {
         if (minRating != null && (replay.rating ?: return false) < minRating) return false
-        return !hasPlayerCriteria || replay.players.any(::matches)
+        if (!hasPlayerCriteria) return true
+        val players = if (winnerOnly) replay.players.filter { player -> replay.winner?.matches(player.name) == true }
+        else replay.players
+        return players.any(::matches)
     }
 
     private fun matches(player: ShowdownReplayPlayer) =
         teamPokemons.all { pokemon -> player.team.any { it.baseMatches(pokemon) } }
-            && broughtPokemons.all { pokemon -> player.brought.any { it.baseMatches(pokemon) } }
+            && broughtPokemons.all { filter ->
+                (if (filter.asLead) player.lead else player.brought).any { it.baseMatches(filter.name) }
+            }
             && (userName.isNullOrBlank() || player.name.value.contains(userName.trim(), ignoreCase = true))
 }

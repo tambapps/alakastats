@@ -1,6 +1,7 @@
 package com.tambapps.pokemon.alakastats.domain.model
 
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -31,6 +32,8 @@ class ShowdownReplayFiltersTest {
     )
 
     private fun names(vararg names: String) = names.map(::PokemonName)
+
+    private fun brought(vararg names: String) = names.map { PokemonFilter(PokemonName(it), asLead = false) }
 
     @Test
     fun theBroughtPokemonsHaveTheItemOfTheirTeamsOne() {
@@ -65,16 +68,16 @@ class ShowdownReplayFiltersTest {
 
     @Test
     fun aPokemonBroughtMustHaveGoneOnTheField() {
-        assertTrue(ShowdownReplayFilters(broughtPokemons = names("garchomp")).matches(replay))
+        assertTrue(ShowdownReplayFilters(broughtPokemons = brought("garchomp")).matches(replay))
         // in the team, but not brought
-        assertFalse(ShowdownReplayFilters(broughtPokemons = names("kingambit")).matches(replay))
+        assertFalse(ShowdownReplayFilters(broughtPokemons = brought("kingambit")).matches(replay))
     }
 
     @Test
     fun thePokemonsMustAllBeOnTheSamePlayersSide() {
         assertTrue(ShowdownReplayFilters(teamPokemons = names("whimsicott", "incineroar")).matches(replay))
         assertFalse(ShowdownReplayFilters(teamPokemons = names("whimsicott", "pelipper")).matches(replay))
-        assertFalse(ShowdownReplayFilters(teamPokemons = names("whimsicott"), broughtPokemons = names("pelipper")).matches(replay))
+        assertFalse(ShowdownReplayFilters(teamPokemons = names("whimsicott"), broughtPokemons = brought("pelipper")).matches(replay))
     }
 
     @Test
@@ -88,6 +91,22 @@ class ShowdownReplayFiltersTest {
     fun aUserNameAndPokemonsMustBeTheSamePlayers() {
         assertTrue(ShowdownReplayFilters(userName = "alaka", teamPokemons = names("whimsicott")).matches(replay))
         assertFalse(ShowdownReplayFilters(userName = "opponent", teamPokemons = names("whimsicott")).matches(replay))
+    }
+
+    @Test
+    fun aPokemonAsLeadMustBeAmongTheFirstTwoBrought() {
+        assertTrue(ShowdownReplayFilters(broughtPokemons = listOf(PokemonFilter(PokemonName("garchomp"), asLead = true))).matches(replay))
+        // brought third
+        assertFalse(ShowdownReplayFilters(broughtPokemons = listOf(PokemonFilter(PokemonName("incineroar"), asLead = true))).matches(replay))
+        assertTrue(ShowdownReplayFilters(broughtPokemons = listOf(PokemonFilter(PokemonName("incineroar"), asLead = false))).matches(replay))
+    }
+
+    @Test
+    fun winnerOnlyLooksForThePokemonsOnTheWinnersSide() {
+        assertTrue(ShowdownReplayFilters(teamPokemons = names("whimsicott"), winnerOnly = true).matches(replay))
+        assertFalse(ShowdownReplayFilters(teamPokemons = names("pelipper"), winnerOnly = true).matches(replay))
+        assertFalse(ShowdownReplayFilters(winnerOnly = true).matches(replay.copy(winner = null)))
+        assertFalse(ShowdownReplayFilters(winnerOnly = true).isEmpty)
     }
 
     @Test

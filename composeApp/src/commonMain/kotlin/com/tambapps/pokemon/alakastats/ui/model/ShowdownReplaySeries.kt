@@ -16,15 +16,17 @@ sealed interface ShowdownReplayListItem {
     }
 
     /**
-     * @param games the saved games, by game number
+     * @param games the saved games the filters show, by game number
+     * @param hiddenGames the number of the series' saved games the filters hide
      * @param players the players, in their order of the first saved game
-     * @param wins the games each player won, in the order of [players]
+     * @param wins the saved games each player won, in the order of [players], the filters don't change the score
      * @param missingGames whether games of the series aren't saved, e.g. the first one uploaded before the loaded period
      */
     data class Series(
         val seriesRef: String,
         val bestOf: Int,
         val games: List<ShowdownReplaySummary>,
+        val hiddenGames: Int,
         val players: List<ShowdownReplayPlayer>,
         val wins: List<Int>,
         val missingGames: Boolean,
@@ -41,26 +43,33 @@ sealed interface ShowdownReplayListItem {
 /**
  * Groups the games of a same series, each series taking the place of its first game in [sortedReplays]
  *
- * @param sortedReplays the replays to show, sorted
+ * @param sortedReplays the replays to show, filtered and sorted
+ * @param allReplays all the saved replays, for the score of the whole series
  */
-fun groupedBySeries(sortedReplays: List<ShowdownReplaySummary>): List<ShowdownReplayListItem> {
-    val gamesBySeries = sortedReplays.filter { it.bestOf != null }.groupBy { it.bestOf!!.seriesRef }
+fun groupedBySeries(
+    sortedReplays: List<ShowdownReplaySummary>,
+    allReplays: List<ShowdownReplaySummary> = sortedReplays,
+): List<ShowdownReplayListItem> {
+    val shownGames = sortedReplays.filter { it.bestOf != null }.groupBy { it.bestOf!!.seriesRef }
+    val allGames = allReplays.filter { it.bestOf != null }.groupBy { it.bestOf!!.seriesRef }
     val listedSeries = mutableSetOf<String>()
     return sortedReplays.mapNotNull { replay ->
         val bestOf = replay.bestOf ?: return@mapNotNull ShowdownReplayListItem.Single(replay)
         if (!listedSeries.add(bestOf.seriesRef)) return@mapNotNull null
-        val games = gamesBySeries.getValue(bestOf.seriesRef).sortedBy { it.bestOf!!.game }
-        val players = games.first().players
-        val playedGames = games.maxOf { it.bestOf!!.game }
+        val games = shownGames.getValue(bestOf.seriesRef).sortedBy { it.bestOf!!.game }
+        val seriesGames = (allGames[bestOf.seriesRef] ?: games).sortedBy { it.bestOf!!.game }
+        val players = seriesGames.first().players
+        val playedGames = seriesGames.maxOf { it.bestOf!!.game }
         ShowdownReplayListItem.Series(
             seriesRef = bestOf.seriesRef,
             bestOf = bestOf.of,
             games = games,
+            hiddenGames = seriesGames.size - games.size,
             players = players,
             // by name: the players' order may change from a game to another
-            wins = players.map { player -> games.count { it.winner?.matches(player.name) == true } },
+            wins = players.map { player -> seriesGames.count { it.winner?.matches(player.name) == true } },
             // e.g. the game 2 without the game 1
-            missingGames = games.map { it.bestOf!!.game }.toSet() != (1..playedGames).toSet(),
+            missingGames = seriesGames.map { it.bestOf!!.game }.toSet() != (1..playedGames).toSet(),
         )
     }
 }
