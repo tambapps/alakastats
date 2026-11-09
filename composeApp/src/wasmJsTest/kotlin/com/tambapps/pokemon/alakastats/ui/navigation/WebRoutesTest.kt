@@ -36,6 +36,11 @@ class WebRoutesTest {
     }
 
     @Test
+    fun theShowdownReplaysAreAboveTheHomeScreen() {
+        assertEquals(listOf(AppRoute.Home, AppRoute.ShowdownReplays), WebRoutes.backStackOf("replays"))
+    }
+
+    @Test
     fun aboutIsAboveTheHomeScreen() {
         assertEquals(listOf(AppRoute.Home, AppRoute.About), WebRoutes.backStackOf("about"))
     }
@@ -68,7 +73,7 @@ class WebRoutesTest {
 
     @Test
     fun eachFixedPathIsTheOneOfItsBackStack() {
-        for (path in listOf("", "about", "cloud-sync", "damage-calc", "quizzes", "quizzes/natures", "quizzes/speed-stat", "quizzes/speed-interactions")) {
+        for (path in listOf("", "replays", "about", "cloud-sync", "damage-calc", "quizzes", "quizzes/natures", "quizzes/speed-stat", "quizzes/speed-interactions")) {
             assertEquals(path, WebRoutes.pathOf(WebRoutes.backStackOf(path)))
         }
     }

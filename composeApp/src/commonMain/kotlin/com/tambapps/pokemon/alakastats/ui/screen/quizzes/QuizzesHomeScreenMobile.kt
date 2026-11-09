@@ -18,12 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
-import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 
 @Composable
 internal fun QuizzesHomeScreenMobile(viewModel: QuizzesViewModel) {
-    val navigator = LocalAppNavigator.current
     Column(
         Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -34,7 +31,6 @@ internal fun QuizzesHomeScreenMobile(viewModel: QuizzesViewModel) {
                 .verticalScroll(rememberScrollState()),
         ) {
             Box(Modifier.fillMaxWidth()) {
-                BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
                 Text(
                     "Quizzes",
                     style = MaterialTheme.typography.headlineMedium,

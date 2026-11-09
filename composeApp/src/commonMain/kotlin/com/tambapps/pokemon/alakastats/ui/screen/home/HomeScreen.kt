@@ -2,15 +2,12 @@ package com.tambapps.pokemon.alakastats.ui.screen.home
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.add
-import alakastats.composeapp.generated.resources.calculate
 import alakastats.composeapp.generated.resources.cloud_alert
 import alakastats.composeapp.generated.resources.cloud_done
 import alakastats.composeapp.generated.resources.cloud_off
 import alakastats.composeapp.generated.resources.cloud_upload
 import alakastats.composeapp.generated.resources.group
 import alakastats.composeapp.generated.resources.more_horiz
-import alakastats.composeapp.generated.resources.pokedex
-import alakastats.composeapp.generated.resources.quiz
 import alakastats.composeapp.generated.resources.share
 import alakastats.composeapp.generated.resources.visibility
 import androidx.compose.foundation.background
@@ -21,7 +18,6 @@ import com.tambapps.pokemon.alakastats.infrastructure.cloud.CloudError
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,7 +34,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -75,7 +70,6 @@ import com.tambapps.pokemon.alakastats.infrastructure.sync.TeamSyncService
 import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.CloudSyncViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.SyncStatusDialog
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
@@ -546,65 +540,6 @@ internal fun SyncReconnectionWarning(viewModel: HomeViewModel, modifier: Modifie
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onErrorContainer,
         )
-    }
-}
-
-@Composable
-internal fun QuizzesButton(modifier: Modifier = Modifier, stacked: Boolean = false) {
-    val navigator = LocalAppNavigator.current
-    HomeToolButton(Res.drawable.quiz, "Quizzes", stacked, modifier) { navigator.push(AppRoute.Quizzes) }
-}
-
-@Composable
-internal fun DamageCalcButton(modifier: Modifier = Modifier, stacked: Boolean = false) {
-    val navigator = LocalAppNavigator.current
-    HomeToolButton(Res.drawable.calculate, "Damage Calc", stacked, modifier) { navigator.push(AppRoute.DamageCalc) }
-}
-
-@Composable
-internal fun PokedexButton(modifier: Modifier = Modifier, stacked: Boolean = false) {
-    val navigator = LocalAppNavigator.current
-    HomeToolButton(Res.drawable.pokedex, "Pokédex", stacked, modifier) { navigator.push(AppRoute.Pokedex()) }
-}
-
-/**
- * Stacked, the icon goes above the label: that's how three of them fit on one line of a phone
- */
-@Composable
-private fun HomeToolButton(
-    icon: DrawableResource,
-    label: String,
-    stacked: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    if (stacked) {
-        FilledTonalButton(
-            onClick = onClick,
-            modifier = modifier,
-            shape = RoundedCornerShape(12.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    painter = painterResource(icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(label, style = buttonTextStyle, maxLines = 1)
-            }
-        }
-    } else {
-        FilledTonalButton(onClick = onClick, modifier = modifier) {
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                modifier = Modifier.size(ButtonDefaults.IconSize)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(label, style = buttonTextStyle)
-        }
     }
 }
 

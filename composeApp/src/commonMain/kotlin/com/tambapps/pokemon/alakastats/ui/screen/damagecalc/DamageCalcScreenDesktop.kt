@@ -14,12 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
-import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 
 @Composable
-internal fun DamageCalcScreenDesktop(viewModel: DamageCalcViewModel, showBackButton: Boolean) {
-    val navigator = LocalAppNavigator.current
+internal fun DamageCalcScreenDesktop(viewModel: DamageCalcViewModel) {
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -27,9 +24,6 @@ internal fun DamageCalcScreenDesktop(viewModel: DamageCalcViewModel, showBackBut
             .fillMaxSize(),
     ) {
         Box(Modifier.fillMaxWidth()) {
-            if (showBackButton) {
-                BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
-            }
             Text(
                 "Damage Calc",
                 style = MaterialTheme.typography.headlineMedium,

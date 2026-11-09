@@ -48,7 +48,6 @@ import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
-import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.SuggestionTextField
 import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
@@ -108,7 +107,6 @@ fun PokedexScreen(form: String?) {
             .then(if (isCompact) Modifier.safeContentPadding() else Modifier.padding(all = 16.dp))
     ) {
         Box(Modifier.fillMaxWidth()) {
-            BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
             Text(
                 "Pokédex",
                 style = MaterialTheme.typography.headlineMedium,

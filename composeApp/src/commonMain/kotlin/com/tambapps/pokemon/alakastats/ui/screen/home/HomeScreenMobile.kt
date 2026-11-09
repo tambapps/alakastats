@@ -54,8 +54,11 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
                     modifier = Modifier.size(80.dp).align(Alignment.Center),
                     contentScale = ContentScale.Fit
                 )
-                CloudSyncButton(Modifier.align(Alignment.TopStart))
-                AboutButton(Modifier.align(Alignment.TopEnd))
+                // the start is the navigation's menu button
+                Column(Modifier.align(Alignment.TopEnd), horizontalAlignment = Alignment.End) {
+                    CloudSyncButton()
+                    AboutButton()
+                }
             }
             SyncReconnectionWarning(viewModel, Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp))
             Text("Alakastats", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
@@ -64,16 +67,6 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
             if (platform.type == PlatformType.Web && platform.deviceType.let { it == DeviceType.Android || it == DeviceType.Ios }) {
                 Spacer(Modifier.height(16.dp))
                 GetAppButton(platform.deviceType)
-            }
-            Spacer(Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                QuizzesButton(Modifier.weight(1f), stacked = true)
-                DamageCalcButton(Modifier.weight(1f), stacked = true)
-                PokedexButton(Modifier.weight(1f), stacked = true)
             }
             Spacer(Modifier.height(16.dp))
 

@@ -40,9 +40,6 @@ import com.tambapps.pokemon.alakastats.AppBuildConfig
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import org.jetbrains.compose.resources.painterResource
 
-// below it, half of what the centered label leaves isn't enough for the tools with their label beside their icon
-private val STACKED_TOOLS_MAX_WIDTH = 1400.dp
-
 @Composable
 internal fun HomeScreenDesktop(viewModel: HomeViewModel) {
     Column(
@@ -51,20 +48,13 @@ internal fun HomeScreenDesktop(viewModel: HomeViewModel) {
             .padding(all = 16.dp)
             .fillMaxSize(),
     ) {
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val stackedTools = maxWidth < STACKED_TOOLS_MAX_WIDTH
-            Row(Modifier.fillMaxWidth()) {
-                // both sides take the same width whatever their buttons, for the label to be at the center of the screen
-                Row(Modifier.weight(1f)) {
-                    QuizzesButton(Modifier.padding(start = 8.dp), stacked = stackedTools)
-                    DamageCalcButton(Modifier.padding(start = 8.dp), stacked = stackedTools)
-                    PokedexButton(Modifier.padding(start = 8.dp), stacked = stackedTools)
-                }
-                AlakastatsLabel()
-                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
-                    CloudSyncButton()
-                    AboutButton()
-                }
+        Row(Modifier.fillMaxWidth()) {
+            // both sides take the same width, for the label to be at the center of the screen
+            Spacer(Modifier.weight(1f))
+            AlakastatsLabel()
+            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
+                CloudSyncButton()
+                AboutButton()
             }
         }
         CatchPhrase()

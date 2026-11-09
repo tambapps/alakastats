@@ -21,6 +21,7 @@ private const val REPLAY_REF_PARAM = "replayRef"
  */
 private val BACK_STACK_BY_PATH: Map<String, List<AppRoute>> = mapOf(
     "" to listOf(AppRoute.Home),
+    "replays" to listOf(AppRoute.Home, AppRoute.ShowdownReplays),
     "about" to listOf(AppRoute.Home, AppRoute.About),
     "cloud-sync" to listOf(AppRoute.Home, AppRoute.CloudSync),
     "damage-calc" to listOf(AppRoute.Home, AppRoute.DamageCalc),

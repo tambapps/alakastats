@@ -3,6 +3,10 @@ package com.tambapps.pokemon.alakastats.ui.navigation
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
+import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -131,6 +135,7 @@ class AppNavigationTest {
         val teamId = Uuid.random()
         val routes = listOf(
             AppRoute.Home,
+            AppRoute.ShowdownReplays,
             AppRoute.Pokedex(),
             AppRoute.Pokedex("metagross-mega"),
             AppRoute.CloudSync,
@@ -286,22 +291,96 @@ class AppNavigationTest {
         assertEquals(listOf("the result"), received)
     }
 
+    private fun ComposeUiTest.goToPart(label: String) {
+        onNode(hasContentDescription("Menu")).performClick()
+        waitForIdle()
+        onNodeWithText(label).performClick()
+    }
+
     @Test
-    fun theRealAppNavigatesToThePokedexAndBack() = runComposeUiTest {
+    fun theRealAppGoesFromAPartToAnotherWithTheNavigation() = runComposeUiTest {
+        var backStack: List<NavKey> = emptyList()
         setContent {
             KoinApplication(
                 configuration = koinConfiguration { modules(appModules + wasmModule) },
                 logLevel = Level.NONE,
             ) {
-                App()
+                App(backStackEffect = { backStack = it })
             }
         }
         waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Pokédex")).fetchSemanticsNodes().isNotEmpty() }
-        onNodeWithText("Pokédex").performClick()
+        goToPart("Pokédex")
         waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Search a Pokémon")).fetchSemanticsNodes().isNotEmpty() }
-        onNode(hasContentDescription("Back")).performClick()
+        assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.Pokedex()), backStack.toList())
+        // a part replaces the other one: a back from it goes to the teams
+        goToPart("Quizzes")
         waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Search a Pokémon")).fetchSemanticsNodes().isEmpty() }
-        waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Pokédex")).fetchSemanticsNodes().isNotEmpty() }
+        assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.Quizzes), backStack.toList())
+        goToPart("Teams")
+        waitUntil(timeoutMillis = 20_000) { backStack.toList() == listOf<NavKey>(AppRoute.Home) }
+    }
+
+    private val partsOfTheApp = listOf(AppRoute.Home, AppRoute.ShowdownReplays, AppRoute.DamageCalc, AppRoute.Quizzes, AppRoute.Pokedex("metagross"))
+    private val screensBelowTheParts = listOf(AppRoute.StandaloneDamageCalc, AppRoute.NatureQuizSetup, AppRoute.Teamlytics(Uuid.random()), AppRoute.About)
+
+    // the drawer's content is there even when it's closed: its menu button is what tells
+    private fun menuButtonIsOnlyOnTheParts(isCompact: Boolean) = runComposeUiTest {
+        val backStack = NavBackStack<NavKey>(AppRoute.Home)
+        setContent {
+            CompositionLocalProvider(LocalIsCompact provides isCompact) {
+                WithAppNavigationDrawer(backStack, AppNavigator(backStack)) {}
+            }
+        }
+        for (route in partsOfTheApp) {
+            backStack[backStack.lastIndex] = route
+            waitForIdle()
+            onNode(hasContentDescription("Menu")).assertExists()
+        }
+        for (route in screensBelowTheParts) {
+            backStack[backStack.lastIndex] = route
+            waitForIdle()
+            onNode(hasContentDescription("Menu")).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun onMobileTheMenuButtonIsOnlyOnThePartsOfTheApp() = menuButtonIsOnlyOnTheParts(isCompact = true)
+
+    @Test
+    fun onDesktopTheMenuButtonIsOnlyOnThePartsOfTheApp() = menuButtonIsOnlyOnTheParts(isCompact = false)
+
+    private fun drawerIsClosedUntilTheMenuButtonOpensIt(isCompact: Boolean) = runComposeUiTest {
+        val backStack = NavBackStack<NavKey>(AppRoute.Home)
+        setContent {
+            CompositionLocalProvider(LocalIsCompact provides isCompact) {
+                WithAppNavigationDrawer(backStack, AppNavigator(backStack)) {}
+            }
+        }
+        onNodeWithText("Damage Calc").assertIsNotDisplayed()
+        onNode(hasContentDescription("Menu")).performClick()
+        waitForIdle()
+        onNodeWithText("Damage Calc").assertIsDisplayed().performClick()
+        waitForIdle()
+        assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.DamageCalc), backStack.toList())
+        onNodeWithText("Damage Calc").assertIsNotDisplayed()
+    }
+
+    @Test
+    fun onMobileTheDrawerIsClosedUntilTheMenuButtonOpensIt() = drawerIsClosedUntilTheMenuButtonOpensIt(isCompact = true)
+
+    @Test
+    fun onDesktopTheDrawerIsClosedUntilTheMenuButtonOpensIt() = drawerIsClosedUntilTheMenuButtonOpensIt(isCompact = false)
+
+    @Test
+    fun aPartOfTheAppIsRightAboveTheRoot() {
+        val backStack = mutableListOf<NavKey>(AppRoute.Home, AppRoute.Quizzes, AppRoute.NatureQuizSetup)
+        val navigator = AppNavigator(backStack)
+        navigator.navigateToTopLevel(AppRoute.Pokedex())
+        assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.Pokedex()), backStack)
+        navigator.navigateToTopLevel(AppRoute.ShowdownReplays)
+        assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.ShowdownReplays), backStack)
+        navigator.navigateToTopLevel(AppRoute.Home)
+        assertEquals(listOf<NavKey>(AppRoute.Home), backStack)
     }
 
     @Test
@@ -490,6 +569,8 @@ class AppNavigationTest {
         mainClock.advanceTimeBy(1_000)
     }
 
+    @Test fun homeOpens() = screenOpens(AppRoute.Home)
+    @Test fun showdownReplaysOpens() = screenOpens(AppRoute.ShowdownReplays)
     @Test fun pokedexOpens() = screenOpens(AppRoute.Pokedex())
     @Test fun pokedexOpensOnAPokemon() = screenOpens(AppRoute.Pokedex("metagross-mega"))
     @Test fun aboutOpens() = screenOpens(AppRoute.About)

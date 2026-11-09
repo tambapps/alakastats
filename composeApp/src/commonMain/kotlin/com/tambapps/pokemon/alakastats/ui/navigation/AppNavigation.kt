@@ -6,6 +6,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
@@ -24,6 +25,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.cloudsync.CloudSyncScreen
 import com.tambapps.pokemon.alakastats.ui.screen.damagecalc.DamageCalcScreen
 import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeScreen
+import com.tambapps.pokemon.alakastats.ui.screen.showdownreplays.ShowdownReplaysScreen
 import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizScreen
@@ -52,8 +54,12 @@ import kotlin.uuid.Uuid
  */
 @Serializable
 sealed interface AppRoute : NavKey {
+    /** The teams' list */
     @Serializable
     data object Home : AppRoute
+
+    @Serializable
+    data object ShowdownReplays : AppRoute
 
     /** @param form the form shown, null for none */
     @Serializable
@@ -68,7 +74,7 @@ sealed interface AppRoute : NavKey {
     @Serializable
     data object DamageCalc : AppRoute
 
-    /** The damage calc alone, on the web app's damage-calc page */
+    /** The damage calc alone, without the navigation bar, on the web app's damage-calc page */
     @Serializable
     data object StandaloneDamageCalc : AppRoute
 
@@ -131,6 +137,18 @@ class AppNavigator(private val backStack: MutableList<NavKey>) {
         if (backStack.size > 1) backStack.removeLastOrNull()
     }
 
+    /**
+     * Goes to one of the parts of the app, right above the root screen: the screens of the part that was shown are
+     * left, as a back from a part goes back to the root
+     */
+    fun navigateToTopLevel(route: AppRoute) {
+        // in one go, for what follows the back stack (e.g. the web app's URL) to only see where it ends
+        Snapshot.withMutableSnapshot {
+            while (backStack.size > 1) backStack.removeLastOrNull()
+            if (backStack.firstOrNull() != route) backStack.add(route)
+        }
+    }
+
     fun replace(route: AppRoute) {
         backStack[backStack.lastIndex] = route
     }
@@ -163,44 +181,48 @@ fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (Nav
     val navigator = remember(backStack) { AppNavigator(backStack) }
     backStackEffect(backStack)
     CompositionLocalProvider(LocalAppNavigator provides navigator) {
-        NavDisplay(
-            backStack = backStack,
-            onBack = navigator::pop,
-            entryDecorators = listOf(
-                rememberSaveableStateHolderNavEntryDecorator(),
-                rememberViewModelStoreNavEntryDecorator(),
-                rememberResultEventBusNavEntryDecorator(),
-            ),
-            // the screens aren't animated
-            transitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
-            popTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
-            predictivePopTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
-            entryProvider = entryProvider {
-                entry<AppRoute.Home> { HomeScreen() }
-                // the same content whatever the form: changing it keeps the screen, its view model and its animations
-                entry<AppRoute.Pokedex>(clazzContentKey = { "pokedex" }) { PokedexScreen(it.form) }
-                entry<AppRoute.CloudSync> { CloudSyncScreen() }
-                entry<AppRoute.About> { AboutScreen() }
-                entry<AppRoute.DamageCalc> { DamageCalcScreen(showBackButton = true) }
-                entry<AppRoute.StandaloneDamageCalc> { DamageCalcScreen(showBackButton = false) }
-                // the same content whatever the tab: changing it keeps the screen and its view model
-                entry<AppRoute.Teamlytics>(clazzContentKey = { "teamlytics-${it.teamId}" }) {
-                    TeamlyticsScreen(it.teamId, it.tab, it.replayRef)
-                }
-                entry<AppRoute.EditTeam> { EditTeamScreen(it.teamId, it.redirectToTeamlytics) }
-                entry<AppRoute.PokemonDetails> { PokemonDetailsScreen(it.teamId, PokemonName(it.pokemonName)) }
-                entry<AppRoute.ManualReplay> { ManualReplayScreen(it.teamId, it.replayReference) }
-                entry<AppRoute.Quizzes> { QuizzesHomeScreen() }
-                entry<AppRoute.NatureQuizSetup> { NatureQuizSetupScreen() }
-                entry<AppRoute.NatureQuiz> { NatureQuizScreen(it.natures, it.direction) }
-                entry<AppRoute.SpeedStatQuizSetup> { SpeedStatQuizSetupScreen() }
-                entry<AppRoute.SpeedStatQuiz> {
-                    SpeedStatQuizScreen(it.format, it.allowChoiceScarf, it.useMaxStatPoints, it.useSpeedBoostingNature)
-                }
-                entry<AppRoute.SpeedInteractionsHomeSetup> { SpeedInteractionsHomeSetupScreen() }
-                entry<AppRoute.SpeedInteractionsTeamSetup> { SpeedInteractionsTeamSetupScreen(it.teamId) }
-                entry<AppRoute.SpeedInteractionsQuiz> { SpeedInteractionsQuizScreen(it.mode) }
-            },
-        )
+        WithAppNavigationDrawer(backStack, navigator) {
+            NavDisplay(
+                backStack = backStack,
+                onBack = navigator::pop,
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                    rememberResultEventBusNavEntryDecorator(),
+                ),
+                // the screens aren't animated
+                transitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
+                popTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
+                predictivePopTransitionSpec = { ContentTransform(EnterTransition.None, ExitTransition.None) },
+                entryProvider = entryProvider {
+                    entry<AppRoute.Home> { HomeScreen() }
+                    entry<AppRoute.ShowdownReplays> { ShowdownReplaysScreen() }
+                    // the same content whatever the form: changing it keeps the screen, its view model and its animations
+                    entry<AppRoute.Pokedex>(clazzContentKey = { "pokedex" }) { PokedexScreen(it.form) }
+                    entry<AppRoute.CloudSync> { CloudSyncScreen() }
+                    entry<AppRoute.About> { AboutScreen() }
+                    // the standalone one has no navigation bar
+                    entry<AppRoute.DamageCalc> { DamageCalcScreen() }
+                    entry<AppRoute.StandaloneDamageCalc> { DamageCalcScreen() }
+                    // the same content whatever the tab: changing it keeps the screen and its view model
+                    entry<AppRoute.Teamlytics>(clazzContentKey = { "teamlytics-${it.teamId}" }) {
+                        TeamlyticsScreen(it.teamId, it.tab, it.replayRef)
+                    }
+                    entry<AppRoute.EditTeam> { EditTeamScreen(it.teamId, it.redirectToTeamlytics) }
+                    entry<AppRoute.PokemonDetails> { PokemonDetailsScreen(it.teamId, PokemonName(it.pokemonName)) }
+                    entry<AppRoute.ManualReplay> { ManualReplayScreen(it.teamId, it.replayReference) }
+                    entry<AppRoute.Quizzes> { QuizzesHomeScreen() }
+                    entry<AppRoute.NatureQuizSetup> { NatureQuizSetupScreen() }
+                    entry<AppRoute.NatureQuiz> { NatureQuizScreen(it.natures, it.direction) }
+                    entry<AppRoute.SpeedStatQuizSetup> { SpeedStatQuizSetupScreen() }
+                    entry<AppRoute.SpeedStatQuiz> {
+                        SpeedStatQuizScreen(it.format, it.allowChoiceScarf, it.useMaxStatPoints, it.useSpeedBoostingNature)
+                    }
+                    entry<AppRoute.SpeedInteractionsHomeSetup> { SpeedInteractionsHomeSetupScreen() }
+                    entry<AppRoute.SpeedInteractionsTeamSetup> { SpeedInteractionsTeamSetupScreen(it.teamId) }
+                    entry<AppRoute.SpeedInteractionsQuiz> { SpeedInteractionsQuizScreen(it.mode) }
+                },
+            )
+        }
     }
 }

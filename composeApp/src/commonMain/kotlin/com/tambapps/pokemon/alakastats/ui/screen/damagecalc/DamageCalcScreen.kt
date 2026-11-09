@@ -5,16 +5,17 @@ import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * @param showBackButton false for the damage calc alone, on the web app's damage-calc page
+ * No back button: it's one of the parts of the app, reached from the navigation bar, or the damage calc alone on the
+ * web app's damage-calc page
  */
 @Composable
-fun DamageCalcScreen(showBackButton: Boolean) {
+fun DamageCalcScreen() {
     val viewModel = koinViewModel<DamageCalcViewModel>()
     val isCompact = LocalIsCompact.current
 
     if (isCompact) {
-        DamageCalcScreenMobile(viewModel, showBackButton)
+        DamageCalcScreenMobile(viewModel)
     } else {
-        DamageCalcScreenDesktop(viewModel, showBackButton)
+        DamageCalcScreenDesktop(viewModel)
     }
 }
