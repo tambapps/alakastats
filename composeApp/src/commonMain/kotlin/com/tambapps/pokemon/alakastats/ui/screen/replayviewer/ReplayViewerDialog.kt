@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -80,6 +82,9 @@ internal fun ReplayAnalytics.textToCopy() = url?.removeSuffix(".json") ?: refere
  * @param browserUrl the replay's page on Showdown, to open it in the browser instead
  * @param textToCopy what the copy button copies
  * @param asP2 whether to show the battle from the second player's side
+ * @param title e.g. the players
+ * @param actions the header's buttons of the context, between the copy and open ones and the close one, e.g. made with
+ * [HeaderIconButton]
  */
 @Composable
 fun ReplayViewerDialog(
@@ -88,6 +93,8 @@ fun ReplayViewerDialog(
     textToCopy: String,
     asP2: Boolean,
     onDismissRequest: () -> Unit,
+    title: String = "Replay",
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
     val replayService = koinInject<ReplayAnalyticsService>()
@@ -125,9 +132,16 @@ fun ReplayViewerDialog(
                         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text("Replay", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                        Text(
+                            title,
+                            style = MaterialTheme.typography.titleLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
                         CopyIconButton(textToCopy)
                         HeaderIconButton(Res.drawable.open_in_new, "Open in browser") { uriHandler.openUri(browserUrl) }
+                        actions()
                         HeaderIconButton(Res.drawable.close, "Close", onClick = onDismissRequest)
                     }
                     when (val result = log) {
@@ -199,7 +213,7 @@ private fun CopyIconButton(text: String) {
 // the label shows as a tooltip, an icon alone being less obvious than a text
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HeaderIconButton(icon: DrawableResource, label: String, onClick: () -> Unit) {
+fun HeaderIconButton(icon: DrawableResource, label: String, onClick: () -> Unit) {
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
         tooltip = { PlainTooltip { Text(label) } },

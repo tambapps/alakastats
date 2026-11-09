@@ -41,6 +41,10 @@ data class ShowdownReplayPlayer(
     val afterElo: Int?,
 ) {
     val lead get() = brought.take(2)
+
+    /** The item of each brought Pokémon, in the order of [brought], when known */
+    val broughtItems: List<ItemName?>
+        get() = brought.map { pokemon -> items.getOrNull(team.indexOfFirst { it.baseMatches(pokemon) }) }
 }
 
 /**

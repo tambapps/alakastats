@@ -78,6 +78,15 @@ class ShowdownReplaysViewModel(
     var load by mutableStateOf<ShowdownReplaysLoad>(ShowdownReplaysLoad.Idle)
         private set
 
+    /** The replay played back in the viewer, null when none */
+    var viewedReplay by mutableStateOf<ShowdownReplaySummary?>(null)
+
+    /** The replay the user is asked to confirm the deletion of, from the viewer, null when not asked */
+    var replayToDelete by mutableStateOf<ShowdownReplaySummary?>(null)
+
+    /** Whether the games of a best-of-3 are grouped together, for the best-of-3 formats */
+    var groupBySeries by mutableStateOf(true)
+
     /** The saved replays the user is asked to confirm the deletion of, null when not asked */
     var replaysToDelete by mutableStateOf<List<ShowdownReplaySummary>?>(null)
         private set
@@ -203,6 +212,14 @@ class ShowdownReplaysViewModel(
         val formatId = formatId
         viewModelScope.launch {
             repository.delete(formatId, replays)
+            loadSaved()
+        }
+    }
+
+    /** Deletes one saved replay */
+    fun deleteReplay(replay: ShowdownReplaySummary) {
+        viewModelScope.launch {
+            repository.delete(replay.formatId, listOf(replay))
             loadSaved()
         }
     }

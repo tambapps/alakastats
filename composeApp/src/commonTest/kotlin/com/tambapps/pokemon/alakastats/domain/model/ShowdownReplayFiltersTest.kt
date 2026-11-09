@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.domain.model
 
 import com.tambapps.pokemon.PokemonName
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -30,6 +31,19 @@ class ShowdownReplayFiltersTest {
     )
 
     private fun names(vararg names: String) = names.map(::PokemonName)
+
+    @Test
+    fun theBroughtPokemonsHaveTheItemOfTheirTeamsOne() {
+        val player = ShowdownReplayPlayer(
+            name = UserName("Alaka"),
+            team = names("charizard", "whimsicott", "garchomp"),
+            items = listOf(com.tambapps.pokemon.ItemName("charizardite-y"), null, com.tambapps.pokemon.ItemName("focus-sash")),
+            brought = names("garchomp", "charizard", "whimsicott"),
+            beforeElo = null,
+            afterElo = null,
+        )
+        assertEquals(listOf("focus-sash", "charizardite-y", null), player.broughtItems.map { it?.value })
+    }
 
     @Test
     fun noFilterKeepsEverything() {
