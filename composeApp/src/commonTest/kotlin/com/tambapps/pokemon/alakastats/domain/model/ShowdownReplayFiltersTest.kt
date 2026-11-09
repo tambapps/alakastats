@@ -10,6 +10,7 @@ class ShowdownReplayFiltersTest {
     private fun player(name: String, team: List<String>, brought: List<String>) = ShowdownReplayPlayer(
         name = UserName(name),
         team = team.map(::PokemonName),
+        items = emptyList(),
         brought = brought.map(::PokemonName),
         beforeElo = null,
         afterElo = null,

@@ -91,6 +91,7 @@ internal fun ReplayAnalytics.toShowdownReplaySummary(id: String) = ShowdownRepla
         ShowdownReplayPlayer(
             name = player.name,
             team = player.teamPreview.pokemons.map { it.name },
+            items = player.teamPreviewItems,
             brought = player.selection,
             beforeElo = player.beforeElo,
             afterElo = player.afterElo,

@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.ui.composables
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.arrow_back
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -13,6 +14,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -60,28 +62,35 @@ val GameOutcome.displayName: String
 
 /**
  * @param letter what the card tells, the outcome's initial by default
+ * @param small to go along a line of text, e.g. before a player's name
  */
 @Composable
-fun GameOutcomeCard(output: GameOutcome, letter: Char = output.name[0]) {
+fun GameOutcomeCard(output: GameOutcome, letter: Char = output.name[0], small: Boolean = false) {
     val color = output.color
     val isCompact = LocalIsCompact.current
 
-    val (size, textSize) = if (isCompact) 42.dp to 22.sp else 52.dp to 30.sp
+    val (size, textSize) = when {
+        small -> 24.dp to 14.sp
+        isCompact -> 42.dp to 22.sp
+        else -> 52.dp to 30.sp
+    }
     Card(
         modifier = Modifier.size(size),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(if (small) 6.dp else 12.dp),
         colors = CardDefaults.cardColors(
             containerColor = color
         ),
     ) {
-        Text(
-            modifier = Modifier.padding(all = 8.dp).fillMaxSize(),
-            text = letter.toString(),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (isDarkThemeEnabled()) Color(0xFF222222) else Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = textSize
-        )
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                modifier = if (small) Modifier else Modifier.padding(all = 8.dp).fillMaxSize(),
+                text = letter.toString(),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (isDarkThemeEnabled()) Color(0xFF222222) else Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = textSize
+            )
+        }
     }
 }

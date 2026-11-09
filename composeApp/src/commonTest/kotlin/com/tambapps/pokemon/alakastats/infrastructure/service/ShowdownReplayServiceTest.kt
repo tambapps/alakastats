@@ -9,6 +9,7 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -78,6 +79,40 @@ class ShowdownReplayServiceTest {
     fun thePrivateReplaysAreLeftOut() = runTest {
         val replays = serviceListing(4, isPrivate = { it % 2 == 0 }).list("gen9vgc", since = 0)
         assertEquals(listOf("gen9vgc-1", "gen9vgc-3"), replays.map { it.id })
+    }
+
+    @Test
+    fun aSummaryKeepsTheTeamsTheirKnownItemsAndWhatWasBrought() = runTest {
+        val log = """
+            |player|p1|me|
+            |player|p2|opponent|
+            |poke|p1|Charizard, L50|
+            |poke|p1|Pikachu, L50|
+            |poke|p2|Garchomp, L50|
+            |switch|p1a: Charizard|Charizard, L50|100/100
+            |switch|p2a: Garchomp|Garchomp, L50|100/100
+            |-mega|p1a: Charizard|Charizard|Charizardite Y
+            |win|me
+        """.trimIndent()
+        val client = HttpClient(MockEngine {
+            val body = """{"formatid":"gen9championsvgc2026regmc","players":["me","opponent"],"uploadtime":1794259449,""" +
+                """"rating":1600,"log":${JsonPrimitive(log)}}"""
+            respond(body, headers = headersOf(HttpHeaders.ContentType, "application/json"))
+        }) {
+            install(ContentNegotiation) { json(json) }
+        }
+        val summary = ShowdownReplayService(client, ReplayAnalyticsService(client))
+            .fetchSummary("gen9championsvgc2026regmc-1").getOrNull()!!
+
+        assertEquals("gen9championsvgc2026regmc-1", summary.id)
+        assertEquals(1600, summary.rating)
+        assertEquals("me", summary.winner?.value)
+        val (me, opponent) = summary.players
+        assertEquals(listOf("charizard", "pikachu"), me.team.map { it.value })
+        // the Mega Stone, for the Mega Evolution to show
+        assertEquals(listOf("charizardite-y", null), me.items.map { it?.value })
+        assertEquals(listOf("charizard"), me.brought.map { it.value })
+        assertEquals(listOf<String?>(null), opponent.items.map { it?.value })
     }
 
     @Test

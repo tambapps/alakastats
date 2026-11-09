@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository
 
+import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.BestOf
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayPlayer
@@ -35,8 +36,8 @@ class KStoreShowdownReplayRepositoryTest {
         rating = rating,
         winner = UserName("Alaka"),
         players = listOf(
-            ShowdownReplayPlayer(UserName("Alaka"), listOf(PokemonName("whimsicott")), listOf(PokemonName("whimsicott")), 1500, 1520),
-            ShowdownReplayPlayer(UserName("Opponent"), listOf(PokemonName("pelipper")), emptyList(), null, null),
+            ShowdownReplayPlayer(UserName("Alaka"), listOf(PokemonName("whimsicott"), PokemonName("garchomp")), listOf(ItemName("focus-sash"), null), listOf(PokemonName("whimsicott")), 1500, 1520),
+            ShowdownReplayPlayer(UserName("Opponent"), listOf(PokemonName("pelipper")), emptyList(), emptyList(), null, null),
         ),
         bestOf = BestOf(1, 3, "series"),
     )

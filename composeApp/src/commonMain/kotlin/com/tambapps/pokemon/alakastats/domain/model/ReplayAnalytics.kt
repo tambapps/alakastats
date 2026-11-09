@@ -258,6 +258,16 @@ data class Player(
 
     val teamPokemonNames get() = ots?.pokemons?.map { it.name } ?: teamPreview.pokemons.map { it.name }
 
+    /**
+     * The item of each Pokémon of the team preview, in its order, when known: from the OTS, or the Mega Stone of the
+     * Pokémon that Mega Evolved
+     */
+    val teamPreviewItems: List<ItemName?>
+        get() = teamPreview.pokemons.map { (name) ->
+            ots?.pokemons?.find { it.name.baseMatches(name) }?.item
+                ?: megaEvolution?.takeIf { it.pokemon.baseMatches(name) }?.item
+        }
+
     fun hasSelected(pokemonName: PokemonName) = selection.any { pokemonName.baseMatches(it) }
 
     fun hasTerastallized(pokemonName: PokemonName) = terastallization?.pokemon?.baseMatches(pokemonName) == true

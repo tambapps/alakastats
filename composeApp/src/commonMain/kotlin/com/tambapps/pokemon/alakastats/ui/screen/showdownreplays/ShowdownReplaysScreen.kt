@@ -38,10 +38,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayPlayer
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplaySummary
+import com.tambapps.pokemon.alakastats.domain.model.GameOutcome
 import com.tambapps.pokemon.alakastats.ui.composables.FormatSelector
+import com.tambapps.pokemon.alakastats.ui.composables.GameOutcomeCard
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.model.formatReplayDate
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -221,13 +224,13 @@ private fun ShowdownReplayCard(replay: ShowdownReplaySummary, modifier: Modifier
                 modifier = Modifier.alpha(0.8f),
             )
             if (LocalIsCompact.current) {
-                for (player in replay.players) {
-                    ShowdownReplayPlayerRow(replay, player, Modifier.fillMaxWidth())
+                replay.players.forEachIndexed { index, player ->
+                    ShowdownReplayPlayerRow(replay, player, facingDirectionOf(index), Modifier.fillMaxWidth())
                 }
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    for (player in replay.players) {
-                        ShowdownReplayPlayerRow(replay, player, Modifier.weight(1f))
+                    replay.players.forEachIndexed { index, player ->
+                        ShowdownReplayPlayerRow(replay, player, facingDirectionOf(index), Modifier.weight(1f))
                     }
                 }
             }
@@ -235,19 +238,33 @@ private fun ShowdownReplayCard(replay: ShowdownReplaySummary, modifier: Modifier
     }
 }
 
+// the players' teams face each other, the first one being on the left
+private fun facingDirectionOf(playerIndex: Int) = if (playerIndex == 0) FacingDirection.RIGHT else FacingDirection.LEFT
+
 @Composable
-private fun ShowdownReplayPlayerRow(replay: ShowdownReplaySummary, player: ShowdownReplayPlayer, modifier: Modifier = Modifier) {
+private fun ShowdownReplayPlayerRow(
+    replay: ShowdownReplaySummary,
+    player: ShowdownReplayPlayer,
+    facingDirection: FacingDirection,
+    modifier: Modifier = Modifier,
+) {
     val hasWon = replay.winner?.matches(player.name) == true
     Column(modifier) {
-        Text(
-            buildString {
-                append(player.name.value)
-                player.beforeElo?.let { append(" ($it)") }
-                if (hasWon) append(" · Winner")
-            },
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = if (hasWon) FontWeight.Bold else FontWeight.Normal,
-        )
-        PokemonTeamPreview(player.team, fillWidth = true)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (hasWon) {
+                GameOutcomeCard(GameOutcome.WIN, small = true)
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(
+                buildString {
+                    append(player.name.value)
+                    player.beforeElo?.let { append(" ($it)") }
+                },
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = if (hasWon) FontWeight.Bold else FontWeight.Normal,
+            )
+        }
+        // with, on desktop, their items, and the Mega Evolutions' sprites
+        PokemonTeamPreview(player.team, player.items, fillWidth = true, facingDirection = facingDirection)
     }
 }

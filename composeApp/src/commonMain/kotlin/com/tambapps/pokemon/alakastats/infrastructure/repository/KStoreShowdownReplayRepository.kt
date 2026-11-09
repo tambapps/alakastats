@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository
 
+import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.BestOf
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayPlayer
@@ -61,6 +62,7 @@ private fun ShowdownReplaySummaryEntity.toDomain(formatId: String) = ShowdownRep
         ShowdownReplayPlayer(
             name = UserName(player.name),
             team = player.team.map(::PokemonName),
+            items = player.items.map { it?.let(::ItemName) },
             brought = player.brought.map(::PokemonName),
             beforeElo = player.beforeElo,
             afterElo = player.afterElo,
@@ -78,6 +80,7 @@ private fun ShowdownReplaySummary.toEntity() = ShowdownReplaySummaryEntity(
         ShowdownReplayPlayerEntity(
             name = player.name.value,
             team = player.team.map { it.value },
+            items = player.items.map { it?.value },
             brought = player.brought.map { it.value },
             beforeElo = player.beforeElo,
             afterElo = player.afterElo,

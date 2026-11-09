@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.domain.model
 
+import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.PokemonName
 
 /**
@@ -27,11 +28,14 @@ const val SHOWDOWN_REPLAYS_URL = "https://replay.pokemonshowdown.com"
 
 /**
  * @param team the 6 Pokémon of the team preview
+ * @param items the item of each Pokémon of the team, in its order, when known: from the open team sheet, or the Mega
+ * Stone of the Pokémon that Mega Evolved
  * @param brought the Pokémon that went on the field, in the order they did: the first 2 are the lead
  */
 data class ShowdownReplayPlayer(
     val name: UserName,
     val team: List<PokemonName>,
+    val items: List<ItemName?>,
     val brought: List<PokemonName>,
     val beforeElo: Int?,
     val afterElo: Int?,

@@ -34,12 +34,7 @@ fun PokemonTeamPreview(
     facingDirection: FacingDirection = FacingDirection.LEFT,
     ) {
     val names = player.teamPreview.pokemons.map { it.name }
-    val items = remember(player) {
-        names.map { name ->
-            player.ots?.pokemons?.find { it.name.baseMatches(name) }?.item
-                ?: player.megaEvolution?.takeIf { it.pokemon.baseMatches(name) }?.item
-        }
-    }
+    val items = remember(player) { player.teamPreviewItems }
     PokemonTeamPreview(names, items, modifier, fillWidth, facingDirection)
 }
 

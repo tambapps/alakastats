@@ -19,6 +19,8 @@ data class ShowdownReplaySummaryEntity(
 data class ShowdownReplayPlayerEntity(
     val name: String,
     val team: List<String>,
+    // in the team's order, null when not known
+    val items: List<String?> = emptyList(),
     val brought: List<String>,
     val beforeElo: Int? = null,
     val afterElo: Int? = null,
