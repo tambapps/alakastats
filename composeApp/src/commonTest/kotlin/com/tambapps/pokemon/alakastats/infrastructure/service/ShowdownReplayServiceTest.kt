@@ -116,6 +116,23 @@ class ShowdownReplayServiceTest {
     }
 
     @Test
+    fun theListingStopsAsSoonAsThereAreMoreNewReplaysThanTheMaximum() = runTest {
+        val urls = mutableListOf<String>()
+        val replays = serviceListing(500, requestedUrls = urls).list("gen9vgc", since = 0, maxNew = 60)
+        // one more than the maximum, telling there are too many
+        assertEquals(61, replays.size)
+        assertEquals(2, urls.size)
+    }
+
+    @Test
+    fun theSavedReplaysDontCountInTheMaximum() = runTest {
+        val saved = (0 until 30).map { "gen9vgc-$it" }.toSet()
+        val replays = serviceListing(80).list("gen9vgc", since = 0, savedIds = saved, maxNew = 50)
+        // the 30 saved ones and the 50 others, no more than the maximum
+        assertEquals(80, replays.size)
+    }
+
+    @Test
     fun theProgressTellsHowManyReplaysWereKept() = runTest {
         val progress = mutableListOf<Int>()
         serviceListing(120).list("gen9vgc", since = 0) { progress.add(it) }

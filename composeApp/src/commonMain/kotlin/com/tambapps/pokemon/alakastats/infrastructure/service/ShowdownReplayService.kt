@@ -16,8 +16,8 @@ import kotlinx.serialization.Serializable
 // Showdown gives one more than a page holds when there are more
 private const val PAGE_SIZE = 50
 
-// a guard against a never ending listing: about 50 000 replays
-private const val MAX_PAGES = 1_000
+// a guard against a never ending listing: about 150 000 replays, beyond 30 days of the busiest formats
+private const val MAX_PAGES = 3_000
 
 /**
  * A public replay, as listed by Showdown's search
@@ -48,15 +48,20 @@ class ShowdownReplayService(
      *
      * @param since in seconds since the epoch
      * @param minRating the battle's minimum rating: the replays without one are left out
+     * @param savedIds the replays already saved, listed but not counted in [maxNew]
+     * @param maxNew the listing stops as soon as it has more replays not saved yet, null for no limit
      * @param onProgress called after each page, with how many replays were kept so far
      */
     suspend fun list(
         formatId: String,
         since: Long,
         minRating: Int? = null,
+        savedIds: Set<String> = emptySet(),
+        maxNew: Int? = null,
         onProgress: (Int) -> Unit = {},
     ): List<ShowdownReplayListing> {
         val replays = LinkedHashMap<String, ShowdownReplayListing>()
+        var newCount = 0
         var before: Long? = null
         for (pageIndex in 0 until MAX_PAGES) {
             val page = httpClient.get("$SHOWDOWN_REPLAYS_URL/search.json") {
@@ -67,7 +72,10 @@ class ShowdownReplayService(
                 if (replay.uploadTime < since) return replays.values.toList().also { onProgress(it.size) }
                 val kept = replay.private == 0 && (minRating == null || (replay.rating ?: 0) >= minRating)
                 // a page starts where the previous one ended: the replays uploaded the same second may come again
-                if (kept) replays[replay.id] = replay
+                if (kept && replays.put(replay.id, replay) == null && replay.id !in savedIds) {
+                    newCount++
+                    if (maxNew != null && newCount > maxNew) return replays.values.toList().also { onProgress(it.size) }
+                }
             }
             onProgress(replays.size)
             if (page.size <= PAGE_SIZE) break

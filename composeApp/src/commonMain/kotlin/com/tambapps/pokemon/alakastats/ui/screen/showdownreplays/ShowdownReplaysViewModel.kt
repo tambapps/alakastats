@@ -25,7 +25,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlin.time.Clock
 
-val SHOWDOWN_REPLAYS_PERIODS = listOf(1, 3, 7)
+val SHOWDOWN_REPLAYS_PERIODS = listOf(1, 3, 7, 14, 30)
 
 // replays saved each time this many are fetched: what was fetched before a cancellation or an error is kept
 private const val SAVE_BATCH_SIZE = 50
@@ -34,6 +34,12 @@ private const val SAVE_BATCH_SIZE = 50
 private const val PARALLEL_REQUESTS = 4
 
 private const val SECONDS_PER_DAY = 86_400L
+
+/**
+ * The most replays a load downloads: beyond it, the download is too long, and the filters, working on all the saved
+ * replays in memory, too slow
+ */
+const val MAX_REPLAYS_PER_LOAD = 10_000
 
 /**
  * Where the loading of a format's public replays is at
@@ -56,6 +62,9 @@ sealed interface ShowdownReplaysLoad {
     data class Done(val saved: Int, val failed: Int) : ShowdownReplaysLoad
 
     data class Failed(val message: String) : ShowdownReplaysLoad
+
+    /** More than [MAX_REPLAYS_PER_LOAD] replays to download: the user has to narrow the load */
+    data object TooMany : ShowdownReplaysLoad
 }
 
 class ShowdownReplaysViewModel(
@@ -155,10 +164,14 @@ class ShowdownReplaysViewModel(
         load = ShowdownReplaysLoad.Listing(0)
         loadJob = viewModelScope.launch {
             load = try {
-                val listed = service.list(formatId, since, minRating) { load = ShowdownReplaysLoad.Listing(it) }
                 val savedIds = repository.list(formatId).mapTo(mutableSetOf()) { it.id }
+                // stopped as soon as there are too many, not to list them all for nothing
+                val listed = service.list(formatId, since, minRating, savedIds, maxNew = MAX_REPLAYS_PER_LOAD) {
+                    load = ShowdownReplaysLoad.Listing(it)
+                }
                 val toDownload = listed.filter { it.id !in savedIds }
-                ShowdownReplaysLoad.Listed(toDownload, alreadySaved = listed.size - toDownload.size)
+                if (toDownload.size > MAX_REPLAYS_PER_LOAD) ShowdownReplaysLoad.TooMany
+                else ShowdownReplaysLoad.Listed(toDownload, alreadySaved = listed.size - toDownload.size)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -237,6 +250,12 @@ class ShowdownReplaysViewModel(
 
     fun dismissDeletion() {
         replaysToDelete = null
+    }
+
+    /** Back to the load dialog, to choose a shorter period or a higher minimum Elo */
+    fun narrowLoad() {
+        load = ShowdownReplaysLoad.Idle
+        showLoadDialog = true
     }
 
     fun dismissResult() {

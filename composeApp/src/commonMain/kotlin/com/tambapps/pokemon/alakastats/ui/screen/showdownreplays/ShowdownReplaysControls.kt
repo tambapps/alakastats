@@ -54,6 +54,9 @@ import org.jetbrains.compose.resources.painterResource
 private const val TEAM_FILTER_MAX = 6
 private const val SELECTION_FILTER_MAX = 4
 
+/** E.g. 10,000 */
+private fun formatCount(count: Int) = count.toString().reversed().chunked(3).joinToString(",").reversed()
+
 /** E.g. "Regulation M-C Bo3" */
 private val ShowdownReplaysViewModel.formatLabel get() = format.displayedName + if (bestOf3) " Bo3" else " Bo1"
 
@@ -96,7 +99,7 @@ internal fun ShowdownReplaysToolbar(viewModel: ShowdownReplaysViewModel, modifie
 @Composable
 private fun LoadStatus(viewModel: ShowdownReplaysViewModel) {
     when (val load = viewModel.load) {
-        ShowdownReplaysLoad.Idle, is ShowdownReplaysLoad.Listed -> Unit
+        ShowdownReplaysLoad.Idle, is ShowdownReplaysLoad.Listed, ShowdownReplaysLoad.TooMany -> Unit
         is ShowdownReplaysLoad.Listing -> Row(verticalAlignment = Alignment.CenterVertically) {
             CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
             Spacer(Modifier.width(12.dp))
@@ -179,7 +182,8 @@ internal fun LoadDialog(viewModel: ShowdownReplaysViewModel) {
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
                 Text(
-                    "You'll see how many there are before they're downloaded. Those already saved are skipped",
+                    "You'll see how many there are before they're downloaded, up to ${formatCount(MAX_REPLAYS_PER_LOAD)} " +
+                        "at once. Those already saved are skipped",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -191,6 +195,21 @@ internal fun LoadDialog(viewModel: ShowdownReplaysViewModel) {
 
 @Composable
 internal fun LoadConfirmationDialog(viewModel: ShowdownReplaysViewModel) {
+    if (viewModel.load == ShowdownReplaysLoad.TooMany) {
+        AlertDialog(
+            onDismissRequest = viewModel::dismissResult,
+            title = { Text("Too many replays") },
+            text = {
+                Text(
+                    "There are more than ${formatCount(MAX_REPLAYS_PER_LOAD)} new replays in this period, more than a " +
+                        "load can download. Choose a shorter period or a minimum Elo."
+                )
+            },
+            confirmButton = { TextButton(onClick = viewModel::narrowLoad) { Text("Change") } },
+            dismissButton = { TextButton(onClick = viewModel::dismissResult) { Text("Cancel") } },
+        )
+        return
+    }
     val listed = viewModel.load as? ShowdownReplaysLoad.Listed ?: return
     val count = listed.toDownload.size
     val skipped = if (listed.alreadySaved > 0) " ${listed.alreadySaved} already saved are skipped." else ""
