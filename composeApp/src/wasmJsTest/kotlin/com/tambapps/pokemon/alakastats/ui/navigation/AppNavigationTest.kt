@@ -366,6 +366,20 @@ class AppNavigationTest {
     }
 
     @Test
+    fun aboutOpensFromTheDrawerAboveTheCurrentPart() = runComposeUiTest {
+        val backStack = NavBackStack<NavKey>(AppRoute.Home, AppRoute.Quizzes)
+        setContent {
+            WithAppNavigationDrawer(backStack, AppNavigator(backStack)) {}
+        }
+        onNode(hasContentDescription("Menu")).performClick()
+        waitForIdle()
+        onNodeWithText("About").performClick()
+        waitForIdle()
+        // its back button goes back to the part it was opened from
+        assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.Quizzes, AppRoute.About), backStack.toList())
+    }
+
+    @Test
     fun onMobileTheDrawerIsClosedUntilTheMenuButtonOpensIt() = drawerIsClosedUntilTheMenuButtonOpensIt(isCompact = true)
 
     @Test

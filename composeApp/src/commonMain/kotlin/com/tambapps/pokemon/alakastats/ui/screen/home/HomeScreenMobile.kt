@@ -54,11 +54,8 @@ internal fun HomeScreenMobile(viewModel: HomeViewModel) {
                     modifier = Modifier.size(80.dp).align(Alignment.Center),
                     contentScale = ContentScale.Fit
                 )
-                // the start is the navigation's menu button
-                Column(Modifier.align(Alignment.TopEnd), horizontalAlignment = Alignment.End) {
-                    CloudSyncButton()
-                    AboutButton()
-                }
+                // the start is the navigation's menu button, About is in its menu
+                CloudSyncButton(Modifier.align(Alignment.TopEnd))
             }
             SyncReconnectionWarning(viewModel, Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp))
             Text("Alakastats", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)

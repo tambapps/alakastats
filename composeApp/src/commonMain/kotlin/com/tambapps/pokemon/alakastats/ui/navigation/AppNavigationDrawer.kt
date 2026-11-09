@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.navigation
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.calculate
 import alakastats.composeapp.generated.resources.group
+import alakastats.composeapp.generated.resources.info
 import alakastats.composeapp.generated.resources.menu
 import alakastats.composeapp.generated.resources.play_arrow
 import alakastats.composeapp.generated.resources.pokedex
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -98,6 +100,18 @@ internal fun WithAppNavigationDrawer(backStack: List<NavKey>, navigator: AppNavi
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                     )
                 }
+                HorizontalDivider(Modifier.padding(horizontal = 28.dp, vertical = 8.dp))
+                // not a part of the app: opened above the current one, its back button going back to it
+                NavigationDrawerItem(
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navigator.push(AppRoute.About)
+                    },
+                    icon = { Icon(painter = painterResource(Res.drawable.info), contentDescription = null, modifier = Modifier.size(24.dp)) },
+                    label = { Text("About") },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                )
             }
         },
     ) {

@@ -53,8 +53,8 @@ internal fun HomeScreenDesktop(viewModel: HomeViewModel) {
             Spacer(Modifier.weight(1f))
             AlakastatsLabel()
             Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
+                // About is in the navigation's menu
                 CloudSyncButton()
-                AboutButton()
             }
         }
         CatchPhrase()

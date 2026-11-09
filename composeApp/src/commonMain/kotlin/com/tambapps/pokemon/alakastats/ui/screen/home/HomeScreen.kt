@@ -465,14 +465,6 @@ private fun ImportChoice(title: String, description: String, onClick: () -> Unit
     }
 }
 
-@Composable
-internal fun AboutButton(modifier: Modifier = Modifier) {
-    val navigator = LocalAppNavigator.current
-    TextButton(onClick = { navigator.push(AppRoute.About) }, modifier = modifier) {
-        Text("About", style = buttonTextStyle)
-    }
-}
-
 private const val PRIVACY_POLICY_URL = "https://alakastats.com/privacy.html"
 
 /**
