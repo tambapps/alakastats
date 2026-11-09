@@ -4,15 +4,18 @@ import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.BestOf
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayPlayer
+import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayStorage
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplaySummary
 import com.tambapps.pokemon.alakastats.domain.model.UserName
 import com.tambapps.pokemon.alakastats.domain.repository.ShowdownReplayRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.BestOfEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ShowdownReplayPlayerEntity
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.entity.ShowdownReplaySummaryEntity
+import io.github.xxfast.kstore.DefaultJson
 import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.extensions.getOrEmpty
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.coroutines.sync.withLock
 
 private const val SECONDS_PER_DAY = 86_400L
@@ -68,7 +71,29 @@ class KStoreShowdownReplayRepository(
             daysStore(formatId).update { days -> days.orEmpty() - emptiedDays }
         }
     }
+
+    override suspend fun deleteAll(formatId: String) = mutex.withLock {
+        val daysStore = daysStore(formatId)
+        for (day in daysStore.getOrEmpty()) {
+            dayStore(formatId, day).delete()
+        }
+        daysStore.delete()
+    }
+
+    override suspend fun storage(formatId: String): ShowdownReplayStorage = mutex.withLock {
+        var count = 0
+        var bytes = 0L
+        for (day in daysStore(formatId).getOrEmpty()) {
+            val replays = dayStore(formatId, day).getOrEmpty()
+            count += replays.size
+            // the stores save their value as JSON
+            bytes += DefaultJson.encodeToString(DAY_SERIALIZER, replays).encodeToByteArray().size
+        }
+        ShowdownReplayStorage(count, bytes)
+    }
 }
+
+private val DAY_SERIALIZER = ListSerializer(ShowdownReplaySummaryEntity.serializer())
 
 private fun ShowdownReplaySummaryEntity.toDomain(formatId: String) = ShowdownReplaySummary(
     id = id,

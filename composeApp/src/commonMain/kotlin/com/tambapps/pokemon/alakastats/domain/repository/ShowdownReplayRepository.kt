@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.domain.repository
 
+import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayStorage
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplaySummary
 
 /**
@@ -15,4 +16,10 @@ interface ShowdownReplayRepository {
 
     /** Deletes saved replays of the format */
     suspend fun delete(formatId: String, replays: List<ShowdownReplaySummary>)
+
+    /** Deletes all the saved replays of the format */
+    suspend fun deleteAll(formatId: String)
+
+    /** How many replays of the format are saved, and the room they take */
+    suspend fun storage(formatId: String): ShowdownReplayStorage
 }

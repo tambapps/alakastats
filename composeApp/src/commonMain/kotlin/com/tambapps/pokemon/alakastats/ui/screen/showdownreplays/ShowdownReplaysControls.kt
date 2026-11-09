@@ -91,6 +91,7 @@ internal fun ShowdownReplaysToolbar(viewModel: ShowdownReplaysViewModel, modifie
             IconButton(onClick = viewModel::askDeletion, enabled = enabled && viewModel.shownReplays.isNotEmpty()) {
                 Icon(painterResource(Res.drawable.delete), contentDescription = "Delete the replays shown")
             }
+            TextButton(onClick = viewModel::showStorage) { Text("Storage") }
         }
         LoadStatus(viewModel)
     }
@@ -234,6 +235,96 @@ internal fun LoadConfirmationDialog(viewModel: ShowdownReplaysViewModel) {
         confirmButton = { TextButton(onClick = viewModel::download) { Text("Download") } },
         dismissButton = { TextButton(onClick = viewModel::cancel) { Text("Cancel") } },
     )
+}
+
+/** E.g. 1.2 MB */
+private fun formatBytes(bytes: Long): String = when {
+    bytes < 1_000 -> "$bytes B"
+    bytes < 1_000_000 -> "${bytes / 1_000} KB"
+    else -> {
+        // one decimal
+        val tenths = (bytes + 50_000) / 100_000
+        "${tenths / 10}.${tenths % 10} MB"
+    }
+}
+
+/**
+ * The saved replays of each format and the room they take, each format's being deletable. A deletion is confirmed in
+ * its row: a dialog opened from this one would be behind it
+ */
+@Composable
+internal fun StorageDialog(viewModel: ShowdownReplaysViewModel) {
+    val formatsStorage = viewModel.storage ?: return
+    var toDelete by remember { mutableStateOf<ShowdownReplaysFormatStorage?>(null) }
+    AlertDialog(
+        onDismissRequest = viewModel::dismissStorage,
+        title = { Text("Saved replays") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                when {
+                    viewModel.isComputingStorage && formatsStorage.isEmpty() -> Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(12.dp))
+                        Text("Computing…")
+                    }
+                    formatsStorage.isEmpty() -> Text("No replay saved on this device")
+                    else -> {
+                        for (formatStorage in formatsStorage) {
+                            StorageRow(
+                                formatStorage = formatStorage,
+                                confirming = toDelete == formatStorage,
+                                enabled = !viewModel.isBusy,
+                                onDelete = { toDelete = formatStorage },
+                                onConfirm = {
+                                    toDelete = null
+                                    viewModel.deleteFormat(formatStorage)
+                                },
+                                onCancel = { toDelete = null },
+                            )
+                        }
+                        val total = formatsStorage.fold(0 to 0L) { (count, bytes), it -> count + it.storage.count to bytes + it.storage.bytes }
+                        Text(
+                            "Total: ${formatCount(total.first)} replays · ${formatBytes(total.second)}",
+                            style = MaterialTheme.typography.titleSmall,
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = viewModel::dismissStorage) { Text("Close") } },
+    )
+}
+
+@Composable
+private fun StorageRow(
+    formatStorage: ShowdownReplaysFormatStorage,
+    confirming: Boolean,
+    enabled: Boolean,
+    onDelete: () -> Unit,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    val label = formatStorage.format.displayedName + if (formatStorage.bestOf3) " Bo3" else " Bo1"
+    val storage = formatStorage.storage
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                if (confirming) "Delete its ${formatCount(storage.count)} replays?"
+                else "${formatCount(storage.count)} replays · ${formatBytes(storage.bytes)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (confirming) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (confirming) {
+            TextButton(onClick = onCancel) { Text("Cancel") }
+            TextButton(onClick = onConfirm) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+        } else {
+            IconButton(onClick = onDelete, enabled = enabled) {
+                Icon(painterResource(Res.drawable.delete), contentDescription = "Delete the replays of $label")
+            }
+        }
+    }
 }
 
 /** Deletes the replays shown: all the saved ones of the format, or those the filters keep */

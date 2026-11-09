@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayFilters
+import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayStorage
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplaySummary
 import com.tambapps.pokemon.alakastats.domain.repository.ShowdownReplayRepository
 import com.tambapps.pokemon.alakastats.infrastructure.service.ShowdownReplayListing
@@ -67,6 +68,16 @@ sealed interface ShowdownReplaysLoad {
     data object TooMany : ShowdownReplaysLoad
 }
 
+/**
+ * The saved replays of a format and best-of
+ */
+data class ShowdownReplaysFormatStorage(
+    val format: Format,
+    val bestOf3: Boolean,
+    val formatId: String,
+    val storage: ShowdownReplayStorage,
+)
+
 class ShowdownReplaysViewModel(
     private val service: ShowdownReplayService,
     private val repository: ShowdownReplayRepository,
@@ -83,6 +94,14 @@ class ShowdownReplaysViewModel(
     var days by mutableIntStateOf(SHOWDOWN_REPLAYS_PERIODS.first())
     /** The minimum Elo of the replays to load, empty for no minimum */
     var minRatingText by mutableStateOf("")
+
+    /**
+     * The saved replays of each format, shown in the storage dialog, null when it's closed. Empty while being computed
+     */
+    var storage by mutableStateOf<List<ShowdownReplaysFormatStorage>?>(null)
+        private set
+    var isComputingStorage by mutableStateOf(false)
+        private set
 
     /** Whether the dialog choosing what to load is shown */
     var showLoadDialog by mutableStateOf(false)
@@ -245,6 +264,41 @@ class ShowdownReplaysViewModel(
         viewModelScope.launch {
             repository.delete(replay.formatId, listOf(replay))
             loadSaved()
+        }
+    }
+
+    /** Opens the storage dialog, with the room each format's replays take */
+    fun showStorage() {
+        storage = emptyList()
+        computeStorage()
+    }
+
+    private fun computeStorage() {
+        isComputingStorage = true
+        viewModelScope.launch {
+            val formatsStorage = formats.flatMap { format ->
+                listOf(false, true).map { bestOf3 ->
+                    val formatId = if (bestOf3) format.showdownBo3Id!! else format.showdownId!!
+                    ShowdownReplaysFormatStorage(format, bestOf3, formatId, repository.storage(formatId))
+                }
+            }.filter { it.storage.count > 0 }
+            // unless closed meanwhile
+            if (storage != null) storage = formatsStorage
+            isComputingStorage = false
+        }
+    }
+
+    fun dismissStorage() {
+        storage = null
+    }
+
+    /** Deletes all the saved replays of a format */
+    fun deleteFormat(formatStorage: ShowdownReplaysFormatStorage) {
+        if (isBusy) return
+        viewModelScope.launch {
+            repository.deleteAll(formatStorage.formatId)
+            if (formatStorage.formatId == formatId) loadSaved()
+            computeStorage()
         }
     }
 

@@ -12,6 +12,7 @@ import io.github.xxfast.kstore.storeOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class KStoreShowdownReplayRepositoryTest {
 
@@ -84,6 +85,27 @@ class KStoreShowdownReplayRepositoryTest {
         assertEquals(listOf(0L), daysCodecs.getValue("gen9vgc").value)
         assertEquals(null, dayCodecs.getValue("gen9vgc" to 1L).value)
         assertEquals(listOf("a"), repository.list("gen9vgc").map { it.id })
+    }
+
+    @Test
+    fun theStorageTellsHowManyReplaysAreSavedAndTheirSize() = runTest {
+        assertEquals(0, repository.storage("gen9vgc").count)
+        assertEquals(0L, repository.storage("gen9vgc").bytes)
+        repository.save("gen9vgc", listOf(replay("a", 100), replay("b", 86_400 + 5)))
+        val storage = repository.storage("gen9vgc")
+        assertEquals(2, storage.count)
+        assertTrue(storage.bytes > 0)
+    }
+
+    @Test
+    fun deletingAFormatDeletesAllItsDays() = runTest {
+        repository.save("gen9vgc", listOf(replay("a", 100), replay("b", 86_400 + 5)))
+        repository.save("gen9vgcbo3", listOf(replay("c", 100)))
+        repository.deleteAll("gen9vgc")
+        assertEquals(emptyList(), repository.list("gen9vgc"))
+        assertEquals(null, daysCodecs.getValue("gen9vgc").value)
+        assertEquals(null, dayCodecs.getValue("gen9vgc" to 0L).value)
+        assertEquals(listOf("c"), repository.list("gen9vgcbo3").map { it.id })
     }
 
     @Test

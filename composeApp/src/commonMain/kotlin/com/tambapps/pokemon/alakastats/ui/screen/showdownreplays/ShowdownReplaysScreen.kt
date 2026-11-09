@@ -87,6 +87,7 @@ fun ShowdownReplaysScreen() {
         }
     }
     LoadDialog(viewModel)
+    StorageDialog(viewModel)
     LoadConfirmationDialog(viewModel)
     DeletionConfirmationDialog(viewModel)
     viewModel.viewedReplay?.let { replay -> ShowdownReplayViewer(viewModel, replay) }

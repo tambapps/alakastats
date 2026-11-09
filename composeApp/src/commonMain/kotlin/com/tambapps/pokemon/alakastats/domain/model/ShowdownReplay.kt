@@ -28,6 +28,13 @@ data class ShowdownReplaySummary(
 const val SHOWDOWN_REPLAYS_URL = "https://replay.pokemonshowdown.com"
 
 /**
+ * The saved replays of a format
+ *
+ * @param bytes the room they take, as saved
+ */
+data class ShowdownReplayStorage(val count: Int, val bytes: Long)
+
+/**
  * @param team the 6 Pokémon of the team preview
  * @param items the item of each Pokémon of the team, in its order, when known: from the open team sheet, or the Mega
  * Stone of the Pokémon that Mega Evolved
