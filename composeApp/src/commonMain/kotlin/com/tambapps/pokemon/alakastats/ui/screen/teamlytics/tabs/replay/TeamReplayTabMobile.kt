@@ -1,5 +1,19 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.mega
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.alpha
+import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.TeraType
+import com.tambapps.pokemon.alakastats.ui.composables.Tooltip
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
+import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
+import com.tambapps.pokemon.alakastats.ui.service.TeraTypeImage
+import com.tambapps.pokemon.alakastats.util.titlecase
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -202,17 +216,59 @@ private fun MobilePlayer(modifier: Modifier, player: Player, playerName: String,
         PlayerNameEloText(player, playerName)
         Spacer(Modifier.height(8.dp))
 
-        for (pokemon in player.selection) {
-            val teraType = player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
-            val megaPokemon = player.megaEvolution
-                ?.takeIf { it.pokemon.baseMatches(pokemon) }
-                ?.let { it.pokemon.toMega(it.item) }
-            SelectedPokemon(
-                pokemon = pokemon,
-                teraType = teraType,
-                isYouPlayer = isYouPlayer,
-                megaPokemon = megaPokemon
-            )
+        // 2 by 2, the lead first: the artworks of the desktop would take a whole screen
+        player.selection.chunked(SELECTION_COLUMNS).forEachIndexed { index, line ->
+            if (index == 0) {
+                Text("Lead", style = MaterialTheme.typography.labelMedium, modifier = Modifier.alpha(0.7f))
+            } else {
+                Spacer(Modifier.height(4.dp))
+            }
+            Row {
+                for (pokemon in line) {
+                    val teraType = player.terastallization?.takeIf { it.pokemon.matches(pokemon) }?.type
+                    val megaPokemon = player.megaEvolution
+                        ?.takeIf { it.pokemon.baseMatches(pokemon) }
+                        ?.let { it.pokemon.toMega(it.item) }
+                    CompactSelectedPokemon(
+                        pokemon = pokemon,
+                        megaPokemon = megaPokemon,
+                        teraType = teraType,
+                        isYouPlayer = isYouPlayer,
+                    )
+                }
+            }
+        }
+    }
+}
+
+private const val SELECTION_COLUMNS = 2
+private val SELECTION_SPRITE_SIZE = 64.dp
+private val SELECTION_BADGE_SIZE = 22.dp
+
+/**
+ * A brought Pokémon as a sprite, its Mega Evolution's when it Mega Evolved, with a small badge telling it or its Tera
+ * type
+ */
+@Composable
+private fun CompactSelectedPokemon(
+    pokemon: PokemonName,
+    megaPokemon: PokemonName?,
+    teraType: TeraType?,
+    isYouPlayer: Boolean,
+) {
+    Box(Modifier.size(SELECTION_SPRITE_SIZE)) {
+        PokemonSprite(
+            megaPokemon ?: pokemon,
+            modifier = Modifier.fillMaxSize(),
+            facingDirection = if (isYouPlayer) FacingDirection.RIGHT else FacingDirection.LEFT,
+        )
+        val badgeModifier = Modifier.align(Alignment.TopEnd).size(SELECTION_BADGE_SIZE)
+        if (megaPokemon != null) {
+            Image(painterResource(Res.drawable.mega), contentDescription = "Mega", modifier = badgeModifier)
+        } else if (teraType != null) {
+            Tooltip(teraType.name.titlecase(), modifier = Modifier.align(Alignment.TopEnd)) {
+                TeraTypeImage(teraType, modifier = Modifier.size(SELECTION_BADGE_SIZE))
+            }
         }
     }
 }
