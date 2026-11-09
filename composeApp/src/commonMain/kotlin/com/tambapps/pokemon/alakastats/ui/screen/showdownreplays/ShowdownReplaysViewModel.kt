@@ -78,6 +78,10 @@ class ShowdownReplaysViewModel(
     var load by mutableStateOf<ShowdownReplaysLoad>(ShowdownReplaysLoad.Idle)
         private set
 
+    /** The saved replays the user is asked to confirm the deletion of, null when not asked */
+    var replaysToDelete by mutableStateOf<List<ShowdownReplaySummary>?>(null)
+        private set
+
     val isBusy get() = load is ShowdownReplaysLoad.Listing || load is ShowdownReplaysLoad.Downloading
 
     val minRating get() = minRatingText.trim().toIntOrNull()
@@ -180,6 +184,31 @@ class ShowdownReplaysViewModel(
         loadJob?.cancel()
         loadJob = null
         load = ShowdownReplaysLoad.Idle
+    }
+
+    /** Asks to delete the saved replays of the selected period, above the minimum Elo if any */
+    fun askDeletion(now: Long = Clock.System.now().epochSeconds) {
+        if (isBusy) return
+        val since = now - days * SECONDS_PER_DAY
+        val minRating = minRating
+        replaysToDelete = savedReplays.filter { replay ->
+            replay.uploadTime >= since && (minRating == null || (replay.rating ?: 0) >= minRating)
+        }
+    }
+
+    fun confirmDeletion() {
+        val replays = replaysToDelete ?: return
+        replaysToDelete = null
+        if (replays.isEmpty()) return
+        val formatId = formatId
+        viewModelScope.launch {
+            repository.delete(formatId, replays)
+            loadSaved()
+        }
+    }
+
+    fun dismissDeletion() {
+        replaysToDelete = null
     }
 
     fun dismissResult() {

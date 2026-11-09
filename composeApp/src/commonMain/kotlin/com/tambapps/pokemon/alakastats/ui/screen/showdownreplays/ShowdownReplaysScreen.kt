@@ -1,5 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.screen.showdownreplays
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.delete
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +25,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -46,6 +50,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import com.tambapps.pokemon.alakastats.ui.model.formatReplayDate
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
 // the cards don't stretch on wide screens
@@ -93,6 +98,7 @@ fun ShowdownReplaysScreen() {
         }
     }
     LoadConfirmationDialog(viewModel)
+    DeletionConfirmationDialog(viewModel)
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -101,7 +107,20 @@ private fun LoadReplaysCard(viewModel: ShowdownReplaysViewModel, modifier: Modif
     val enabled = !viewModel.isBusy
     MyCard(modifier = modifier) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Load public replays", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Load public replays",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(
+                    onClick = { viewModel.askDeletion() },
+                    enabled = enabled && viewModel.savedReplays.isNotEmpty(),
+                ) {
+                    Icon(painterResource(Res.drawable.delete), contentDescription = "Delete the saved replays")
+                }
+            }
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -206,6 +225,40 @@ private fun LoadConfirmationDialog(viewModel: ShowdownReplaysViewModel) {
         },
         confirmButton = { TextButton(onClick = viewModel::download) { Text("Download") } },
         dismissButton = { TextButton(onClick = viewModel::cancel) { Text("Cancel") } },
+    )
+}
+
+@Composable
+private fun DeletionConfirmationDialog(viewModel: ShowdownReplaysViewModel) {
+    val replays = viewModel.replaysToDelete ?: return
+    val selection = buildString {
+        append(viewModel.format.displayedName)
+        append(if (viewModel.bestOf3) " Bo3" else " Bo1")
+        append(if (viewModel.days == 1) ", last day" else ", last ${viewModel.days} days")
+        viewModel.minRating?.let { append(", Elo $it or more") }
+    }
+    if (replays.isEmpty()) {
+        AlertDialog(
+            onDismissRequest = viewModel::dismissDeletion,
+            title = { Text("No replay to delete") },
+            text = { Text("No saved replay matches $selection.") },
+            confirmButton = { TextButton(onClick = viewModel::dismissDeletion) { Text("OK") } },
+        )
+        return
+    }
+    AlertDialog(
+        onDismissRequest = viewModel::dismissDeletion,
+        title = { Text("Delete replays") },
+        text = {
+            Text(
+                (if (replays.size == 1) "1 saved replay" else "${replays.size} saved replays") +
+                    " of $selection will be deleted from this device. They can be downloaded again."
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = viewModel::confirmDeletion) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+        },
+        dismissButton = { TextButton(onClick = viewModel::dismissDeletion) { Text("Cancel") } },
     )
 }
 

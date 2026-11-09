@@ -67,6 +67,26 @@ class KStoreShowdownReplayRepositoryTest {
     }
 
     @Test
+    fun deletedReplaysAreNotListedAnymore() = runTest {
+        val a = replay("a", 100)
+        val b = replay("b", 200)
+        val c = replay("c", 86_400 + 5)
+        repository.save("gen9vgc", listOf(a, b, c))
+        repository.delete("gen9vgc", listOf(b))
+        assertEquals(listOf("a", "c"), repository.list("gen9vgc").map { it.id })
+        assertEquals(listOf(0L, 1L), daysCodecs.getValue("gen9vgc").value)
+    }
+
+    @Test
+    fun aDayWithoutReplaysLeftIsDeleted() = runTest {
+        repository.save("gen9vgc", listOf(replay("a", 100), replay("b", 86_400 + 5)))
+        repository.delete("gen9vgc", listOf(replay("b", 86_400 + 5)))
+        assertEquals(listOf(0L), daysCodecs.getValue("gen9vgc").value)
+        assertEquals(null, dayCodecs.getValue("gen9vgc" to 1L).value)
+        assertEquals(listOf("a"), repository.list("gen9vgc").map { it.id })
+    }
+
+    @Test
     fun eachFormatHasItsOwnReplays() = runTest {
         repository.save("gen9vgc", listOf(replay("a", 100)))
         repository.save("gen9vgcbo3", listOf(replay("b", 100)))

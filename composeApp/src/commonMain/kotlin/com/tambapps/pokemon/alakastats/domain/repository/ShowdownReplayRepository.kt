@@ -12,4 +12,7 @@ interface ShowdownReplayRepository {
 
     /** Adds the replays to the saved ones of their format, a replay already saved being replaced */
     suspend fun save(formatId: String, replays: List<ShowdownReplaySummary>)
+
+    /** Deletes saved replays of the format */
+    suspend fun delete(formatId: String, replays: List<ShowdownReplaySummary>)
 }

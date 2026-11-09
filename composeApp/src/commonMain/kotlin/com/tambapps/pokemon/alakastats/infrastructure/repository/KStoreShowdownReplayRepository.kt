@@ -50,6 +50,24 @@ class KStoreShowdownReplayRepository(
         daysStore(formatId).update { days -> (days.orEmpty() + replaysByDay.keys).distinct().sorted() }
         Unit
     }
+
+    override suspend fun delete(formatId: String, replays: List<ShowdownReplaySummary>) = mutex.withLock {
+        val emptiedDays = mutableSetOf<Long>()
+        for ((day, dayReplays) in replays.groupBy { it.uploadTime / SECONDS_PER_DAY }) {
+            val ids = dayReplays.mapTo(mutableSetOf()) { it.id }
+            val store = dayStore(formatId, day)
+            val left = store.getOrEmpty().filter { it.id !in ids }
+            if (left.isEmpty()) {
+                store.delete()
+                emptiedDays.add(day)
+            } else {
+                store.set(left)
+            }
+        }
+        if (emptiedDays.isNotEmpty()) {
+            daysStore(formatId).update { days -> days.orEmpty() - emptiedDays }
+        }
+    }
 }
 
 private fun ShowdownReplaySummaryEntity.toDomain(formatId: String) = ShowdownReplaySummary(
