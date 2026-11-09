@@ -10,18 +10,26 @@ import com.tambapps.pokemon.pokepaste.parser.PokePaste
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
+/**
+ * @param showdownId the format's id on Pokémon Showdown, in best of 1, null for none
+ */
 enum class Format(
     val displayedName: String,
     val allowedMechanics: List<Mechanic>,
-    val pokemonLevel: Int? = null
+    val pokemonLevel: Int? = null,
+    val showdownId: String? = null,
 ) {
     NONE("<none>", Mechanic.entries),
-    REGULATION_MC("Regulation M-C", allowedMechanics = listOf(Mechanic.MEGA_EVOLUTION), pokemonLevel = 50),
-    REGULATION_MB("Regulation M-B", allowedMechanics = listOf(Mechanic.MEGA_EVOLUTION), pokemonLevel = 50),
-    REGULATION_MA("Regulation M-A", allowedMechanics = listOf(Mechanic.MEGA_EVOLUTION), pokemonLevel = 50),
-    REGULATION_I("Regulation I", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
-    REGULATION_F("Regulation F", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
-    REGULATION_H("Regulation H", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50),
+    REGULATION_MC("Regulation M-C", allowedMechanics = listOf(Mechanic.MEGA_EVOLUTION), pokemonLevel = 50, showdownId = "gen9championsvgc2026regmc"),
+    REGULATION_MB("Regulation M-B", allowedMechanics = listOf(Mechanic.MEGA_EVOLUTION), pokemonLevel = 50, showdownId = "gen9championsvgc2026regmb"),
+    REGULATION_MA("Regulation M-A", allowedMechanics = listOf(Mechanic.MEGA_EVOLUTION), pokemonLevel = 50, showdownId = "gen9championsvgc2026regma"),
+    REGULATION_I("Regulation I", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50, showdownId = "gen9vgc2025regi"),
+    // the regulations played more than once are at their last year's id
+    REGULATION_F("Regulation F", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50, showdownId = "gen9vgc2026regf"),
+    REGULATION_H("Regulation H", allowedMechanics = listOf(Mechanic.TERASTALLIZATION), pokemonLevel = 50, showdownId = "gen9vgc2025regh");
+
+    /** The format's id on Pokémon Showdown in best of 3, null for none */
+    val showdownBo3Id: String? get() = showdownId?.let { "${it}bo3" }
 }
 
 val Teamlytics.usesLegacySystem
