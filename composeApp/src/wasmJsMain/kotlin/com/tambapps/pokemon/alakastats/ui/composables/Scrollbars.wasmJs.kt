@@ -5,6 +5,8 @@ import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -65,14 +67,29 @@ actual fun LazyColumnWithScrollbar(
     state: LazyListState,
     horizontalAlignment: Alignment.Horizontal,
     scrollbarThickness: Dp,
+    verticalArrangement: Arrangement.Vertical,
+    contentPadding: PaddingValues,
     content: LazyListScope.() -> Unit
 ) {
     if (LocalIsCompact.current) {
-        LazyColumn(modifier = modifier, state = state, content = content)
+        LazyColumn(
+            modifier = modifier,
+            state = state,
+            verticalArrangement = verticalArrangement,
+            contentPadding = contentPadding,
+            content = content,
+        )
     } else {
         // defined scrollbar for desktop Web
         Box(modifier) {
-            LazyColumn(modifier = modifier.fillMaxSize(), horizontalAlignment = horizontalAlignment, state = state, content = content)
+            LazyColumn(
+                modifier = modifier.fillMaxSize(),
+                horizontalAlignment = horizontalAlignment,
+                verticalArrangement = verticalArrangement,
+                contentPadding = contentPadding,
+                state = state,
+                content = content,
+            )
 
             val style = if (isDarkThemeEnabled()) LocalScrollbarStyle.current.copy(
                 unhoverColor = Color.White.copy(alpha = 0.12f),

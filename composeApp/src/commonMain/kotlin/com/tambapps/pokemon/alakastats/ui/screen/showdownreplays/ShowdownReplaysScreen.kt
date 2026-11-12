@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
+import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
@@ -52,13 +52,15 @@ fun ShowdownReplaysScreen() {
         else shown.map(ShowdownReplayListItem::Single)
     }
     val contentModifier = Modifier.widthIn(max = MAX_CONTENT_WIDTH).fillMaxWidth()
-    LazyColumn(
+    // on desktop, with a scrollbar on the right of the window: the margins are the list's, not around it
+    LazyColumnWithScrollbar(
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .then(if (isCompact) Modifier.safeContentPadding() else Modifier.padding(all = 16.dp)),
+            .then(if (isCompact) Modifier.safeContentPadding() else Modifier),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(horizontal = if (isCompact) 8.dp else 0.dp, vertical = 8.dp),
+        contentPadding = if (isCompact) PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+        else PaddingValues(horizontal = 16.dp, vertical = 24.dp),
     ) {
         item {
             Box(Modifier.fillMaxWidth()) {

@@ -1,6 +1,8 @@
 package com.tambapps.pokemon.alakastats.ui.composables
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.lazy.LazyListScope
@@ -22,11 +24,16 @@ expect fun ScrollableRow(
     content: @Composable RowScope.() -> Unit
 )
 
+/**
+ * A lazy column with, on the desktop web, a scrollbar on its right
+ */
 @Composable
 expect fun LazyColumnWithScrollbar(
     modifier: Modifier,
     state: LazyListState = rememberLazyListState(),
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     scrollbarThickness: Dp = defaultScrollbarThickness,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     content: LazyListScope.() -> Unit
 )

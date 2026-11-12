@@ -2,6 +2,8 @@ package com.tambapps.pokemon.alakastats.ui.composables
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,5 +28,14 @@ actual fun LazyColumnWithScrollbar(
     state: LazyListState,
     horizontalAlignment: Alignment.Horizontal,
     scrollbarThickness: Dp,
+    verticalArrangement: Arrangement.Vertical,
+    contentPadding: PaddingValues,
     content: LazyListScope.() -> Unit
-) = LazyColumn(modifier = modifier, horizontalAlignment = horizontalAlignment, state = state, content = content)
+) = LazyColumn(
+    modifier = modifier,
+    horizontalAlignment = horizontalAlignment,
+    verticalArrangement = verticalArrangement,
+    contentPadding = contentPadding,
+    state = state,
+    content = content,
+)
