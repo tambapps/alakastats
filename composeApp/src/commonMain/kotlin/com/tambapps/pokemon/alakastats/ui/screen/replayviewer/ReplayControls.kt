@@ -7,7 +7,6 @@ import alakastats.composeapp.generated.resources.play_arrow
 import alakastats.composeapp.generated.resources.restart_alt
 import alakastats.composeapp.generated.resources.skip_next
 import alakastats.composeapp.generated.resources.skip_previous
-import alakastats.composeapp.generated.resources.swap_horiz
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -96,15 +95,6 @@ fun ReplayControls(
                 showMenu = false
                 onOverlayChange(false)
             }) {
-                DropdownMenuItem(
-                    text = { Text("Switch sides") },
-                    leadingIcon = { Icon(painterResource(Res.drawable.swap_horiz), contentDescription = null) },
-                    onClick = {
-                        player.switchSides()
-                        showMenu = false
-                        onOverlayChange(false)
-                    }
-                )
                 DropdownMenuItem(
                     text = { Text(if (player.showLog) "Hide battle log" else "Show battle log") },
                     onClick = {

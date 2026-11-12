@@ -5,6 +5,7 @@ import alakastats.composeapp.generated.resources.check
 import alakastats.composeapp.generated.resources.close
 import alakastats.composeapp.generated.resources.content_copy
 import alakastats.composeapp.generated.resources.open_in_new
+import alakastats.composeapp.generated.resources.swap_horiz
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -139,6 +140,8 @@ fun ReplayViewerDialog(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f),
                         )
+                        // in the header, at hand rather than in the controls' menu
+                        HeaderIconButton(Res.drawable.swap_horiz, "Switch sides") { player.switchSides() }
                         CopyIconButton(textToCopy)
                         HeaderIconButton(Res.drawable.open_in_new, "Open in browser") { uriHandler.openUri(browserUrl) }
                         actions()
