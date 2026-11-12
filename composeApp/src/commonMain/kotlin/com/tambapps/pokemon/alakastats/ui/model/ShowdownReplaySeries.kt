@@ -41,7 +41,8 @@ sealed interface ShowdownReplayListItem {
 }
 
 /**
- * Groups the games of a same series, each series taking the place of its first game in [sortedReplays]
+ * Groups the games of a same series, each series taking the place of its first game in [sortedReplays]. A series with
+ * a single saved game is that game alone
  *
  * @param sortedReplays the replays to show, filtered and sorted
  * @param allReplays all the saved replays, for the score of the whole series
@@ -58,6 +59,8 @@ fun groupedBySeries(
         if (!listedSeries.add(bestOf.seriesRef)) return@mapNotNull null
         val games = shownGames.getValue(bestOf.seriesRef).sortedBy { it.bestOf!!.game }
         val seriesGames = (allGames[bestOf.seriesRef] ?: games).sortedBy { it.bestOf!!.game }
+        // the only saved game of its series: a series' card would only add a click to it
+        if (seriesGames.size == 1) return@mapNotNull ShowdownReplayListItem.Single(replay)
         val players = seriesGames.first().players
         val playedGames = seriesGames.maxOf { it.bestOf!!.game }
         ShowdownReplayListItem.Series(

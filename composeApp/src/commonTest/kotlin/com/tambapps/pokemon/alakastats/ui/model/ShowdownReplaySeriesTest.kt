@@ -87,7 +87,17 @@ class ShowdownReplaySeriesTest {
 
     @Test
     fun aSeriesWithoutAMajorityYetHasNoWinner() {
-        val items = groupedBySeries(listOf(game("g1", "alaka", BestOf(1, 3, "s"))))
+        val items = groupedBySeries(listOf(
+            game("g1", "alaka", BestOf(1, 3, "s")),
+            game("g2", "opponent", BestOf(2, 3, "s")),
+        ))
         assertNull(assertIs<ShowdownReplayListItem.Series>(items.single()).winner)
+    }
+
+    @Test
+    fun theOnlySavedGameOfASeriesIsShownAlone() {
+        val game = game("g2", "alaka", BestOf(2, 3, "s"))
+        val item = assertIs<ShowdownReplayListItem.Single>(groupedBySeries(listOf(game)).single())
+        assertEquals(game, item.replay)
     }
 }
