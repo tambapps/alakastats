@@ -67,6 +67,13 @@ class ShowdownReplayServiceTest {
     }
 
     @Test
+    fun aGameUploadedAfterTheLastOneOfItsSeriesIsKept() = runTest {
+        // newest first: e.g. the game 1, saved after the game 3, the one rated
+        val service = serviceListing(count = 2, rating = { index -> if (index == 1) 1600 else null })
+        assertEquals(listOf("gen9vgc-0", "gen9vgc-1"), service.list("gen9vgcbo3", since = 0, minRating = 1500).map { it.id })
+    }
+
+    @Test
     fun anUnratedReplayLongBeforeIsntAGameOfTheSameSeries() = runTest {
         val service = serviceListing(count = 2, rating = { index -> if (index == 0) 1600 else null }, spacing = 4 * 60 * 60)
         assertEquals(listOf("gen9vgc-0"), service.list("gen9vgcbo3", since = 0, minRating = 1500).map { it.id })
@@ -93,7 +100,12 @@ class ShowdownReplayServiceTest {
 
     @Test
     fun theReplaysBelowTheMinimumRatingOrWithoutOneAreLeftOut() = runTest {
-        val service = serviceListing(10, rating = { index -> if (index == 0) null else 1400 + index * 20 })
+        val service = serviceListing(
+            10,
+            rating = { index -> if (index == 0) null else 1400 + index * 20 },
+            // not the players of a kept replay: not a game of its series
+            players = { index -> if (index == 0) listOf("c", "d") else listOf("a", "b") },
+        )
         val replays = service.list("gen9vgc", since = 0, minRating = 1500)
         assertEquals((5 until 10).map { "gen9vgc-$it" }, replays.map { it.id })
     }
