@@ -17,23 +17,26 @@ class ShowdownReplayServiceTest {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    /** A replay every 10 seconds, the newest uploaded at [newest], as Showdown's search pages them */
+    /** A replay every [spacing] seconds, the newest uploaded at [newest], as Showdown's search pages them */
     private fun serviceListing(
         count: Int,
         newest: Long = 10_000,
         rating: (Int) -> Int? = { 1500 },
         isPrivate: (Int) -> Boolean = { false },
+        players: (Int) -> List<String> = { listOf("a", "b") },
+        spacing: Long = 10,
         requestedUrls: MutableList<String> = mutableListOf(),
     ): ShowdownReplayService {
         val replays = (0 until count).map { index ->
-            """{"id":"gen9vgc-$index","uploadtime":${newest - index * 10},"rating":${rating(index)},""" +
-                """"players":["a","b"],"private":${if (isPrivate(index)) 1 else 0},"format":"[Gen 9] VGC"}"""
+            val playersJson = players(index).joinToString(",") { "\"$it\"" }
+            """{"id":"gen9vgc-$index","uploadtime":${newest - index * spacing},"rating":${rating(index)},""" +
+                """"players":[$playersJson],"private":${if (isPrivate(index)) 1 else 0},"format":"[Gen 9] VGC"}"""
         }
         val client = HttpClient(MockEngine { request ->
             requestedUrls.add(request.url.toString())
             val before = request.url.parameters["before"]?.toLong()
             val page = replays.withIndex()
-                .filter { (index, _) -> before == null || newest - index * 10 < before }
+                .filter { (index, _) -> before == null || newest - index * spacing < before }
                 .take(51)
                 .map { it.value }
             respond("[${page.joinToString(",")}]", headers = headersOf(HttpHeaders.ContentType, "application/json"))
@@ -41,6 +44,32 @@ class ShowdownReplayServiceTest {
             install(ContentNegotiation) { json(json) }
         }
         return ShowdownReplayService(client, ReplayAnalyticsService(client))
+    }
+
+    @Test
+    fun aboveAMinimumRatingTheEarlierGamesOfAKeptSeriesAreKept() = runTest {
+        // newest first: a series' last game, rated, then its earlier ones, without rating
+        val service = serviceListing(
+            count = 5,
+            rating = { index -> when (index) { 0 -> 1600; 3 -> 1200; else -> null } },
+            players = { index ->
+                when (index) {
+                    1 -> listOf("B", "A")
+                    2 -> listOf("a", "b")
+                    3, 4 -> listOf("c", "d")
+                    else -> listOf("a", "b")
+                }
+            },
+        )
+        val replays = service.list("gen9vgcbo3", since = 0, minRating = 1500)
+        // the series of c and d ended below the minimum: its earlier game isn't kept either
+        assertEquals(listOf("gen9vgc-0", "gen9vgc-1", "gen9vgc-2"), replays.map { it.id })
+    }
+
+    @Test
+    fun anUnratedReplayLongBeforeIsntAGameOfTheSameSeries() = runTest {
+        val service = serviceListing(count = 2, rating = { index -> if (index == 0) 1600 else null }, spacing = 4 * 60 * 60)
+        assertEquals(listOf("gen9vgc-0"), service.list("gen9vgcbo3", since = 0, minRating = 1500).map { it.id })
     }
 
     @Test

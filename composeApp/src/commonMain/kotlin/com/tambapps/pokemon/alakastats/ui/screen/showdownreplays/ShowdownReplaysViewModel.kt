@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayFilters
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayStorage
+import com.tambapps.pokemon.alakastats.domain.model.withSeriesRatings
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplaySummary
 import com.tambapps.pokemon.alakastats.domain.repository.ShowdownReplayRepository
 import com.tambapps.pokemon.alakastats.infrastructure.service.ShowdownReplayListing
@@ -168,7 +169,8 @@ class ShowdownReplaysViewModel(
         isLoadingSaved = true
         val formatId = formatId
         savedJob = viewModelScope.launch {
-            savedReplays = repository.list(formatId).sortedByDescending { it.uploadTime }
+            // the series' first games rated as their last: the Elo filter and sort take them with it
+            savedReplays = repository.list(formatId).withSeriesRatings().sortedByDescending { it.uploadTime }
             isLoadingSaved = false
         }
     }

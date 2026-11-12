@@ -61,7 +61,12 @@ fun groupedBySeries(
         val seriesGames = (allGames[bestOf.seriesRef] ?: games).sortedBy { it.bestOf!!.game }
         // the only saved game of its series: a series' card would only add a click to it
         if (seriesGames.size == 1) return@mapNotNull ShowdownReplayListItem.Single(replay)
-        val players = seriesGames.first().players
+        // their Elo is only in the series' last game, rated once for the whole series
+        val players = seriesGames.first().players.map { player ->
+            if (player.beforeElo != null) return@map player
+            val rated = seriesGames.flatMap { it.players }.firstOrNull { it.name.matches(player.name) && it.beforeElo != null }
+            if (rated == null) player else player.copy(beforeElo = rated.beforeElo, afterElo = rated.afterElo)
+        }
         val playedGames = seriesGames.maxOf { it.bestOf!!.game }
         ShowdownReplayListItem.Series(
             seriesRef = bestOf.seriesRef,

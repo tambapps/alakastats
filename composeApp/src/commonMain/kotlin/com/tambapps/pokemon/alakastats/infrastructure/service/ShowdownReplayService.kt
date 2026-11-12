@@ -47,7 +47,8 @@ class ShowdownReplayService(
      * by page
      *
      * @param since in seconds since the epoch
-     * @param minRating the battle's minimum rating: the replays without one are left out
+     * @param minRating the battle's minimum rating: the replays without one are left out, except the games of a series
+     * played before its last one, which only the last one is rated for (see [isEarlierGameOf])
      * @param savedIds the replays already saved, listed but not counted in [maxNew]
      * @param maxNew the listing stops as soon as it has more replays not saved yet, null for no limit
      * @param onProgress called after each page, with how many replays were kept so far
@@ -61,6 +62,8 @@ class ShowdownReplayService(
         onProgress: (Int) -> Unit = {},
     ): List<ShowdownReplayListing> {
         val replays = LinkedHashMap<String, ShowdownReplayListing>()
+        // the rated replays kept, the last games of their series when in one
+        val keptRated = mutableListOf<ShowdownReplayListing>()
         var newCount = 0
         var before: Long? = null
         for (pageIndex in 0 until MAX_PAGES) {
@@ -70,7 +73,13 @@ class ShowdownReplayService(
             }.body<List<ShowdownReplayListing>>()
             for (replay in page) {
                 if (replay.uploadTime < since) return replays.values.toList().also { onProgress(it.size) }
-                val kept = replay.private == 0 && (minRating == null || (replay.rating ?: 0) >= minRating)
+                val rating = replay.rating
+                val kept = replay.private == 0 && when {
+                    minRating == null -> true
+                    rating != null -> (rating >= minRating).also { if (it) keptRated.add(replay) }
+                    // newest first: the last game of its series, uploaded after it, was listed before
+                    else -> keptRated.any { replay.isEarlierGameOf(it) }
+                }
                 // a page starts where the previous one ended: the replays uploaded the same second may come again
                 if (kept && replays.put(replay.id, replay) == null && replay.id !in savedIds) {
                     newCount++
@@ -87,6 +96,19 @@ class ShowdownReplayService(
     /** Fetches a replay, to keep what's needed of it */
     suspend fun fetchSummary(id: String): Either<DomainError, ShowdownReplaySummary> =
         replayAnalyticsService.fetch("$SHOWDOWN_REPLAYS_URL/$id").map { it.toShowdownReplaySummary(id) }
+}
+
+// a series' games are played in a row: beyond it, the same players are in another series
+private const val SERIES_MAX_SECONDS = 3 * 60 * 60L
+
+/**
+ * Whether this unrated replay may be a game of the series [lastGame] ended: Showdown rates a series once, on its last
+ * game, its other games having no rating. The listing doesn't tell the series, so it's the same players a bit before
+ */
+internal fun ShowdownReplayListing.isEarlierGameOf(lastGame: ShowdownReplayListing): Boolean {
+    val delay = lastGame.uploadTime - uploadTime
+    return delay in 0..SERIES_MAX_SECONDS &&
+        players.map { it.lowercase() }.toSet() == lastGame.players.map { it.lowercase() }.toSet()
 }
 
 internal fun ReplayAnalytics.toShowdownReplaySummary(id: String) = ShowdownReplaySummary(

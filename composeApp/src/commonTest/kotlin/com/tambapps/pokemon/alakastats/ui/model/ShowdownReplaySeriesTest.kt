@@ -4,6 +4,7 @@ import com.tambapps.pokemon.alakastats.domain.model.BestOf
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayPlayer
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplaySummary
 import com.tambapps.pokemon.alakastats.domain.model.UserName
+import com.tambapps.pokemon.alakastats.domain.model.withSeriesRatings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -28,6 +29,33 @@ class ShowdownReplaySeriesTest {
         players = players.map(::player),
         bestOf = bestOf,
     )
+
+    @Test
+    fun theEarlierGamesOfASeriesTakeTheRatingOfItsLastOne() {
+        val replays = listOf(
+            game("g1", "alaka", BestOf(1, 3, "s")),
+            game("g2", "opponent", BestOf(2, 3, "s")),
+            game("g3", "alaka", BestOf(3, 3, "s")).copy(rating = 1600),
+            game("other", "alaka", BestOf(1, 3, "other")),
+            game("single", "alaka", bestOf = null),
+        ).withSeriesRatings()
+        assertEquals(listOf(1600, 1600, 1600, null, null), replays.map { it.rating })
+    }
+
+    @Test
+    fun theSeriesPlayersHaveTheEloOfTheGameTellingIt() {
+        val rated = game("g3", "alaka", BestOf(3, 3, "s"), players = listOf("opponent", "alaka")).let { game ->
+            game.copy(players = game.players.map { it.copy(beforeElo = if (it.name.value == "alaka") 1500 else 1400) })
+        }
+        val items = groupedBySeries(listOf(
+            game("g1", "alaka", BestOf(1, 3, "s")),
+            game("g2", "opponent", BestOf(2, 3, "s")),
+            rated,
+        ))
+        val series = assertIs<ShowdownReplayListItem.Series>(items.single())
+        // in the order of the first game, whatever the order of the last one
+        assertEquals(listOf("alaka" to 1500, "opponent" to 1400), series.players.map { it.name.value to it.beforeElo })
+    }
 
     @Test
     fun theGamesOfASeriesAreGroupedWhereItsFirstListedGameIs() {

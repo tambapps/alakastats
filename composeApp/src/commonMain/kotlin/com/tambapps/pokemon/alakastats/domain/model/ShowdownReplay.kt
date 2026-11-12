@@ -28,6 +28,21 @@ data class ShowdownReplaySummary(
 const val SHOWDOWN_REPLAYS_URL = "https://replay.pokemonshowdown.com"
 
 /**
+ * The replays with, for the games of a series played before its last one, the series' rating: Showdown rates a series
+ * once, on its last game, the others having none. Without it, they'd be left out by a minimum Elo and sorted last
+ */
+fun List<ShowdownReplaySummary>.withSeriesRatings(): List<ShowdownReplaySummary> {
+    val seriesRatings = mapNotNull { replay ->
+        val rating = replay.rating ?: return@mapNotNull null
+        replay.bestOf?.let { it.seriesRef to rating }
+    }.toMap()
+    return map { replay ->
+        if (replay.rating != null) replay
+        else replay.bestOf?.let { seriesRatings[it.seriesRef] }?.let { replay.copy(rating = it) } ?: replay
+    }
+}
+
+/**
  * The saved replays of a format
  *
  * @param bytes the room they take, as saved
