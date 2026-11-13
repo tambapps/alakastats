@@ -1,6 +1,27 @@
 package com.tambapps.pokemon.alakastats.ui.screen.showdownreplays
 
 import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.arrow_upward
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.plus
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 import alakastats.composeapp.generated.resources.delete
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -42,9 +63,18 @@ private val MAX_CONTENT_WIDTH = 900.dp
 /**
  * To download the public Showdown replays of a format and browse the saved ones
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ShowdownReplaysScreen() {
+    val listState = rememberLazyListState()
+    Box(Modifier.fillMaxSize()) {
+        ShowdownReplaysList(listState)
+        ScrollToTopButton(listState, Modifier.align(Alignment.BottomEnd))
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ShowdownReplaysList(listState: LazyListState) {
     val viewModel = koinViewModel<ShowdownReplaysViewModel>()
     val isCompact = LocalIsCompact.current
     val shown = viewModel.shownReplays
@@ -59,10 +89,12 @@ fun ShowdownReplaysScreen() {
         modifier = Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .then(if (isCompact) Modifier.safeContentPadding() else Modifier),
+        state = listState,
+        // room for the scroll to top button below the last replay
+        contentPadding = if (isCompact) PaddingValues(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 80.dp)
+        else PaddingValues(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 96.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = if (isCompact) PaddingValues(horizontal = 8.dp, vertical = 8.dp)
-        else PaddingValues(horizontal = 16.dp, vertical = 24.dp),
     ) {
         item {
             Box(Modifier.fillMaxWidth()) {
@@ -190,4 +222,27 @@ private fun ReplayDeletionConfirmationDialog(viewModel: ShowdownReplaysViewModel
         },
         dismissButton = { TextButton(onClick = dismiss) { Text("Cancel") } },
     )
+}
+
+/**
+ * Shown once the top of the list is scrolled out of sight, to go back to its toolbar and filters
+ */
+@Composable
+private fun ScrollToTopButton(listState: LazyListState, modifier: Modifier = Modifier) {
+    val isCompact = LocalIsCompact.current
+    val scope = rememberCoroutineScope()
+    val scrolled by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+    AnimatedVisibility(
+        visible = scrolled,
+        enter = fadeIn() + scaleIn(),
+        exit = fadeOut() + scaleOut(),
+        modifier = modifier
+            // above the system's navigation bar on a phone, beside the scrollbar on desktop
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.End))
+            .padding(end = if (isCompact) 16.dp else 32.dp, bottom = if (isCompact) 16.dp else 24.dp),
+    ) {
+        SmallFloatingActionButton(onClick = { scope.launch { listState.animateScrollToItem(0) } }) {
+            Icon(painterResource(Res.drawable.arrow_upward), contentDescription = "Scroll to the top")
+        }
+    }
 }
