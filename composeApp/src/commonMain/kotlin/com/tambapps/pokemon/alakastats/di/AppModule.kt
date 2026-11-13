@@ -7,6 +7,7 @@ import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonMovesRepository
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
+import com.tambapps.pokemon.alakastats.domain.usecase.AddReplaysToTeamUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ConsultPokemonDetailUseCase
 import com.tambapps.pokemon.pokepaste.parser.PokepasteParser
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeViewModel
@@ -113,6 +114,7 @@ val appModules = listOf(module {
     single { AppPreferencesRepository(createAppPreferencesKStore()) }
     single<ReplayAnalyticsService> { ReplayAnalyticsService(get()) }
     singleOf(::ShowdownReplayService)
+    singleOf(::AddReplaysToTeamUseCase)
     single<ShowdownReplayRepository> {
         KStoreShowdownReplayRepository(::createShowdownReplayDaysKStore, ::createShowdownReplayDayKStore)
     }

@@ -12,8 +12,12 @@ import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayFilters
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayStorage
 import com.tambapps.pokemon.alakastats.domain.model.withSeriesRatings
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplaySummary
+import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.domain.repository.ShowdownReplayRepository
+import com.tambapps.pokemon.alakastats.domain.usecase.AddReplaysToTeamUseCase
+import com.tambapps.pokemon.alakastats.infrastructure.service.ReplayAnalyticsService
 import com.tambapps.pokemon.alakastats.infrastructure.service.ShowdownReplayListing
+import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.infrastructure.service.ShowdownReplayService
 import com.tambapps.pokemon.alakastats.ui.model.ShowdownReplaySort
 import com.tambapps.pokemon.alakastats.ui.model.sortedBy
@@ -79,9 +83,16 @@ data class ShowdownReplaysFormatStorage(
     val storage: ShowdownReplayStorage,
 )
 
+/**
+ * Where the adding of the selected replays to a team is at: their whole replays are fetched first
+ */
+data class AddToTeamProgress(val teamName: String, val fetched: Int, val total: Int)
+
 class ShowdownReplaysViewModel(
     private val service: ShowdownReplayService,
     private val repository: ShowdownReplayRepository,
+    private val replayAnalyticsService: ReplayAnalyticsService,
+    private val addReplaysToTeam: AddReplaysToTeamUseCase,
 ) : ViewModel() {
 
     /** The formats having replays on Showdown */
@@ -130,6 +141,22 @@ class ShowdownReplaysViewModel(
     /** The saved replays the user is asked to confirm the deletion of, null when not asked */
     var replaysToDelete by mutableStateOf<List<ShowdownReplaySummary>?>(null)
         private set
+    /** Whether [replaysToDelete] are the selected replays rather than those the filters show */
+    var isDeletingSelection by mutableStateOf(false)
+        private set
+
+    /** Whether a click on a replay selects it rather than playing it back */
+    var isSelecting by mutableStateOf(false)
+        private set
+    var selectedIds by mutableStateOf<Set<String>>(emptySet())
+        private set
+
+    /** The teams to add the selected replays to, shown in the team picker, null when it's closed */
+    var teamsToPick by mutableStateOf<List<TeamlyticsPreview>?>(null)
+        private set
+    /** Null when not adding the selected replays to a team */
+    var addToTeamProgress by mutableStateOf<AddToTeamProgress?>(null)
+        private set
 
     /** The saved replays the filters keep, in the sort's order */
     val shownReplays by derivedStateOf { savedReplays.filter(filters::matches).sortedBy(sort) }
@@ -161,7 +188,96 @@ class ShowdownReplaysViewModel(
 
     private fun onFormatChanged() {
         load = ShowdownReplaysLoad.Idle
+        stopSelection()
         loadSaved()
+    }
+
+    fun startSelection() {
+        isSelecting = true
+    }
+
+    fun stopSelection() {
+        isSelecting = false
+        selectedIds = emptySet()
+    }
+
+    fun toggleSelection(replay: ShowdownReplaySummary) {
+        selectedIds = if (replay.id in selectedIds) selectedIds - replay.id else selectedIds + replay.id
+    }
+
+    /** Selects all the replays, e.g. the games of a series, or unselects them when they all are */
+    fun toggleSelection(replays: List<ShowdownReplaySummary>) {
+        val ids = replays.mapTo(mutableSetOf()) { it.id }
+        selectedIds = if (selectedIds.containsAll(ids)) selectedIds - ids else selectedIds + ids
+    }
+
+    /** Whether all the replays the filters show are selected */
+    val areAllShownSelected get() = shownReplays.isNotEmpty() && shownReplays.all { it.id in selectedIds }
+
+    /** Selects all the replays the filters show, or unselects them when they all are */
+    fun toggleSelectAll() = toggleSelection(shownReplays)
+
+    private val selectedReplays get() = savedReplays.filter { it.id in selectedIds }
+    /** Asks to delete the selected replays */
+    fun askSelectionDeletion() {
+        if (isBusy || selectedIds.isEmpty()) return
+        replaysToDelete = selectedReplays
+        isDeletingSelection = true
+    }
+
+    /** Opens the team picker, to add the selected replays to a team */
+    fun askTeam() {
+        if (selectedIds.isEmpty()) return
+        viewModelScope.launch {
+            teamsToPick = addReplaysToTeam.listTeams().sortedByDescending { it.lastUpdatedAt }
+        }
+    }
+
+    fun dismissTeamPicker() {
+        teamsToPick = null
+    }
+
+    /**
+     * Adds the selected replays to the team: the app only keeps a summary of them, their whole replays are fetched again
+     * from Showdown
+     */
+    fun addSelectionToTeam(team: TeamlyticsPreview, snackBar: SnackBar) {
+        val replays = selectedReplays
+        teamsToPick = null
+        if (replays.isEmpty() || addToTeamProgress != null) return
+        addToTeamProgress = AddToTeamProgress(team.name, 0, replays.size)
+        viewModelScope.launch {
+            var fetchedCount = 0
+            val semaphore = Semaphore(PARALLEL_REQUESTS)
+            val fetched = coroutineScope {
+                replays.map { replay ->
+                    async {
+                        semaphore.withPermit { replayAnalyticsService.fetch(replay.url) }.also {
+                            fetchedCount++
+                            addToTeamProgress = AddToTeamProgress(team.name, fetchedCount, replays.size)
+                        }
+                    }
+                }.awaitAll()
+            }
+            val failed = fetched.count { it.isLeft() }
+            val result = addReplaysToTeam.add(team.id, fetched.mapNotNull { it.getOrNull() })
+            addToTeamProgress = null
+            result.fold(
+                ifLeft = { error -> snackBar.show("Couldn't add the replays to ${team.name}: ${error.message}", SnackBar.Severity.ERROR) },
+                ifRight = { added ->
+                    val alreadyIn = replays.size - failed - added
+                    snackBar.show(
+                        buildString {
+                            append(if (added == 1) "1 replay added to ${team.name}" else "$added replays added to ${team.name}")
+                            if (alreadyIn > 0) append(", $alreadyIn already in it")
+                            if (failed > 0) append(", $failed couldn't be downloaded")
+                        },
+                        if (failed > 0) SnackBar.Severity.WARNING else SnackBar.Severity.SUCCESS,
+                    )
+                    stopSelection()
+                },
+            )
+        }
     }
 
     private fun loadSaved() {
@@ -248,11 +364,13 @@ class ShowdownReplaysViewModel(
     fun askDeletion() {
         if (isBusy) return
         replaysToDelete = shownReplays
+        isDeletingSelection = false
     }
 
     fun confirmDeletion() {
         val replays = replaysToDelete ?: return
         replaysToDelete = null
+        if (isDeletingSelection) stopSelection()
         if (replays.isEmpty()) return
         val formatId = formatId
         viewModelScope.launch {

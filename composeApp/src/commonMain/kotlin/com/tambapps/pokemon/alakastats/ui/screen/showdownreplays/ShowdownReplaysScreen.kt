@@ -2,6 +2,7 @@ package com.tambapps.pokemon.alakastats.ui.screen.showdownreplays
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.delete
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +42,7 @@ private val MAX_CONTENT_WIDTH = 900.dp
 /**
  * To download the public Showdown replays of a format and browse the saved ones
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ShowdownReplaysScreen() {
     val viewModel = koinViewModel<ShowdownReplaysViewModel>()
@@ -78,11 +80,35 @@ fun ShowdownReplaysScreen() {
             viewModel.savedReplays.isEmpty() -> item { NoSavedReplays(viewModel, contentModifier) }
             else -> {
                 item { ShowdownReplayFiltersCard(viewModel, contentModifier) }
-                item { ResultsHeader(viewModel, shown.size, contentModifier) }
+                // stays at the top while scrolling: the selection's actions are at hand
+                stickyHeader(key = "results-header") {
+                    Box(
+                        Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(vertical = 4.dp),
+                        contentAlignment = Alignment.TopCenter,
+                    ) {
+                        if (viewModel.isSelecting) SelectionBar(viewModel, contentModifier)
+                        else ResultsHeader(viewModel, shown.size, contentModifier)
+                    }
+                }
                 items(listItems, key = { it.key }) { item ->
+                    val selecting = viewModel.isSelecting
+                    val onReplayClick = { replay: ShowdownReplaySummary ->
+                        if (selecting) viewModel.toggleSelection(replay) else viewModel.viewedReplay = replay
+                    }
                     when (item) {
-                        is ShowdownReplayListItem.Single -> ShowdownReplayCard(item.replay, { viewModel.viewedReplay = item.replay }, contentModifier)
-                        is ShowdownReplayListItem.Series -> ShowdownReplaySeriesCard(item, { viewModel.viewedReplay = it }, contentModifier)
+                        is ShowdownReplayListItem.Single -> ShowdownReplayCard(
+                            replay = item.replay,
+                            onClick = { onReplayClick(item.replay) },
+                            modifier = contentModifier,
+                            selected = if (selecting) item.replay.id in viewModel.selectedIds else null,
+                        )
+                        is ShowdownReplayListItem.Series -> ShowdownReplaySeriesCard(
+                            series = item,
+                            onGameClick = onReplayClick,
+                            modifier = contentModifier,
+                            selectedIds = if (selecting) viewModel.selectedIds else null,
+                            onSeriesSelectionToggle = { viewModel.toggleSelection(item.games) },
+                        )
                     }
                 }
             }
@@ -92,6 +118,7 @@ fun ShowdownReplaysScreen() {
     StorageDialog(viewModel)
     LoadConfirmationDialog(viewModel)
     DeletionConfirmationDialog(viewModel)
+    TeamPickerDialog(viewModel)
     viewModel.viewedReplay?.let { replay -> ShowdownReplayViewer(viewModel, replay) }
     ReplayDeletionConfirmationDialog(viewModel)
 }
@@ -113,6 +140,7 @@ private fun ResultsHeader(viewModel: ShowdownReplaysViewModel, shownCount: Int, 
                 label = { Text("Group by Bo3", maxLines = 1) },
             )
         }
+        TextButton(onClick = viewModel::startSelection, enabled = shownCount > 0) { Text("Select") }
     }
 }
 

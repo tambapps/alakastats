@@ -1,6 +1,8 @@
 package com.tambapps.pokemon.alakastats.ui.screen.showdownreplays
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TriStateCheckbox
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -67,20 +72,32 @@ private val GAME_LABEL_WIDTH = 36.dp
 /**
  * A replay that isn't in a series, or not grouped with it: the players face each other, each with their team, what
  * they didn't bring faded and their leads marked
+ *
+ * @param selected whether it's selected, null when not selecting: a click then selects it rather than playing it back
  */
 @Composable
 internal fun ShowdownReplayCard(
     replay: ShowdownReplaySummary,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    selected: Boolean? = null,
 ) {
-    MyCard(modifier = modifier, onClick = onClick) {
+    MyCard(
+        modifier = modifier,
+        onClick = onClick,
+        border = if (selected == true) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+    ) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            DetailsLine(
-                formatReplayDate(replay.uploadTime),
-                replay.rating?.let { "Rating $it" },
-                replay.bestOf?.let { "Game ${it.game} of ${it.of}" },
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                DetailsLine(
+                    formatReplayDate(replay.uploadTime),
+                    replay.rating?.let { "Rating $it" },
+                    replay.bestOf?.let { "Game ${it.game} of ${it.of}" },
+                    modifier = Modifier.weight(1f),
+                )
+                // the card's click toggles it
+                selected?.let { Checkbox(checked = it, onCheckedChange = null) }
+            }
             PlayersHeader(replay.players, between = "vs", winner = replay.winner)
             Teams(replay.players, markSelection = true)
         }
@@ -90,12 +107,17 @@ internal fun ShowdownReplayCard(
 /**
  * Closed, the series takes the place of a replay: its players with its score between them, and their teams. Opened,
  * its games, a line each: the Pokémon each player brought, the winner's side standing out
+ *
+ * @param selectedIds the selected replays, null when not selecting: a click on a game then selects it, and the series'
+ * checkbox its games the filters show
  */
 @Composable
 internal fun ShowdownReplaySeriesCard(
     series: ShowdownReplayListItem.Series,
     onGameClick: (ShowdownReplaySummary) -> Unit,
     modifier: Modifier = Modifier,
+    selectedIds: Set<String>? = null,
+    onSeriesSelectionToggle: () -> Unit = {},
 ) {
     val isCompact = LocalIsCompact.current
     ExpansionTile(
@@ -104,7 +126,23 @@ internal fun ShowdownReplaySeriesCard(
         title = {
             // its games are played the same day: they don't repeat it
             val date = series.games.map { it.uploadTime }.filter { it > 0 }.minOrNull()?.let { formatReplayDate(it) }
-            DetailsLine("Best-of-${series.bestOf}", "incomplete".takeIf { series.missingGames }, date)
+            DetailsLine(
+                "Best-of-${series.bestOf}",
+                "incomplete".takeIf { series.missingGames },
+                date,
+                modifier = Modifier.weight(1f),
+            )
+            selectedIds?.let { ids ->
+                val selectedCount = series.games.count { it.id in ids }
+                TriStateCheckbox(
+                    state = when (selectedCount) {
+                        0 -> ToggleableState.Off
+                        series.games.size -> ToggleableState.On
+                        else -> ToggleableState.Indeterminate
+                    },
+                    onClick = onSeriesSelectionToggle,
+                )
+            }
         },
         // below it, on the whole width as the games, for the players and their teams to be centered as them
         subtitle = {
@@ -122,7 +160,7 @@ internal fun ShowdownReplaySeriesCard(
     ) {
         Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             for (game in series.games) {
-                SeriesGameRow(game, series.players, onClick = { onGameClick(game) })
+                SeriesGameRow(game, series.players, onClick = { onGameClick(game) }, selected = selectedIds?.let { game.id in it })
             }
             if (series.hiddenGames > 0) {
                 Text(
@@ -138,11 +176,11 @@ internal fun ShowdownReplaySeriesCard(
 
 /** E.g. "Nov 9 · Rating 1429", without what isn't known */
 @Composable
-private fun DetailsLine(vararg details: String?) {
+private fun DetailsLine(vararg details: String?, modifier: Modifier = Modifier) {
     Text(
         details.filterNotNull().joinToString(" · "),
         style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.alpha(0.8f),
+        modifier = modifier.alpha(0.8f),
     )
 }
 
@@ -289,18 +327,27 @@ private fun TeamSlotView(slot: TeamSlot, size: Dp, facingDirection: FacingDirect
  * @param seriesPlayers the players in the order of the series' card: a game may list them the other way around
  */
 @Composable
-private fun SeriesGameRow(game: ShowdownReplaySummary, seriesPlayers: List<ShowdownReplayPlayer>, onClick: () -> Unit) {
+private fun SeriesGameRow(
+    game: ShowdownReplaySummary,
+    seriesPlayers: List<ShowdownReplayPlayer>,
+    onClick: () -> Unit,
+    selected: Boolean? = null,
+) {
     // on a phone, the margins go to the sprites, small enough already
     val isCompact = LocalIsCompact.current
     val sides = seriesPlayers.map { seriesPlayer -> game.players.find { it.name.matches(seriesPlayer.name) } ?: seriesPlayer }
+    val shape = RoundedCornerShape(12.dp)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f))
+            .then(if (selected == true) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
             .clickable(onClick = onClick)
             .padding(horizontal = if (isCompact) 8.dp else 16.dp, vertical = if (isCompact) 6.dp else 8.dp),
     ) {
+        // the row's click toggles it
+        selected?.let { Checkbox(checked = it, onCheckedChange = null, modifier = Modifier.padding(end = 8.dp)) }
         // the players' Elo is in the series' header
         Text(
             "G${game.bestOf?.game ?: "?"}",

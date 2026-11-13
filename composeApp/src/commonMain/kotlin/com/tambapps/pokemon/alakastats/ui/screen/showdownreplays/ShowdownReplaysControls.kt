@@ -332,8 +332,11 @@ private fun StorageRow(
 internal fun DeletionConfirmationDialog(viewModel: ShowdownReplaysViewModel) {
     val replays = viewModel.replaysToDelete ?: return
     val count = if (replays.size == 1) "1 saved replay" else "${replays.size} saved replays"
-    val which = if (viewModel.filters.isEmpty) "All the $count of ${viewModel.formatLabel}"
-    else "The $count of ${viewModel.formatLabel} the filters show"
+    val which = when {
+        viewModel.isDeletingSelection -> if (replays.size == 1) "The selected replay" else "The ${replays.size} selected replays"
+        viewModel.filters.isEmpty -> "All the $count of ${viewModel.formatLabel}"
+        else -> "The $count of ${viewModel.formatLabel} the filters show"
+    }
     AlertDialog(
         onDismissRequest = viewModel::dismissDeletion,
         title = { Text("Delete replays") },
