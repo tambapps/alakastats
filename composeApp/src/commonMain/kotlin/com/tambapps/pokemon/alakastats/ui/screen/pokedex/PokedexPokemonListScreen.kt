@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
@@ -45,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.alakastats.domain.model.PokedexSpecies
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
+import com.tambapps.pokemon.alakastats.ui.composables.LazyVerticalGridWithScrollbar
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.TypeBadge
 import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
@@ -108,9 +108,10 @@ fun PokedexPokemonListScreen() {
                 }
                 viewModel.loadingFailed -> EmptyText("The Pokédex couldn't be loaded")
                 viewModel.pokemons.isEmpty() -> EmptyText("No Pokémon matches \"${viewModel.query}\"")
-                else -> LazyVerticalGrid(
+                else -> LazyVerticalGridWithScrollbar(
                     columns = GridCells.Adaptive(CARD_MIN_WIDTH),
-                    contentPadding = PaddingValues(bottom = 16.dp),
+                    // on desktop, room for the scrollbar on the right of the cards
+                    contentPadding = PaddingValues(bottom = 16.dp, end = if (isCompact) 0.dp else 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxSize(),

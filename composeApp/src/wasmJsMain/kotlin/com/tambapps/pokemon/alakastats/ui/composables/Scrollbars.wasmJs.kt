@@ -20,6 +20,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -88,6 +92,54 @@ actual fun LazyColumnWithScrollbar(
                 verticalArrangement = verticalArrangement,
                 contentPadding = contentPadding,
                 state = state,
+                content = content,
+            )
+
+            val style = if (isDarkThemeEnabled()) LocalScrollbarStyle.current.copy(
+                unhoverColor = Color.White.copy(alpha = 0.12f),
+                hoverColor = Color.White.copy(alpha = 0.50f)
+            )
+            else LocalScrollbarStyle.current
+
+            VerticalScrollbar(
+                adapter = rememberScrollbarAdapter(state),
+                modifier = Modifier.align(Alignment.TopEnd).fillMaxHeight().width(scrollbarThickness),
+                style = style
+            )
+        }
+    }
+}
+@Composable
+actual fun LazyVerticalGridWithScrollbar(
+    columns: GridCells,
+    modifier: Modifier,
+    state: LazyGridState,
+    scrollbarThickness: Dp,
+    verticalArrangement: Arrangement.Vertical,
+    horizontalArrangement: Arrangement.Horizontal,
+    contentPadding: PaddingValues,
+    content: LazyGridScope.() -> Unit
+) {
+    if (LocalIsCompact.current) {
+        LazyVerticalGrid(
+            columns = columns,
+            modifier = modifier,
+            state = state,
+            verticalArrangement = verticalArrangement,
+            horizontalArrangement = horizontalArrangement,
+            contentPadding = contentPadding,
+            content = content,
+        )
+    } else {
+        // defined scrollbar for desktop Web
+        Box(modifier) {
+            LazyVerticalGrid(
+                columns = columns,
+                modifier = Modifier.fillMaxSize(),
+                state = state,
+                verticalArrangement = verticalArrangement,
+                horizontalArrangement = horizontalArrangement,
+                contentPadding = contentPadding,
                 content = content,
             )
 

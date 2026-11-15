@@ -9,6 +9,10 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,5 +41,24 @@ actual fun LazyColumnWithScrollbar(
     verticalArrangement = verticalArrangement,
     contentPadding = contentPadding,
     state = state,
+    content = content,
+)
+@Composable
+actual fun LazyVerticalGridWithScrollbar(
+    columns: GridCells,
+    modifier: Modifier,
+    state: LazyGridState,
+    scrollbarThickness: Dp,
+    verticalArrangement: Arrangement.Vertical,
+    horizontalArrangement: Arrangement.Horizontal,
+    contentPadding: PaddingValues,
+    content: LazyGridScope.() -> Unit
+) = LazyVerticalGrid(
+    columns = columns,
+    modifier = modifier,
+    state = state,
+    verticalArrangement = verticalArrangement,
+    horizontalArrangement = horizontalArrangement,
+    contentPadding = contentPadding,
     content = content,
 )
