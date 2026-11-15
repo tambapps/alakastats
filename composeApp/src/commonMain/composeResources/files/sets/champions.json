@@ -1,0 +1,2206 @@
+{
+  "Venusaur" : [ {
+    "name" : "Sun Sleep Offense",
+    "nature" : "Modest",
+    "ability" : "Chlorophyll",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Leaf Storm", "Sludge Bomb", "Earth Power", "Sleep Powder" ]
+  }, {
+    "name" : "Bulky Mega Offense",
+    "nature" : "Modest",
+    "ability" : "Chlorophyll",
+    "item" : "Venusaurite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 2
+    },
+    "moves" : [ "Energy Ball", "Sludge Bomb", "Earth Power", "Giga Drain" ]
+  } ],
+  "Charizard" : [ {
+    "name" : "Fast Offense Mega Y",
+    "nature" : "Modest",
+    "ability" : "Solar Power",
+    "item" : "Charizardite Y",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Heat Wave", "Weather Ball", "Solar Beam", "Ancient Power" ]
+  }, {
+    "name" : "Physically Bulky Mega Y",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Charizardite Y",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 32,
+      "spa" : 1,
+      "spd" : 0,
+      "spe" : 1
+    },
+    "moves" : [ "Heat Wave", "Weather Ball", "Solar Beam", "Air Slash" ]
+  }, {
+    "name" : "DD Mega X",
+    "nature" : "Adamant",
+    "ability" : "Blaze",
+    "item" : "Charizardite X",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Flare Blitz", "Dragon Claw", "Thunder Punch", "Dragon Dance" ]
+  } ],
+  "Blastoise" : [ {
+    "name" : "Fast Mega Attacker",
+    "nature" : "Modest",
+    "ability" : "Rain Dish",
+    "item" : "Blastoisinite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Water Spout", "Dark Pulse", "Aura Sphere", "Ice Beam" ]
+  }, {
+    "name" : "Trick Room Mega Offense",
+    "nature" : "Quiet",
+    "ability" : "Rain Dish",
+    "item" : "Blastoisinite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Water Spout", "Dark Pulse", "Ice Beam", "Fake Out" ]
+  } ],
+  "Beedrill" : [ {
+    "name" : "Adamant Coverage Mega",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Beedrillite",
+    "statPoints" : {
+      "hp" : 0,
+      "atk" : 30,
+      "def" : 5,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 31
+    },
+    "moves" : [ "Poison Jab", "U-turn", "Drill Run", "Knock Off" ]
+  } ],
+  "Pidgeot" : [ {
+    "name" : "Offense Tailwind Mega",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Pidgeotite",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 1,
+      "spe" : 32
+    },
+    "moves" : [ "Hurricane", "Heat Wave", "Hyper Beam", "Tailwind" ]
+  } ],
+  "Raichu" : [ {
+    "name" : "HP/Def Invested Mega Y",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Raichunite Y",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 11,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 23
+    },
+    "moves" : [ "Zap Cannon", "Focus Blast", "Fake Out", "Grass Knot" ]
+  }, {
+    "name" : "Rising Voltage Mega X",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Raichunite X",
+    "statPoints" : {
+      "hp" : 30,
+      "atk" : 0,
+      "def" : 1,
+      "spa" : 10,
+      "spd" : 0,
+      "spe" : 25
+    },
+    "moves" : [ "Rising Voltage", "Volt Tackle", "Fake Out", "Volt Switch" ]
+  } ],
+  "Clefable" : [ {
+    "name" : "Physically Defensive Sitrus",
+    "nature" : "Bold",
+    "ability" : "Unaware",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 32,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Moonblast", "Icy Wind", "Follow Me", "Helping Hand" ]
+  } ],
+  "Ninetales" : [ {
+    "name" : "Fake Tears Scarf Offense",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 0,
+      "def" : 1,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Heat Wave", "Solar Beam", "Overheat", "Fake Tears" ]
+  } ],
+  "Gengar" : [ {
+    "name" : "Offensive Mega",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Gengarite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Shadow Ball", "Sludge Bomb", "Icy Wind", "Protect" ]
+  }, {
+    "name" : "Bulkier Perish Mega",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Gengarite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 9,
+      "spa" : 1,
+      "spd" : 1,
+      "spe" : 23
+    },
+    "moves" : [ "Shadow Ball", "Sludge Bomb", "Perish Song", "Disable" ]
+  }, {
+    "name" : "Sash Offense",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Shadow Ball", "Sludge Bomb", "Icy Wind", "Protect" ]
+  } ],
+  "Kangaskhan" : [ {
+    "name" : "Silk Scarf Last Resort",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Silk Scarf",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 2,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 0
+    },
+    "moves" : [ "Fake Out", "Last Resort" ]
+  }, {
+    "name" : "Fast Mega",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Kangaskhanite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Fake Out", "Double-Edge", "Sucker Punch", "Drain Punch" ]
+  }, {
+    "name" : "Trick Room Max Attack Mega",
+    "nature" : "Brave",
+    "ability" : "",
+    "item" : "Kangaskhanite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Fake Out", "Double-Edge", "Hammer Arm", "Ice Punch" ]
+  } ],
+  "Starmie" : [ {
+    "name" : "Rain Offense Mega",
+    "nature" : "Jolly",
+    "ability" : "Natural Cure",
+    "item" : "Starminite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Liquidation", "Zen Headbutt", "Ice Spinner", "Aqua Jet" ]
+  } ],
+  "Gyarados" : [ {
+    "name" : "Max Speed DD Mega",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Gyaradosite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Waterfall", "Lash Out", "Earthquake", "Dragon Dance" ]
+  }, {
+    "name" : "Sitrus Disruption",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 2,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 0
+    },
+    "moves" : [ "Waterfall", "Ice Fang", "Taunt", "Thunder Wave" ]
+  } ],
+  "Aerodactyl" : [ {
+    "name" : "Sash Tailwind Support",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Rock Slide", "Dual Wingbeat", "Tailwind", "Taunt" ]
+  }, {
+    "name" : "Offensive Mega",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Aerodactylite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Rock Slide", "Dual Wingbeat", "Ice Fang", "Iron Head" ]
+  } ],
+  "Dragonite" : [ {
+    "name" : "Special Coverage Mega",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Dragoninite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Dragon Pulse", "Thunderbolt", "Heat Wave", "Ice Beam" ]
+  }, {
+    "name" : "Special Rain Mega",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Dragoninite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Draco Meteor", "Hurricane", "Extreme Speed", "Thunder" ]
+  }, {
+    "name" : "Dragon Fang Physical Offense",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Dragon Fang",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Dragon Claw", "Low Kick", "Extreme Speed", "Scale Shot" ]
+  } ],
+  "Meganium" : [ {
+    "name" : "Bulky Offense Mega",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Meganiumite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 2
+    },
+    "moves" : [ "Solar Beam", "Dazzling Gleam", "Weather Ball", "Earth Power" ]
+  } ],
+  "Ariados" : [ {
+    "name" : "FedeCampo's GC 1st Sitrus Support",
+    "nature" : "Impish",
+    "ability" : "Insomnia",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 31,
+      "atk" : 0,
+      "def" : 20,
+      "spa" : 0,
+      "spd" : 15,
+      "spe" : 0
+    },
+    "moves" : [ "Knock Off", "Rage Powder", "String Shot", "Protect" ]
+  } ],
+  "Politoed" : [ {
+    "name" : "Scarf Offense",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Weather Ball", "Icy Wind", "Muddy Water", "Ice Beam" ]
+  }, {
+    "name" : "Bulky Support",
+    "nature" : "Calm",
+    "ability" : "",
+    "item" : "Leftovers",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 32,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Weather Ball", "Icy Wind", "Helping Hand", "Perish Song" ]
+  } ],
+  "Steelix" : [ {
+    "name" : "Specially Defensive Mega",
+    "nature" : "Brave",
+    "ability" : "",
+    "item" : "Steelixite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 6,
+      "def" : 1,
+      "spa" : 0,
+      "spd" : 27,
+      "spe" : 0
+    },
+    "moves" : [ "High Horsepower", "Heavy Slam", "Body Press", "Wide Guard" ]
+  } ],
+  "Scizor" : [ {
+    "name" : "Offense Mega on Rain",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Scizorite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Bullet Punch", "Bug Bite", "Close Combat", "Swords Dance" ]
+  } ],
+  "Tyranitar" : [ {
+    "name" : "Scarf Offense",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Rock Slide", "Knock Off", "Ice Punch", "Low Kick" ]
+  }, {
+    "name" : "Bulky Max Attack Mega",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Tyranitarite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Rock Slide", "Knock Off", "High Horsepower", "Low Kick" ]
+  }, {
+    "name" : "DD Max Speed Mega",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Tyranitarite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Rock Slide", "Knock Off", "Dragon Dance", "Protect" ]
+  } ],
+  "Pelipper" : [ {
+    "name" : "Sash Tailwind Offense",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Weather Ball", "Hurricane", "Muddy Water", "Tailwind" ]
+  }, {
+    "name" : "Sitrus Offensive Support",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 31,
+      "atk" : 0,
+      "def" : 1,
+      "spa" : 5,
+      "spd" : 18,
+      "spe" : 11
+    },
+    "moves" : [ "Weather Ball", "Hurricane", "Wide Guard", "Helping Hand" ]
+  }, {
+    "name" : "Max Speed Scarf",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Weather Ball", "Hurricane", "Icy Wind", "Muddy Water" ]
+  } ],
+  "Gardevoir" : [ {
+    "name" : "Bulky TR Mega",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Gardevoirite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 0
+    },
+    "moves" : [ "Hyper Voice", "Psyshock", "Expanding Force", "Trick Room" ]
+  }, {
+    "name" : "Timid Scarf",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 0,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Moonblast", "Psyshock", "Dazzling Gleam", "Icy Wind" ]
+  } ],
+  "Sableye" : [ {
+    "name" : "Roseli Disruption",
+    "nature" : "Careful",
+    "ability" : "",
+    "item" : "Roseli Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 0,
+      "spd" : 32,
+      "spe" : 0
+    },
+    "moves" : [ "Foul Play", "Fake Out", "Encore", "Will-O-Wisp" ]
+  } ],
+  "Camerupt" : [ {
+    "name" : "TR Offense Mega",
+    "nature" : "Quiet",
+    "ability" : "",
+    "item" : "Cameruptite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 0
+    },
+    "moves" : [ "Earth Power", "Heat Wave", "Eruption", "Ancient Power" ]
+  } ],
+  "Torkoal" : [ {
+    "name" : "TR Sun Offense",
+    "nature" : "Quiet",
+    "ability" : "",
+    "item" : "Charcoal",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Eruption", "Heat Wave", "Weather Ball", "Earth Power" ]
+  } ],
+  "Milotic" : [ {
+    "name" : "Lefties Bulk",
+    "nature" : "Bold",
+    "ability" : "",
+    "item" : "Leftovers",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 32,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Scald", "Icy Wind", "Ice Beam", "Recover" ]
+  } ],
+  "Absol" : [ {
+    "name" : "Mega Z Offense",
+    "nature" : "Jolly",
+    "ability" : "Justified",
+    "item" : "Absolite Z",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Night Slash", "Shadow Claw", "Close Combat", "Psycho Cut" ]
+  } ],
+  "Garchomp" : [ {
+    "name" : "Scarf Offense",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Earthquake", "Dragon Claw", "Rock Slide", "Stomping Tantrum" ]
+  }, {
+    "name" : "Max Speed LOrb",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Life Orb",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Earthquake", "Dragon Claw", "Rock Slide", "Stomping Tantrum" ]
+  }, {
+    "name" : "cona's Worlds 2nd Max Speed Sitrus",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 21,
+      "atk" : 7,
+      "def" : 6,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Earthquake", "Dragon Claw", "Rock Slide", "Protect" ]
+  }, {
+    "name" : "Mega for Both Offense and Bulk",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Garchompite",
+    "statPoints" : {
+      "hp" : 22,
+      "atk" : 21,
+      "def" : 3,
+      "spa" : 0,
+      "spd" : 1,
+      "spe" : 19
+    },
+    "moves" : [ "Earthquake", "Dragon Claw", "Rock Slide", "Stomping Tantrum" ]
+  }, {
+    "name" : "Mega Z Draco + Pulse + Coverage",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Garchompite Z",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Draco Meteor", "Dragon Pulse", "Flamethrower", "Power Gem" ]
+  } ],
+  "Lucario" : [ {
+    "name" : "Mega Z Calm Mind Bulk",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Lucarionite Z",
+    "statPoints" : {
+      "hp" : 31,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 8,
+      "spd" : 6,
+      "spe" : 19
+    },
+    "moves" : [ "Dark Pulse", "Aura Sphere", "Flash Cannon", "Calm Mind" ]
+  } ],
+  "Mamoswine" : [ {
+    "name" : "Sash Oblivious Offense",
+    "nature" : "Adamant",
+    "ability" : "Oblivious",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 0,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 32
+    },
+    "moves" : [ "Ice Shard", "High Horsepower", "Icicle Crash", "Rock Slide" ]
+  } ],
+  "Gallade" : [ {
+    "name" : "Sash TR Offense",
+    "nature" : "Brave",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 2,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 0
+    },
+    "moves" : [ "Sacred Sword", "Psycho Cut", "Wide Guard", "Trick Room" ]
+  } ],
+  "Froslass" : [ {
+    "name" : "Offensive Veil Mega",
+    "nature" : "Timid",
+    "ability" : "Cursed Body",
+    "item" : "Froslassite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Blizzard", "Shadow Ball", "Thunderbolt", "Aurora Veil" ]
+  } ],
+  "Rotom-Wash" : [ {
+    "name" : "Wisp Support",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 2
+    },
+    "moves" : [ "Hydro Pump", "Thunderbolt", "Volt Switch", "Will-O-Wisp" ]
+  }, {
+    "name" : "Scarf Electroweb",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Hydro Pump", "Electroweb", "Volt Switch", "Trick" ]
+  } ],
+  "Rotom-Heat" : [ {
+    "name" : "Scarf Electroweb",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Overheat", "Electroweb", "Volt Switch", "Trick" ]
+  }, {
+    "name" : "Wisp Support",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 2
+    },
+    "moves" : [ "Overheat", "Thunderbolt", "Volt Switch", "Will-O-Wisp" ]
+  } ],
+  "Rotom-Mow" : [ {
+    "name" : "Scarf Electroweb",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Leaf Storm", "Electroweb", "Volt Switch", "Thunderbolt" ]
+  } ],
+  "Excadrill" : [ {
+    "name" : "Max Attack Sand Offense",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 0,
+      "atk" : 32,
+      "def" : 2,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "High Horsepower", "Iron Head", "Rock Slide", "Earthquake" ]
+  }, {
+    "name" : "Max Speed Mega Option",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Excadrite",
+    "statPoints" : {
+      "hp" : 0,
+      "atk" : 32,
+      "def" : 2,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "High Horsepower", "Iron Head", "Rock Slide", "Earthquake" ]
+  } ],
+  "Whimsicott" : [ {
+    "name" : "Sash Tailwind Support",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Moonblast", "Tailwind", "Encore", "Protect" ]
+  } ],
+  "Vanilluxe" : [ {
+    "name" : "Scarf Ice Offense",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 0,
+      "def" : 1,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Blizzard", "Freeze-Dry", "Icy Wind", "Sheer Cold" ]
+  } ],
+  "Golurk" : [ {
+    "name" : "TR Offense Mega",
+    "nature" : "Brave",
+    "ability" : "No Guard",
+    "item" : "Golurkite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Headlong Rush", "Poltergeist", "Ice Punch", "Drain Punch" ]
+  } ],
+  "Hydreigon" : [ {
+    "name" : "Scarf Coverage Offense",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Dark Pulse", "Draco Meteor", "Earth Power", "Flamethrower" ]
+  } ],
+  "Volcarona" : [ {
+    "name" : "Grassy Seed Quiver Dance",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Grassy Seed",
+    "statPoints" : {
+      "hp" : 19,
+      "atk" : 0,
+      "def" : 13,
+      "spa" : 5,
+      "spd" : 1,
+      "spe" : 28
+    },
+    "moves" : [ "Heat Wave", "Giga Drain", "Fiery Dance", "Quiver Dance" ]
+  }, {
+    "name" : "Rocky Helmet Support",
+    "nature" : "Bold",
+    "ability" : "",
+    "item" : "Rocky Helmet",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 32,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Overheat", "Struggle Bug", "Rage Powder", "Tailwind" ]
+  } ],
+  "Delphox" : [ {
+    "name" : "Fast Offensive Mega",
+    "nature" : "Timid",
+    "ability" : "Blaze",
+    "item" : "Delphoxite",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 0,
+      "def" : 1,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Heat Wave", "Psychic", "Psyshock", "Dazzling Gleam" ]
+  } ],
+  "Talonflame" : [ {
+    "name" : "Sharp Beak TW Offense",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Sharp Beak",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Flare Blitz", "Brave Bird", "Dual Wingbeat", "Tailwind" ]
+  }, {
+    "name" : "Yurine's Korea Cup 2nd Mixed Charcoal",
+    "nature" : "Naive",
+    "ability" : "",
+    "item" : "Charcoal",
+    "statPoints" : {
+      "hp" : 8,
+      "atk" : 1,
+      "def" : 0,
+      "spa" : 30,
+      "spd" : 0,
+      "spe" : 27
+    },
+    "moves" : [ "Overheat", "Brave Bird", "Protect", "Tailwind" ]
+  }, {
+    "name" : "Itemless Acrobatics",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Flare Blitz", "Acrobatics", "Protect", "Tailwind" ]
+  } ],
+  "Vivillon" : [ {
+    "name" : "Scarf Rain Dance Support",
+    "nature" : "Timid",
+    "ability" : "Compound Eyes",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 0,
+      "atk" : 0,
+      "def" : 24,
+      "spa" : 5,
+      "spd" : 5,
+      "spe" : 32
+    },
+    "moves" : [ "Hurricane", "Sleep Powder", "Tailwind", "Rain Dance" ]
+  }, {
+    "name" : "Sash Rage Powder",
+    "nature" : "Timid",
+    "ability" : "Compound Eyes",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Hurricane", "Pollen Puff", "Sleep Powder", "Rage Powder" ]
+  } ],
+  "Floette-Eternal" : [ {
+    "name" : "Max Speed Mega Attacker",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Floettite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Moonblast", "Dazzling Gleam", "Light of Ruin", "Protect" ]
+  }, {
+    "name" : "Calm Mind Mega Sweeper",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Floettite",
+    "statPoints" : {
+      "hp" : 26,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 25,
+      "spd" : 0,
+      "spe" : 13
+    },
+    "moves" : [ "Moonblast", "Dazzling Gleam", "Draining Kiss", "Calm Mind" ]
+  } ],
+  "Aegislash" : [ {
+    "name" : "Spell Tag Physical",
+    "nature" : "Brave",
+    "ability" : "",
+    "item" : "Spell Tag",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Poltergeist", "Shadow Sneak", "Iron Head", "Sacred Sword" ]
+  }, {
+    "name" : "Lefties Wide Guard Special",
+    "nature" : "Quiet",
+    "ability" : "",
+    "item" : "Leftovers",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Shadow Ball", "Flash Cannon", "Wide Guard", "King's Shield" ]
+  } ],
+  "Sylveon" : [ {
+    "name" : "Fairy Feather Offense",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Fairy Feather",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 2
+    },
+    "moves" : [ "Hyper Voice", "Hyper Beam", "Quick Attack", "Mystical Fire" ]
+  } ],
+  "Incineroar" : [ {
+    "name" : "Balanced Bulk Sitrus",
+    "nature" : "Careful",
+    "ability" : "",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 14,
+      "spa" : 0,
+      "spd" : 20,
+      "spe" : 0
+    },
+    "moves" : [ "Flare Blitz", "Darkest Lariat", "Fake Out", "Parting Shot" ]
+  }, {
+    "name" : "Trick Room Offense",
+    "nature" : "Brave",
+    "ability" : "",
+    "item" : "Life Orb",
+    "statPoints" : {
+      "hp" : 29,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 5,
+      "spe" : 0
+    },
+    "moves" : [ "Flare Blitz", "Darkest Lariat", "Close Combat", "Fake Out" ]
+  } ],
+  "Primarina" : [ {
+    "name" : "Mystic Water Offense",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Mystic Water",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 2
+    },
+    "moves" : [ "Hyper Voice", "Moonblast", "Dazzling Gleam", "Ice Beam" ]
+  } ],
+  "Kommo-o" : [ {
+    "name" : "Omni Boost Lefties Sweeper",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Leftovers",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Clanging Scales", "Aura Sphere", "Vacuum Wave", "Clangorous Soul" ]
+  }, {
+    "name" : "Iron Defense Body Press",
+    "nature" : "Bold",
+    "ability" : "",
+    "item" : "Leftovers",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 32,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 2
+    },
+    "moves" : [ "Body Press", "Flamethrower", "Draco Meteor", "Iron Defense" ]
+  } ],
+  "Corviknight" : [ {
+    "name" : "Full Bulk TW Support",
+    "nature" : "Impish",
+    "ability" : "",
+    "item" : "Leftovers",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 32,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Brave Bird", "Body Press", "Roost", "Tailwind" ]
+  }, {
+    "name" : "Bulk Up Sitrus",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 20,
+      "atk" : 24,
+      "def" : 3,
+      "spa" : 0,
+      "spd" : 1,
+      "spe" : 18
+    },
+    "moves" : [ "Brave Bird", "Body Press", "Iron Head", "Bulk Up" ]
+  } ],
+  "Hatterene" : [ {
+    "name" : "Life Orb Trick Room",
+    "nature" : "Quiet",
+    "ability" : "",
+    "item" : "Life Orb",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 0
+    },
+    "moves" : [ "Psyshock", "Dazzling Gleam", "Expanding Force", "Trick Room" ]
+  } ],
+  "Dragapult" : [ {
+    "name" : "Physical Sash Wisp",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Dragon Darts", "Phantom Force", "Psychic Fangs", "Will-O-Wisp" ]
+  } ],
+  "Kleavor" : [ {
+    "name" : "Scarf Offense",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Stone Axe", "Close Combat", "Rock Slide", "U-turn" ]
+  }, {
+    "name" : "Sash Adamant",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Stone Axe", "Close Combat", "Feint", "X-Scissor" ]
+  } ],
+  "Basculegion" : [ {
+    "name" : "Scarf Adaptability",
+    "nature" : "Jolly",
+    "ability" : "Adaptability",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Last Respects", "Wave Crash", "Flip Turn", "Aqua Jet" ]
+  }, {
+    "name" : "Sash Liqudation",
+    "nature" : "Adamant",
+    "ability" : "Adaptability",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Last Respects", "Liquidation", "Aqua Jet", "Protect" ]
+  }, {
+    "name" : "shinde_klefki's PJCS Top 8 Sitrus",
+    "nature" : "Adamant",
+    "ability" : "Adaptability",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 6,
+      "atk" : 8,
+      "def" : 11,
+      "spa" : 0,
+      "spd" : 23,
+      "spe" : 18
+    },
+    "moves" : [ "Wave Crash", "Last Respects", "Aqua Jet", "Protect" ]
+  }, {
+    "name" : "Life Orb Adaptability",
+    "nature" : "Adamant",
+    "ability" : "Adaptability",
+    "item" : "Life Orb",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Last Respects", "Wave Crash", "Aqua Jet", "Protect" ]
+  }, {
+    "name" : "Life Orb Swift Swim",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Life Orb",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Last Respects", "Wave Crash", "Flip Turn", "Aqua Jet" ]
+  } ],
+  "Sneasler" : [ {
+    "name" : "Offensive White Herb Unburden",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "White Herb",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Close Combat", "Dire Claw", "Fake Out", "Rock Slide" ]
+  }, {
+    "name" : "Psychic Seed Offense",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Psychic Seed",
+    "statPoints" : {
+      "hp" : 0,
+      "atk" : 27,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 7,
+      "spe" : 32
+    },
+    "moves" : [ "Dire Claw", "Close Combat", "Throat Chop", "Rock Slide" ]
+  }, {
+    "name" : "Poison Touch Sash",
+    "nature" : "Jolly",
+    "ability" : "Poison Touch",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Close Combat", "Poison Jab", "Fake Out", "Feint" ]
+  } ],
+  "Maushold" : [ {
+    "name" : "Chople Support",
+    "nature" : "Jolly",
+    "ability" : "Friend Guard",
+    "item" : "Chople Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Super Fang", "Feint", "Follow Me", "Taunt" ]
+  }, {
+    "name" : "Technician Offense",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Wide Lens",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Population Bomb", "Bite", "Feint", "Follow Me" ]
+  } ],
+  "Maushold-Four" : [ {
+    "name" : "Chople Support",
+    "nature" : "Jolly",
+    "ability" : "Friend Guard",
+    "item" : "Chople Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Super Fang", "Feint", "Follow Me", "Taunt" ]
+  }, {
+    "name" : "Technician Offense",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Wide Lens",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Population Bomb", "Bite", "Feint", "Follow Me" ]
+  } ],
+  "Armarouge" : [ {
+    "name" : "Psyspam Trick Room",
+    "nature" : "Quiet",
+    "ability" : "",
+    "item" : "Life Orb",
+    "statPoints" : {
+      "hp" : 29,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 5,
+      "spe" : 0
+    },
+    "moves" : [ "Armor Cannon", "Expanding Force", "Heat Wave", "Trick Room" ]
+  } ],
+  "Ceruledge" : [ {
+    "name" : "Dawei Si's NAIC T8 Colbur Bulk Up",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Colbur Berry",
+    "statPoints" : {
+      "hp" : 27,
+      "atk" : 20,
+      "def" : 18,
+      "spa" : 0,
+      "spd" : 1,
+      "spe" : 0
+    },
+    "moves" : [ "Bitter Blade", "Shadow Sneak", "Bulk Up", "Protect" ]
+  } ],
+  "Scovillain" : [ {
+    "name" : "Bulky Moody Mega",
+    "nature" : "Calm",
+    "ability" : "Moody",
+    "item" : "Scovillainite",
+    "statPoints" : {
+      "hp" : 30,
+      "atk" : 0,
+      "def" : 18,
+      "spa" : 0,
+      "spd" : 18,
+      "spe" : 0
+    },
+    "moves" : [ "Overheat", "Giga Drain", "Rage Powder", "Leech Seed" ]
+  } ],
+  "Palafin" : [ {
+    "name" : "Leftovers Bulk Up",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Leftovers",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 2
+    },
+    "moves" : [ "Jet Punch", "Wave Crash", "Drain Punch", "Bulk Up" ]
+  }, {
+    "name" : "Mystic Water Offense",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Mystic Water",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 2
+    },
+    "moves" : [ "Wave Crash", "Jet Punch", "Flip Turn", "Close Combat" ]
+  } ],
+  "Glimmora" : [ {
+    "name" : "Modest Sash",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 1,
+      "spe" : 32
+    },
+    "moves" : [ "Power Gem", "Sludge Bomb", "Earth Power", "Energy Ball" ]
+  }, {
+    "name" : "Fast Offense Mega",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Glimmoranite",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 1,
+      "spe" : 32
+    },
+    "moves" : [ "Power Gem", "Sludge Bomb", "Sludge Wave", "Earth Power" ]
+  } ],
+  "Farigiraf" : [ {
+    "name" : "Offensive TR Sitrus",
+    "nature" : "Quiet",
+    "ability" : "Armor Tail",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 0
+    },
+    "moves" : [ "Psychic", "Twin Beam", "Thunderbolt", "Trick Room" ]
+  }, {
+    "name" : "Bulky Colbur",
+    "nature" : "Bold",
+    "ability" : "Armor Tail",
+    "item" : "Colbur Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 22,
+      "spa" : 0,
+      "spd" : 12,
+      "spe" : 0
+    },
+    "moves" : [ "Psychic", "Thunderbolt", "Twin Beam", "Trick Room" ]
+  } ],
+  "Kingambit" : [ {
+    "name" : "Black Glasses Offense",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Black Glasses",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Kowtow Cleave", "Iron Head", "Sucker Punch", "Low Kick" ]
+  }, {
+    "name" : "Speedy Sash",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Kowtow Cleave", "Iron Head", "Sucker Punch", "Low Kick" ]
+  }, {
+    "name" : "natsumewato's Worlds 1st Chople",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Chople Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 15,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 19,
+      "spe" : 0
+    },
+    "moves" : [ "Kowtow Cleave", "Iron Head", "Sucker Punch", "Low Kick" ]
+  } ],
+  "Sinistcha" : [ {
+    "name" : "Sitrus TR Redirect",
+    "nature" : "Bold",
+    "ability" : "",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 14,
+      "spa" : 0,
+      "spd" : 20,
+      "spe" : 0
+    },
+    "moves" : [ "Matcha Gotcha", "Shadow Ball", "Rage Powder", "Trick Room" ]
+  } ],
+  "Archaludon" : [ {
+    "name" : "Bulky Stamina Lefties",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Leftovers",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 1,
+      "spa" : 5,
+      "spd" : 25,
+      "spe" : 3
+    },
+    "moves" : [ "Electro Shot", "Flash Cannon", "Draco Meteor", "Dragon Pulse" ]
+  }, {
+    "name" : "Fast Stamina Chople",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Chople Berry",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Electro Shot", "Flash Cannon", "Dragon Pulse", "Aura Sphere" ]
+  } ],
+  "Ninetales-Alola" : [ {
+    "name" : "Ice Offense",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Never-Melt Ice",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 0,
+      "def" : 1,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Blizzard", "Freeze-Dry", "Icy Wind", "Moonblast" ]
+  }, {
+    "name" : "Sash Veil Encore",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 0,
+      "def" : 1,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Blizzard", "Icy Wind", "Aurora Veil", "Encore" ]
+  } ],
+  "Arcanine-Hisui" : [ {
+    "name" : "Scarf Full Offense",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 1,
+      "spe" : 32
+    },
+    "moves" : [ "Flare Blitz", "Rock Slide", "Extreme Speed", "Head Smash" ]
+  }, {
+    "name" : "Jolly Sash Rock Head",
+    "nature" : "Jolly",
+    "ability" : "Rock Head",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 1,
+      "spe" : 32
+    },
+    "moves" : [ "Flare Blitz", "Rock Slide", "Extreme Speed", "Head Smash" ]
+  } ],
+  "Typhlosion-Hisui" : [ {
+    "name" : "Scarf Eruption",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 0,
+      "def" : 1,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Eruption", "Shadow Ball", "Heat Wave", "Overheat" ]
+  } ],
+  "Samurott-Hisui" : [ {
+    "name" : "Jolly Scarf",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Sacred Sword", "Aqua Cutter", "Night Slash", "Flip Turn" ]
+  }, {
+    "name" : "Adamant Sash",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Sacred Sword", "Aqua Cutter", "Night Slash", "Sucker Punch" ]
+  } ],
+  "Zoroark-Hisui" : [ {
+    "name" : "Sash Support/Offense",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 0,
+      "def" : 1,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Hyper Voice", "Bitter Malice", "Icy Wind", "Psychic" ]
+  } ],
+  "Lycanroc-Dusk" : [ {
+    "name" : "Adamant Sash",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 32,
+      "def" : 1,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Rock Slide", "Close Combat", "Accelerock", "Psychic Fangs" ]
+  } ],
+  "Sceptile" : [ {
+    "name" : "Offense Mega",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Sceptilite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Leaf Storm", "Dragon Pulse", "Earth Power", "Energy Ball" ]
+  } ],
+  "Blaziken" : [ {
+    "name" : "Physical Offense Mega",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Blazikenite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Flare Blitz", "Close Combat", "Rock Slide", "Detect" ]
+  }, {
+    "name" : "Special Coaching Sash",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Heat Wave", "Aura Sphere", "Overheat", "Coaching" ]
+  } ],
+  "Swampert" : [ {
+    "name" : "Rain Offense Mega",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Swampertite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Wave Crash", "High Horsepower", "Ice Punch", "Earthquake" ]
+  } ],
+  "Mawile" : [ {
+    "name" : "TR Attacker Mega",
+    "nature" : "Brave",
+    "ability" : "",
+    "item" : "Mawilite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Play Rough", "Sucker Punch", "Iron Head", "Rock Slide" ]
+  }, {
+    "name" : "Tailwind Offense Mega",
+    "nature" : "Adamant",
+    "ability" : "Hyper Cutter",
+    "item" : "Mawilite",
+    "statPoints" : {
+      "hp" : 19,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 15
+    },
+    "moves" : [ "Play Rough", "Sucker Punch", "Iron Head", "Brick Break" ]
+  } ],
+  "Metagross" : [ {
+    "name" : "Jolly Offense Mega",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Metagrossite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Iron Head", "Psychic Fangs", "Body Press", "Ice Punch" ]
+  } ],
+  "Staraptor" : [ {
+    "name" : "Jolly STABs Roost Mega",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Staraptite",
+    "statPoints" : {
+      "hp" : 0,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 32
+    },
+    "moves" : [ "Close Combat", "Brave Bird", "Dual Wingbeat", "Roost" ]
+  }, {
+    "name" : "Scarf Final Gambit",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 1,
+      "def" : 1,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Final Gambit", "Close Combat", "Brave Bird", "U-turn" ]
+  } ],
+  "Pyroar" : [ {
+    "name" : "Sun Offense Mega",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Pyroarite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Heat Wave", "Overheat", "Solar Beam", "Protect" ]
+  } ],
+  "Grimmsnarl" : [ {
+    "name" : "Screens Clay Support",
+    "nature" : "Careful",
+    "ability" : "",
+    "item" : "Light Clay",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 13,
+      "spa" : 0,
+      "spd" : 21,
+      "spe" : 0
+    },
+    "moves" : [ "Reflect", "Light Screen", "Spirit Break", "Foul Play" ]
+  } ],
+  "Annihilape" : [ {
+    "name" : "Bulk Up Lefties",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Leftovers",
+    "statPoints" : {
+      "hp" : 24,
+      "atk" : 25,
+      "def" : 8,
+      "spa" : 0,
+      "spd" : 7,
+      "spe" : 2
+    },
+    "moves" : [ "Rage Fist", "Drain Punch", "Bulk Up", "Protect" ]
+  }, {
+    "name" : "Scarf Offense",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Shadow Claw", "Close Combat", "U-turn", "Rock Slide" ]
+  } ],
+  "Gholdengo" : [ {
+    "name" : "Life Orb Modest",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Life Orb",
+    "statPoints" : {
+      "hp" : 7,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 27,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Make It Rain", "Shadow Ball", "Thunderbolt", "Nasty Plot" ]
+  }, {
+    "name" : "Timid Scarf",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 1,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 1,
+      "spe" : 32
+    },
+    "moves" : [ "Make It Rain", "Shadow Ball", "Power Gem", "Steel Beam" ]
+  } ],
+  "Salamence" : [ {
+    "name" : "Mixed Offense Mega",
+    "nature" : "Timid",
+    "ability" : "",
+    "item" : "Salamencite",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 0,
+      "def" : 0,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Double-Edge", "Hyper Voice", "Draco Meteor", "Flamethrower" ]
+  } ],
+  "Golisopod" : [ {
+    "name" : "TR Offense Mega",
+    "nature" : "Brave",
+    "ability" : "",
+    "item" : "Golisopite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Leech Life", "Iron Head", "First Impression", "Sucker Punch" ]
+  } ],
+  "Rillaboom" : [ {
+    "name" : "Basic Miracle Seed",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Miracle Seed",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Wood Hammer", "Grassy Glide", "High Horsepower", "Fake Out" ]
+  }, {
+    "name" : "Bulkier Sitrus Berry",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Sitrus Berry",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 15,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 19,
+      "spe" : 0
+    },
+    "moves" : [ "Wood Hammer", "Grassy Glide", "U-turn", "Fake Out" ]
+  } ],
+  "Indeedee" : [ {
+    "name" : "Scarf Offense",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Choice Scarf",
+    "statPoints" : {
+      "hp" : 0,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Expanding Force", "Dazzling Gleam", "Mystical Fire", "Trick" ]
+  }, {
+    "name" : "Sash Imprison Trick Room",
+    "nature" : "Modest",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 0,
+      "atk" : 0,
+      "def" : 2,
+      "spa" : 32,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Expanding Force", "Hyper Voice", "Imprison", "Trick Room" ]
+  } ],
+  "Indeedee-F" : [ {
+    "name" : "Psychic Seed Support",
+    "nature" : "Relaxed",
+    "ability" : "",
+    "item" : "Psychic Seed",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 0,
+      "def" : 32,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Psychic", "Terrain Pulse", "Mystical Fire", "Follow Me" ]
+  } ],
+  "Pawmot" : [ {
+    "name" : "Life Orb Offense",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Life Orb",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Double Shock", "Close Combat", "Ice Punch", "Fake Out" ]
+  }, {
+    "name" : "Sash Revival Blessing",
+    "nature" : "Jolly",
+    "ability" : "",
+    "item" : "Focus Sash",
+    "statPoints" : {
+      "hp" : 2,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 0,
+      "spe" : 32
+    },
+    "moves" : [ "Double Shock", "Close Combat", "Revival Blessing", "Fake Out" ]
+  } ],
+  "Baxcalibur" : [ {
+    "name" : "Basic Mega Offense",
+    "nature" : "Adamant",
+    "ability" : "",
+    "item" : "Baxcalibrite",
+    "statPoints" : {
+      "hp" : 32,
+      "atk" : 32,
+      "def" : 0,
+      "spa" : 0,
+      "spd" : 2,
+      "spe" : 0
+    },
+    "moves" : [ "Glaive Rush", "Icicle Crash", "Ice Shard", "High Horsepower" ]
+  } ]
+}

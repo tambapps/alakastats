@@ -1,0 +1,64 @@
+import marcel.json.*
+import java.nio.file.Files
+
+/*
+ * Converts the Pokémon Champions sets of the Nerd of Now damage calculator (NCP-VGC-Damage-Calculator, MIT license,
+ * https://github.com/nerd-of-now/NCP-VGC-Damage-Calculator) into the sets file of the damage calc.
+ *
+ * Usage, from this folder: marcl ncp_sets_to_json.mcl <path to script_res/setdex_ncp-g10.js> [output file]
+ * The output is sets/champions.json by default.
+ *
+ * The source is a JS file (var SETDEX_GEN10 = {...}), with comments and trailing commas, and not JSON. The output is
+ * {"<species>": [{"name", "nature", "ability", "item", "statPoints": {"hp", "atk", "def", "spa", "spd", "spe"}, "moves"}]}
+ * the sets of each species in the source's order (the first one being applied when the species is picked). An empty
+ * ability means the species' default ability, like in the source, which gives only a few sets one
+ */
+
+String inputFilename = args[0]
+String outputFilename = args.length > 1 ? args[1] : "sets/champions.json"
+
+String source = Files.readString(new File(inputFilename).toPath())
+// the object assigned to SETDEX_GEN10, without "var SETDEX_GEN10 = " and the final ";"
+String body = source.substring(source.indexOf('{'), source.lastIndexOf('}') + 1)
+// whole-line comments only: strings like "King's Shield" or set names can't hold a //
+String withoutComments = body.split("\n").toList().findAll { String line -> !line.trim().startsWith("//") }.join("\n")
+// JSON doesn't allow a comma before a closing brace or bracket
+String json = withoutComments.replaceAll(',(\\s*[}\\]])', '$1')
+
+// a LinkedHashMap keeps the source's order, the sets' one mattering
+Map setdex = DynamicJson.instance.read(json, LinkedHashMap.class)
+
+// the source's stat keys, and ours (the ones of the species' base stats), in the order to write them
+List sourceStatKeys = ["hp", "at", "df", "sa", "sd", "sp"]
+List statKeys = ["hp", "atk", "def", "spa", "spd", "spe"]
+
+Map result = new LinkedHashMap()
+int setCount = 0
+for ((String species, Map sets) in setdex) {
+  List convertedSets = new ArrayList()
+  for ((String setName, Map set) in sets) {
+    Map sps = set["sps"]
+    Map statPoints = new LinkedHashMap()
+    for (int i in 0..<statKeys.size()) {
+      statPoints[statKeys[i]] = sps[sourceStatKeys[i]] ?: 0
+    }
+    Map convertedSet = new LinkedHashMap()
+    convertedSet["name"] = setName
+    convertedSet["nature"] = set["nature"]
+    // most sets don't have one, the species' default ability being used, like in the source
+    convertedSet["ability"] = set["ability"] ?: ""
+    convertedSet["item"] = set["item"] ?: ""
+    convertedSet["statPoints"] = statPoints
+    // empty move slots aren't kept
+    convertedSet["moves"] = (set["moves"] as List).findAll { String move -> move != null && !move.isBlank() }
+    convertedSets << convertedSet
+    setCount++
+  }
+  result[species] = convertedSets
+}
+
+File outputFile = new File(outputFilename)
+outputFile.parentFile?.mkdirs()
+// pretty, for readable diffs when the sets are updated
+Files.writeString(outputFile.toPath(), DynamicJson.instance.writeAsPrettyString(result) + "\n")
+println("$setCount sets of ${result.size()} species written to $outputFilename")
