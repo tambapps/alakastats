@@ -42,7 +42,16 @@ data class PokedexAbility(
 }
 
 /**
+ * A family of moves some abilities or items act on: most are Showdown's flags (e.g. the punching moves Iron Fist boosts),
+ * the explosive ones are the moves Damp prevents and the mental ones the moves Aroma Veil protects from
+ */
+enum class MoveClassification {
+    PUNCHING, SOUND, DANCE, SLICING, WIND, POWDER, BALL_AND_BOMB, PULSE, BITING, EXPLOSIVE, MENTAL, HEALING,
+}
+
+/**
  * @property accuracy null for a move that can't miss
+ * @property pp its PP in battle, Champions' (e.g. 8 for a move of 5 PP in the main games)
  * @property target Showdown's target, e.g. `allAdjacentFoes`
  * @property championsModified whether Champions changed what it does compared to the main games
  * @property descFr null when PokéAPI has none, or only the one of the main games for a modified move
@@ -58,6 +67,7 @@ data class PokedexMove(
     val priority: Int,
     val target: String,
     val makesContact: Boolean,
+    val classifications: Set<MoveClassification>,
     val shortDesc: String?,
     val desc: String?,
     val descFr: String?,

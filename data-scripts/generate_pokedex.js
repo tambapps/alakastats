@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 const WORKSPACE = path.join(__dirname, '..', '..');
 const SHOWDOWN_DIR = path.resolve(process.argv[2] || path.join(WORKSPACE, 'pokemon-showdown'));
 const POKEAPI_CSV_DIR = path.resolve(process.argv[3] || path.join(WORKSPACE, 'pokeapi', 'data', 'v2', 'csv'));
@@ -261,6 +261,30 @@ const speciesEntries = legalSpecies.map(s => {
 // --- what the Pokémon refer to ---
 const usedAbilityIds = new Set(speciesEntries.flatMap(s => [...s.abilities, s.hiddenAbility].filter(Boolean)));
 
+// --- the classifications of the moves: the flags of Showdown, and the moves an ability blocks for the classifications
+// without flag ---
+const FLAG_CLASSIFICATIONS = {
+  punch: 'PUNCHING', sound: 'SOUND', dance: 'DANCE', slicing: 'SLICING', wind: 'WIND', powder: 'POWDER',
+  bullet: 'BALL_AND_BOMB', pulse: 'PULSE', bite: 'BITING', heal: 'HEALING',
+};
+// the ids of moves an ability's handler lists, e.g. ["explosion", "mindblown", ...] in Damp's
+function movesListedBy(abilityId, handler) {
+  const source = String(dex.abilities.get(abilityId)[handler] ?? '');
+  const list = source.match(/\[([^\]]*)\]\.includes/);
+  const ids = list ? [...list[1].matchAll(/["']([a-z0-9]+)["']/g)].map(match => match[1]) : [];
+  if (!ids.length) problems.push(`no move found in ${abilityId}.${handler}: its source changed`);
+  return new Set(ids);
+}
+// the moves Damp prevents, and the ones Aroma Veil protects from
+const EXPLOSIVE_MOVES = movesListedBy('damp', 'onAnyTryMove');
+const MENTAL_MOVES = movesListedBy('aromaveil', 'onAllyTryAddVolatile');
+function classificationsOf(move) {
+  const classifications = Object.keys(move.flags).map(flag => FLAG_CLASSIFICATIONS[flag]).filter(Boolean);
+  if (EXPLOSIVE_MOVES.has(move.id)) classifications.push('EXPLOSIVE');
+  if (MENTAL_MOVES.has(move.id)) classifications.push('MENTAL');
+  return classifications.sort();
+}
+
 const moveEntries = legalMoves.sort((a, b) => a.name.localeCompare(b.name)).map(m => {
   const modified = isModified('Moves', m.id);
   return {
@@ -272,10 +296,12 @@ const moveEntries = legalMoves.sort((a, b) => a.name.localeCompare(b.name)).map(
     basePower: m.basePower,
     // null for a move that can't miss
     accuracy: m.accuracy === true ? null : m.accuracy,
-    pp: m.pp,
+    // the PP in battle, the format's mod computing them its way (Champions: 5 gives 8, 10 gives 12, 15 gives 16)
+    pp: dex.data.Scripts.calculatePP ? dex.data.Scripts.calculatePP(m, 3) : m.pp,
     priority: m.priority,
     target: m.target,
     makesContact: !!m.flags.contact,
+    classifications: classificationsOf(m),
     championsModified: modified,
     ...englishDescs('Moves', m.id),
     descFr: frenchDesc('moves', m.id, pokeApiMoves, modified),

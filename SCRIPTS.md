@@ -116,6 +116,10 @@ What it does with the data:
   with its Mega Stone.
 - Forms only taken in battle (e.g. Aegislash-Blade, Palafin-Hero) are left out; cosmetic forms (e.g. Vivillon-Polar,
   or any form playing exactly like its base form) are listed in the `cosmeticForms` of their base form.
+- A move's PP are its PP in battle, computed like the format's mod does (Champions: 5 gives 8, 10 gives 12, 15 gives
+  16), and its `classifications` the families some abilities and items act on: Showdown's flags (punching, sound,
+  dance, slicing, wind, powder, ball & bomb, pulse, biting, healing), the moves Damp prevents (explosive) and the ones
+  Aroma Veil protects from (mental), read from these abilities.
 - `championsModified` tells a move, ability or item Champions changed (its legality and the PP cap left aside). The
   English descriptions are Showdown's Champions ones; the French description of a modified entry is left out (null)
   unless PokéAPI has the one of Champions, the others describing the main games' version.

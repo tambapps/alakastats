@@ -28,6 +28,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.home.HomeScreen
 import com.tambapps.pokemon.alakastats.ui.screen.showdownreplays.ShowdownReplaysScreen
 import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexHomeScreen
+import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexMovesScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexPokemonListScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexSection
@@ -219,7 +220,7 @@ fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (Nav
                         if (form == null) PokedexPokemonListScreen() else PokedexScreen(form)
                     }
                     entry<AppRoute.PokedexAbilities> { PokedexSectionScreen(PokedexSection.ABILITIES) }
-                    entry<AppRoute.PokedexMoves> { PokedexSectionScreen(PokedexSection.MOVES) }
+                    entry<AppRoute.PokedexMoves> { PokedexMovesScreen() }
                     entry<AppRoute.CloudSync> { CloudSyncScreen() }
                     entry<AppRoute.About> { AboutScreen() }
                     // the standalone one has no navigation bar
