@@ -28,6 +28,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.home.HomeScreen
 import com.tambapps.pokemon.alakastats.ui.screen.showdownreplays.ShowdownReplaysScreen
 import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexHomeScreen
+import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexPokemonListScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexSection
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexSectionScreen
@@ -68,7 +69,7 @@ sealed interface AppRoute : NavKey {
     @Serializable
     data object Pokedex : AppRoute
 
-    /** The search of a Pokémon of the Pokédex. @param form the form shown, null for none */
+    /** The Pokémon of the Pokédex: their list, or the sheet of one. @param form the form shown, null for the list */
     @Serializable
     data class PokedexPokemon(val form: String? = null) : AppRoute
 
@@ -215,7 +216,11 @@ fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (Nav
                     entry<AppRoute.ShowdownReplays> { ShowdownReplaysScreen() }
                     // the same content whatever the form: changing it keeps the screen, its view model and its animations
                     entry<AppRoute.Pokedex> { PokedexHomeScreen() }
-                    entry<AppRoute.PokedexPokemon>(clazzContentKey = { "pokedex-pokemon" }) { PokedexScreen(it.form) }
+                    // the same sheet whatever the form: changing it keeps the screen, its view model and its animations
+                    entry<AppRoute.PokedexPokemon>(clazzContentKey = { if (it.form == null) "pokedex-pokemon-list" else "pokedex-pokemon" }) {
+                        val form = it.form
+                        if (form == null) PokedexPokemonListScreen() else PokedexScreen(form)
+                    }
                     entry<AppRoute.PokedexTypes> { PokedexSectionScreen(PokedexSection.TYPES) }
                     entry<AppRoute.PokedexAbilities> { PokedexSectionScreen(PokedexSection.ABILITIES) }
                     entry<AppRoute.PokedexMoves> { PokedexSectionScreen(PokedexSection.MOVES) }

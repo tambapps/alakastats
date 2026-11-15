@@ -34,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,10 +48,9 @@ import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
-import com.tambapps.pokemon.alakastats.ui.composables.SuggestionTextField
+import com.tambapps.pokemon.alakastats.ui.composables.TypeBadge
 import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
-import com.tambapps.pokemon.alakastats.ui.service.availablePokemonNames
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
 private const val MAX_STAT_POINTS = 32
@@ -75,24 +73,22 @@ private val DISPLAYED_STATS = listOf(
 )
 
 /**
- * @param form the form shown, null for none. It's in the route, for it to be restored and to be in the web app's URL
+ * The sheet of a Pokémon of the Pokédex: its forms, artwork, types and stats
+ *
+ * @param form the form shown. It's in the route, for it to be restored and to be in the web app's URL
  */
 @Composable
-fun PokedexScreen(form: String?) {
+fun PokedexScreen(form: String) {
     val viewModel = koinViewModel<PokedexViewModel>()
     val navigator = LocalAppNavigator.current
     val snackBar = LocalSnackBar.current
     val isCompact = LocalIsCompact.current
-    val focusManager = LocalFocusManager.current
-    val availableNames = availablePokemonNames()
-    // the names load in one go. The megas are reached from their base form, with the form selector
-    val searchablePokemons = remember(availableNames.size) { availableNames.filterNot { it.isMega } }
     LaunchedEffect(form) {
-        viewModel.show(form?.let(::PokemonName))
+        viewModel.show(PokemonName(form))
     }
     // a form can come from an URL, so it may not exist
-    LaunchedEffect(form, availableNames.size) {
-        if (form != null && availableNames.isNotEmpty() && baseFormOf(PokemonName(form)) !in availableNames) {
+    if (viewModel.isUnknown) {
+        LaunchedEffect(form) {
             snackBar.show("Unknown Pokémon: $form", SnackBar.Severity.ERROR)
             navigator.replace(AppRoute.PokedexPokemon())
         }
@@ -116,36 +112,8 @@ fun PokedexScreen(form: String?) {
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-        Spacer(Modifier.height(8.dp))
-        SuggestionTextField(
-            value = viewModel.query,
-            onValueChange = { viewModel.query = it },
-            suggestions = searchablePokemons,
-            suggestionText = { it.pretty },
-            label = "Search a Pokémon",
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-            suggestionLeadingContent = { PokemonSprite(it, Modifier.size(32.dp)) },
-            onSuggestionPicked = {
-                // on a phone, the keyboard would hide the sheet
-                focusManager.clearFocus()
-                // emptied, ready for the next search, the sheet telling which pokemon is shown
-                viewModel.query = ""
-                navigator.replace(AppRoute.PokedexPokemon(it.value))
-            },
-        )
         Spacer(Modifier.height(16.dp))
-        val pokemon = viewModel.selectedForm
-        if (pokemon == null) {
-            Text(
-                "Search a Pokémon to see its stats",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-            )
-        } else {
-            PokemonSheet(viewModel, pokemon, isCompact)
-        }
+        PokemonSheet(viewModel, viewModel.selectedForm ?: PokemonName(form), isCompact)
     }
 }
 
@@ -155,7 +123,13 @@ private fun PokemonSheet(viewModel: PokedexViewModel, pokemon: PokemonName, isCo
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(pokemon.pretty, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        val species = viewModel.species
+        Text(species?.name?.en ?: pokemon.pretty, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        if (species != null) {
+            Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                species.types.forEach { TypeBadge(it) }
+            }
+        }
         FormSelector(viewModel)
         Spacer(Modifier.height(8.dp))
         if (isCompact) {

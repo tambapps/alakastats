@@ -30,18 +30,18 @@ class WebRoutesTest {
     // the URL it had before the Pokédex had other parts
     @Test
     fun aPokemonIsRightUnderThePokedex() {
-        assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon("metagross")), WebRoutes.backStackOf("pokedex/metagross"))
-        assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon("metagross-mega")), WebRoutes.backStackOf("pokedex/metagross-mega"))
+        assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon(), AppRoute.PokedexPokemon("metagross")), WebRoutes.backStackOf("pokedex/metagross"))
+        assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon(), AppRoute.PokedexPokemon("metagross-mega")), WebRoutes.backStackOf("pokedex/metagross-mega"))
     }
 
     @Test
     fun aFormStaysAsItIsWithoutBeingNormalized() {
-        assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon("ogerpon-wellspring")), WebRoutes.backStackOf("pokedex/ogerpon-wellspring"))
+        assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon(), AppRoute.PokedexPokemon("ogerpon-wellspring")), WebRoutes.backStackOf("pokedex/ogerpon-wellspring"))
     }
 
     @Test
     fun thePathIsToleratedWithCapitalsAndATrailingSlash() {
-        assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon("metagross")), WebRoutes.backStackOf("pokedex/Metagross/"))
+        assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon(), AppRoute.PokedexPokemon("metagross")), WebRoutes.backStackOf("pokedex/Metagross/"))
     }
 
     @Test
@@ -230,7 +230,7 @@ class WebRoutesTest {
         assertEquals("", WebRoutes.pathOf(listOf(AppRoute.Home)))
         assertEquals("pokedex", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.Pokedex)))
         assertEquals("pokedex/pokemon", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon())))
-        assertEquals("pokedex/metagross", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon("metagross"))))
+        assertEquals("pokedex/metagross", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon(), AppRoute.PokedexPokemon("metagross"))))
         assertEquals("pokedex/moves", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves)))
         // no URL for this screen yet
         assertEquals("", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.EditTeam())))

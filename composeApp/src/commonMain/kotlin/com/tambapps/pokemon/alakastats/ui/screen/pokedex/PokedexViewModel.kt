@@ -4,78 +4,76 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
-import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
-
-// a pokemon's megas are named after it, e.g. charizard-mega-x. The longest first, for baseFormOf
-private val MEGA_SUFFIXES = listOf("-mega-x", "-mega-y", "-mega-z", "-mega")
+import com.tambapps.pokemon.alakastats.domain.model.Pokedex
+import com.tambapps.pokemon.alakastats.domain.model.PokedexSpecies
+import com.tambapps.pokemon.alakastats.domain.repository.PokedexRepository
 
 /**
- * The pokemon a form is the form of, e.g. metagross for metagross-mega
+ * The sheet of a Pokémon of the Pokédex, and its forms (the Pokémon and its Megas) to switch between
  */
-internal fun baseFormOf(form: PokemonName): PokemonName {
-    val suffix = MEGA_SUFFIXES.find { form.value.endsWith(it) } ?: return form
-    return PokemonName(form.value.removeSuffix(suffix))
-}
-
 class PokedexViewModel(
-    private val pokemonBaseStatsRepository: PokemonBaseStatsRepository,
+    private val pokedexRepository: PokedexRepository,
 ) : ViewModel() {
 
-    var query by mutableStateOf("")
-    // the form shown, null until a pokemon is searched
+    // the form shown, normalized, null until one is
     var selectedForm by mutableStateOf<PokemonName?>(null)
         private set
-    // the searched pokemon, then its megas
+    var species by mutableStateOf<PokedexSpecies?>(null)
+        private set
+    // the Pokémon, then its Megas, normalized
     var forms by mutableStateOf(emptyList<PokemonName>())
         private set
     var isLoading by mutableStateOf(false)
         private set
-    // the form to show instead of the one asked, which doesn't exist (e.g. in an URL)
+    // the form to show instead of the one asked, which doesn't exist (e.g. a Mega the Pokémon doesn't have, in an URL)
     var formToShowInstead by mutableStateOf<PokemonName?>(null)
         private set
-    private var statsByForm by mutableStateOf(emptyMap<PokemonName, PokeStats>())
+    // the form asked isn't a Pokémon of the Pokédex (e.g. in an URL)
+    var isUnknown by mutableStateOf(false)
+        private set
 
-    // null if they're still loading or couldn't be found
-    val baseStats get() = selectedForm?.let { statsByForm[it.normalized] }
+    // null while it's loading or when it couldn't be
+    val baseStats get() = species?.baseStats
 
-    // the pokemon whose forms are loaded
-    private var loadedPokemon: PokemonName? = null
+    private var pokedex: Pokedex? = null
 
     /**
-     * Shows a form, loading what its pokemon needs unless it already is
+     * Shows a form, loading the Pokédex unless it already is
      *
      * @param form the form, null for none
      */
     suspend fun show(form: PokemonName?) {
         formToShowInstead = null
-        selectedForm = form
+        isUnknown = false
+        selectedForm = form?.normalized
         if (form == null) {
-            loadedPokemon = null
+            species = null
             forms = emptyList()
-            statsByForm = emptyMap()
-            isLoading = false
             return
         }
-        val pokemon = baseFormOf(form)
-        if (pokemon != loadedPokemon) load(pokemon)
-        if (loadedPokemon == pokemon && form !in forms) formToShowInstead = pokemon
+        // a failure to load isn't an unknown form: the sheet tells its stats aren't available
+        val pokedex = loadPokedex() ?: return
+        val shown = pokedex.species(form)
+        if (shown == null) {
+            // e.g. metagross-mega-x: its Pokémon, if it's one
+            val pokemon = pokedex.species(form.baseNormalized)
+            if (pokemon != null) formToShowInstead = pokemon.pokemonName.normalized else isUnknown = true
+            return
+        }
+        species = shown
+        selectedForm = shown.pokemonName.normalized
+        forms = pokedex.formsOf(shown).map { it.pokemonName.normalized }
     }
 
-    private suspend fun load(pokemon: PokemonName) {
-        loadedPokemon = null
-        forms = emptyList()
-        statsByForm = emptyMap()
+    private suspend fun loadPokedex(): Pokedex? {
+        pokedex?.let { return it }
         isLoading = true
-        val megaCandidates = MEGA_SUFFIXES.map { PokemonName(pokemon.normalized.value + it) }
-        pokemonBaseStatsRepository.getBaseStats(listOf(pokemon) + megaCandidates).onRight { stats ->
-            // the repository gives zeros for a pokemon it doesn't know
-            val knownStats = stats.filterValues { it.hp > 0 }
-            statsByForm = knownStats
-            forms = listOf(pokemon) + megaCandidates.filter { it.normalized in knownStats }
-            loadedPokemon = pokemon
+        species = null
+        forms = emptyList()
+        return pokedexRepository.getPokedex().getOrNull().also {
+            pokedex = it
+            isLoading = false
         }
-        isLoading = false
     }
 }

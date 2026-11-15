@@ -52,9 +52,10 @@ internal object WebRoutes {
         BACK_STACK_BY_PATH[normalizedPath]?.let { return it }
         val segments = normalizedPath.split('/')
         return when {
-            // a Pokémon is right under the Pokédex (pokedex/metagross), as it was before the Pokédex had other parts
+            // a Pokémon is right under the Pokédex (pokedex/metagross), as it was before the Pokédex had other parts.
+            // Its sheet is above the list of the Pokémon, where its back button goes
             segments.size == 2 && segments[0] == POKEDEX_PATH ->
-                listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon(segments[1]))
+                listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon(), AppRoute.PokedexPokemon(segments[1]))
             segments.size in 2..3 && segments[0] == TEAMS_PATH -> teamBackStackOf(segments[1], segments.getOrNull(2), query)
             segments.size == 4 && segments[0] == TEAMS_PATH -> teamScreenBackStackOf(segments[1], segments[2], segments[3])
             else -> listOf(AppRoute.Home)
