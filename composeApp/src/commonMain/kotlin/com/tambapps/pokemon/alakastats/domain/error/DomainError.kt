@@ -28,6 +28,11 @@ data class LoadFormatDataError(
     override val cause: Throwable? = null
 ) : DomainError
 
+data class LoadPresetSetsError(
+    override val message: String,
+    override val cause: Throwable? = null
+) : DomainError
+
 data class LoadTeamError(
     override val message: String,
     override val cause: Throwable?

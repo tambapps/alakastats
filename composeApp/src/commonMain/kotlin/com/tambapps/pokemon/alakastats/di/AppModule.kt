@@ -4,6 +4,7 @@ import androidx.compose.runtime.MutableState
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.model.FormatData
 import com.tambapps.pokemon.alakastats.domain.repository.FormatDataRepository
+import com.tambapps.pokemon.alakastats.domain.repository.PresetSetRepository
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonBaseStatsRepository
 import com.tambapps.pokemon.alakastats.domain.repository.PokemonMovesRepository
 import com.tambapps.pokemon.alakastats.domain.repository.TeamlyticsRepository
@@ -42,8 +43,11 @@ import com.tambapps.pokemon.alakastats.domain.usecase.ManageReplayFiltersUseCase
 import com.tambapps.pokemon.alakastats.domain.usecase.ManageTeamlyticsListUseCase
 import com.tambapps.pokemon.alakastats.infrastructure.repository.KStoreTeamlyticsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.HttpFormatDataRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.HttpPresetSetRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.HybridFormatDataRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.HybridPresetSetRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalFormatDataRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalPresetSetRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalPokemonBaseStatsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonMovesRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
@@ -125,6 +129,12 @@ val appModules = listOf(module {
         HybridFormatDataRepository(
             httpRepository = HttpFormatDataRepository(get(), get()),
             localRepository = LocalFormatDataRepository(get())
+        )
+    }
+    single<PresetSetRepository> {
+        HybridPresetSetRepository(
+            httpRepository = HttpPresetSetRepository(get(), get()),
+            localRepository = LocalPresetSetRepository(get())
         )
     }
 
