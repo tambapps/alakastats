@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 const WORKSPACE = path.join(__dirname, '..', '..');
 const SHOWDOWN_DIR = path.resolve(process.argv[2] || path.join(WORKSPACE, 'pokemon-showdown'));
 const POKEAPI_CSV_DIR = path.resolve(process.argv[3] || path.join(WORKSPACE, 'pokeapi', 'data', 'v2', 'csv'));
@@ -242,6 +242,9 @@ const speciesEntries = legalSpecies.map(s => {
     name: s.name,
     nameFr,
     num: s.num,
+    // the form in its name (e.g. Paldea-Aqua for Tauros-Paldea-Aqua, Mega-Y), null for a base form, whose name may have
+    // a dash of its own (e.g. Kommo-o)
+    form: s.forme || null,
     types: s.types.map(TYPE_ID),
     baseStats: { ...s.baseStats },
     abilities,

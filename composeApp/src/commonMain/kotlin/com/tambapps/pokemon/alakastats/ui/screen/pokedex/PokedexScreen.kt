@@ -126,7 +126,7 @@ private fun PokemonSheet(viewModel: PokedexViewModel, pokemon: PokemonName, isCo
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val species = viewModel.species
-        Text(species?.name?.en ?: pokemon.pretty, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text(species?.displayName ?: pokemon.pretty, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         if (species != null) {
             Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 species.types.forEach { TypeBadge(it) }

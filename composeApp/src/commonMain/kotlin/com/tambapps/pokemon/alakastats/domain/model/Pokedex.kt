@@ -95,6 +95,7 @@ data class PokedexItem(
  * A Pokémon legal in the Pokédex's format. A Mega is one of its own, its moves being the ones of the form it mega
  * evolves from.
  *
+ * @property form the form in its name (e.g. Paldea-Aqua for Tauros-Paldea-Aqua, Mega-Y), null for a base form
  * @property baseSpecies the Pokémon it is a form of (e.g. tauros for Tauros-Paldea-Aqua), normalized, null for a base form
  * @property megaOf the form a Mega mega evolves from, normalized
  * @property cosmeticForms the forms only differing from it by their look (e.g. Vivillon-Polar), not entries of their own
@@ -103,6 +104,7 @@ data class PokedexSpecies(
     override val id: String,
     override val name: LocalizedName,
     val num: Int,
+    val form: String?,
     val types: List<PokeType>,
     val baseStats: PokeStats,
     val abilities: List<PokedexAbility>,
@@ -117,6 +119,12 @@ data class PokedexSpecies(
 ) : PokedexEntry {
     /** Its name in the app, the one of Showdown (e.g. `Charizard-Mega-Y`) */
     val pokemonName get() = PokemonName(name.en)
+
+    /**
+     * Its English name to show: a form's without dashes (e.g. Tauros Paldea Aqua, Mega Absol Z, see
+     * [PokemonName.pretty]), a base form's as it is (e.g. Kommo-o, Mr. Mime)
+     */
+    val displayName: String get() = if (form == null) name.en else pokemonName.pretty
 
     val allAbilities: List<PokedexAbility> get() = abilities + listOfNotNull(hiddenAbility)
 }

@@ -134,6 +134,20 @@ class PokedexTest {
     }
 
     @Test
+    fun aFormsNameIsShownWithoutDashes() = runTest {
+        val pokedex = pokedex()
+        fun displayName(name: String) = pokedex.species(PokemonName(name))?.displayName
+        assertEquals("Mega Absol Z", displayName("Absol-Mega-Z"))
+        assertEquals("Mega Charizard Y", displayName("Charizard-Mega-Y"))
+        assertEquals("Tauros Paldea Aqua", displayName("Tauros-Paldea-Aqua"))
+        assertEquals("Floette Eternal", displayName("Floette-Eternal"))
+        // a base form's dash is part of its name
+        assertEquals("Kommo-o", displayName("Kommo-o"))
+        assertEquals("Mr. Rime", displayName("Mr. Rime"))
+        assertEquals("Incineroar", displayName("Incineroar"))
+    }
+
+    @Test
     fun aNameIsFolded() {
         assertEquals("megadracaufeuy", foldName("Méga-Dracaufeu Y"))
         assertEquals("farfetchd", foldName("Farfetch’d"))
