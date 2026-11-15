@@ -15,7 +15,7 @@ import java.nio.file.Files
  */
 
 String inputFilename = args[0]
-String outputFilename = args.length > 1 ? args[1] : "sets/champions.json"
+String outputFilename = args.length > 1 ? args[1] : "../composeApp/src/commonMain/composeResources/files/sets/champions.json"
 
 String source = Files.readString(new File(inputFilename).toPath())
 // the object assigned to SETDEX_GEN10, without "var SETDEX_GEN10 = " and the final ";"

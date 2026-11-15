@@ -1,16 +1,19 @@
 # Data scripts
 
-The data files bundled with the app are generated or completed by [Marcel](https://github.com/tambapps/marcel) scripts,
-run with `marcl`. They live in `composeApp/src/commonMain/composeResources/files/`, next to the files they work on, and
-are meant to be run from that folder:
+The data files bundled with the app, in `composeApp/src/commonMain/composeResources/files/`, are generated or completed
+by scripts living in `data-scripts/`: [Marcel](https://github.com/tambapps/marcel) scripts run with `marcl`, and the
+Node.js generator of the Pokédex. They are meant to be run from that folder:
 
 ```bash
-cd composeApp/src/commonMain/composeResources/files
+cd data-scripts
 ```
 
+The scripts and their sources are kept out of `composeResources`, as everything in it is bundled in the apps: only the
+JSON files the app reads go there.
+
 The YAML files the scripts read (`pokemon-sprites.yaml`, `items-mapping.yaml`, `moves.yaml`) are ignored by git: they
-only exist on the machine maintaining the data. The app only reads the JSON files generated from them, which are
-versioned.
+only exist on the machine maintaining the data, in `data-scripts/`. The app only reads the JSON files generated from
+them, which are versioned.
 
 ## `yaml_to_json.mcl`: a YAML mapping to its JSON
 
@@ -18,7 +21,8 @@ versioned.
 marcl yaml_to_json.mcl <file.yaml>
 ```
 
-Writes the JSON of a YAML file next to it, with the same name (`pokemon-sprites.yaml` gives `pokemon-sprites.json`).
+Writes the JSON of a YAML file to the app's resources, with the same name (`pokemon-sprites.yaml` gives
+`composeResources/files/pokemon-sprites.json`).
 Used after editing one of the YAML mappings:
 
 | YAML (source, not versioned) | JSON (read by the app)  | Content                                                |
@@ -61,7 +65,7 @@ marcl ncp_sets_to_json.mcl <path to NCP-VGC-Damage-Calculator>/script_res/setdex
 ```
 
 Converts the Pokémon Champions sets of the [Nerd of Now damage calculator](https://github.com/nerd-of-now/NCP-VGC-Damage-Calculator)
-into `sets/champions.json` (or the given output file), the sets the damage calc proposes for a Pokémon.
+into `composeResources/files/sets/champions.json` (or the given output file), the sets the damage calc proposes for a Pokémon.
 
 - The source is a JS file (`var SETDEX_GEN10 = {...}`), with comments and trailing commas: the script cleans it up into
   JSON before reading it.
@@ -78,7 +82,7 @@ When Nerd of Now publishes new sets (e.g. for a new regulation):
 
 ```bash
 git -C <path to NCP-VGC-Damage-Calculator> pull
-cd composeApp/src/commonMain/composeResources/files
+cd data-scripts
 marcl ncp_sets_to_json.mcl <path to NCP-VGC-Damage-Calculator>/script_res/setdex_ncp-g10.js
 cd -
 ./gradlew :composeApp:wasmJsBrowserTest --tests "*PresetSetsFileTest*"

@@ -10,5 +10,6 @@ dynobj content = DynamicYaml.instance.read(file)
 
 //for (dynobj obj in content.asMap().values()) obj.setProperty('type', obj.type.asString().toUpperCase() as dynobj)
 
-File outputFile = new File(filename.replaceAll('yaml', 'json'))
+// the JSON goes to the app's resources, the YAML staying here
+File outputFile = new File("../composeApp/src/commonMain/composeResources/files/" + file.name.replaceAll('\\.yaml$', '.json'))
 DynamicJson.instance.write(content, outputFile)
