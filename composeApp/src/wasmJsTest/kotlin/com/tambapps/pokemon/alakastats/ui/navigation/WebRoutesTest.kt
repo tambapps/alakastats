@@ -27,6 +27,13 @@ class WebRoutesTest {
     }
 
     @Test
+    fun anAbilityIsAboveTheAbilities() {
+        val intimidate = listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexAbilities, AppRoute.PokedexAbility("intimidate"))
+        assertEquals(intimidate, WebRoutes.backStackOf("pokedex/abilities/intimidate"))
+        assertEquals("pokedex/abilities/intimidate", WebRoutes.pathOf(intimidate))
+    }
+
+    @Test
     fun aMoveIsAboveTheMoves() {
         val trickRoom = listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves, AppRoute.PokedexMove("trick-room"))
         assertEquals(trickRoom, WebRoutes.backStackOf("pokedex/moves/trick-room"))

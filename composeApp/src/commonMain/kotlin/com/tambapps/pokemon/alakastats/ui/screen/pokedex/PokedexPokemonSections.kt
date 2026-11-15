@@ -62,14 +62,21 @@ internal fun AbilitiesSection(species: PokedexSpecies, modifier: Modifier = Modi
     MyCard(modifier = modifier) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             SectionTitle("Abilities")
-            species.allAbilities.forEach { AbilityRow(it) }
+            val navigator = LocalAppNavigator.current
+            species.allAbilities.forEach { ability ->
+                AbilityRow(ability) { navigator.push(AppRoute.PokedexAbility(ability.id)) }
+            }
         }
     }
 }
 
+/** An ability and what it does, opening its sheet */
 @Composable
-private fun AbilityRow(ability: PokedexAbility) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+private fun AbilityRow(ability: PokedexAbility, onClick: () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).clickable(onClick = onClick).padding(4.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
         Text(ability.name.en, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
         Text(
             ability.shortDesc ?: ability.desc ?: "",

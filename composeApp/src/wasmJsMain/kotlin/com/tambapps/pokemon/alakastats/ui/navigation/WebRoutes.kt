@@ -12,6 +12,7 @@ import kotlin.uuid.Uuid
 private const val POKEDEX_PATH = "pokedex"
 private const val POKEDEX_POKEMON_PATH = "pokemon"
 private const val POKEDEX_MOVES_PATH = "moves"
+private const val POKEDEX_ABILITIES_PATH = "abilities"
 private const val TEAMS_PATH = "teams"
 private const val TEAM_POKEMON_PATH = "pokemon"
 private const val SPEED_INTERACTIONS_PATH = "speed-interactions"
@@ -25,7 +26,7 @@ private val BACK_STACK_BY_PATH: Map<String, List<AppRoute>> = mapOf(
     "" to listOf(AppRoute.Home),
     POKEDEX_PATH to listOf(AppRoute.Home, AppRoute.Pokedex),
     "$POKEDEX_PATH/$POKEDEX_POKEMON_PATH" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon()),
-    "$POKEDEX_PATH/abilities" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexAbilities),
+    "$POKEDEX_PATH/$POKEDEX_ABILITIES_PATH" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexAbilities),
     "$POKEDEX_PATH/$POKEDEX_MOVES_PATH" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves),
     "replays" to listOf(AppRoute.Home, AppRoute.ShowdownReplays),
     "about" to listOf(AppRoute.Home, AppRoute.About),
@@ -61,6 +62,12 @@ internal object WebRoutes {
                 // a badly encoded name throws
                 val move = runCatching { segments[2].decodeURLPart() }.getOrNull() ?: return listOf(AppRoute.Home)
                 listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves, AppRoute.PokedexMove(move))
+            }
+            // an ability's sheet is above the list of the abilities
+            segments.size == 3 && segments[0] == POKEDEX_PATH && segments[1] == POKEDEX_ABILITIES_PATH -> {
+                // a badly encoded name throws
+                val ability = runCatching { segments[2].decodeURLPart() }.getOrNull() ?: return listOf(AppRoute.Home)
+                listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexAbilities, AppRoute.PokedexAbility(ability))
             }
             segments.size in 2..3 && segments[0] == TEAMS_PATH -> teamBackStackOf(segments[1], segments.getOrNull(2), query)
             segments.size == 4 && segments[0] == TEAMS_PATH -> teamScreenBackStackOf(segments[1], segments[2], segments[3])
@@ -108,6 +115,7 @@ internal object WebRoutes {
 
     private fun pathOfRoute(route: NavKey): String? = when (route) {
         is AppRoute.PokedexPokemon -> "$POKEDEX_PATH/${route.form ?: POKEDEX_POKEMON_PATH}"
+        is AppRoute.PokedexAbility -> "$POKEDEX_PATH/$POKEDEX_ABILITIES_PATH/${route.ability.encodeURLPathPart()}"
         // ids aren't always URL safe, e.g. king's-shield
         is AppRoute.PokedexMove -> "$POKEDEX_PATH/$POKEDEX_MOVES_PATH/${route.move.encodeURLPathPart()}"
         is AppRoute.Teamlytics -> {

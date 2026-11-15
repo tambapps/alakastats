@@ -32,8 +32,8 @@ import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexMoveScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexMovesScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexPokemonListScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexScreen
-import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexSection
-import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexSectionScreen
+import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexAbilitiesScreen
+import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexAbilityScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizSetupScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizDirection
@@ -80,6 +80,10 @@ sealed interface AppRoute : NavKey {
 
     @Serializable
     data object PokedexMoves : AppRoute
+
+    /** The sheet of an ability of the Pokédex. @param ability its id in the Pokédex, e.g. intimidate */
+    @Serializable
+    data class PokedexAbility(val ability: String) : AppRoute
 
     /** The sheet of a move of the Pokédex. @param move its id in the Pokédex, e.g. trick-room */
     @Serializable
@@ -224,7 +228,8 @@ fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (Nav
                         val form = it.form
                         if (form == null) PokedexPokemonListScreen() else PokedexScreen(form)
                     }
-                    entry<AppRoute.PokedexAbilities> { PokedexSectionScreen(PokedexSection.ABILITIES) }
+                    entry<AppRoute.PokedexAbilities> { PokedexAbilitiesScreen() }
+                    entry<AppRoute.PokedexAbility> { PokedexAbilityScreen(it.ability) }
                     entry<AppRoute.PokedexMoves> { PokedexMovesScreen() }
                     entry<AppRoute.PokedexMove> { PokedexMoveScreen(it.move) }
                     entry<AppRoute.CloudSync> { CloudSyncScreen() }

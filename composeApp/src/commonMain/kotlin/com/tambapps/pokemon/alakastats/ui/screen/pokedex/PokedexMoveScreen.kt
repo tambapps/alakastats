@@ -166,47 +166,17 @@ private fun LearnersGrid(
     modifier: Modifier = Modifier,
     header: LazyGridScope.() -> Unit = {},
 ) {
-    val navigator = LocalAppNavigator.current
-    val showSpeed = viewModel.sort.criterion == PokedexPokemonSortCriterion.SPEED
-    val content: LazyGridScope.() -> Unit = {
+    PokedexPokemonGrid(
+        viewModel.pokemons,
+        showSpeed = viewModel.sort.criterion == PokedexPokemonSortCriterion.SPEED,
+        state = state,
+        isCompact = isCompact,
+        emptyText = if (viewModel.learnerCount == 0) "No Pokémon learns this move" else "No Pokémon matches the filters",
+        modifier = modifier,
+        tag = { if (viewModel.isStab(it)) "STAB" else null },
+    ) {
         header()
         item(span = { GridItemSpan(maxLineSpan) }) { LearnersControls(viewModel) }
-        if (viewModel.pokemons.isEmpty()) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                CenteredText(if (viewModel.learnerCount == 0) "No Pokémon learns this move" else "No Pokémon matches the filters")
-            }
-        }
-        items(viewModel.pokemons, key = { it.id }) { pokemon ->
-            PokemonListCard(
-                pokemon,
-                showSpeed = showSpeed,
-                spriteSize = if (isCompact) 72.dp else 88.dp,
-                onClick = { navigator.push(AppRoute.PokedexPokemon(pokemon.id)) },
-                tag = if (viewModel.isStab(pokemon)) "STAB" else null,
-            )
-        }
-    }
-    if (isCompact) {
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(LEARNER_CARD_MIN_WIDTH),
-            state = state,
-            contentPadding = PaddingValues(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = modifier.fillMaxSize(),
-            content = content,
-        )
-    } else {
-        LazyVerticalGridWithScrollbar(
-            columns = GridCells.Adaptive(LEARNER_CARD_MIN_WIDTH),
-            state = state,
-            // room for the scrollbar on the right of the cards
-            contentPadding = PaddingValues(bottom = 16.dp, end = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = modifier.fillMaxSize(),
-            content = content,
-        )
     }
 }
 
@@ -246,17 +216,6 @@ private fun LearnersControls(viewModel: PokedexMoveViewModel) {
     }
 }
 
-@Composable
-private fun ToggleChip(label: String, selected: Boolean, onChange: (Boolean) -> Unit) {
-    FilterChip(
-        selected = selected,
-        onClick = { onChange(!selected) },
-        label = { Text(label, maxLines = 1) },
-        leadingIcon = if (selected) {
-            { Icon(painterResource(Res.drawable.check), contentDescription = null, Modifier.size(FilterChipDefaults.IconSize)) }
-        } else null,
-    )
-}
 
 /** The move's card: name, type and category, its figures as tiles, then its target, classifications and description */
 @OptIn(ExperimentalLayoutApi::class)
@@ -378,13 +337,3 @@ private fun ClassificationTag(text: String) {
     )
 }
 
-@Composable
-private fun CenteredText(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth().padding(32.dp),
-    )
-}
