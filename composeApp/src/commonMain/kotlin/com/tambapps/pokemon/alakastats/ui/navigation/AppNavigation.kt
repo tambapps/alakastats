@@ -28,6 +28,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.home.HomeScreen
 import com.tambapps.pokemon.alakastats.ui.screen.showdownreplays.ShowdownReplaysScreen
 import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexHomeScreen
+import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexMoveScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexMovesScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexPokemonListScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexScreen
@@ -79,6 +80,10 @@ sealed interface AppRoute : NavKey {
 
     @Serializable
     data object PokedexMoves : AppRoute
+
+    /** The sheet of a move of the Pokédex. @param move its id in the Pokédex, e.g. trick-room */
+    @Serializable
+    data class PokedexMove(val move: String) : AppRoute
 
     @Serializable
     data object CloudSync : AppRoute
@@ -221,6 +226,7 @@ fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (Nav
                     }
                     entry<AppRoute.PokedexAbilities> { PokedexSectionScreen(PokedexSection.ABILITIES) }
                     entry<AppRoute.PokedexMoves> { PokedexMovesScreen() }
+                    entry<AppRoute.PokedexMove> { PokedexMoveScreen(it.move) }
                     entry<AppRoute.CloudSync> { CloudSyncScreen() }
                     entry<AppRoute.About> { AboutScreen() }
                     // the standalone one has no navigation bar

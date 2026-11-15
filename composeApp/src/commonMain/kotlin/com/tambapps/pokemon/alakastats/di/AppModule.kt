@@ -18,6 +18,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayViewMo
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexPokemonListViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexMovesViewModel
+import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexMoveViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizzesViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.damagecalc.DamageCalcViewModel
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizSetupViewModel
@@ -190,6 +191,7 @@ val appModules = listOf(module {
     factoryOf(::PokedexViewModel)
     factoryOf(::PokedexPokemonListViewModel)
     factoryOf(::PokedexMovesViewModel)
+    factoryOf(::PokedexMoveViewModel)
     factory { DamageCalcViewModel(get<PresetSetRepository>()) }
     factoryOf(::NatureQuizSetupViewModel)
     factoryOf(::SpeedStatQuizSetupViewModel)

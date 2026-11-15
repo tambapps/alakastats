@@ -26,6 +26,16 @@ class WebRoutesTest {
         assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves), WebRoutes.backStackOf("pokedex/moves"))
     }
 
+    @Test
+    fun aMoveIsAboveTheMoves() {
+        val trickRoom = listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves, AppRoute.PokedexMove("trick-room"))
+        assertEquals(trickRoom, WebRoutes.backStackOf("pokedex/moves/trick-room"))
+        assertEquals("pokedex/moves/trick-room", WebRoutes.pathOf(trickRoom))
+        // its id isn't always URL safe
+        val kingsShield = listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves, AppRoute.PokedexMove("king's-shield"))
+        assertEquals(kingsShield, WebRoutes.backStackOf(WebRoutes.pathOf(kingsShield)))
+    }
+
     // the URL it had before the Pokédex had other parts
     @Test
     fun aPokemonIsRightUnderThePokedex() {

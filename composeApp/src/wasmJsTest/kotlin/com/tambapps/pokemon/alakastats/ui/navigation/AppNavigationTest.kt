@@ -141,6 +141,7 @@ class AppNavigationTest {
             AppRoute.PokedexPokemon("metagross-mega"),
             AppRoute.PokedexAbilities,
             AppRoute.PokedexMoves,
+            AppRoute.PokedexMove("king's-shield"),
             AppRoute.CloudSync,
             AppRoute.About,
             AppRoute.DamageCalc,
@@ -593,6 +594,7 @@ class AppNavigationTest {
     @Test fun pokedexPokemonOpensOnAPokemon() = screenOpens(AppRoute.PokedexPokemon("metagross-mega"))
     @Test fun pokedexAbilitiesOpen() = screenOpens(AppRoute.PokedexAbilities)
     @Test fun pokedexMovesOpen() = screenOpens(AppRoute.PokedexMoves)
+    @Test fun pokedexMoveOpens() = screenOpens(AppRoute.PokedexMove("trick-room"))
     @Test fun aboutOpens() = screenOpens(AppRoute.About)
     @Test fun cloudSyncOpens() = screenOpens(AppRoute.CloudSync)
     @Test fun damageCalcOpens() = screenOpens(AppRoute.DamageCalc)

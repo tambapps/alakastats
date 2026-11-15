@@ -266,9 +266,17 @@ private fun EmptyText(text: String) {
 /**
  * A Pokémon's sprite, name and types, on the color of its primary type, then its base stat total or, when the Pokémon
  * are sorted by speed, its speed
+ *
+ * @param tag a tag after its types, e.g. STAB
  */
 @Composable
-private fun PokemonListCard(pokemon: PokedexSpecies, showSpeed: Boolean, spriteSize: Dp, onClick: () -> Unit) {
+internal fun PokemonListCard(
+    pokemon: PokedexSpecies,
+    showSpeed: Boolean,
+    spriteSize: Dp,
+    onClick: () -> Unit,
+    tag: String? = null,
+) {
     val surface = MaterialTheme.colorScheme.surface
     val typeColor = pokemon.types.first().color
     // stronger in dark mode, where a light tint is barely seen
@@ -289,8 +297,19 @@ private fun PokemonListCard(pokemon: PokedexSpecies, showSpeed: Boolean, spriteS
             Spacer(Modifier.width(16.dp))
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(pokemon.name.en, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                     pokemon.types.forEach { TypeBadge(it) }
+                    if (tag != null) {
+                        Text(
+                            tag,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                        )
+                    }
                 }
                 if (showSpeed) {
                     SpeedStats(pokemon.baseStats)

@@ -81,6 +81,7 @@ import com.tambapps.pokemon.alakastats.ui.model.PokedexMoveFilters
 import com.tambapps.pokemon.alakastats.ui.model.PokedexMoveSort
 import com.tambapps.pokemon.alakastats.ui.model.PokedexMoveSortCriterion
 import com.tambapps.pokemon.alakastats.ui.model.label
+import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
 import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.alakastats.ui.service.MoveTypeImage
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -153,6 +154,7 @@ fun PokedexMovesScreen() {
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun MovesContent(viewModel: PokedexMovesViewModel, isCompact: Boolean) {
+    val navigator = LocalAppNavigator.current
     var showFiltersSheet by remember { mutableStateOf(false) }
     val gridState = rememberLazyGridState()
     // new filters or a new order start from the first move
@@ -210,7 +212,9 @@ private fun MovesContent(viewModel: PokedexMovesViewModel, isCompact: Boolean) {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxSize(),
         ) {
-            items(viewModel.moves, key = { it.id }) { MoveCard(it) }
+            items(viewModel.moves, key = { it.id }) { move ->
+                MoveCard(move, onClick = { navigator.push(AppRoute.PokedexMove(move.id)) })
+            }
         }
     }
     if (showFiltersSheet) {
@@ -382,12 +386,13 @@ private fun <T> FilterSection(
 /** A move's name and icons, its description, then its power, accuracy, PP, priority and classifications */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun MoveCard(move: PokedexMove) {
+private fun MoveCard(move: PokedexMove, onClick: () -> Unit) {
     val surface = MaterialTheme.colorScheme.surface
     val typeColor = move.type.color
     // stronger in dark mode, where a light tint is barely seen
     val tint = if (surface.luminance() < 0.5f) CARD_TINT_DARK else CARD_TINT_LIGHT
     MyCard(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(containerColor = typeColor.copy(alpha = tint).compositeOver(surface)),
         border = BorderStroke(1.dp, typeColor.copy(alpha = CARD_BORDER_ALPHA)),
@@ -450,7 +455,7 @@ private fun Tag(text: String, highlighted: Boolean = false) {
 }
 
 @Composable
-private fun DamageClassImage(damageClass: DamageClass, modifier: Modifier = Modifier) {
+internal fun DamageClassImage(damageClass: DamageClass, modifier: Modifier = Modifier) {
     val resource = when (damageClass) {
         DamageClass.PHYSICAL -> Res.drawable.move_physical
         DamageClass.SPECIAL -> Res.drawable.move_special
