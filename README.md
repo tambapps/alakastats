@@ -83,6 +83,9 @@ Built entirely with **Kotlin Multiplatform**, Alakastats delivers a native-feeli
 
 ### Note to self
 
+The scripts generating the data files (images, mappings, the damage calc's sets) are documented in
+[SCRIPTS.md](./SCRIPTS.md).
+
 Sprites can be found with the following URLs patterns
 
 ```text
