@@ -90,3 +90,56 @@ cd -
 
 Then commit and push `sets/champions.json` to `main`: the apps fetch it from the repository, so the new sets are used
 without releasing a new version (the bundled file being the fallback when offline).
+
+## `generate_pokedex.js`: the Pokédex of the current Champions format
+
+```bash
+node generate_pokedex.js [path to pokemon-showdown] [path to pokeapi]/data/v2/csv [format id]
+```
+
+Generates `composeResources/files/pokedex/champions.json`, read by `LocalPokedexRepository`: every Pokémon legal in the
+format (`gen9championsvgc2026regmc` by default), its types, base stats, abilities (the hidden one apart) and movepool,
+and the moves, abilities, items and types, with their English and French names and descriptions. The app keeps it in
+memory, with indexes for its queries (`Pokedex`).
+
+It needs [Node.js](https://nodejs.org) and two checkouts, siblings of the alakastats one by default:
+
+- [Pokémon Showdown](https://github.com/smogon/pokemon-showdown), the source of the game data, built (`node build` in
+  its folder). The script uses Showdown's own `Dex` on the format (which applies its mod, e.g. `data/mods/champions`)
+  and team validator (which decides what a Pokémon learns): Showdown's rules aren't reimplemented.
+- [PokéAPI](https://github.com/PokeAPI/pokeapi), for its CSVs (`data/v2/csv`, a sparse checkout is enough): the French
+  names and descriptions. Showdown's French translations come next, then `pokedex-fr-overrides.json`.
+
+What it does with the data:
+
+- A Mega is an entry of its own (its stats, types and ability), learning the moves of the form it mega evolves from,
+  with its Mega Stone.
+- Forms only taken in battle (e.g. Aegislash-Blade, Palafin-Hero) are left out; cosmetic forms (e.g. Vivillon-Polar,
+  or any form playing exactly like its base form) are listed in the `cosmeticForms` of their base form.
+- `championsModified` tells a move, ability or item Champions changed (its legality and the PP cap left aside). The
+  English descriptions are Showdown's Champions ones; the French description of a modified entry is left out (null)
+  unless PokéAPI has the one of Champions, the others describing the main games' version.
+- The JSON has one line per entry, for a regulation's changes to be read in its diff, and its `meta` gives the format
+  and the commits of Showdown and PokéAPI it was generated from.
+
+The script fails without writing anything when something is missing, listing every problem: a Pokémon, move, ability,
+item or type without French name, which `pokedex-fr-overrides.json` completes (`species`, `moves`, `abilities`,
+`items`, `types`, by Showdown id), along with the PokéAPI identifiers of the forms Showdown names otherwise
+(`pokeApiIds`, e.g. `tauros-paldea-combat-breed`). `PokedexFileTest` checks the result: every entry has its names, a
+Mega learns its base form's moves, the stats and types agree with the damage calc's data, and the preset sets only use
+moves their Pokémon learn.
+
+### Updating the Pokédex for a new regulation
+
+```bash
+git -C <path to pokemon-showdown> pull
+(cd <path to pokemon-showdown> && node build)
+git -C <path to pokeapi> pull
+cd data-scripts
+node generate_pokedex.js "" "" <id of the new format>
+cd -
+./gradlew :composeApp:wasmJsBrowserTest --tests "*Pokedex*"
+```
+
+Review the diff of `pokedex/champions.json`, update the format expected by `PokedexFileTest` and the default one of
+the script, then commit: unlike the preset sets, the Pokédex only changes with a new version of the app.

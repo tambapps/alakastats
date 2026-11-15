@@ -1,0 +1,20 @@
+{
+  "_comment": "Completes PokéAPI for generate_pokedex.js. pokeApiIds: the PokéAPI identifier of a form Showdown names otherwise. species/moves/abilities/items/types: a French name PokéAPI doesn't have. <table>Descriptions: a French description to use instead of PokéAPI's.",
+  "pokeApiIds": {
+    "taurospaldeacombat": "tauros-paldea-combat-breed",
+    "taurospaldeablaze": "tauros-paldea-blaze-breed",
+    "taurospaldeaaqua": "tauros-paldea-aqua-breed",
+    "meowsticf": "meowstic-female",
+    "indeedeef": "indeedee-female",
+    "basculegionf": "basculegion-female",
+    "squawkabillyyellow": "squawkabilly-yellow-plumage",
+    "squawkabillywhite": "squawkabilly-white-plumage"
+  },
+  "species": {},
+  "moves": {},
+  "abilities": {
+    "auraguard": "Aura Guard"
+  },
+  "items": {},
+  "types": {}
+}

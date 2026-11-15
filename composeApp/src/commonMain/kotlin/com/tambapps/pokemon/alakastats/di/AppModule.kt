@@ -50,6 +50,8 @@ import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalFormatData
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalPresetSetRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalPokemonBaseStatsRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.PokeApiPokemonMovesRepository
+import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalPokedexRepository
+import com.tambapps.pokemon.alakastats.domain.repository.PokedexRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.KStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsKStorage
 import com.tambapps.pokemon.alakastats.infrastructure.repository.storage.createTeamlyticsPreviewKStorage
@@ -125,6 +127,7 @@ val appModules = listOf(module {
     single { PokeApiGqlClient(get()) }
     singleOf(::LocalPokemonBaseStatsRepository).bind(PokemonBaseStatsRepository::class)
     singleOf(::PokeApiPokemonMovesRepository).bind(PokemonMovesRepository::class)
+    singleOf(::LocalPokedexRepository).bind(PokedexRepository::class)
     single<FormatDataRepository> {
         HybridFormatDataRepository(
             httpRepository = HttpFormatDataRepository(get(), get()),
