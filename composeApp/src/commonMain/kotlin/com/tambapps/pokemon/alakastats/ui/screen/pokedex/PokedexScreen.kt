@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -74,7 +75,7 @@ private val DISPLAYED_STATS = listOf(
 )
 
 /**
- * The sheet of a Pokémon of the Pokédex: its forms, artwork, types and stats
+ * The sheet of a Pokémon of the Pokédex: its forms, artwork, types and stats, then its abilities and its moves
  *
  * @param form the form shown. It's in the route, for it to be restored and to be in the web app's URL
  */
@@ -137,18 +138,34 @@ private fun PokemonSheet(viewModel: PokedexViewModel, pokemon: PokemonName, isCo
             CrossfadingArtwork(pokemon, Modifier.size(200.dp))
             Spacer(Modifier.height(16.dp))
             PokemonStats(viewModel, Modifier.fillMaxWidth())
-        } else {
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(32.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    CrossfadingArtwork(pokemon, Modifier.size(320.dp))
+            if (species != null) {
+                Spacer(Modifier.height(24.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    AbilitiesSection(species, Modifier.fillMaxWidth())
+                    MovepoolSection(viewModel, species, showPp = false, Modifier.fillMaxWidth())
                 }
-                PokemonStats(viewModel, Modifier.weight(1f))
+            }
+        } else {
+            Column(Modifier.fillMaxWidth().widthIn(max = 1400.dp)) {
+                // the abilities, short, on the line of the artwork and the stats
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(32.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(Modifier.weight(0.8f), contentAlignment = Alignment.Center) {
+                        CrossfadingArtwork(pokemon, Modifier.size(280.dp))
+                    }
+                    PokemonStats(viewModel, Modifier.weight(1.2f))
+                    if (species != null) AbilitiesSection(species, Modifier.width(320.dp))
+                }
+                if (species != null) {
+                    Spacer(Modifier.height(24.dp))
+                    MovepoolSection(viewModel, species, showPp = true, Modifier.fillMaxWidth())
+                }
             }
         }
+        if (species != null) Spacer(Modifier.height(16.dp))
     }
 }
 

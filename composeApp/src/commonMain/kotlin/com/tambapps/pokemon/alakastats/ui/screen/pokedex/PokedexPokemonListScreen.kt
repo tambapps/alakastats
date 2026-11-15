@@ -62,6 +62,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.LazyVerticalGridWithScroll
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.SortChip
 import com.tambapps.pokemon.alakastats.ui.composables.TypeBadge
+import com.tambapps.pokemon.alakastats.ui.composables.TypeFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.displayName
 import com.tambapps.pokemon.alakastats.ui.model.PokedexPokemonSort
 import com.tambapps.pokemon.alakastats.ui.model.PokedexPokemonSortCriterion
@@ -127,7 +128,7 @@ fun PokedexPokemonListScreen() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) {
-                TypeChip(viewModel)
+                TypeFilterChip(viewModel.type, onTypeChange = { viewModel.type = it })
                 MegasChip(viewModel, isCompact)
                 PokemonSortChip(viewModel)
             }
@@ -183,45 +184,6 @@ private fun SearchField(viewModel: PokedexPokemonListViewModel) {
         },
         modifier = Modifier.fillMaxWidth(),
     )
-}
-
-/** The type the Pokémon must have, picked from a menu of the types */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TypeChip(viewModel: PokedexPokemonListViewModel) {
-    var expanded by remember { mutableStateOf(false) }
-    val type = viewModel.type
-    // the box anchors the menu under the chip
-    Box {
-        FilterChip(
-            selected = type != null,
-            onClick = { expanded = true },
-            label = { if (type != null) TypeBadge(type) else Text("Type", maxLines = 1) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-        )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text("All types", fontWeight = if (type == null) FontWeight.Bold else null) },
-                onClick = {
-                    viewModel.type = null
-                    expanded = false
-                },
-            )
-            HorizontalDivider()
-            PokeType.entries.sortedBy { it.displayName }.forEach { entry ->
-                DropdownMenuItem(
-                    text = { TypeBadge(entry) },
-                    trailingIcon = if (entry == type) {
-                        { Icon(painterResource(Res.drawable.check), contentDescription = "Selected", Modifier.size(18.dp)) }
-                    } else null,
-                    onClick = {
-                        viewModel.type = entry
-                        expanded = false
-                    },
-                )
-            }
-        }
-    }
 }
 
 /** Whether the Megas are listed, with their Pokémon */

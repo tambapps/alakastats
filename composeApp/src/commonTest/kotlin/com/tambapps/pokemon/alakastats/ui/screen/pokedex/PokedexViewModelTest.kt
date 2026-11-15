@@ -3,8 +3,10 @@ package com.tambapps.pokemon.alakastats.ui.screen.pokedex
 import arrow.core.Either
 import arrow.core.left
 import com.tambapps.pokemon.PokeStats
+import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.alakastats.domain.error.GetPokemonDataError
+import com.tambapps.pokemon.alakastats.domain.model.DamageClass
 import com.tambapps.pokemon.alakastats.domain.model.Pokedex
 import com.tambapps.pokemon.alakastats.domain.repository.PokedexRepository
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalPokedexRepository
@@ -83,6 +85,52 @@ class PokedexViewModelTest {
         viewModel.show(PokemonName("missingno"))
         assertTrue(viewModel.isUnknown)
         assertNull(viewModel.formToShowInstead)
+    }
+
+    @Test
+    fun thePokemonComesWithItsAbilitiesAndMoves() = runTest {
+        viewModel.show(PokemonName("Incineroar"))
+        val species = viewModel.species!!
+        assertEquals(listOf("blaze"), species.abilities.map { it.id })
+        assertEquals("intimidate", species.hiddenAbility?.id)
+        val ids = viewModel.moves.map { it.id }
+        assertEquals(species.moves.size, ids.size)
+        assertTrue("fake-out" in ids && "parting-shot" in ids)
+        // by name
+        assertEquals(viewModel.moves.sortedBy { it.name.en }, viewModel.moves)
+    }
+
+    @Test
+    fun theMovesAreSearchedAndFilteredByCategory() = runTest {
+        viewModel.show(PokemonName("Incineroar"))
+        viewModel.moveQuery = "flare blitz"
+        assertEquals(listOf("flare-blitz"), viewModel.moves.map { it.id })
+        viewModel.moveQuery = ""
+        viewModel.moveCategory = DamageClass.STATUS
+        assertTrue(viewModel.moves.isNotEmpty())
+        assertTrue(viewModel.moves.all { it.damageClass == DamageClass.STATUS })
+    }
+
+    @Test
+    fun theMovesAreFilteredByType() = runTest {
+        viewModel.show(PokemonName("Incineroar"))
+        viewModel.moveType = PokeType.FIRE
+        assertTrue("flare-blitz" in viewModel.moves.map { it.id })
+        assertTrue(viewModel.moves.all { it.type == PokeType.FIRE })
+        // with the category
+        viewModel.moveCategory = DamageClass.STATUS
+        assertTrue("will-o-wisp" in viewModel.moves.map { it.id })
+        assertTrue(viewModel.moves.all { it.type == PokeType.FIRE && it.damageClass == DamageClass.STATUS })
+        // the filter only proposes the types of its moves
+        assertEquals(viewModel.species!!.moves.map { it.type }.toSet(), viewModel.moveTypes)
+    }
+
+    @Test
+    fun aMegaHasTheMovesOfItsBaseForm() = runTest {
+        viewModel.show(metagross)
+        val moves = viewModel.moves
+        viewModel.show(megaMetagross)
+        assertEquals(moves, viewModel.moves)
     }
 
     @Test
