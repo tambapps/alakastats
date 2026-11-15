@@ -12,6 +12,7 @@ import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.Pokemon
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
+import com.tambapps.pokemon.alakastats.domain.model.PresetSet
 import com.tambapps.pokemon.champions.data.Ability
 import com.tambapps.pokemon.champions.data.ChampionsDex
 import com.tambapps.pokemon.champions.data.Move
@@ -64,6 +65,26 @@ enum class RivalryRelation(val displayName: String) {
 
 // Hail doesn't exist in Champions, it was replaced by Snow
 val WEATHERS = listOf(Weather.NONE, Weather.SUN, Weather.RAIN, Weather.SAND, Weather.SNOW)
+
+/**
+ * A choice of set for a pokemon: one of the preset sets of its species, the blank set, or a custom one (what the pokemon
+ * has once one of its set is changed, which can't be chosen)
+ */
+sealed interface SetChoice {
+    val text: String
+
+    data class Preset(val set: PresetSet) : SetChoice {
+        override val text get() = set.name
+    }
+
+    data object Blank : SetChoice {
+        override val text = "Blank"
+    }
+
+    data object Custom : SetChoice {
+        override val text = "Custom"
+    }
+}
 
 enum class DamageCalcSide(val displayName: String, val keyStats: List<Stat>) {
     ATTACKER("Attacker", listOf(Stat.ATTACK, Stat.SPECIAL_ATTACK)),
@@ -359,16 +380,64 @@ class DamageCalcPokemonState(
     }
 
     /**
-     * Whether this pokemon has the set [fillFrom] fills from [pokemon]: same species (not a mega form), ability, item,
-     * nature and stat points. Moves and battle settings (boosts, status, HP...) don't matter
+     * Whether this pokemon has the set [fillFrom] fills from [pokemon]: same species (in its base form, or mega evolved
+     * by its stone), ability (before mega evolving), item, nature and stat points. Moves and battle settings (boosts,
+     * status, HP...) don't matter
      */
-    fun hasSetOf(pokemon: Pokemon): Boolean =
-        name.normalized == pokemon.name.normalized &&
-            form == availableForms.first() &&
-            ability == (pokemon.ability?.pretty ?: "") &&
+    fun hasSetOf(pokemon: Pokemon): Boolean {
+        // mega evolving is a choice of the battle, not a change of the set
+        val setAbility = if (isMegaEvolved) abilityBeforeMega ?: ability else ability
+        return name.normalized == pokemon.name.normalized &&
+            (form == availableForms.first() || isMegaEvolved) &&
+            setAbility == (pokemon.ability?.pretty ?: "") &&
             item == (pokemon.item?.pretty ?: "") &&
             nature == natureOf(pokemon) &&
             STATS.all { getStatPoints(it) == statPointsOf(pokemon, it) }
+    }
+
+    // the preset sets of a species, given by the view model once they're loaded
+    internal var presetSetsOf: (PokemonName) -> List<PresetSet> = { emptyList() }
+
+    /** The preset sets of this pokemon's species, in their source's order */
+    val presetSets: List<PresetSet> get() = presetSetsOf(name)
+
+    /**
+     * What this pokemon's set is: one of its [presetSets], the blank set (no item nor stat points, the species' default
+     * ability), or a custom one
+     */
+    val setChoice: SetChoice
+        get() = presetSets.find { hasSetOf(it.toPokemon()) }?.let(SetChoice::Preset)
+            ?: SetChoice.Blank.takeIf { hasSetOf(blankSet().toPokemon()) }
+            ?: SetChoice.Custom
+
+    /** The choices of set, the custom one not being one: it's what the pokemon has once one of its set is changed */
+    val setChoices: List<SetChoice> get() = presetSets.map(SetChoice::Preset) + SetChoice.Blank
+
+    fun chooseSet(choice: SetChoice) {
+        when (choice) {
+            is SetChoice.Preset -> fillFrom(choice.set.toPokemon())
+            SetChoice.Blank -> fillFrom(blankSet().toPokemon())
+            SetChoice.Custom -> {}
+        }
+    }
+
+    /**
+     * Pick a species, with its first preset set if it has one (e.g. from the pokemon picker), else like [selectSpecies]
+     */
+    fun pickSpecies(pokemonName: PokemonName) {
+        selectSpecies(pokemonName)
+        presetSets.firstOrNull()?.let { chooseSet(SetChoice.Preset(it)) }
+    }
+
+    private fun blankSet() = PresetSet(
+        name = SetChoice.Blank.text,
+        species = name,
+        nature = Nature.SERIOUS,
+        ability = ChampionsDex.speciesOrNull(name)?.defaultAbility,
+        item = null,
+        statPoints = PokeStats.default(0),
+        moves = emptyList(),
+    )
 
     // only one neutral nature is proposed
     private fun natureOf(pokemon: Pokemon) = pokemon.nature?.takeUnless { it.isNeutral } ?: Nature.SERIOUS

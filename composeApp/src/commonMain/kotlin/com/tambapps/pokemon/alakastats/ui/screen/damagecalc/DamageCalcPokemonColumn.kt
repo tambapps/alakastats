@@ -165,7 +165,7 @@ internal fun DamageCalcPokemonColumn(
     if (showPasteDialog) {
         // the same as the mobile layout's: a pokemon name or a pokepaste
         SelectPokemonDialog(
-            onSelect = { state.selectSpecies(it) },
+            onSelect = { state.pickSpecies(it) },
             onDismissRequest = { showPasteDialog = false },
             title = "Paste ${side.desktopName}",
             confirmButtonText = "Fill",
@@ -188,7 +188,7 @@ private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, m
                 label = "Pokémon",
                 value = ChampionsDex.speciesOrNull(state.name)?.name?.value ?: state.name.value,
                 catalog = POKEMON_CATALOG,
-                onValueSelected = { state.selectSpecies(PokemonName(it)) },
+                onValueSelected = { state.pickSpecies(PokemonName(it)) },
                 modifier = Modifier.weight(1f),
             )
             OutlinedButton(onClick = onPasteClick, contentPadding = PaddingValues(horizontal = 12.dp)) {
@@ -204,6 +204,17 @@ private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, m
                 options = state.availableForms,
                 optionText = { it.pretty },
                 onSelect = { state.selectForm(it) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        // only for the species having preset sets
+        if (state.presetSets.isNotEmpty()) {
+            DropdownField(
+                label = "Set",
+                selected = state.setChoice,
+                options = state.setChoices,
+                optionText = { it.text },
+                onSelect = { state.chooseSet(it) },
                 modifier = Modifier.fillMaxWidth(),
             )
         }

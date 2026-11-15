@@ -6,8 +6,12 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.tambapps.pokemon.Gender
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.alakastats.domain.model.PresetSets
+import com.tambapps.pokemon.alakastats.domain.repository.PresetSetRepository
+import kotlinx.coroutines.launch
 import com.tambapps.pokemon.champions.data.Ability
 import com.tambapps.pokemon.alakastats.ui.util.VoidSignal
 import com.tambapps.pokemon.champions.data.ChampionsCalcException
@@ -20,7 +24,16 @@ import com.tambapps.pokemon.champions.engine.effectiveTypeOf
 import com.tambapps.pokemon.champions.engine.terrainSetOnField
 import com.tambapps.pokemon.champions.engine.weatherSetOnField
 
-class DamageCalcViewModel : ViewModel() {
+/**
+ * @param presetSetRepository where the preset sets of the pokemon are loaded from, none without (e.g. in tests)
+ */
+class DamageCalcViewModel(
+    presetSetRepository: PresetSetRepository? = null,
+) : ViewModel() {
+
+    // the preset sets of the species, empty until they're loaded
+    var presetSets by mutableStateOf(PresetSets.EMPTY)
+        private set
 
     var attacker by mutableStateOf(
         DamageCalcPokemonState(
@@ -58,6 +71,12 @@ class DamageCalcViewModel : ViewModel() {
     init {
         attacker.onAbilityChange = ::onAbilityChange
         defender.onAbilityChange = ::onAbilityChange
+        // read when needed, so that the pokemon get the sets once loaded
+        attacker.presetSetsOf = { presetSets.of(it) }
+        defender.presetSetsOf = { presetSets.of(it) }
+        presetSetRepository?.let { repository ->
+            viewModelScope.launch { repository.get().onRight { presetSets = it } }
+        }
         // like the source calculator when loading the pokemons
         onAbilityChange(attacker, isAbilityChange = true)
         onAbilityChange(defender, isAbilityChange = true)

@@ -177,6 +177,12 @@ private fun Credits() = Section(
         }
         append(" allowing the app to fetch Pokemon-related data to display in the app\n")
 
+        append("• ")
+        withLink(LinkAnnotation.Url("https://github.com/nerd-of-now/NCP-VGC-Damage-Calculator")) {
+            withStyle(linkStyle) { append("Nerd of Now") }
+        }
+        append(" whose damage calculator the damage calc is ported from, and its sets come from\n")
+
         append("• myself to have designed the whole app from scratch")
     }
 )

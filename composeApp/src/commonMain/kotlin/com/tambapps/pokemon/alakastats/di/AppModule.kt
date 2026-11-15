@@ -183,7 +183,7 @@ val appModules = listOf(module {
     factoryOf(::MatchupPlanEditViewModel)
     factoryOf(::QuizzesViewModel)
     factoryOf(::PokedexViewModel)
-    factoryOf(::DamageCalcViewModel)
+    factory { DamageCalcViewModel(get<PresetSetRepository>()) }
     factoryOf(::NatureQuizSetupViewModel)
     factoryOf(::SpeedStatQuizSetupViewModel)
     factoryOf(::SpeedInteractionsHomeSetupViewModel)

@@ -89,6 +89,7 @@ internal fun DamageCalcPokemonPanel(
 ) {
     var showPokemonDialog by remember { mutableStateOf(false) }
     var showFormDialog by remember { mutableStateOf(false) }
+    var showSetDialog by remember { mutableStateOf(false) }
     var showNatureDialog by remember { mutableStateOf(false) }
     var showStatusDialog by remember { mutableStateOf(false) }
     var showToxicCounterDialog by remember { mutableStateOf(false) }
@@ -128,6 +129,10 @@ internal fun DamageCalcPokemonPanel(
         }
         if (state.availableForms.size > 1 && state.megaFormOfItem == null) {
             PropertyRow("Form", state.form.pretty, onClick = { showFormDialog = true })
+        }
+        // only for the species having preset sets
+        if (state.presetSets.isNotEmpty()) {
+            PropertyRow("Set", state.setChoice.text, onClick = { showSetDialog = true })
         }
         PropertyRow(
             label = "Ability",
@@ -251,7 +256,7 @@ internal fun DamageCalcPokemonPanel(
 
     if (showPokemonDialog) {
         SelectPokemonDialog(
-            onSelect = { state.selectSpecies(it) },
+            onSelect = { state.pickSpecies(it) },
             onDismissRequest = { showPokemonDialog = false },
             title = "Select ${side.displayName}",
             confirmButtonText = "Select",
@@ -268,6 +273,18 @@ internal fun DamageCalcPokemonPanel(
             initialIndex = forms.indexOf(state.form).coerceAtLeast(0),
             onPicked = { state.selectForm(forms[it]) },
             onDismissRequest = { showFormDialog = false },
+        )
+    }
+    if (showSetDialog) {
+        val choices = state.setChoices
+        WheelPickerDialog(
+            title = "Select Set",
+            items = choices,
+            // on the current set, the first one for a custom set
+            initialIndex = choices.indexOf(state.setChoice).coerceAtLeast(0),
+            itemToText = { it.text },
+            onPicked = { state.chooseSet(it) },
+            onDismissRequest = { showSetDialog = false },
         )
     }
     if (showNatureDialog) {
