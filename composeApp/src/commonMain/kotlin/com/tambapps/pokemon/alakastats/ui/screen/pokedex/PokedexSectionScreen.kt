@@ -22,7 +22,7 @@ import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 
 /**
- * A part of the Pokédex not made yet (types, abilities, moves): its title, and a back button to the Pokédex's home
+ * A part of the Pokédex not made yet (abilities, moves): its title, and a back button to the Pokédex's home
  */
 @Composable
 internal fun PokedexSectionScreen(section: PokedexSection) {

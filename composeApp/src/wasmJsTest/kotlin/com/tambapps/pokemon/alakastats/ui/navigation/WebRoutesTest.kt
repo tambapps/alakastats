@@ -22,7 +22,6 @@ class WebRoutesTest {
     @Test
     fun thePartsOfThePokedexAreAboveIt() {
         assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon()), WebRoutes.backStackOf("pokedex/pokemon"))
-        assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexTypes), WebRoutes.backStackOf("pokedex/types"))
         assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexAbilities), WebRoutes.backStackOf("pokedex/abilities"))
         assertEquals(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves), WebRoutes.backStackOf("pokedex/moves"))
     }

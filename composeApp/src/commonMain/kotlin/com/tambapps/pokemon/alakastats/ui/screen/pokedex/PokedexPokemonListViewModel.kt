@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.domain.model.Pokedex
 import com.tambapps.pokemon.alakastats.domain.model.PokedexSpecies
 import com.tambapps.pokemon.alakastats.domain.model.foldName
@@ -24,16 +25,20 @@ class PokedexPokemonListViewModel(
     var sort by mutableStateOf(PokedexPokemonSort())
     // the Megas are on their Pokémon's sheet: they're only listed on demand
     var includeMegas by mutableStateOf(false)
+    // the type the Pokémon must have, null for all of them
+    var type by mutableStateOf<PokeType?>(null)
     var isLoading by mutableStateOf(true)
         private set
     var loadingFailed by mutableStateOf(false)
         private set
     private var pokedex by mutableStateOf<Pokedex?>(null)
 
-    /** The Pokémon matching the query, in the order of the sort */
+    /** The Pokémon matching the query and of the type, in the order of the sort */
     val pokemons: List<PokedexSpecies> by derivedStateOf {
         val pokedex = pokedex ?: return@derivedStateOf emptyList()
-        matching(pokedex, query, includeMegas).sortedBy(sort)
+        matching(pokedex, query, includeMegas)
+            .filter { pokemon -> type.let { it == null || it in pokemon.types } }
+            .sortedBy(sort)
     }
 
     suspend fun load() {

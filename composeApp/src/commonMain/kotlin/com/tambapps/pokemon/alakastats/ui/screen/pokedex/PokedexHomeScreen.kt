@@ -3,7 +3,6 @@ package com.tambapps.pokemon.alakastats.ui.screen.pokedex
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.ability
 import alakastats.composeapp.generated.resources.move_physical
-import alakastats.composeapp.generated.resources.tera_type_dragon
 import androidx.compose.foundation.Image
 import com.tambapps.pokemon.PokemonName
 import androidx.compose.foundation.background
@@ -63,7 +62,6 @@ internal enum class PokedexSection(
     val tinted: Boolean = false,
     val artwork: PokemonName? = null,
 ) {
-    TYPES("Types", "The Pokémon of each type and type combination", Res.drawable.tera_type_dragon, AppRoute.PokedexTypes),
     // the Pokémon Alakastats is named after
     POKEMON("Pokémon", "Search a Pokémon, its stats and its forms", null, AppRoute.PokedexPokemon(), artwork = PokemonName("alakazam")),
     ABILITIES("Abilities", "What each ability does, and who has it", Res.drawable.ability, AppRoute.PokedexAbilities, tinted = true),
@@ -98,17 +96,13 @@ fun PokedexHomeScreen() {
                 }
             }
         } else {
-            // two by two, not wider than what reads well
-            Column(
-                Modifier.widthIn(max = 960.dp).align(Alignment.CenterHorizontally).padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+            // side by side, not wider than what reads well
+            Row(
+                Modifier.widthIn(max = 1200.dp).align(Alignment.CenterHorizontally).padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                for (row in PokedexSection.entries.chunked(2)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        for (section in row) {
-                            PokedexSectionCard(section, height = 180.dp, iconSize = 200.dp, Modifier.weight(1f))
-                        }
-                    }
+                for (section in PokedexSection.entries) {
+                    PokedexSectionCard(section, height = 180.dp, iconSize = 200.dp, Modifier.weight(1f))
                 }
             }
         }

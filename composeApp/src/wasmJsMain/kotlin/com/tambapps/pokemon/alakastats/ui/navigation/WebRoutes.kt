@@ -24,7 +24,6 @@ private val BACK_STACK_BY_PATH: Map<String, List<AppRoute>> = mapOf(
     "" to listOf(AppRoute.Home),
     POKEDEX_PATH to listOf(AppRoute.Home, AppRoute.Pokedex),
     "$POKEDEX_PATH/$POKEDEX_POKEMON_PATH" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon()),
-    "$POKEDEX_PATH/types" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexTypes),
     "$POKEDEX_PATH/abilities" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexAbilities),
     "$POKEDEX_PATH/moves" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves),
     "replays" to listOf(AppRoute.Home, AppRoute.ShowdownReplays),

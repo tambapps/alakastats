@@ -1,5 +1,6 @@
 package com.tambapps.pokemon.alakastats.ui.screen.pokedex
 
+import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalPokedexRepository
 import com.tambapps.pokemon.alakastats.ui.model.PokedexPokemonSort
 import com.tambapps.pokemon.alakastats.ui.model.PokedexPokemonSortCriterion
@@ -36,6 +37,23 @@ class PokedexPokemonListViewModelTest {
         assertEquals(withoutMegas + viewModel.pokemons.count { it.isMega }, viewModel.pokemons.size)
         viewModel.query = "Dracaufeu"
         assertEquals(listOf("charizard", "charizard-mega-x", "charizard-mega-y"), ids())
+    }
+
+    @Test
+    fun thePokemonCanBeFilteredByType() = runTest {
+        viewModel.load()
+        viewModel.type = PokeType.DRAGON
+        assertTrue(viewModel.pokemons.isNotEmpty())
+        assertTrue(viewModel.pokemons.all { PokeType.DRAGON in it.types })
+        // whether it's their first or second type
+        assertTrue("garchomp" in ids())
+        assertTrue("kommo-o" in ids())
+        // with the search
+        viewModel.query = "garch"
+        assertEquals(listOf("garchomp"), ids())
+        viewModel.query = ""
+        viewModel.type = null
+        assertTrue("incineroar" in ids())
     }
 
     @Test

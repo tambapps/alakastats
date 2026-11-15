@@ -74,9 +74,6 @@ sealed interface AppRoute : NavKey {
     data class PokedexPokemon(val form: String? = null) : AppRoute
 
     @Serializable
-    data object PokedexTypes : AppRoute
-
-    @Serializable
     data object PokedexAbilities : AppRoute
 
     @Serializable
@@ -221,7 +218,6 @@ fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (Nav
                         val form = it.form
                         if (form == null) PokedexPokemonListScreen() else PokedexScreen(form)
                     }
-                    entry<AppRoute.PokedexTypes> { PokedexSectionScreen(PokedexSection.TYPES) }
                     entry<AppRoute.PokedexAbilities> { PokedexSectionScreen(PokedexSection.ABILITIES) }
                     entry<AppRoute.PokedexMoves> { PokedexSectionScreen(PokedexSection.MOVES) }
                     entry<AppRoute.CloudSync> { CloudSyncScreen() }

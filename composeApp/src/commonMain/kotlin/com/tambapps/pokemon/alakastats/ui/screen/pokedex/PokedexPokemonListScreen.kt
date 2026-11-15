@@ -8,6 +8,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +27,12 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeStats
+import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.domain.model.PokedexSpecies
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
@@ -54,6 +62,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.LazyVerticalGridWithScroll
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.SortChip
 import com.tambapps.pokemon.alakastats.ui.composables.TypeBadge
+import com.tambapps.pokemon.alakastats.ui.composables.displayName
 import com.tambapps.pokemon.alakastats.ui.model.PokedexPokemonSort
 import com.tambapps.pokemon.alakastats.ui.model.PokedexPokemonSortCriterion
 import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
@@ -75,6 +84,7 @@ private val CARD_MIN_WIDTH = 340.dp
  * The Pokémon of the Pokédex as cards in the color of their type, searched and sorted by name. A card opens the
  * Pokémon's sheet
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PokedexPokemonListScreen() {
     val viewModel = koinViewModel<PokedexPokemonListViewModel>()
@@ -82,11 +92,12 @@ fun PokedexPokemonListScreen() {
     val isCompact = LocalIsCompact.current
     LaunchedEffect(Unit) { viewModel.load() }
     val gridState = rememberLazyGridState()
-    // a new order starts from its first Pokémon
-    var shownSort by remember { mutableStateOf(viewModel.sort) }
-    LaunchedEffect(viewModel.sort) {
-        if (viewModel.sort != shownSort) {
-            shownSort = viewModel.sort
+    // a new order or type starts from its first Pokémon
+    val order = viewModel.sort to viewModel.type
+    var shownOrder by remember { mutableStateOf(order) }
+    LaunchedEffect(order) {
+        if (order != shownOrder) {
+            shownOrder = order
             gridState.scrollToItem(0)
         }
     }
@@ -111,17 +122,20 @@ fun PokedexPokemonListScreen() {
         ) {
             SearchField(viewModel)
             Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    if (viewModel.isLoading) "" else "${viewModel.pokemons.size} Pokémon",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f),
-                )
+            // on several lines on a phone, where they may not fit on one
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                TypeChip(viewModel)
                 MegasChip(viewModel, isCompact)
-                Spacer(Modifier.width(8.dp))
                 PokemonSortChip(viewModel)
             }
+            Text(
+                if (viewModel.isLoading) "" else "${viewModel.pokemons.size} Pokémon",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(Modifier.height(8.dp))
             when {
                 viewModel.isLoading -> Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
@@ -169,6 +183,45 @@ private fun SearchField(viewModel: PokedexPokemonListViewModel) {
         },
         modifier = Modifier.fillMaxWidth(),
     )
+}
+
+/** The type the Pokémon must have, picked from a menu of the types */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TypeChip(viewModel: PokedexPokemonListViewModel) {
+    var expanded by remember { mutableStateOf(false) }
+    val type = viewModel.type
+    // the box anchors the menu under the chip
+    Box {
+        FilterChip(
+            selected = type != null,
+            onClick = { expanded = true },
+            label = { if (type != null) TypeBadge(type) else Text("Type", maxLines = 1) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+        )
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text("All types", fontWeight = if (type == null) FontWeight.Bold else null) },
+                onClick = {
+                    viewModel.type = null
+                    expanded = false
+                },
+            )
+            HorizontalDivider()
+            PokeType.entries.sortedBy { it.displayName }.forEach { entry ->
+                DropdownMenuItem(
+                    text = { TypeBadge(entry) },
+                    trailingIcon = if (entry == type) {
+                        { Icon(painterResource(Res.drawable.check), contentDescription = "Selected", Modifier.size(18.dp)) }
+                    } else null,
+                    onClick = {
+                        viewModel.type = entry
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
 }
 
 /** Whether the Megas are listed, with their Pokémon */
