@@ -52,8 +52,9 @@ private class FakeHistory(path: String = "", initialIndex: Int? = null) : WebHis
 class BackStackHistorySyncTest {
 
     private val home = AppRoute.Home
-    private val pokedex = AppRoute.Pokedex()
-    private val metagross = AppRoute.Pokedex("metagross")
+    private val pokedex = AppRoute.Pokedex
+    private val pokemonSearch = AppRoute.PokedexPokemon()
+    private val metagross = AppRoute.PokedexPokemon("metagross")
     // a screen without URL
     private val createTeam = AppRoute.EditTeam()
 
@@ -89,7 +90,7 @@ class BackStackHistorySyncTest {
     fun changingThePokemonReplacesTheEntry() {
         val history = FakeHistory()
         val (sync, backStack) = sync(history, home)
-        sync.navigate(backStack) { add(pokedex) }
+        sync.navigate(backStack) { add(pokemonSearch) }
         sync.navigate(backStack) { this[lastIndex] = metagross }
         assertEquals("pokedex/metagross", history.path)
         assertEquals(2, history.entries.size)

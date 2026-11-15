@@ -50,15 +50,11 @@ internal enum class TopLevelDestination(val label: String, val icon: DrawableRes
     SHOWDOWN_REPLAYS("Replays", Res.drawable.play_arrow, AppRoute.ShowdownReplays),
     DAMAGE_CALC("Damage Calc", Res.drawable.calculate, AppRoute.DamageCalc),
     QUIZZES("Quizzes", Res.drawable.quiz, AppRoute.Quizzes),
-    POKEDEX("Pokédex", Res.drawable.pokedex, AppRoute.Pokedex());
+    POKEDEX("Pokédex", Res.drawable.pokedex, AppRoute.Pokedex);
 
     companion object {
         /** The destination a screen is, null for a screen below one of them */
-        fun of(route: NavKey?): TopLevelDestination? = when (route) {
-            // whatever the form shown
-            is AppRoute.Pokedex -> POKEDEX
-            else -> entries.find { it.route == route }
-        }
+        fun of(route: NavKey?): TopLevelDestination? = entries.find { it.route == route }
     }
 }
 

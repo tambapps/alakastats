@@ -48,6 +48,7 @@ import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
+import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.SuggestionTextField
 import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
@@ -93,12 +94,12 @@ fun PokedexScreen(form: String?) {
     LaunchedEffect(form, availableNames.size) {
         if (form != null && availableNames.isNotEmpty() && baseFormOf(PokemonName(form)) !in availableNames) {
             snackBar.show("Unknown Pokémon: $form", SnackBar.Severity.ERROR)
-            navigator.replace(AppRoute.Pokedex())
+            navigator.replace(AppRoute.PokedexPokemon())
         }
     }
     viewModel.formToShowInstead?.let { replacement ->
         LaunchedEffect(replacement) {
-            navigator.replace(AppRoute.Pokedex(replacement.value))
+            navigator.replace(AppRoute.PokedexPokemon(replacement.value))
         }
     }
     Column(
@@ -107,8 +108,9 @@ fun PokedexScreen(form: String?) {
             .then(if (isCompact) Modifier.safeContentPadding() else Modifier.padding(all = 16.dp))
     ) {
         Box(Modifier.fillMaxWidth()) {
+            BackIconButton(navigator, Modifier.align(Alignment.CenterStart))
             Text(
-                "Pokédex",
+                "Pokémon",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.Center)
@@ -128,7 +130,7 @@ fun PokedexScreen(form: String?) {
                 focusManager.clearFocus()
                 // emptied, ready for the next search, the sheet telling which pokemon is shown
                 viewModel.query = ""
-                navigator.replace(AppRoute.Pokedex(it.value))
+                navigator.replace(AppRoute.PokedexPokemon(it.value))
             },
         )
         Spacer(Modifier.height(16.dp))
@@ -199,7 +201,7 @@ private fun FormSelector(viewModel: PokedexViewModel) {
                 Modifier.size(FORM_SIZE)
                     .clip(RoundedCornerShape(12.dp))
                     .background(background)
-                    .clickable { navigator.replace(AppRoute.Pokedex(form.value)) }
+                    .clickable { navigator.replace(AppRoute.PokedexPokemon(form.value)) }
                     .padding(4.dp),
                 contentAlignment = Alignment.Center,
             ) {

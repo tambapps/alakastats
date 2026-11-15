@@ -10,6 +10,7 @@ import io.ktor.http.parseQueryString
 import kotlin.uuid.Uuid
 
 private const val POKEDEX_PATH = "pokedex"
+private const val POKEDEX_POKEMON_PATH = "pokemon"
 private const val TEAMS_PATH = "teams"
 private const val TEAM_POKEMON_PATH = "pokemon"
 private const val SPEED_INTERACTIONS_PATH = "speed-interactions"
@@ -21,6 +22,11 @@ private const val REPLAY_REF_PARAM = "replayRef"
  */
 private val BACK_STACK_BY_PATH: Map<String, List<AppRoute>> = mapOf(
     "" to listOf(AppRoute.Home),
+    POKEDEX_PATH to listOf(AppRoute.Home, AppRoute.Pokedex),
+    "$POKEDEX_PATH/$POKEDEX_POKEMON_PATH" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon()),
+    "$POKEDEX_PATH/types" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexTypes),
+    "$POKEDEX_PATH/abilities" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexAbilities),
+    "$POKEDEX_PATH/moves" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves),
     "replays" to listOf(AppRoute.Home, AppRoute.ShowdownReplays),
     "about" to listOf(AppRoute.Home, AppRoute.About),
     "cloud-sync" to listOf(AppRoute.Home, AppRoute.CloudSync),
@@ -46,8 +52,9 @@ internal object WebRoutes {
         BACK_STACK_BY_PATH[normalizedPath]?.let { return it }
         val segments = normalizedPath.split('/')
         return when {
-            segments.singleOrNull() == POKEDEX_PATH -> listOf(AppRoute.Home, AppRoute.Pokedex())
-            segments.size == 2 && segments[0] == POKEDEX_PATH -> listOf(AppRoute.Home, AppRoute.Pokedex(segments[1]))
+            // a Pokémon is right under the Pokédex (pokedex/metagross), as it was before the Pokédex had other parts
+            segments.size == 2 && segments[0] == POKEDEX_PATH ->
+                listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon(segments[1]))
             segments.size in 2..3 && segments[0] == TEAMS_PATH -> teamBackStackOf(segments[1], segments.getOrNull(2), query)
             segments.size == 4 && segments[0] == TEAMS_PATH -> teamScreenBackStackOf(segments[1], segments[2], segments[3])
             else -> listOf(AppRoute.Home)
@@ -93,7 +100,7 @@ internal object WebRoutes {
         backStack.asReversed().firstNotNullOfOrNull(::pathOfRoute).orEmpty()
 
     private fun pathOfRoute(route: NavKey): String? = when (route) {
-        is AppRoute.Pokedex -> if (route.form != null) "$POKEDEX_PATH/${route.form}" else POKEDEX_PATH
+        is AppRoute.PokedexPokemon -> "$POKEDEX_PATH/${route.form ?: POKEDEX_POKEMON_PATH}"
         is AppRoute.Teamlytics -> {
             val teamPath = "$TEAMS_PATH/${route.teamId}"
             val query = route.replayRef?.let { "?$REPLAY_REF_PARAM=${it.encodeURLParameter()}" }.orEmpty()

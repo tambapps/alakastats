@@ -136,8 +136,12 @@ class AppNavigationTest {
         val routes = listOf(
             AppRoute.Home,
             AppRoute.ShowdownReplays,
-            AppRoute.Pokedex(),
-            AppRoute.Pokedex("metagross-mega"),
+            AppRoute.Pokedex,
+            AppRoute.PokedexPokemon(),
+            AppRoute.PokedexPokemon("metagross-mega"),
+            AppRoute.PokedexTypes,
+            AppRoute.PokedexAbilities,
+            AppRoute.PokedexMoves,
             AppRoute.CloudSync,
             AppRoute.About,
             AppRoute.DamageCalc,
@@ -220,7 +224,7 @@ class AppNavigationTest {
     fun replacingARouteOfTheSameContentKeepsItsViewModelAndUpdatesTheScreen() = runComposeUiTest {
         RecordingViewModel.cleared.clear()
         val id = Uuid.random()
-        val backStack = NavBackStack<NavKey>(AppRoute.Pokedex("first"))
+        val backStack = NavBackStack<NavKey>(AppRoute.PokedexPokemon("first"))
         setContent {
             KoinApplication(
                 configuration = koinConfiguration {
@@ -235,7 +239,7 @@ class AppNavigationTest {
                         rememberViewModelStoreNavEntryDecorator(),
                     ),
                     entryProvider = entryProvider {
-                        entry<AppRoute.Pokedex>(clazzContentKey = { "pokedex" }) { route ->
+                        entry<AppRoute.PokedexPokemon>(clazzContentKey = { "pokedex-pokemon" }) { route ->
                             val viewModel = koinViewModel<RecordingViewModel> { parametersOf(id) }
                             Column {
                                 Text("form=${route.form} clicks=${viewModel.clicks}")
@@ -249,7 +253,7 @@ class AppNavigationTest {
         onNodeWithText("click").performClick()
         onNodeWithText("form=first clicks=1").assertExists()
 
-        backStack[0] = AppRoute.Pokedex("second")
+        backStack[0] = AppRoute.PokedexPokemon("second")
         waitForIdle()
         onNodeWithText("form=second clicks=1").assertExists()
         assertEquals(emptyList(), RecordingViewModel.cleared)
@@ -310,18 +314,18 @@ class AppNavigationTest {
         }
         waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Pokédex")).fetchSemanticsNodes().isNotEmpty() }
         goToPart("Pokédex")
-        waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Search a Pokémon")).fetchSemanticsNodes().isNotEmpty() }
-        assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.Pokedex()), backStack.toList())
+        waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Abilities")).fetchSemanticsNodes().isNotEmpty() }
+        assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.Pokedex), backStack.toList())
         // a part replaces the other one: a back from it goes to the teams
         goToPart("Quizzes")
-        waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Search a Pokémon")).fetchSemanticsNodes().isEmpty() }
+        waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText("Abilities")).fetchSemanticsNodes().isEmpty() }
         assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.Quizzes), backStack.toList())
         goToPart("Teams")
         waitUntil(timeoutMillis = 20_000) { backStack.toList() == listOf<NavKey>(AppRoute.Home) }
     }
 
-    private val partsOfTheApp = listOf(AppRoute.Home, AppRoute.ShowdownReplays, AppRoute.DamageCalc, AppRoute.Quizzes, AppRoute.Pokedex("metagross"))
-    private val screensBelowTheParts = listOf(AppRoute.StandaloneDamageCalc, AppRoute.NatureQuizSetup, AppRoute.Teamlytics(Uuid.random()), AppRoute.About)
+    private val partsOfTheApp = listOf<AppRoute>(AppRoute.Home, AppRoute.ShowdownReplays, AppRoute.DamageCalc, AppRoute.Quizzes, AppRoute.Pokedex)
+    private val screensBelowTheParts = listOf(AppRoute.StandaloneDamageCalc, AppRoute.NatureQuizSetup, AppRoute.Teamlytics(Uuid.random()), AppRoute.About, AppRoute.PokedexPokemon("metagross"))
 
     // the drawer's content is there even when it's closed: its menu button is what tells
     private fun menuButtonIsOnlyOnTheParts(isCompact: Boolean) = runComposeUiTest {
@@ -389,8 +393,8 @@ class AppNavigationTest {
     fun aPartOfTheAppIsRightAboveTheRoot() {
         val backStack = mutableListOf<NavKey>(AppRoute.Home, AppRoute.Quizzes, AppRoute.NatureQuizSetup)
         val navigator = AppNavigator(backStack)
-        navigator.navigateToTopLevel(AppRoute.Pokedex())
-        assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.Pokedex()), backStack)
+        navigator.navigateToTopLevel(AppRoute.Pokedex)
+        assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.Pokedex), backStack)
         navigator.navigateToTopLevel(AppRoute.ShowdownReplays)
         assertEquals(listOf<NavKey>(AppRoute.Home, AppRoute.ShowdownReplays), backStack)
         navigator.navigateToTopLevel(AppRoute.Home)
@@ -585,8 +589,12 @@ class AppNavigationTest {
 
     @Test fun homeOpens() = screenOpens(AppRoute.Home)
     @Test fun showdownReplaysOpens() = screenOpens(AppRoute.ShowdownReplays)
-    @Test fun pokedexOpens() = screenOpens(AppRoute.Pokedex())
-    @Test fun pokedexOpensOnAPokemon() = screenOpens(AppRoute.Pokedex("metagross-mega"))
+    @Test fun pokedexOpens() = screenOpens(AppRoute.Pokedex)
+    @Test fun pokedexPokemonOpens() = screenOpens(AppRoute.PokedexPokemon())
+    @Test fun pokedexPokemonOpensOnAPokemon() = screenOpens(AppRoute.PokedexPokemon("metagross-mega"))
+    @Test fun pokedexTypesOpen() = screenOpens(AppRoute.PokedexTypes)
+    @Test fun pokedexAbilitiesOpen() = screenOpens(AppRoute.PokedexAbilities)
+    @Test fun pokedexMovesOpen() = screenOpens(AppRoute.PokedexMoves)
     @Test fun aboutOpens() = screenOpens(AppRoute.About)
     @Test fun cloudSyncOpens() = screenOpens(AppRoute.CloudSync)
     @Test fun damageCalcOpens() = screenOpens(AppRoute.DamageCalc)

@@ -27,7 +27,10 @@ import com.tambapps.pokemon.alakastats.ui.screen.editteam.EditTeamScreen
 import com.tambapps.pokemon.alakastats.ui.screen.home.HomeScreen
 import com.tambapps.pokemon.alakastats.ui.screen.showdownreplays.ShowdownReplaysScreen
 import com.tambapps.pokemon.alakastats.ui.screen.manualreplay.ManualReplayScreen
+import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexHomeScreen
 import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexScreen
+import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexSection
+import com.tambapps.pokemon.alakastats.ui.screen.pokedex.PokedexSectionScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.NatureQuizSetupScreen
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.QuizDirection
@@ -61,9 +64,22 @@ sealed interface AppRoute : NavKey {
     @Serializable
     data object ShowdownReplays : AppRoute
 
-    /** @param form the form shown, null for none */
+    /** The Pokédex's home screen, leading to its parts */
     @Serializable
-    data class Pokedex(val form: String? = null) : AppRoute
+    data object Pokedex : AppRoute
+
+    /** The search of a Pokémon of the Pokédex. @param form the form shown, null for none */
+    @Serializable
+    data class PokedexPokemon(val form: String? = null) : AppRoute
+
+    @Serializable
+    data object PokedexTypes : AppRoute
+
+    @Serializable
+    data object PokedexAbilities : AppRoute
+
+    @Serializable
+    data object PokedexMoves : AppRoute
 
     @Serializable
     data object CloudSync : AppRoute
@@ -198,7 +214,11 @@ fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (Nav
                     entry<AppRoute.Home> { HomeScreen() }
                     entry<AppRoute.ShowdownReplays> { ShowdownReplaysScreen() }
                     // the same content whatever the form: changing it keeps the screen, its view model and its animations
-                    entry<AppRoute.Pokedex>(clazzContentKey = { "pokedex" }) { PokedexScreen(it.form) }
+                    entry<AppRoute.Pokedex> { PokedexHomeScreen() }
+                    entry<AppRoute.PokedexPokemon>(clazzContentKey = { "pokedex-pokemon" }) { PokedexScreen(it.form) }
+                    entry<AppRoute.PokedexTypes> { PokedexSectionScreen(PokedexSection.TYPES) }
+                    entry<AppRoute.PokedexAbilities> { PokedexSectionScreen(PokedexSection.ABILITIES) }
+                    entry<AppRoute.PokedexMoves> { PokedexSectionScreen(PokedexSection.MOVES) }
                     entry<AppRoute.CloudSync> { CloudSyncScreen() }
                     entry<AppRoute.About> { AboutScreen() }
                     // the standalone one has no navigation bar
