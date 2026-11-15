@@ -3,9 +3,9 @@ package com.tambapps.pokemon.alakastats.ui.screen.pokedex
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.ability
 import alakastats.composeapp.generated.resources.move_physical
-import alakastats.composeapp.generated.resources.pokeball
 import alakastats.composeapp.generated.resources.tera_type_dragon
 import androidx.compose.foundation.Image
+import com.tambapps.pokemon.PokemonName
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +38,7 @@ import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
 import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
+import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -50,17 +51,21 @@ private val SECTION_ICON_OFFSET = 28.dp
 /**
  * The parts of the Pokédex, each reached from its card
  *
+ * @property icon the icon of the card, null for a Pokémon's artwork
+ * @property artwork the Pokémon whose artwork is the icon of the card
  * @property tinted whether the icon is a monochrome vector, drawn in the card's text color
  */
 internal enum class PokedexSection(
     val title: String,
     val description: String,
-    val icon: DrawableResource,
+    val icon: DrawableResource?,
     val route: AppRoute,
     val tinted: Boolean = false,
+    val artwork: PokemonName? = null,
 ) {
     TYPES("Types", "The Pokémon of each type and type combination", Res.drawable.tera_type_dragon, AppRoute.PokedexTypes),
-    POKEMON("Pokémon", "Search a Pokémon, its stats and its forms", Res.drawable.pokeball, AppRoute.PokedexPokemon()),
+    // the Pokémon Alakastats is named after
+    POKEMON("Pokémon", "Search a Pokémon, its stats and its forms", null, AppRoute.PokedexPokemon(), artwork = PokemonName("alakazam")),
     ABILITIES("Abilities", "What each ability does, and who has it", Res.drawable.ability, AppRoute.PokedexAbilities, tinted = true),
     MOVES("Moves", "What each move does, and who learns it", Res.drawable.move_physical, AppRoute.PokedexMoves),
 }
@@ -119,16 +124,21 @@ private fun PokedexSectionCard(section: PokedexSection, height: Dp, iconSize: Dp
         gradientBackgroundColors = elevatedCardGradientColors,
     ) {
         Box(Modifier.fillMaxSize().clipToBounds()) {
-            Image(
-                painterResource(section.icon),
-                contentDescription = null,
-                colorFilter = if (section.tinted) ColorFilter.tint(MaterialTheme.colorScheme.onSurface) else null,
-                modifier = Modifier.size(iconSize)
-                    .align(Alignment.BottomEnd)
-                    .offset(x = SECTION_ICON_OFFSET, y = SECTION_ICON_OFFSET)
-                    .rotate(SECTION_ICON_ROTATION)
-                    .alpha(SECTION_ICON_ALPHA),
-            )
+            val iconModifier = Modifier.size(iconSize)
+                .align(Alignment.BottomEnd)
+                .offset(x = SECTION_ICON_OFFSET, y = SECTION_ICON_OFFSET)
+                .alpha(SECTION_ICON_ALPHA)
+            if (section.artwork != null) {
+                // upright, facing the text
+                PokemonArtwork(section.artwork, iconModifier)
+            } else if (section.icon != null) {
+                Image(
+                    painterResource(section.icon),
+                    contentDescription = null,
+                    colorFilter = if (section.tinted) ColorFilter.tint(MaterialTheme.colorScheme.onSurface) else null,
+                    modifier = iconModifier.rotate(SECTION_ICON_ROTATION),
+                )
+            }
             Column(Modifier.align(Alignment.CenterStart).padding(horizontal = 20.dp)) {
                 Text(section.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(4.dp))
