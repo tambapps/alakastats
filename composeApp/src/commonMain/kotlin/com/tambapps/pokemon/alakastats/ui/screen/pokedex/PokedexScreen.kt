@@ -49,6 +49,7 @@ import com.tambapps.pokemon.PokemonName
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.TypeBadge
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonArtwork
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -154,7 +155,8 @@ private fun PokemonSheet(viewModel: PokedexViewModel, pokemon: PokemonName, isCo
 @Composable
 private fun CrossfadingArtwork(pokemon: PokemonName, modifier: Modifier = Modifier) {
     Crossfade(pokemon, modifier, animationSpec = tween(ARTWORK_CROSSFADE_MILLIS)) {
-        PokemonArtwork(it, Modifier.fillMaxSize())
+        // facing the stats, on its right on desktop
+        PokemonArtwork(it, Modifier.fillMaxSize(), FacingDirection.RIGHT)
     }
 }
 
