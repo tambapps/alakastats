@@ -5,21 +5,24 @@ import com.tambapps.pokemon.PokemonName
 // Champions dex names megas "Mega Charizard X", images are named "charizard-mega-x"
 private val CHAMPIONS_MEGA_NAME = Regex("^mega-(.+?)(-[xyz])?$")
 
-// forms (from the Champions dex) that have no image of their own, and use their base form's image
+// names whose image is named otherwise, the Pokémon looking the same. A form looking otherwise (e.g. Tauros-Paldea-Aqua)
+// has an image of its own: aliasing it to its base form's would show another Pokémon
 private val IMAGE_NAME_ALIASES = mapOf(
+    // the default forms
     "aegislash-shield" to "aegislash",
     "lycanroc-midday" to "lycanroc",
     "gourgeist-average" to "gourgeist",
+    // the sizes, hardly visible on an image
     "gourgeist-small" to "gourgeist",
     "gourgeist-large" to "gourgeist",
     "gourgeist-super" to "gourgeist",
-    "tauros-paldea-combat" to "tauros",
-    "tauros-paldea-aqua" to "tauros",
-    "tauros-paldea-blaze" to "tauros",
-    "meowstic-f" to "meowstic",
-    "morpeko-hangry" to "morpeko",
-    "persian-alola" to "persian",
+    // Mega Meowstic looks the same whatever its gender
+    "meowstic-m-mega" to "meowstic-mega",
+    "meowstic-f-mega" to "meowstic-mega",
+    // the apostrophes: Showdown's names have a typographic one
+    "farfetch’d" to "farfetch'd",
     "sirfetch'd" to "sirfetch-d",
+    "sirfetch’d" to "sirfetch-d",
 )
 
 /**
