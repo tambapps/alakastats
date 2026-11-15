@@ -1,7 +1,9 @@
 package com.tambapps.pokemon.alakastats.infrastructure.repository
 
 import alakastats.composeapp.generated.resources.Res
+import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.alakastats.domain.model.Pokedex
 import com.tambapps.pokemon.champions.data.ChampionsDex
 import kotlinx.coroutines.test.runTest
@@ -38,6 +40,17 @@ class PokedexFileTest {
         assertEquals(18, pokedex.types.size)
     }
 
+    /** The ids are the names of the app, normalized like the app normalizes the names it gets */
+    @Test
+    fun theIdsAreTheNormalizedNames() = runTest {
+        val pokedex = pokedex()
+        val entries = pokedex.species + pokedex.moves + pokedex.abilities + pokedex.items
+        val problems = entries.filter { it.id != PokemonNormalizer.normalize(it.name.en) }.map { "${it.id}: ${it.name.en}" }
+        assertEquals(emptyList(), problems)
+        assertEquals("charizard-mega-y", pokedex.species(PokemonName("Charizard-Mega-Y"))?.id)
+        assertEquals("trick-room", pokedex.move(MoveName("Trick Room"))?.id)
+    }
+
     @Test
     fun everyPokemonCanBePlayed() = runTest {
         val problems = pokedex().species.flatMap { s ->
@@ -56,11 +69,11 @@ class PokedexFileTest {
         val megas = pokedex.species.filter { it.isMega }
         assertTrue(megas.size > 50)
         val problems = megas.mapNotNull { mega ->
-            val base = mega.megaOfId?.let(pokedex::species) ?: return@mapNotNull "${mega.id} has no base form"
+            val base = mega.megaOf?.let(pokedex::species) ?: return@mapNotNull "${mega.id} has no base form"
             when {
                 mega.moves != base.moves -> "${mega.id} doesn't learn the moves of ${base.id}"
                 mega.megaStone == null -> "${mega.id} has no Mega Stone"
-                mega.id !in mega.megaStone.megaForms -> "${mega.megaStone.id} doesn't make ${mega.id} mega evolve"
+                mega.pokemonName.normalized !in mega.megaStone.megaForms -> "${mega.megaStone.id} doesn't make ${mega.id} mega evolve"
                 mega !in pokedex.formsOf(base) -> "${mega.id} isn't a form of ${base.id}"
                 else -> null
             }
@@ -85,7 +98,7 @@ class PokedexFileTest {
         }
         assertEquals(emptyList(), problems)
         assertTrue(compared > 200, "only $compared Pokémon compared")
-        val unknownMoves = ChampionsDex.allMoves.map { it.name.value }.filter { pokedex.move(foldId(it)) == null }
+        val unknownMoves = ChampionsDex.allMoves.map { it.name }.filter { pokedex.move(it) == null }
         assertEquals(emptyList(), unknownMoves)
     }
 
@@ -103,7 +116,7 @@ class PokedexFileTest {
                 continue
             }
             for (move in set.moves) {
-                val pokedexMove = pokedex.move(foldId(move.value))
+                val pokedexMove = pokedex.move(move)
                 if (pokedexMove == null) problems += "$where: unknown move ${move.value}"
                 else if (pokedexMove !in species.moves) problems += "$where: doesn't learn ${move.value}"
             }
@@ -117,7 +130,4 @@ class PokedexFileTest {
         assertEquals("vivillon", pokedex.species(PokemonName("Vivillon-Polar"))?.id)
         assertEquals("Prismillon", pokedex.species(PokemonName("vivillon"))?.name?.fr)
     }
-
-    // the id of Showdown of a name, e.g. kingsshield for King's Shield
-    private fun foldId(name: String) = name.lowercase().filter { it in 'a'..'z' || it in '0'..'9' }
 }

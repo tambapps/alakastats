@@ -1,8 +1,12 @@
 package com.tambapps.pokemon.alakastats.domain.model
 
+import com.tambapps.pokemon.AbilityName
+import com.tambapps.pokemon.ItemName
+import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeStats
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.PokemonName
+import com.tambapps.pokemon.PokemonNormalizer
 import com.tambapps.pokemon.Stat
 
 /** A name in the languages of the Pokédex */
@@ -10,7 +14,10 @@ data class LocalizedName(val en: String, val fr: String)
 
 /** The entries of the Pokédex, which can be searched by name */
 sealed interface PokedexEntry {
-    /** The id of Showdown, e.g. `charizardmegay` */
+    /**
+     * The English name normalized like the app's names are (see [PokemonNormalizer.normalize]), e.g. `charizard-mega-y`,
+     * `trick-room`, `king's-rock`
+     */
     val id: String
     val name: LocalizedName
 }
@@ -30,7 +37,9 @@ data class PokedexAbility(
     val desc: String?,
     val descFr: String?,
     val championsModified: Boolean,
-) : PokedexEntry
+) : PokedexEntry {
+    val abilityName get() = AbilityName(name.en)
+}
 
 /**
  * @property accuracy null for a move that can't miss
@@ -53,47 +62,52 @@ data class PokedexMove(
     val desc: String?,
     val descFr: String?,
     val championsModified: Boolean,
-) : PokedexEntry
+) : PokedexEntry {
+    val moveName get() = MoveName(name.en)
+}
 
 /**
- * @property megaForms the ids of the Megas a Mega Stone makes mega evolve
+ * @property megaForms the Megas a Mega Stone makes mega evolve, normalized
  */
 data class PokedexItem(
     override val id: String,
     override val name: LocalizedName,
-    val megaForms: List<String>,
+    val megaForms: List<PokemonName>,
     val shortDesc: String?,
     val desc: String?,
     val descFr: String?,
     val championsModified: Boolean,
-) : PokedexEntry
+) : PokedexEntry {
+    val itemName get() = ItemName(name.en)
+}
 
 /**
  * A Pokémon legal in the Pokédex's format. A Mega is one of its own, its moves being the ones of the form it mega
  * evolves from.
  *
- * @property pokemonName its name in the app, the one of Showdown (e.g. `Charizard-Mega-Y`)
- * @property baseSpeciesId the Pokémon it is a form of (e.g. tauros for Tauros-Paldea-Aqua), null for a base form
- * @property megaOfId the form a Mega mega evolves from
+ * @property baseSpecies the Pokémon it is a form of (e.g. tauros for Tauros-Paldea-Aqua), normalized, null for a base form
+ * @property megaOf the form a Mega mega evolves from, normalized
  * @property cosmeticForms the forms only differing from it by their look (e.g. Vivillon-Polar), not entries of their own
  */
 data class PokedexSpecies(
     override val id: String,
     override val name: LocalizedName,
-    val pokemonName: PokemonName,
     val num: Int,
     val types: List<PokeType>,
     val baseStats: PokeStats,
     val abilities: List<PokedexAbility>,
     val hiddenAbility: PokedexAbility?,
-    val baseSpeciesId: String?,
+    val baseSpecies: PokemonName?,
     val isMega: Boolean,
-    val megaOfId: String?,
+    val megaOf: PokemonName?,
     val megaStone: PokedexItem?,
     val weightKg: Double,
     val cosmeticForms: List<PokemonName>,
     val moves: Set<PokedexMove>,
 ) : PokedexEntry {
+    /** Its name in the app, the one of Showdown (e.g. `Charizard-Mega-Y`) */
+    val pokemonName get() = PokemonName(name.en)
+
     val allAbilities: List<PokedexAbility> get() = abilities + listOfNotNull(hiddenAbility)
 }
 
@@ -128,18 +142,12 @@ class Pokedex(
     val items: List<PokedexItem>,
     val types: List<PokedexType>,
 ) {
-    private val speciesById = species.associateBy { it.id }
-    private val movesById = moves.associateBy { it.id }
-    private val abilitiesById = abilities.associateBy { it.id }
-    private val itemsById = items.associateBy { it.id }
-
     // a cosmetic form is found as its base form
-    private val speciesByName: Map<PokemonName, PokedexSpecies> = buildMap {
-        for (s in species) {
-            put(s.pokemonName.normalized, s)
-            s.cosmeticForms.forEach { put(it.normalized, s) }
-        }
-    }
+    private val speciesByName = NameLookup(species) { s -> listOf(s.pokemonName.value) + s.cosmeticForms.map { it.value } }
+    private val movesByName = NameLookup(moves)
+    private val abilitiesByName = NameLookup(abilities)
+    private val itemsByName = NameLookup(items)
+
     private val speciesByType: Map<PokeType, List<PokedexSpecies>> = species
         .flatMap { s -> s.types.map { it to s } }
         .groupBy({ it.first }, { it.second })
@@ -150,21 +158,22 @@ class Pokedex(
         .flatMap { s -> s.moves.map { it.id to s } }
         .groupBy({ it.first }, { it.second })
     private val megasByForm: Map<String, List<PokedexSpecies>> = species
-        .filter { it.megaOfId != null }
-        .groupBy { it.megaOfId!! }
+        .mapNotNull { mega -> mega.megaOf?.let { it.value to mega } }
+        .groupBy({ it.first }, { it.second })
     private val nameIndex = PokedexNameIndex(species + moves + abilities + items + types)
 
-    fun species(id: String): PokedexSpecies? = speciesById[id]
-    fun move(id: String): PokedexMove? = movesById[id]
-    fun ability(id: String): PokedexAbility? = abilitiesById[id]
-    fun item(id: String): PokedexItem? = itemsById[id]
-
-    /** The Pokémon of a name of the app (e.g. of a replay), a cosmetic form giving its base form */
-    fun species(name: PokemonName): PokedexSpecies? = speciesByName[name.normalized]
+    /**
+     * The Pokémon of a name of the app (e.g. of a replay or a paste), a cosmetic form giving its base form. See
+     * [NameLookup] for how it's looked up
+     */
+    fun species(name: PokemonName): PokedexSpecies? = speciesByName.find(name.value)
+    fun move(name: MoveName): PokedexMove? = movesByName.find(name.value)
+    fun ability(name: AbilityName): PokedexAbility? = abilitiesByName.find(name.value)
+    fun item(name: ItemName): PokedexItem? = itemsByName.find(name.value)
 
     /** A Pokémon and its Megas, the form a Mega mega evolves from for a Mega */
-    fun formsOf(species: PokedexSpecies): List<PokedexSpecies> {
-        val base = species.megaOfId?.let(speciesById::get) ?: species
+    fun formsOf(pokemon: PokedexSpecies): List<PokedexSpecies> {
+        val base = pokemon.megaOf?.let { species(it) } ?: pokemon
         return listOf(base) + megasByForm[base.id].orEmpty()
     }
 
@@ -209,4 +218,30 @@ class Pokedex(
      * and punctuation, and tolerating a prefix or typos
      */
     fun searchByName(query: String, limit: Int = 20): List<PokedexEntry> = nameIndex.search(query, limit)
+}
+
+/**
+ * The entries of a table by name: the name normalized like the app's names are first (its id), and else folded
+ * (see [foldName]), for a name written otherwise to be found too (e.g. `King’s Shield` with a curly apostrophe, `Kings
+ * Shield`, `Flabebe`), like Showdown's ids are
+ *
+ * @param names the names of an entry, its English one by default
+ */
+private class NameLookup<T : PokedexEntry>(
+    entries: List<T>,
+    names: (T) -> List<String> = { listOf(it.name.en) },
+) {
+    private val byNormalizedName = HashMap<String, T>()
+    private val byFoldedName = HashMap<String, T>()
+
+    init {
+        for (entry in entries) {
+            for (name in names(entry)) {
+                byNormalizedName[PokemonNormalizer.normalize(name)] = entry
+                byFoldedName[foldName(name)] = entry
+            }
+        }
+    }
+
+    fun find(name: String): T? = byNormalizedName[PokemonNormalizer.normalize(name)] ?: byFoldedName[foldName(name)]
 }

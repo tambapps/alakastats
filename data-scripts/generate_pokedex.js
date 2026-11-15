@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 const WORKSPACE = path.join(__dirname, '..', '..');
 const SHOWDOWN_DIR = path.resolve(process.argv[2] || path.join(WORKSPACE, 'pokemon-showdown'));
 const POKEAPI_CSV_DIR = path.resolve(process.argv[3] || path.join(WORKSPACE, 'pokeapi', 'data', 'v2', 'csv'));
@@ -335,6 +335,36 @@ for (const s of speciesEntries) {
 if (problems.length) {
   console.error(`${problems.length} problem(s), nothing written:\n- ${problems.join('\n- ')}`);
   process.exit(1);
+}
+
+// --- the ids of the app: Showdown's names normalized like PokemonNormalizer.normalize does (lowercase, a space giving
+// a dash), e.g. charizard-mega-y, trick-room, king's-rock. Up to here, the entries and their references had
+// Showdown's ids ---
+const normalize = name => name.toLowerCase().replace(/ /g, '-');
+function appIds(entries) {
+  const ids = new Map(entries.map(e => [e.id, normalize(e.name)]));
+  if (new Set(ids.values()).size !== ids.size) throw new Error('two entries have the same normalized name');
+  return id => {
+    if (!ids.has(id)) throw new Error(`no entry of id ${id}`);
+    return ids.get(id);
+  };
+}
+const speciesId = appIds(speciesEntries);
+const moveId = appIds(moveEntries);
+const abilityId = appIds(abilityEntries);
+const itemId = appIds(itemEntries);
+const nullable = (id, toAppId) => (id == null ? null : toAppId(id));
+for (const s of speciesEntries) {
+  s.abilities = s.abilities.map(abilityId);
+  s.hiddenAbility = nullable(s.hiddenAbility, abilityId);
+  s.baseSpecies = nullable(s.baseSpecies, speciesId);
+  s.megaOf = nullable(s.megaOf, speciesId);
+  s.megaStone = nullable(s.megaStone, itemId);
+  s.moves = s.moves.map(moveId).sort();
+}
+for (const i of itemEntries) i.megaForms = i.megaForms.map(speciesId);
+for (const [entries, toAppId] of [[speciesEntries, speciesId], [moveEntries, moveId], [abilityEntries, abilityId], [itemEntries, itemId]]) {
+  for (const e of entries) e.id = toAppId(e.id);
 }
 
 // --- output: one line per entry, for readable diffs ---

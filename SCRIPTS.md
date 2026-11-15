@@ -119,12 +119,15 @@ What it does with the data:
 - `championsModified` tells a move, ability or item Champions changed (its legality and the PP cap left aside). The
   English descriptions are Showdown's Champions ones; the French description of a modified entry is left out (null)
   unless PokéAPI has the one of Champions, the others describing the main games' version.
+- The ids (and the references between entries) are the names of the app: Showdown's English names normalized like
+  `PokemonNormalizer.normalize` does, e.g. `charizard-mega-y`, `trick-room`, `king's-rock`. `Pokedex` finds an entry
+  by its normalized name, else by its name without case, accents and punctuation (`King’s Shield`, `Kings Shield`).
 - The JSON has one line per entry, for a regulation's changes to be read in its diff, and its `meta` gives the format
   and the commits of Showdown and PokéAPI it was generated from.
 
 The script fails without writing anything when something is missing, listing every problem: a Pokémon, move, ability,
 item or type without French name, which `pokedex-fr-overrides.json` completes (`species`, `moves`, `abilities`,
-`items`, `types`, by Showdown id), along with the PokéAPI identifiers of the forms Showdown names otherwise
+`items`, `types`, by Showdown id, e.g. `charizardmegay`), along with the PokéAPI identifiers of the forms Showdown names otherwise
 (`pokeApiIds`, e.g. `tauros-paldea-combat-breed`). `PokedexFileTest` checks the result: every entry has its names, a
 Mega learns its base form's moves, the stats and types agree with the damage calc's data, and the preset sets only use
 moves their Pokémon learn.
