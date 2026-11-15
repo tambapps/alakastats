@@ -1,6 +1,8 @@
 package com.tambapps.pokemon.alakastats.ui.screen.pokedex
 
 import com.tambapps.pokemon.alakastats.infrastructure.repository.LocalPokedexRepository
+import com.tambapps.pokemon.alakastats.ui.model.PokedexPokemonSort
+import com.tambapps.pokemon.alakastats.ui.model.PokedexPokemonSortCriterion
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -26,10 +28,37 @@ class PokedexPokemonListViewModelTest {
     }
 
     @Test
+    fun theMegasCanBeIncluded() = runTest {
+        viewModel.load()
+        val withoutMegas = viewModel.pokemons.size
+        viewModel.includeMegas = true
+        assertTrue("charizard-mega-y" in ids())
+        assertEquals(withoutMegas + viewModel.pokemons.count { it.isMega }, viewModel.pokemons.size)
+        viewModel.query = "Dracaufeu"
+        assertEquals(listOf("charizard", "charizard-mega-x", "charizard-mega-y"), ids())
+    }
+
+    @Test
     fun theOrderCanBeReversed() = runTest {
         viewModel.load()
-        viewModel.toggleOrder()
+        viewModel.sort = PokedexPokemonSort(PokedexPokemonSortCriterion.NAME, descending = true)
         assertEquals(viewModel.pokemons.sortedByDescending { it.name.en }, viewModel.pokemons)
+    }
+
+    @Test
+    fun thePokemonCanBeSortedBySpeedTheFastestFirst() = runTest {
+        viewModel.load()
+        viewModel.sort = PokedexPokemonSort(PokedexPokemonSortCriterion.SPEED)
+        assertTrue(viewModel.sort.descending)
+        val speeds = viewModel.pokemons.map { it.baseStats.speed }
+        assertEquals(speeds.sortedDescending(), speeds)
+        // the ones of the same speed by name
+        val sameSpeed = viewModel.pokemons.filter { it.baseStats.speed == speeds.first() }
+        assertEquals(sameSpeed.sortedBy { it.name.en }, sameSpeed)
+
+        viewModel.sort = PokedexPokemonSort(PokedexPokemonSortCriterion.SPEED, descending = false)
+        val slowestFirst = viewModel.pokemons.map { it.baseStats.speed }
+        assertEquals(slowestFirst.sorted(), slowestFirst)
     }
 
     @Test

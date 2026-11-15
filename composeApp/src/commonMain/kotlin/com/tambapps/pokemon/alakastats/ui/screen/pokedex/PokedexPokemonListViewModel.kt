@@ -9,28 +9,31 @@ import com.tambapps.pokemon.alakastats.domain.model.Pokedex
 import com.tambapps.pokemon.alakastats.domain.model.PokedexSpecies
 import com.tambapps.pokemon.alakastats.domain.model.foldName
 import com.tambapps.pokemon.alakastats.domain.repository.PokedexRepository
+import com.tambapps.pokemon.alakastats.ui.model.PokedexPokemonSort
+import com.tambapps.pokemon.alakastats.ui.model.sortedBy
 
 /**
- * The Pokémon of the Pokédex, searched by name and sorted by name. The Megas aren't listed: they're the forms of their
- * Pokémon, on its sheet
+ * The Pokémon of the Pokédex, searched by name and sorted by name or speed. The Megas are only listed on demand: they're
+ * the forms of their Pokémon, on its sheet
  */
 class PokedexPokemonListViewModel(
     private val pokedexRepository: PokedexRepository,
 ) : ViewModel() {
 
     var query by mutableStateOf("")
-    var descending by mutableStateOf(false)
+    var sort by mutableStateOf(PokedexPokemonSort())
+    // the Megas are on their Pokémon's sheet: they're only listed on demand
+    var includeMegas by mutableStateOf(false)
     var isLoading by mutableStateOf(true)
         private set
     var loadingFailed by mutableStateOf(false)
         private set
     private var pokedex by mutableStateOf<Pokedex?>(null)
 
-    /** The Pokémon matching the query, by name */
+    /** The Pokémon matching the query, in the order of the sort */
     val pokemons: List<PokedexSpecies> by derivedStateOf {
         val pokedex = pokedex ?: return@derivedStateOf emptyList()
-        val order = compareBy<PokedexSpecies> { it.name.en }
-        matching(pokedex, query).sortedWith(if (descending) order.reversed() else order)
+        matching(pokedex, query, includeMegas).sortedBy(sort)
     }
 
     suspend fun load() {
@@ -41,21 +44,19 @@ class PokedexPokemonListViewModel(
             .onLeft { loadingFailed = true }
         isLoading = false
     }
-
-    fun toggleOrder() {
-        descending = !descending
-    }
 }
 
 /**
  * The Pokémon whose English or French name contains the query (ignoring the case, accents and punctuation), all of them
  * for no query. With none, the ones whose name the query is close to, for a typo
+ *
+ * @param includeMegas whether the Megas are among them
  */
-internal fun matching(pokedex: Pokedex, query: String): List<PokedexSpecies> {
-    val pokemons = pokedex.species.filterNot { it.isMega }
+internal fun matching(pokedex: Pokedex, query: String, includeMegas: Boolean = false): List<PokedexSpecies> {
+    val pokemons = pokedex.species.filter { includeMegas || !it.isMega }
     val folded = foldName(query)
     if (folded.isEmpty()) return pokemons
     val containing = pokemons.filter { folded in foldName(it.name.en) || folded in foldName(it.name.fr) }
     if (containing.isNotEmpty()) return containing
-    return pokedex.searchByName(query, limit = 10).filterIsInstance<PokedexSpecies>().filterNot { it.isMega }
+    return pokedex.searchByName(query, limit = 10).filterIsInstance<PokedexSpecies>().filter { includeMegas || !it.isMega }
 }

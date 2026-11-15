@@ -1,7 +1,7 @@
 package com.tambapps.pokemon.alakastats.ui.screen.pokedex
 
 import alakastats.composeapp.generated.resources.Res
-import alakastats.composeapp.generated.resources.arrow_forward
+import alakastats.composeapp.generated.resources.check
 import alakastats.composeapp.generated.resources.close
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -21,10 +21,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,9 +34,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
@@ -42,13 +47,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.PokeStats
+import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.domain.model.PokedexSpecies
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.LazyVerticalGridWithScrollbar
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
+import com.tambapps.pokemon.alakastats.ui.composables.SortChip
 import com.tambapps.pokemon.alakastats.ui.composables.TypeBadge
+import com.tambapps.pokemon.alakastats.ui.model.PokedexPokemonSort
+import com.tambapps.pokemon.alakastats.ui.model.PokedexPokemonSortCriterion
 import com.tambapps.pokemon.alakastats.ui.navigation.AppRoute
 import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
+import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.color
@@ -71,6 +81,15 @@ fun PokedexPokemonListScreen() {
     val navigator = LocalAppNavigator.current
     val isCompact = LocalIsCompact.current
     LaunchedEffect(Unit) { viewModel.load() }
+    val gridState = rememberLazyGridState()
+    // a new order starts from its first Pokémon
+    var shownSort by remember { mutableStateOf(viewModel.sort) }
+    LaunchedEffect(viewModel.sort) {
+        if (viewModel.sort != shownSort) {
+            shownSort = viewModel.sort
+            gridState.scrollToItem(0)
+        }
+    }
     Column(
         Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
@@ -99,7 +118,9 @@ fun PokedexPokemonListScreen() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
-                NameOrderChip(viewModel)
+                MegasChip(viewModel, isCompact)
+                Spacer(Modifier.width(8.dp))
+                PokemonSortChip(viewModel)
             }
             Spacer(Modifier.height(8.dp))
             when {
@@ -110,6 +131,7 @@ fun PokedexPokemonListScreen() {
                 viewModel.pokemons.isEmpty() -> EmptyText("No Pokémon matches \"${viewModel.query}\"")
                 else -> LazyVerticalGridWithScrollbar(
                     columns = GridCells.Adaptive(CARD_MIN_WIDTH),
+                    state = gridState,
                     // on desktop, room for the scrollbar on the right of the cards
                     contentPadding = PaddingValues(bottom = 16.dp, end = if (isCompact) 0.dp else 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -119,6 +141,7 @@ fun PokedexPokemonListScreen() {
                     items(viewModel.pokemons, key = { it.id }) { pokemon ->
                         PokemonListCard(
                             pokemon,
+                            showSpeed = viewModel.sort.criterion == PokedexPokemonSortCriterion.SPEED,
                             spriteSize = if (isCompact) 72.dp else 96.dp,
                             onClick = { navigator.push(AppRoute.PokedexPokemon(pokemon.id)) },
                         )
@@ -148,21 +171,31 @@ private fun SearchField(viewModel: PokedexPokemonListViewModel) {
     )
 }
 
-/** The only order for now, by name: a click reverses it */
+/** Whether the Megas are listed, with their Pokémon */
 @Composable
-private fun NameOrderChip(viewModel: PokedexPokemonListViewModel) {
-    val label = if (viewModel.descending) "Name · Z → A" else "Name · A → Z"
-    AssistChip(
-        onClick = viewModel::toggleOrder,
-        label = { Text(label) },
-        leadingIcon = {
-            Icon(
-                painterResource(Res.drawable.arrow_forward),
-                contentDescription = null,
-                // pointing down for the descending order
-                modifier = Modifier.size(18.dp).rotate(if (viewModel.descending) 90f else -90f),
-            )
-        },
+private fun MegasChip(viewModel: PokedexPokemonListViewModel, isCompact: Boolean) {
+    FilterChip(
+        selected = viewModel.includeMegas,
+        onClick = { viewModel.includeMegas = !viewModel.includeMegas },
+        // shorter on mobile, where the row has less room
+        label = { Text(if (isCompact) "Megas" else "Include Megas", maxLines = 1) },
+        leadingIcon = if (viewModel.includeMegas) {
+            { Icon(painterResource(Res.drawable.check), contentDescription = null, Modifier.size(FilterChipDefaults.IconSize)) }
+        } else null,
+    )
+}
+
+@Composable
+private fun PokemonSortChip(viewModel: PokedexPokemonListViewModel) {
+    val sort = viewModel.sort
+    SortChip(
+        criteria = PokedexPokemonSortCriterion.entries,
+        criterion = sort.criterion,
+        descending = sort.descending,
+        isDefault = sort.isDefault,
+        onSortChange = { criterion, descending -> viewModel.sort = PokedexPokemonSort(criterion, descending) },
+        onReset = { viewModel.sort = PokedexPokemonSort() },
+        resetLabel = "Reset to A → Z",
     )
 }
 
@@ -177,9 +210,12 @@ private fun EmptyText(text: String) {
     )
 }
 
-/** A Pokémon's sprite, name and types, on the color of its primary type */
+/**
+ * A Pokémon's sprite, name and types, on the color of its primary type, then its base stat total or, when the Pokémon
+ * are sorted by speed, its speed
+ */
 @Composable
-private fun PokemonListCard(pokemon: PokedexSpecies, spriteSize: Dp, onClick: () -> Unit) {
+private fun PokemonListCard(pokemon: PokedexSpecies, showSpeed: Boolean, spriteSize: Dp, onClick: () -> Unit) {
     val surface = MaterialTheme.colorScheme.surface
     val typeColor = pokemon.types.first().color
     // stronger in dark mode, where a light tint is barely seen
@@ -195,20 +231,50 @@ private fun PokemonListCard(pokemon: PokedexSpecies, spriteSize: Dp, onClick: ()
             Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PokemonSprite(pokemon.pokemonName, Modifier.size(spriteSize))
+            // facing the text
+            PokemonSprite(pokemon.pokemonName, Modifier.size(spriteSize), FacingDirection.RIGHT)
             Spacer(Modifier.width(16.dp))
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(pokemon.name.en, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     pokemon.types.forEach { TypeBadge(it) }
                 }
-                Text(
-                    "Base stat total ${pokemon.baseStats.total}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                if (showSpeed) {
+                    SpeedStats(pokemon.baseStats)
+                } else {
+                    Text(
+                        "Base stat total ${pokemon.baseStats.total}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
+    }
+}
+
+/** The level 50 speeds of a Pokémon, like on its sheet: max, neutral, without stat points, min */
+@Composable
+private fun SpeedStats(baseStats: PokeStats) {
+    val speeds = remember(baseStats) { levelFiftyStats(baseStats, Stat.SPEED) }
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        SpeedValue("Max", speeds.max)
+        SpeedValue("Neu", speeds.neutral)
+        SpeedValue("0 SP", speeds.noStatPoints)
+        SpeedValue("Min", speeds.min)
+    }
+}
+
+@Composable
+private fun SpeedValue(label: String, value: Int) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+        )
+        Text(value.toString(), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
     }
 }
 

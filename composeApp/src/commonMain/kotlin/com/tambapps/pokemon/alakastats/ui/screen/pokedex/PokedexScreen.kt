@@ -226,16 +226,7 @@ private fun StatsTable(baseStats: PokeStats) {
 
 @Composable
 private fun StatRow(stat: Stat, name: String, baseStats: PokeStats) {
-    val values = remember(baseStats, stat) {
-        val boosting = Nature.entries.firstOrNull { it.bonusStat == stat } ?: Nature.QUIRKY
-        val lowering = Nature.entries.firstOrNull { it.malusStat == stat } ?: Nature.QUIRKY
-        listOf(
-            computeStats(baseStats, MAX_STAT_POINTS, boosting),
-            computeStats(baseStats, MAX_STAT_POINTS, Nature.QUIRKY),
-            computeStats(baseStats, statPoints = 0, Nature.QUIRKY),
-            computeStats(baseStats, statPoints = 0, lowering),
-        ).map { it[stat] }
-    }
+    val values = remember(baseStats, stat) { levelFiftyStats(baseStats, stat).all }
     // the speed is what's looked up the most: it stands out
     val isHighlighted = stat == Stat.SPEED
     val valueWeight = if (isHighlighted) FontWeight.Bold else null
@@ -259,6 +250,25 @@ private fun StatRow(stat: Stat, name: String, baseStats: PokeStats) {
             }
         }
     }
+}
+
+/**
+ * The level 50 values of a stat: max (all the stat points and a nature boosting it), neutral (all the stat points, a
+ * neutral nature), without stat points (a neutral nature) and min (no stat points, a nature lowering it)
+ */
+internal data class LevelFiftyStats(val max: Int, val neutral: Int, val noStatPoints: Int, val min: Int) {
+    val all get() = listOf(max, neutral, noStatPoints, min)
+}
+
+internal fun levelFiftyStats(baseStats: PokeStats, stat: Stat): LevelFiftyStats {
+    val boosting = Nature.entries.firstOrNull { it.bonusStat == stat } ?: Nature.QUIRKY
+    val lowering = Nature.entries.firstOrNull { it.malusStat == stat } ?: Nature.QUIRKY
+    return LevelFiftyStats(
+        max = computeStats(baseStats, MAX_STAT_POINTS, boosting)[stat],
+        neutral = computeStats(baseStats, MAX_STAT_POINTS, Nature.QUIRKY)[stat],
+        noStatPoints = computeStats(baseStats, statPoints = 0, Nature.QUIRKY)[stat],
+        min = computeStats(baseStats, statPoints = 0, lowering)[stat],
+    )
 }
 
 private fun computeStats(baseStats: PokeStats, statPoints: Int, nature: Nature) =
