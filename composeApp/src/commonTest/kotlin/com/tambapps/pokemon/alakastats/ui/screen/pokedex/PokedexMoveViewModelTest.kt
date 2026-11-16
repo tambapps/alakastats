@@ -27,7 +27,7 @@ class PokedexMoveViewModelTest {
         assertTrue("slowbro" in ids())
         assertFalse("incineroar" in ids())
         // without the Megas, by name
-        assertFalse(viewModel.pokemons.any { it.isMega })
+        assertFalse(viewModel.pokemons.any { it.isMega || it.isBattleOnly })
         assertEquals(viewModel.pokemons.size, viewModel.learnerCount)
         assertEquals(viewModel.pokemons.sortedBy { it.name.en }, viewModel.pokemons)
     }

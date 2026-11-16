@@ -9,6 +9,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -178,15 +180,18 @@ private fun CrossfadingArtwork(pokemon: PokemonName, modifier: Modifier = Modifi
 }
 
 /**
- * The forms of the pokemon, as clickable sprites, for a pokemon having several of them
+ * The forms of the pokemon (e.g. its regional forms, its Megas), as clickable sprites, for a pokemon having several of
+ * them. On several lines when they don't fit on one (e.g. Rotom's)
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FormSelector(viewModel: PokedexViewModel) {
     if (viewModel.forms.size < 2) return
     val navigator = LocalAppNavigator.current
-    Row(
+    FlowRow(
         Modifier.padding(top = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         for (form in viewModel.forms) {
             val background = if (form == viewModel.selectedForm) MaterialTheme.colorScheme.primaryContainer else Color.Transparent

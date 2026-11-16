@@ -114,8 +114,11 @@ What it does with the data:
 
 - A Mega is an entry of its own (its stats, types and ability), learning the moves of the form it mega evolves from,
   with its Mega Stone.
-- Forms only taken in battle (e.g. Aegislash-Blade, Palafin-Hero) are left out; cosmetic forms (e.g. Vivillon-Polar,
-  or any form playing exactly like its base form) are listed in the `cosmeticForms` of their base form.
+- Forms only taken in battle (e.g. Morpeko-Hangry, Aegislash-Blade) are entries of their own, flagged `isBattleOnly`:
+  shown among the forms of their Pokémon's sheet, not in the lists, as no team can have them. Every form has the
+  `baseSpecies` it is a form of, even when that species isn't legal (e.g. Floette for Floette-Eternal), the forms of a
+  Pokémon being the ones of its species. Cosmetic forms (e.g. Vivillon-Polar, or any form playing exactly like its base
+  form) are listed in the `cosmeticForms` of their base form.
 - A move's PP are its PP in battle, computed like the format's mod does (Champions: 5 gives 8, 10 gives 12, 15 gives
   16), and its `classifications` the families some abilities and items act on: Showdown's flags (punching, sound,
   dance, slicing, wind, powder, ball & bomb, pulse, biting, healing), the moves Damp prevents (explosive) and the ones

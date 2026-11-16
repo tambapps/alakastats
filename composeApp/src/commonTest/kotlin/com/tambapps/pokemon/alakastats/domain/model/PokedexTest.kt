@@ -85,6 +85,23 @@ class PokedexTest {
     }
 
     @Test
+    fun theFormsAreAllTheFormsOfTheSpecies() = runTest {
+        val pokedex = pokedex()
+        fun formsOf(name: String) = pokedex.formsOf(pokedex.species(PokemonName(name))!!).ids()
+        val raichus = listOf("raichu", "raichu-alola", "raichu-mega-x", "raichu-mega-y")
+        assertEquals(raichus.toSet(), formsOf("Raichu").toSet())
+        assertEquals(formsOf("Raichu"), formsOf("Raichu-Alola"))
+        assertEquals("raichu", formsOf("Raichu-Mega-Y").first())
+        assertEquals(6, formsOf("Rotom-Wash").size)
+        // the forms only taken in battle
+        assertEquals(listOf("morpeko", "morpeko-hangry"), formsOf("Morpeko"))
+        assertTrue(pokedex.species(PokemonName("Morpeko-Hangry"))!!.isBattleOnly)
+        // a species whose base form isn't legal
+        assertEquals(listOf("floette-eternal", "floette-mega"), formsOf("Floette-Mega"))
+        assertEquals(listOf("kommo-o"), formsOf("Kommo-o"))
+    }
+
+    @Test
     fun theMovepoolIsSortedByName() = runTest {
         val pokedex = pokedex()
         val names = pokedex.movepool(pokedex.species(PokemonName("Incineroar"))!!).map { it.name.en }

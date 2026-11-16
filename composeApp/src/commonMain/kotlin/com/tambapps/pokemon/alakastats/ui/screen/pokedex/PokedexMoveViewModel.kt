@@ -55,7 +55,7 @@ class PokedexMoveViewModel(
             .onRight { pokedex ->
                 val found = pokedex.move(MoveName(id))
                 move = found
-                learners = found?.let(pokedex::learners).orEmpty()
+                learners = found?.let(pokedex::learners).orEmpty().filterNot { it.isBattleOnly }
                 isUnknown = found == null
             }
             .onLeft { loadingFailed = true }

@@ -111,6 +111,8 @@ data class PokedexSpecies(
     val hiddenAbility: PokedexAbility?,
     val baseSpecies: PokemonName?,
     val isMega: Boolean,
+    /** A form only taken in battle (e.g. Morpeko-Hangry): not one a team can have */
+    val isBattleOnly: Boolean,
     val megaOf: PokemonName?,
     val megaStone: PokedexItem?,
     val weightKg: Double,
@@ -175,9 +177,8 @@ class Pokedex(
     private val speciesByMove: Map<String, List<PokedexSpecies>> = species
         .flatMap { s -> s.moves.map { it.id to s } }
         .groupBy({ it.first }, { it.second })
-    private val megasByForm: Map<String, List<PokedexSpecies>> = species
-        .mapNotNull { mega -> mega.megaOf?.let { it.value to mega } }
-        .groupBy({ it.first }, { it.second })
+    // the forms of each species (its regional forms, Megas, forms only taken in battle...), in the Pokédex's order
+    private val formsBySpecies: Map<String, List<PokedexSpecies>> = species.groupBy { it.baseSpecies?.value ?: it.id }
     private val nameIndex = PokedexNameIndex(species + moves + abilities + items + types)
 
     /**
@@ -189,11 +190,9 @@ class Pokedex(
     fun ability(name: AbilityName): PokedexAbility? = abilitiesByName.find(name.value)
     fun item(name: ItemName): PokedexItem? = itemsByName.find(name.value)
 
-    /** A Pokémon and its Megas, the form a Mega mega evolves from for a Mega */
-    fun formsOf(pokemon: PokedexSpecies): List<PokedexSpecies> {
-        val base = pokemon.megaOf?.let { species(it) } ?: pokemon
-        return listOf(base) + megasByForm[base.id].orEmpty()
-    }
+    /** All the forms of a Pokémon's species (e.g. Raichu, Raichu-Alola and its Megas), the base form first */
+    fun formsOf(pokemon: PokedexSpecies): List<PokedexSpecies> =
+        formsBySpecies[pokemon.baseSpecies?.value ?: pokemon.id].orEmpty()
 
     /** The Pokémon having a type, or both types when there are two */
     fun withTypes(type: PokeType, otherType: PokeType? = null): List<PokedexSpecies> =

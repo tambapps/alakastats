@@ -25,6 +25,9 @@ class PokedexPokemonListViewModelTest {
         val ids = ids()
         assertTrue("charizard" in ids)
         assertFalse(viewModel.pokemons.any { it.isMega })
+        // nor the forms only taken in battle, on their Pokémon's sheet
+        assertFalse(viewModel.pokemons.any { it.isBattleOnly })
+        assertFalse("morpeko-hangry" in ids)
         assertEquals(viewModel.pokemons.sortedBy { it.name.en }, viewModel.pokemons)
     }
 

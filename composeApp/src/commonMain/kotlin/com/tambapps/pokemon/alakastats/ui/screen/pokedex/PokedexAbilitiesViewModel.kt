@@ -80,7 +80,7 @@ class PokedexAbilitiesViewModel(
         pokedexRepository.getPokedex()
             .onRight { pokedex ->
                 all = pokedex.abilities.map { ability ->
-                    val (megas, pokemons) = pokedex.withAbility(ability).partition { it.isMega }
+                    val (megas, pokemons) = pokedex.withAbility(ability).filterNot { it.isBattleOnly }.partition { it.isMega }
                     AbilityHolders(ability, pokemons, megas)
                 }
             }

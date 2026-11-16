@@ -58,10 +58,10 @@ class PokedexPokemonListViewModel(
  * @param includeMegas whether the Megas are among them
  */
 internal fun matching(pokedex: Pokedex, query: String, includeMegas: Boolean = false): List<PokedexSpecies> {
-    val pokemons = pokedex.species.filter { includeMegas || !it.isMega }
+    val pokemons = pokedex.species.filter { (includeMegas || !it.isMega) && !it.isBattleOnly }
     val folded = foldName(query)
     if (folded.isEmpty()) return pokemons
     val containing = pokemons.filter { folded in foldName(it.name.en) || folded in foldName(it.name.fr) }
     if (containing.isNotEmpty()) return containing
-    return pokedex.searchByName(query, limit = 10).filterIsInstance<PokedexSpecies>().filter { includeMegas || !it.isMega }
+    return pokedex.searchByName(query, limit = 10).filterIsInstance<PokedexSpecies>().filter { (includeMegas || !it.isMega) && !it.isBattleOnly }
 }

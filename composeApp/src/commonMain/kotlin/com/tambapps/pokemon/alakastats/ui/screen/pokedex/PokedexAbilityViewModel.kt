@@ -54,7 +54,7 @@ class PokedexAbilityViewModel(
             .onRight { pokedex ->
                 val ability = pokedex.ability(AbilityName(id))
                 holders = ability?.let {
-                    val (megas, pokemons) = pokedex.withAbility(it).partition { pokemon -> pokemon.isMega }
+                    val (megas, pokemons) = pokedex.withAbility(it).filterNot { pokemon -> pokemon.isBattleOnly }.partition { pokemon -> pokemon.isMega }
                     AbilityHolders(it, pokemons, megas)
                 }
                 isUnknown = ability == null

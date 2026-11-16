@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 const WORKSPACE = path.join(__dirname, '..', '..');
 const SHOWDOWN_DIR = path.resolve(process.argv[2] || path.join(WORKSPACE, 'pokemon-showdown'));
 const POKEAPI_CSV_DIR = path.resolve(process.argv[3] || path.join(WORKSPACE, 'pokeapi', 'data', 'v2', 'csv'));
@@ -196,12 +196,11 @@ const cosmeticFormsOf = new Map();
 const legalSpecies = [];
 for (const s of dex.species.all()) {
   if (!isLegalSpecies(s)) continue;
-  // forms only taken in battle (e.g. Aegislash-Blade, Palafin-Hero), Megas aside
-  if (s.battleOnly && !s.isMega) continue;
   // cosmetic forms are the same Pokémon as their base form: the ones Showdown says so (e.g. Vivillon-Polar), and the
-  // ones only differing by their look (e.g. Vivillon-Fancy, Polteageist-Antique)
+  // ones only differing by their look (e.g. Vivillon-Fancy, Polteageist-Antique). Not the forms only taken in battle,
+  // e.g. Mimikyu-Busted playing like Mimikyu but for its disguise
   const base = dex.species.get(s.baseSpecies);
-  if (s.forme && !s.isMega && (base.cosmeticFormes?.includes(s.name) || (isLegalSpecies(base) && playsLike(s, base)))) {
+  if (s.forme && !s.isMega && !s.battleOnly && (base.cosmeticFormes?.includes(s.name) || (isLegalSpecies(base) && playsLike(s, base)))) {
     if (!cosmeticFormsOf.has(base.id)) cosmeticFormsOf.set(base.id, []);
     cosmeticFormsOf.get(base.id).push(s.name);
     continue;
@@ -250,8 +249,12 @@ const speciesEntries = legalSpecies.map(s => {
     abilities,
     hiddenAbility: s.abilities.H ? toID(s.abilities.H) : null,
     // the species of Showdown this one is a form of (e.g. tauros for Tauros-Paldea-Aqua), null for a base form
-    baseSpecies: s.forme && legalSpeciesIds.has(toID(s.baseSpecies)) ? toID(s.baseSpecies) : null,
+    // the species this one is a form of (e.g. Tauros for Tauros-Paldea-Aqua, Floette for Floette-Eternal), even when
+    // it isn't legal; null for a base form
+    baseSpecies: s.forme ? s.baseSpecies : null,
     isMega: !!s.isMega,
+    // a form only taken in battle (e.g. Morpeko-Hangry, Aegislash-Blade): not one a team can have
+    isBattleOnly: !!s.battleOnly && !s.isMega,
     // the form a Mega mega evolves from, and the Mega Stone it needs
     megaOf: megaOf ? megaOf.id : null,
     megaStone: s.isMega && s.requiredItem ? toID(s.requiredItem) : null,
@@ -386,7 +389,8 @@ const nullable = (id, toAppId) => (id == null ? null : toAppId(id));
 for (const s of speciesEntries) {
   s.abilities = s.abilities.map(abilityId);
   s.hiddenAbility = nullable(s.hiddenAbility, abilityId);
-  s.baseSpecies = nullable(s.baseSpecies, speciesId);
+  // a name: its species may not be in the Pokédex
+  s.baseSpecies = s.baseSpecies && normalize(s.baseSpecies);
   s.megaOf = nullable(s.megaOf, speciesId);
   s.megaStone = nullable(s.megaStone, itemId);
   s.moves = s.moves.map(moveId).sort();
