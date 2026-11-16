@@ -133,6 +133,15 @@ class ReplaySeriesTest {
     }
 
     @Test
+    fun seriesWithASingleGameIsThatGameAlone() {
+        val g2 = game("g2", won = true, series = "s", game = 2)
+
+        val item = assertIs<ReplayListItem.Single>(team(listOf(g2)).groupedBySeries(listOf(g2)).single())
+
+        assertEquals(g2, item.replay)
+    }
+
+    @Test
     fun bo3ReplaysWithoutTheirGameNumberAreToReload() {
         val old = game("old", won = true)
         val numbered = game("numbered", won = true, series = "s")

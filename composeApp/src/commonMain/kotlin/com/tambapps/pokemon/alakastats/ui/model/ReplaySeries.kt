@@ -54,7 +54,8 @@ fun List<ReplayListItem>.indexOfReplay(reference: String) = indexOfFirst { item 
 }
 
 /**
- * Groups the games of a same series, each series taking the place of its first game in [sortedReplays]
+ * Groups the games of a same series, each series taking the place of its first game in [sortedReplays]. A series with
+ * a single game in the team is that game alone
  *
  * @param sortedReplays the replays to show, filtered and sorted
  */
@@ -67,6 +68,8 @@ fun Teamlytics.groupedBySeries(sortedReplays: List<ReplayAnalytics>): List<Repla
         if (!listedSeries.add(bestOf.seriesRef)) return@mapNotNull null
         val games = shownGames.getValue(bestOf.seriesRef).sortedBy { it.bestOf!!.game }
         val seriesGames = allGames[bestOf.seriesRef] ?: games
+        // the only game of its series in the team: a series' card would only add a click to it
+        if (seriesGames.size == 1) return@mapNotNull ReplayListItem.Single(replay)
         val outcomes = seriesGames.map { getGameOutcome(it) }
         val playedGames = seriesGames.maxOf { it.bestOf!!.game }
         ReplayListItem.Series(
