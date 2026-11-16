@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -79,8 +80,14 @@ internal fun TeamReplayTabDesktop(viewModel: TeamReplayViewModel, scrollState: L
         item {
             ReloadOutdatedReplaysHint(viewModel, Modifier.padding(bottom = 16.dp))
         }
+        replaySelectionItem(viewModel)
         itemsIndexed(viewModel.replayItems) { index, item ->
-            ReplayListItemView(team, item) { replay ->
+            ReplayListItemView(
+                team,
+                item,
+                selectedRefs = if (viewModel.isSelecting) viewModel.selectedRefs else null,
+                onSeriesSelectionToggle = { viewModel.toggleSelection(it.games) },
+            ) { replay ->
                 DesktopReplay(viewModel, team, replay, inSeries = item is ReplayListItem.Series)
             }
             Spacer(Modifier.height(32.dp))
@@ -130,11 +137,18 @@ fun ExpandableDesktopReplay(
 fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics, inSeries: Boolean = false) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
     val gameOutput = team.getGameOutcome(replay)
+    // null when not selecting: a click then selects it
+    val selected = if (viewModel.isSelecting && viewModel.isSelectable(replay)) replay.reference in viewModel.selectedRefs else null
     MyCard(
+        onClick = if (selected != null) ({ viewModel.toggleSelection(replay) }) else null,
         modifier = Modifier.fillMaxWidth(),
         gradientBackgroundColors = cardGradientColors,
         // as the expandable cards
-        border = if (inSeries) BorderStroke(2.dp, MaterialTheme.colorScheme.outline) else null,
+        border = when {
+            selected == true -> BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+            inSeries -> BorderStroke(2.dp, MaterialTheme.colorScheme.outline)
+            else -> null
+        },
     ) {
         HeadRow(
             team,
@@ -144,6 +158,7 @@ fun DesktopReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: Repl
             opponentPlayer = opponentPlayer,
             viewModel,
             inSeries = inSeries,
+            selected = selected,
         )
         Spacer(Modifier.height(16.dp))
         ReplayContent(
@@ -166,12 +181,16 @@ private fun HeadRow(
     opponentPlayer: Player,
     viewModel: TeamReplayViewModel?,
     inSeries: Boolean = false,
+    // null when not selecting
+    selected: Boolean? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         // in a series, no team makes the row taller than its title
         modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = if (inSeries) 12.dp else 0.dp)
     ) {
+        // the card's click selects it
+        selected?.let { Checkbox(checked = it, onCheckedChange = null, modifier = Modifier.padding(end = 8.dp)) }
         GameOutcomeCard(gameOutcome)
         VsText(currentPlayer, opponentPlayer, gameOutcome, team.isInternalMatch(replay), replay, inSeries = inSeries)
         Spacer(Modifier.width(16.dp))

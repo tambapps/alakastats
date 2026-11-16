@@ -1,5 +1,17 @@
 package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.replay
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.close
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TriStateCheckbox
+import androidx.compose.ui.state.ToggleableState
+import com.tambapps.pokemon.alakastats.ui.composables.CopyReplayUrlsButton
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,19 +56,65 @@ internal fun GroupBySeriesChip(viewModel: TeamReplayViewModel, modifier: Modifie
 }
 
 /**
+ * Above the replays: where the selection bar is while selecting, so that the list doesn't move when it starts
+ */
+@OptIn(ExperimentalFoundationApi::class)
+internal fun LazyListScope.replaySelectionItem(viewModel: TeamReplayViewModel) {
+    if (viewModel.isSelecting) {
+        // stays at the top while scrolling: the selection's actions are at hand
+        stickyHeader(key = "selection") { ReplaySelectionBar(viewModel, Modifier.padding(bottom = 8.dp)) }
+    } else {
+        item(key = "selection") {
+            // not in the filters' title, whose title would no longer fit on mobile
+            Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = viewModel::startSelection, enabled = viewModel.canSelect) { Text("Select") }
+            }
+        }
+    }
+}
+
+/**
+ * While selecting: how many are selected, selecting them all, and the actions on them
+ */
+@Composable
+private fun ReplaySelectionBar(viewModel: TeamReplayViewModel, modifier: Modifier = Modifier) {
+    val count = viewModel.selectedRefs.size
+    Row(
+        modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = viewModel::stopSelection) {
+            Icon(painterResource(Res.drawable.close), contentDescription = "Stop selecting")
+        }
+        Text(
+            if (count == 1) "1 selected" else "$count selected",
+            style = MaterialTheme.typography.titleMedium,
+        )
+        TextButton(onClick = viewModel::toggleSelectAll) {
+            Text(if (viewModel.areAllShownSelected) "Unselect all" else "Select all")
+        }
+        Spacer(Modifier.weight(1f))
+        CopyReplayUrlsButton(urls = viewModel::selectedUrls, enabled = count > 0)
+    }
+}
+
+/**
  * A replay, or the games of a series in a frame with the series' score
  *
  * @param game how a game is shown, as when not grouped
+ * @param selectedRefs the selected replays, null when not selecting: the series' checkbox then selects its games
  */
 @Composable
 internal fun ReplayListItemView(
     team: Teamlytics,
     item: ReplayListItem,
+    selectedRefs: Set<String>? = null,
+    onSeriesSelectionToggle: (ReplayListItem.Series) -> Unit = {},
     game: @Composable (ReplayAnalytics) -> Unit,
 ) {
     when (item) {
         is ReplayListItem.Single -> game(item.replay)
-        is ReplayListItem.Series -> SeriesView(team, item, game)
+        is ReplayListItem.Series -> SeriesView(team, item, selectedRefs, { onSeriesSelectionToggle(item) }, game)
     }
 }
 
@@ -69,6 +127,8 @@ internal fun ReplayListItemView(
 private fun SeriesView(
     team: Teamlytics,
     series: ReplayListItem.Series,
+    selectedRefs: Set<String>?,
+    onSelectionToggle: () -> Unit,
     game: @Composable (ReplayAnalytics) -> Unit,
 ) {
     val opponent = team.getPlayers(series.games.first()).second
@@ -77,6 +137,19 @@ private fun SeriesView(
     val isCompact = LocalIsCompact.current
     ExpansionTile(
         title = {
+            // only the games having a link can be selected
+            val selectableGames = series.games.filter { it.url != null }
+            if (selectedRefs != null && selectableGames.isNotEmpty()) {
+                val selectedCount = selectableGames.count { it.reference in selectedRefs }
+                TriStateCheckbox(
+                    state = when (selectedCount) {
+                        0 -> ToggleableState.Off
+                        selectableGames.size -> ToggleableState.On
+                        else -> ToggleableState.Indeterminate
+                    },
+                    onClick = onSelectionToggle,
+                )
+            }
             // an unknown outcome is an incomplete series, as its subtitle tells
             GameOutcomeCard(series.outcome, letter = if (series.outcome == GameOutcome.UNKNOWN) 'I' else series.outcome.name[0])
             SeriesTitle(series, opponent)

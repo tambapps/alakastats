@@ -218,6 +218,13 @@ class ShowdownReplaysViewModel(
     fun toggleSelectAll() = toggleSelection(shownReplays)
 
     private val selectedReplays get() = savedReplays.filter { it.id in selectedIds }
+
+    /** The selected replays' URLs, in the order they're shown, then those the filters hide */
+    fun selectedUrls(): List<String> {
+        val shown = shownReplays.filter { it.id in selectedIds }
+        val shownIds = shown.mapTo(mutableSetOf()) { it.id }
+        return (shown + selectedReplays.filter { it.id !in shownIds }).map { it.url }
+    }
     /** Asks to delete the selected replays */
     fun askSelectionDeletion() {
         if (isBusy || selectedIds.isEmpty()) return

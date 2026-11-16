@@ -95,6 +95,64 @@ class TeamReplayViewModel(
     /** the replays to reload for them to show all the app knows, the ungrouped best-of-3s included */
     val outdatedReplays by derivedStateOf { (useCase.originalTeam.outdatedReplays + ungroupedSeriesReplays).distinct() }
 
+    /** Whether a click on a replay selects it, e.g. to copy the URLs of the selected ones */
+    var isSelecting by mutableStateOf(false)
+        private set
+    /** The references of the selected replays */
+    var selectedRefs by mutableStateOf<Set<String>>(emptySet())
+        private set
+
+    /** The replays shown, in the order they are: those of a series one after the other */
+    private val shownReplays get() = replayItems.flatMap { item ->
+        when (item) {
+            is ReplayListItem.Single -> listOf(item.replay)
+            is ReplayListItem.Series -> item.games
+        }
+    }
+
+    /** Only the replays having a link can be selected: there's nothing to copy of the others */
+    private val selectableShownReplays get() = shownReplays.filter { it.url != null }
+
+    val canSelect get() = selectableShownReplays.isNotEmpty()
+
+    fun isSelectable(replay: ReplayAnalytics) = replay.url != null
+
+    fun startSelection() {
+        isSelecting = true
+    }
+
+    fun stopSelection() {
+        isSelecting = false
+        selectedRefs = emptySet()
+    }
+
+    fun toggleSelection(replay: ReplayAnalytics) {
+        if (!isSelectable(replay)) return
+        val ref = replay.reference
+        selectedRefs = if (ref in selectedRefs) selectedRefs - ref else selectedRefs + ref
+    }
+
+    /** Selects the replays, e.g. the games of a series, or unselects them when they all are */
+    fun toggleSelection(replays: List<ReplayAnalytics>) {
+        val refs = replays.filter(::isSelectable).mapTo(mutableSetOf()) { it.reference }
+        selectedRefs = if (selectedRefs.containsAll(refs)) selectedRefs - refs else selectedRefs + refs
+    }
+
+    /** Whether all the replays shown that can be selected are */
+    val areAllShownSelected get() = selectableShownReplays.let { replays ->
+        replays.isNotEmpty() && replays.all { it.reference in selectedRefs }
+    }
+
+    fun toggleSelectAll() = toggleSelection(selectableShownReplays)
+
+    /** The selected replays' URLs, in the order they're shown, then those the filters hide */
+    fun selectedUrls(): List<String> {
+        val shown = shownReplays.filter { it.reference in selectedRefs }
+        val shownRefs = shown.mapTo(mutableSetOf()) { it.reference }
+        val hidden = useCase.originalTeam.replays.filter { it.reference in selectedRefs && it.reference !in shownRefs }
+        return (shown + hidden).mapNotNull { it.url?.removeSuffix(".json") }
+    }
+
     fun applySort(sort: ReplaySort) {
         this.sort = sort
     }

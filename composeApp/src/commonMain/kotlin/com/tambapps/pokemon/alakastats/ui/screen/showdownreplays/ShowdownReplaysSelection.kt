@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.TeamlyticsPreview
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.CopyReplayUrlsButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonTeamPreview
 import org.jetbrains.compose.resources.painterResource
 
@@ -62,6 +63,7 @@ internal fun SelectionBar(viewModel: ShowdownReplaysViewModel, modifier: Modifie
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
+                CopyReplayUrlsButton(urls = viewModel::selectedUrls, enabled = count > 0)
                 IconButton(onClick = viewModel::askSelectionDeletion, enabled = count > 0 && progress == null && !viewModel.isBusy) {
                     Icon(painterResource(Res.drawable.delete), contentDescription = "Delete the selected replays")
                 }

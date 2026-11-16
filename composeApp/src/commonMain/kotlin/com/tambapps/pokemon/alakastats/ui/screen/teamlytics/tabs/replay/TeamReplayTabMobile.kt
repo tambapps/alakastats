@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -84,8 +85,15 @@ internal fun TeamReplayTabMobile(viewModel: TeamReplayViewModel, scrollState: La
             ReloadOutdatedReplaysHint(viewModel, Modifier.padding(vertical = 8.dp))
         }
 
+        replaySelectionItem(viewModel)
+
         itemsIndexed(items) { index, item ->
-            ReplayListItemView(team, item) { replay ->
+            ReplayListItemView(
+                team,
+                item,
+                selectedRefs = if (viewModel.isSelecting) viewModel.selectedRefs else null,
+                onSeriesSelectionToggle = { viewModel.toggleSelection(it.games) },
+            ) { replay ->
                 MobileReplay(viewModel, team, replay, inSeries = item is ReplayListItem.Series)
             }
             if (index < items.size - 1) {
@@ -117,7 +125,17 @@ private fun MobileSdNamesWarning(viewModel: TeamReplayViewModel) {
 
 @Composable
 private fun MobileReplay(viewModel: TeamReplayViewModel, team: Teamlytics, replay: ReplayAnalytics, inSeries: Boolean) {
-    ReplayCompact(team, replay, viewModel, inSeries = inSeries)
+    // null when not selecting: a tap then selects it rather than opening it
+    val selected = if (viewModel.isSelecting && viewModel.isSelectable(replay)) replay.reference in viewModel.selectedRefs else null
+    ReplayCompact(
+        team,
+        replay,
+        viewModel,
+        onClick = if (selected != null) ({ viewModel.toggleSelection(replay) }) else null,
+        borderColor = if (selected == true) MaterialTheme.colorScheme.primary else null,
+        inSeries = inSeries,
+        selected = selected,
+    )
 }
 
 /**
@@ -133,11 +151,15 @@ fun ReplayCompact(
     gradientBackgroundColors: List<Color>? = null,
     borderColor: Color? = null,
     inSeries: Boolean = false,
+    // null when not selecting
+    selected: Boolean? = null,
     ) {
     val (currentPlayer, opponentPlayer) = team.getPlayers(replay)
     val gameOutput = team.getGameOutcome(replay)
     ExpansionTile(
         title = { isExpanded ->
+            // the tile's click selects it
+            selected?.let { Checkbox(checked = it, onCheckedChange = null, modifier = Modifier.padding(end = 8.dp)) }
             GameOutcomeCard(gameOutput)
             VsText(currentPlayer, opponentPlayer, gameOutput, team.isInternalMatch(replay), replay, inSeries = inSeries,
                 showNotesIcon = !isExpanded)

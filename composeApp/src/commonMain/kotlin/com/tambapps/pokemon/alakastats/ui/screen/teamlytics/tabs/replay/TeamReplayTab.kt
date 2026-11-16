@@ -92,8 +92,8 @@ import com.tambapps.pokemon.alakastats.util.titlecase
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
-// the filters bar, the header and the hint about outdated replays, on mobile and on desktop
-private const val REPLAY_LIST_ITEMS_BEFORE_REPLAYS = 3
+// the filters bar, the header, the hint about outdated replays and the selection bar, on mobile and on desktop
+private const val REPLAY_LIST_ITEMS_BEFORE_REPLAYS = 4
 
 @Composable
 fun TeamReplayTab(viewModel: TeamReplayViewModel) {
