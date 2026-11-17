@@ -44,7 +44,11 @@ class PokedexViewModelTest {
         viewModel.show(metagross)
         assertEquals(metagross, viewModel.selectedForm)
         assertEquals(listOf(metagross, megaMetagross), viewModel.forms)
-        assertEquals(PokeStats(80, 135, 130, 95, 90, 70), viewModel.baseStats)
+        // named: PokeStats' order isn't Showdown's (the speed is 2nd)
+        assertEquals(
+            PokeStats(hp = 80, attack = 135, defense = 130, specialAttack = 95, specialDefense = 90, speed = 70),
+            viewModel.baseStats,
+        )
     }
 
     @Test
