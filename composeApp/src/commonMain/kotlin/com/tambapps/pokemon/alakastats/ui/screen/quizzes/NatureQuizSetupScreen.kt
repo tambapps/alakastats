@@ -272,7 +272,8 @@ internal fun NatureStatsCaption(
 }
 
 internal val increasedStatColor @Composable get() = if (isDarkThemeEnabled()) Color(0xFFE57373) else Color.Red
-internal val decreasedStatColor @Composable get() = if (isDarkThemeEnabled()) Color.Cyan else Color.Blue
+// the blue matching the red's lightness in dark mode, a pure cyan standing out much more
+internal val decreasedStatColor @Composable get() = if (isDarkThemeEnabled()) Color(0xFF64B5F6) else Color.Blue
 
 internal val Nature.displayName: String
     get() = name.lowercase().replaceFirstChar { it.uppercase() }

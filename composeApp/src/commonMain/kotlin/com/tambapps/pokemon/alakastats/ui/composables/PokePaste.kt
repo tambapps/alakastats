@@ -218,7 +218,7 @@ internal val Stat.shortName get() = when(this) {
 @Composable
 internal fun natureStatColor(nature: Nature?, stat: Stat) = when {
     nature?.bonusStat == stat -> if (isDarkThemeEnabled()) Color(0xFFE57373) else Color.Red
-    nature?.malusStat == stat -> if (isDarkThemeEnabled()) Color.Cyan else Color.Blue
+    nature?.malusStat == stat -> if (isDarkThemeEnabled()) Color(0xFF64B5F6) else Color.Blue
     else -> Color.Unspecified
 }
 

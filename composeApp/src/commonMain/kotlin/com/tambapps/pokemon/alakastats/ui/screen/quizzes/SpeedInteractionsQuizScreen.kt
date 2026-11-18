@@ -413,7 +413,7 @@ private fun RevealedNature.label(): String = when (this) {
 private fun RevealedNature.color(): Color = when (this) {
     RevealedNature.BOOSTING -> if (isDarkThemeEnabled()) Color(0xFFE57373) else Color.Red
     RevealedNature.NEUTRAL -> Color.Unspecified
-    RevealedNature.REDUCING -> if (isDarkThemeEnabled()) Color.Cyan else Color.Blue
+    RevealedNature.REDUCING -> if (isDarkThemeEnabled()) Color(0xFF64B5F6) else Color.Blue
 }
 
 private fun teamModeExplanation(question: SpeedInteractionQuestion, range: OpponentSpeedRange): String {
