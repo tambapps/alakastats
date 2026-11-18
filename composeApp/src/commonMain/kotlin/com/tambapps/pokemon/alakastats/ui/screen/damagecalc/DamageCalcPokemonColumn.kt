@@ -302,28 +302,16 @@ private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, m
  */
 @Composable
 private fun PokemonHeaderTitle(state: DamageCalcPokemonState, side: DamageCalcSide) {
-    val species = ChampionsDex.speciesOrNull(state.form)
-    Column(
-        horizontalAlignment = if (side == DamageCalcSide.ATTACKER) Alignment.Start else Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
+    val horizontalAlignment = if (side == DamageCalcSide.ATTACKER) Alignment.Start else Alignment.End
+    Column(horizontalAlignment = horizontalAlignment, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
             side.desktopName,
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Text(state.form.pretty, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        if (species != null) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                listOfNotNull(species.primaryType, species.secondaryType).forEach {
-                    MoveTypeImage(it, Modifier.size(HEADER_TYPE_ICON_SIZE))
-                }
-            }
-        }
+        PokemonFormTitle(state, horizontalAlignment)
     }
 }
-
-private val HEADER_TYPE_ICON_SIZE = 20.dp
 
 /**
  * The ability, with its "ability on" toggle for the abilities the source calculator has one for
@@ -358,7 +346,7 @@ private fun AbilityField(state: DamageCalcPokemonState, modifier: Modifier = Mod
  * field is given the modifier to apply
  */
 @Composable
-private fun FieldPairRow(
+internal fun FieldPairRow(
     first: (@Composable (Modifier) -> Unit)?,
     second: (@Composable (Modifier) -> Unit)?,
 ) {

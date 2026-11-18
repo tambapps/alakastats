@@ -246,6 +246,26 @@ internal fun DamageCalcItemIcon(item: String, modifier: Modifier = Modifier) {
 }
 
 /**
+ * The pokemon's form and the icons of its types under it, for the headers of both layouts
+ */
+@Composable
+internal fun PokemonFormTitle(state: DamageCalcPokemonState, horizontalAlignment: Alignment.Horizontal) {
+    val species = ChampionsDex.speciesOrNull(state.form)
+    Column(horizontalAlignment = horizontalAlignment, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(state.form.pretty, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        if (species != null) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                listOfNotNull(species.primaryType, species.secondaryType).forEach {
+                    MoveTypeImage(it, Modifier.size(HEADER_TYPE_ICON_SIZE))
+                }
+            }
+        }
+    }
+}
+
+private val HEADER_TYPE_ICON_SIZE = 20.dp
+
+/**
  * The sprite of the pokemon with its held item's icon in the bottom corner, like in the team previews. Not for a mega
  * stone, the mega switch already showing it
  */

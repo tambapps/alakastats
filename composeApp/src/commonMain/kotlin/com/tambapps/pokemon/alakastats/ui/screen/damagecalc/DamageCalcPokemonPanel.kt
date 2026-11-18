@@ -2,6 +2,11 @@ package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.restart_alt
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -35,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -47,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
@@ -127,50 +135,82 @@ internal fun DamageCalcPokemonPanel(
                 }
             }
         }
-        if (state.availableForms.size > 1 && state.megaFormOfItem == null) {
-            PropertyRow("Form", state.form.pretty, onClick = { showFormDialog = true })
-        }
-        // only for the species having preset sets
-        if (state.presetSets.isNotEmpty()) {
-            PropertyRow("Set", state.setChoice.text, onClick = { showSetDialog = true })
-        }
-        PropertyRow(
-            label = "Ability",
-            value = state.ability,
-            onClick = { showAbilityDialog = true },
-            // only for the abilities the source calculator has an "ability on" toggle for
-            trailingContent = if (state.hasAbilityToggle) {
-                {
-                    FilterChip(
-                        selected = state.isAbilityActive,
-                        onClick = { state.isAbilityActive = !state.isAbilityActive },
-                        label = { Text("Active", maxLines = 1, softWrap = false) },
+        // the set in a grid of 2 columns, like the desktop layout. A tile alone on its row takes the whole width
+        FieldPairRow(
+            first = if (state.availableForms.size > 1 && state.megaFormOfItem == null) {
+                { modifier -> PropertyTile("Form", state.form.pretty, onClick = { showFormDialog = true }, modifier) }
+            } else null,
+            // only for the species having preset sets
+            second = if (state.presetSets.isNotEmpty()) {
+                { modifier -> PropertyTile("Set", state.setChoice.text, onClick = { showSetDialog = true }, modifier) }
+            } else null,
+        )
+        FieldPairRow(
+            first = { modifier ->
+                PropertyTile(
+                    label = "Ability",
+                    value = state.ability,
+                    onClick = { showAbilityDialog = true },
+                    modifier = modifier,
+                    // only for the abilities the source calculator has an "ability on" toggle for
+                    labelTrailingContent = if (state.hasAbilityToggle) {
+                        {
+                            ActiveToggle(
+                                isActive = state.isAbilityActive,
+                                onClick = { state.isAbilityActive = !state.isAbilityActive },
+                            )
+                        }
+                    } else null,
+                )
+            },
+            second = { modifier ->
+                PropertyTile(
+                    label = "Item",
+                    value = state.item.ifBlank { "None" },
+                    onClick = { showItemDialog = true },
+                    modifier = modifier,
+                    leadingIcon = state.item.ifBlank { null }
+                        ?.let { { DamageCalcItemIcon(it, Modifier.size(ITEM_ICON_SIZE)) } },
+                )
+            },
+        )
+        FieldPairRow(
+            first = { modifier ->
+                PropertyTile("Nature", natureText(state.nature), onClick = { showNatureDialog = true }, modifier)
+            },
+            second = { modifier ->
+                PropertyTile("Status", state.status.displayName, onClick = { showStatusDialog = true }, modifier)
+            },
+        )
+        // the settings shown for some abilities and statuses only
+        FieldPairRow(
+            // the ability settings the source calculator shows for these abilities only
+            first = when (state.resolvedAbility) {
+                Ability.RIVALRY -> { modifier ->
+                    PropertyTile("Rivalry", state.rivalry.displayName, onClick = { showRivalryDialog = true }, modifier)
+                }
+                Ability.SUPREME_OVERLORD -> { modifier ->
+                    PropertyTile(
+                        "Fainted Allies",
+                        faintedAlliesText(state.faintedAllyCount),
+                        onClick = { showFaintedAlliesDialog = true },
+                        modifier,
+                    )
+                }
+                else -> null
+            },
+            second = if (state.status == Status.BADLY_POISONED) {
+                { modifier ->
+                    PropertyTile(
+                        "Toxic Damage",
+                        toxicCounterText(state.toxicCounter),
+                        onClick = { showToxicCounterDialog = true },
+                        modifier,
                     )
                 }
             } else null,
         )
-        // the ability settings the source calculator shows for these abilities only
-        when (state.resolvedAbility) {
-            Ability.RIVALRY -> PropertyRow("Rivalry", state.rivalry.displayName, onClick = { showRivalryDialog = true })
-            Ability.SUPREME_OVERLORD -> PropertyRow(
-                "Fainted Allies",
-                faintedAlliesText(state.faintedAllyCount),
-                onClick = { showFaintedAlliesDialog = true }
-            )
-            else -> {}
-        }
-        PropertyRow(
-            label = "Item",
-            value = state.item.ifBlank { "None" },
-            onClick = { showItemDialog = true },
-            leadingIcon = state.item.ifBlank { null }?.let { { DamageCalcItemIcon(it, Modifier.size(ITEM_ICON_SIZE)) } },
-        )
-        PropertyRow("Nature", natureText(state.nature), onClick = { showNatureDialog = true })
         StatPointsTile(state, side, finalSpeed = state.finalSpeed(field, side))
-        PropertyRow("Status", state.status.displayName, onClick = { showStatusDialog = true })
-        if (state.status == Status.BADLY_POISONED) {
-            PropertyRow("Toxic Damage", toxicCounterText(state.toxicCounter), onClick = { showToxicCounterDialog = true })
-        }
         // needed on both sides, as some moves depend on the attacker's current HP
         CurrentHpSlider(state)
         ResetBattleStateButton(state, Modifier.fillMaxWidth())
@@ -443,7 +483,7 @@ private fun PokemonButton(state: DamageCalcPokemonState, side: DamageCalcSide, o
                 sprite()
                 Spacer(Modifier.width(8.dp))
             }
-            Text(state.name.pretty, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            PokemonFormTitle(state, if (isAttacker) Alignment.Start else Alignment.End)
             if (!isAttacker) {
                 Spacer(Modifier.width(8.dp))
                 sprite()
@@ -452,24 +492,93 @@ private fun PokemonButton(state: DamageCalcPokemonState, side: DamageCalcSide, o
     }
 }
 
+/**
+ * A tile of the set's grid: its label above its value, the whole tile opening the value's picker
+ */
+@Composable
+private fun PropertyTile(
+    label: String,
+    value: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    labelTrailingContent: (@Composable () -> Unit)? = null,
+) = PropertyTile(label, AnnotatedString(value), onClick, modifier, leadingIcon, labelTrailingContent)
+
+@Composable
+private fun PropertyTile(
+    label: String,
+    value: AnnotatedString,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    // optional icon displayed before the value (e.g. the item's)
+    leadingIcon: (@Composable () -> Unit)? = null,
+    // optional content at the end of the label's line (e.g. the ability's toggle)
+    labelTrailingContent: (@Composable () -> Unit)? = null,
+) {
+    OutlinedCard(onClick = onClick, shape = TILE_SHAPE, modifier = modifier) {
+        Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Row(Modifier.height(TILE_LABEL_HEIGHT), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f),
+                )
+                labelTrailingContent?.invoke()
+            }
+            Row(Modifier.height(TILE_VALUE_HEIGHT), verticalAlignment = Alignment.CenterVertically) {
+                if (leadingIcon != null) {
+                    leadingIcon()
+                    Spacer(Modifier.width(6.dp))
+                }
+                Text(
+                    value,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * A small pill toggling whether the ability is active, fitting on the line of a tile's label
+ */
+@Composable
+private fun ActiveToggle(isActive: Boolean, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Text(
+        "Active",
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        color = if (isActive) colors.onPrimary else colors.onSurfaceVariant,
+        maxLines = 1,
+        softWrap = false,
+        modifier = Modifier
+            .clip(CircleShape)
+            .then(
+                if (isActive) Modifier.background(colors.primary)
+                else Modifier.border(1.dp, colors.outline, CircleShape)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+    )
+}
+
+private val TILE_SHAPE = RoundedCornerShape(12.dp)
+private val TILE_LABEL_HEIGHT = 20.dp
+private val TILE_VALUE_HEIGHT = 28.dp
+
 @Composable
 private fun PropertyRow(
     label: String,
     value: String,
     onClick: () -> Unit,
-    trailingContent: (@Composable () -> Unit)? = null,
-    leadingIcon: (@Composable () -> Unit)? = null,
-) = PropertyRow(label, AnnotatedString(value), onClick, trailingContent, leadingIcon)
-
-@Composable
-private fun PropertyRow(
-    label: String,
-    value: AnnotatedString,
-    onClick: () -> Unit,
     // optional content displayed after the button, e.g. a move's hit count
     trailingContent: (@Composable () -> Unit)? = null,
-    // optional icon displayed before the value, in the button (e.g. the item's)
-    leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -479,10 +588,6 @@ private fun PropertyRow(
             modifier = Modifier.width(72.dp)
         )
         OutlinedButton(onClick = onClick, modifier = Modifier.weight(1f)) {
-            if (leadingIcon != null) {
-                leadingIcon()
-                Spacer(Modifier.width(8.dp))
-            }
             // centered also when too long for one line (e.g. a move next to its chips)
             Text(value, textAlign = TextAlign.Center)
         }
