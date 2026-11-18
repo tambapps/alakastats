@@ -160,7 +160,12 @@ internal fun DamageCalcPokemonPanel(
             )
             else -> {}
         }
-        PropertyRow("Item", state.item.ifBlank { "None" }, onClick = { showItemDialog = true })
+        PropertyRow(
+            label = "Item",
+            value = state.item.ifBlank { "None" },
+            onClick = { showItemDialog = true },
+            leadingIcon = state.item.ifBlank { null }?.let { { DamageCalcItemIcon(it, Modifier.size(ITEM_ICON_SIZE)) } },
+        )
         PropertyRow("Nature", state.nature.effectDisplayName(), onClick = { showNatureDialog = true })
         StatPointsTile(state, side, finalSpeed = state.finalSpeed(field, side))
         PropertyRow("Status", state.status.displayName, onClick = { showStatusDialog = true })
@@ -437,10 +442,10 @@ private fun PokemonButton(state: DamageCalcPokemonState, side: DamageCalcSide, o
         ) {
             val sprite = @Composable {
                 // the attacker faces right, towards its target
-                PokemonSprite(
-                    state.form,
-                    Modifier.size(64.dp),
+                DamageCalcPokemonSprite(
+                    state,
                     facingDirection = if (isAttacker) FacingDirection.RIGHT else FacingDirection.LEFT,
+                    modifier = Modifier.size(64.dp),
                 )
             }
             if (isAttacker) {
@@ -463,6 +468,8 @@ private fun PropertyRow(
     onClick: () -> Unit,
     // optional content displayed after the button, e.g. a move's hit count
     trailingContent: (@Composable () -> Unit)? = null,
+    // optional icon displayed before the value, in the button (e.g. the item's)
+    leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -472,6 +479,10 @@ private fun PropertyRow(
             modifier = Modifier.width(72.dp)
         )
         OutlinedButton(onClick = onClick, modifier = Modifier.weight(1f)) {
+            if (leadingIcon != null) {
+                leadingIcon()
+                Spacer(Modifier.width(8.dp))
+            }
             // centered also when too long for one line (e.g. a move next to its chips)
             Text(value, textAlign = TextAlign.Center)
         }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,12 +36,14 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.tambapps.pokemon.ItemName
 import com.tambapps.pokemon.MoveName
 import com.tambapps.pokemon.PokeType
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
+import com.tambapps.pokemon.alakastats.ui.service.ItemImage
 import com.tambapps.pokemon.alakastats.ui.service.MoveTypeImage
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -229,6 +232,32 @@ private fun damageBarColors() = if (isDarkThemeEnabled()) {
 }
 
 internal val MOVE_TYPE_ICON_SIZE = 24.dp
+internal val ITEM_ICON_SIZE = 28.dp
+
+/**
+ * The item's icon, nothing for no item
+ */
+@Composable
+internal fun DamageCalcItemIcon(item: String, modifier: Modifier = Modifier) {
+    if (item.isNotBlank()) {
+        ItemImage(ItemName(item), modifier)
+    }
+}
+
+/**
+ * The sprite of the pokemon with its held item's icon in the bottom corner, like in the team previews
+ */
+@Composable
+internal fun DamageCalcPokemonSprite(
+    state: DamageCalcPokemonState,
+    facingDirection: FacingDirection,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier) {
+        PokemonSprite(state.form, Modifier.fillMaxSize(), facingDirection = facingDirection)
+        DamageCalcItemIcon(state.item, Modifier.align(Alignment.BottomEnd).fillMaxSize(0.4f))
+    }
+}
 
 /**
  * The type icon of a suggested move, nothing for a name that isn't a Champions move

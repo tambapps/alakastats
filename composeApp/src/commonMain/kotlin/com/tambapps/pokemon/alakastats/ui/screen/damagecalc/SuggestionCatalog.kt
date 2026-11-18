@@ -45,7 +45,13 @@ internal val ABILITY_CATALOG by lazy {
 }
 
 // no item is allowed
-internal val ITEM_CATALOG by lazy { SuggestionCatalog(Item.entries.map { it.displayName }, allowBlank = true) }
+internal val ITEM_CATALOG by lazy {
+    SuggestionCatalog(
+        values = Item.entries.map { it.displayName },
+        allowBlank = true,
+        suggestionLeadingContent = { DamageCalcItemIcon(it, Modifier.size(32.dp)) },
+    )
+}
 
 // an empty move slot is allowed
 internal val MOVE_CATALOG by lazy {

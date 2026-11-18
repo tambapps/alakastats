@@ -89,10 +89,10 @@ internal fun DamageCalcPokemonColumn(
             ) {
                 val sprite = @Composable {
                     // the attacker faces right, towards its target
-                    PokemonSprite(
-                        state.form,
-                        Modifier.size(80.dp),
+                    DamageCalcPokemonSprite(
+                        state,
                         facingDirection = if (isAttacker) FacingDirection.RIGHT else FacingDirection.LEFT,
+                        modifier = Modifier.size(80.dp),
                     )
                 }
                 // a pokemon holding its mega stone has a mega switch instead of a form selection, in the top corner:
@@ -266,6 +266,7 @@ private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, m
             value = state.item,
             catalog = ITEM_CATALOG,
             onValueSelected = { state.item = it },
+            leadingIcon = state.item.ifBlank { null }?.let { { DamageCalcItemIcon(it, Modifier.size(ITEM_ICON_SIZE)) } },
             modifier = Modifier.fillMaxWidth(),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
