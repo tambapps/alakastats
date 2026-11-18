@@ -75,11 +75,10 @@ internal fun DamageCalcPokemonColumn(
     modifier: Modifier = Modifier,
 ) {
     var showPasteDialog by remember { mutableStateOf(false) }
-    MyCard(modifier = modifier, gradientBackgroundColors = cardGradientColors, border = fieldEffectsBorder(field)) {
+    // no field effects here, only on the field's card: drawn behind this much text, they would get in the way of reading
+    MyCard(modifier = modifier, gradientBackgroundColors = cardGradientColors) {
         Column(
-            Modifier.typeTint(state, side, diagonalLength = TYPE_TINT_LENGTH)
-                .fieldEffectsBackground(field)
-                .padding(12.dp),
+            Modifier.typeTint(state, side, diagonalLength = TYPE_TINT_LENGTH).padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // the defender's mirrors the attacker's, the sprite on the right
