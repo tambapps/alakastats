@@ -37,6 +37,8 @@ import com.tambapps.pokemon.alakastats.domain.model.PokedexAbility
 import com.tambapps.pokemon.alakastats.domain.model.PokedexMove
 import com.tambapps.pokemon.alakastats.domain.model.PokedexSpecies
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardActions
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardOptions
 import com.tambapps.pokemon.alakastats.ui.composables.SortChip
 import com.tambapps.pokemon.alakastats.ui.composables.TypeFilterChip
 import com.tambapps.pokemon.alakastats.ui.model.PokedexMoveSort
@@ -112,6 +114,8 @@ internal fun MovepoolSection(viewModel: PokedexViewModel, species: PokedexSpecie
                 onValueChange = { viewModel.moveQuery = it },
                 placeholder = { Text("Search a move...", maxLines = 1) },
                 singleLine = true,
+                keyboardOptions = searchKeyboardOptions,
+                keyboardActions = searchKeyboardActions(),
                 shape = RoundedCornerShape(12.dp),
                 trailingIcon = {
                     if (viewModel.moveQuery.isNotEmpty()) {

@@ -59,6 +59,8 @@ import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.domain.model.PokedexSpecies
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.LazyVerticalGridWithScrollbar
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardActions
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardOptions
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.SortChip
 import com.tambapps.pokemon.alakastats.ui.composables.TypeBadge
@@ -174,6 +176,8 @@ private fun SearchField(viewModel: PokedexPokemonListViewModel) {
         onValueChange = { viewModel.query = it },
         placeholder = { Text("Search Pokémon...") },
         singleLine = true,
+        keyboardOptions = searchKeyboardOptions,
+        keyboardActions = searchKeyboardActions(),
         shape = RoundedCornerShape(12.dp),
         trailingIcon = {
             if (viewModel.query.isNotEmpty()) {

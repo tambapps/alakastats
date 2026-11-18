@@ -34,12 +34,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.ShowdownReplayFilters
 import com.tambapps.pokemon.alakastats.ui.composables.FormatSelector
 import com.tambapps.pokemon.alakastats.ui.composables.SortChip
+import com.tambapps.pokemon.alakastats.ui.composables.doneKeyboardActions
 import com.tambapps.pokemon.alakastats.ui.model.PokemonFilter
 import com.tambapps.pokemon.alakastats.ui.model.ShowdownReplaySort
 import com.tambapps.pokemon.alakastats.ui.model.ShowdownReplaySortCriterion
@@ -180,7 +182,7 @@ internal fun LoadDialog(viewModel: ShowdownReplaysViewModel) {
                     onValueChange = { text -> viewModel.minRatingText = text.filter(Char::isDigit).take(4) },
                     label = { Text("Minimum Elo (optional)") },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                 )
                 Text(
                     "You'll see how many there are before they're downloaded, up to ${formatCount(MAX_REPLAYS_PER_LOAD)} " +
@@ -467,7 +469,8 @@ private fun MinEloFilterButton(minRating: Int?, onChange: (Int?) -> Unit) {
                     onValueChange = { text = it.filter(Char::isDigit).take(4) },
                     label = { Text("Elo") },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                    keyboardActions = doneKeyboardActions(canConfirm = true) { onChange(text.toIntOrNull()); dismiss() },
                 )
             },
             confirmButton = {

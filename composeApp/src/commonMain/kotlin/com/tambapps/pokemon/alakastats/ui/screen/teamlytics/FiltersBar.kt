@@ -54,6 +54,8 @@ import com.tambapps.pokemon.alakastats.ui.composables.SelectPokemonDialog
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonWheelPicker
+import com.tambapps.pokemon.alakastats.ui.composables.doneKeyboardActions
+import com.tambapps.pokemon.alakastats.ui.composables.doneKeyboardOptions
 import com.tambapps.pokemon.alakastats.ui.composables.wheelPickerKeys
 import com.tambapps.pokemon.alakastats.ui.composables.color
 import com.tambapps.pokemon.alakastats.ui.composables.displayName
@@ -604,6 +606,11 @@ internal fun ShowdownNameDialog(
                     placeholder = { Text("Enter a Showdown username") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    keyboardOptions = doneKeyboardOptions,
+                    keyboardActions = doneKeyboardActions(isSdNameValid(newName)) {
+                        onAdd(newName.trim())
+                        onDismissRequest()
+                    },
                     isError = !isSdNameValid(newName) && !newName.isEmpty(),
                     supportingText = {
                         when {

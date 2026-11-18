@@ -74,6 +74,8 @@ fun <T> SuggestionTextField(
             isError = isError,
             supportingText = supportingText,
             singleLine = true,
+            // only closes the keyboard, a suggestion is picked in the menu
+            keyboardOptions = doneKeyboardOptions,
             label = { Text(label) },
             leadingIcon = leadingIcon,
             modifier = textFieldModifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)

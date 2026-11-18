@@ -44,6 +44,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.LazyVerticalGridWithScrollbar
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardActions
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardOptions
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.SortChip
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
@@ -104,6 +106,8 @@ fun PokedexAbilitiesScreen() {
                 onValueChange = { viewModel.query = it },
                 placeholder = { Text("Search abilities by name or description...", maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 singleLine = true,
+                keyboardOptions = searchKeyboardOptions,
+                keyboardActions = searchKeyboardActions(),
                 shape = RoundedCornerShape(12.dp),
                 trailingIcon = {
                     if (viewModel.query.isNotEmpty()) {

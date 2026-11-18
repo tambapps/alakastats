@@ -56,6 +56,10 @@ import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
+import com.tambapps.pokemon.alakastats.ui.composables.HideKeyboardButton
+import com.tambapps.pokemon.alakastats.ui.composables.keyboardAwarePadding
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardActions
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardOptions
 import com.tambapps.pokemon.alakastats.ui.composables.LazyColumnWithScrollbar
 import com.tambapps.pokemon.alakastats.ui.service.ItemImage
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
@@ -119,7 +123,7 @@ private fun ManualReplayForm(viewModel: ManualReplayViewModel, replayToEdit: Rep
             )
         }
     ) { scaffoldPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(scaffoldPadding)) {
+        Box(modifier = Modifier.fillMaxSize().keyboardAwarePadding(scaffoldPadding)) {
             FabLayout(
                 fab = {
                     DoneButton(enabled = viewModel.canBuildReplayAnalytics) {
@@ -157,6 +161,8 @@ private fun ManualReplayForm(viewModel: ManualReplayViewModel, replayToEdit: Rep
                     }
                 }
             }
+            // on the other side of the Done FAB, which completes the replay
+            HideKeyboardButton(Modifier.align(Alignment.BottomStart).padding(16.dp), floating = true)
         }
     }
 
@@ -359,6 +365,8 @@ private fun SelectPokemonDialog(viewModel: ManualReplayViewModel) {
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Pokemon Name") },
                     singleLine = true,
+                    keyboardOptions = searchKeyboardOptions,
+                    keyboardActions = searchKeyboardActions(),
                 )
                 Spacer(Modifier.height(8.dp))
                 LazyColumnWithScrollbar(modifier = Modifier.heightIn(max = 320.dp)) {

@@ -3,6 +3,7 @@ package com.tambapps.pokemon.alakastats.ui.composables
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
@@ -122,6 +123,8 @@ fun SelectPokemonDialog(
                     isError = error != null,
                     singleLine = onPokepasteSelect == null,
                     maxLines = if (onPokepasteSelect == null) 1 else POKEPASTE_MAX_LINES,
+                    // a pokepaste is multiline, its return key has to make new lines
+                    keyboardOptions = if (onPokepasteSelect == null) doneKeyboardOptions else KeyboardOptions.Default,
                     supportingText = error?.let { ({ Text(it) }) },
                     label = {
                         Text(label ?: if (onPokepasteSelect == null) "Pokemon Name" else "Pokemon Name or Pokepaste")

@@ -70,6 +70,8 @@ import com.tambapps.pokemon.alakastats.domain.model.DamageClass
 import com.tambapps.pokemon.alakastats.domain.model.MoveClassification
 import com.tambapps.pokemon.alakastats.domain.model.PokedexMove
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardActions
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardOptions
 import com.tambapps.pokemon.alakastats.ui.composables.LazyVerticalGridWithScrollbar
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.SortChip
@@ -231,6 +233,8 @@ private fun SearchField(viewModel: PokedexMovesViewModel, modifier: Modifier = M
         onValueChange = { viewModel.query = it },
         placeholder = { Text("Search moves by name or description...", maxLines = 1, overflow = TextOverflow.Ellipsis) },
         singleLine = true,
+        keyboardOptions = searchKeyboardOptions,
+        keyboardActions = searchKeyboardActions(),
         shape = RoundedCornerShape(12.dp),
         trailingIcon = {
             if (viewModel.query.isNotEmpty()) {

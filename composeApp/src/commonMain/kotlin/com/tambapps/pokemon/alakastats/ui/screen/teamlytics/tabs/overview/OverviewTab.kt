@@ -3,9 +3,12 @@ package com.tambapps.pokemon.alakastats.ui.screen.teamlytics.tabs.overview
 import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.more_vert
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,7 +40,9 @@ import com.tambapps.pokemon.alakastats.domain.model.PokemonData
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.computeWinRatePercentage
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
+import com.tambapps.pokemon.alakastats.ui.composables.HideKeyboardButton
 import com.tambapps.pokemon.alakastats.ui.composables.PokepastePokemon
+import com.tambapps.pokemon.alakastats.ui.composables.hideKeyboardOnTap
 import com.tambapps.pokemon.alakastats.ui.composables.ScrollToTopIfNeeded
 import com.tambapps.pokemon.alakastats.ui.screen.home.buttonTextStyle
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.NbReplaysText
@@ -50,10 +56,19 @@ import org.jetbrains.compose.resources.painterResource
 fun OverviewTab(viewModel: OverviewViewModel) {
     val isCompact = LocalIsCompact.current
     val scrollState = rememberScrollState()
-    if (isCompact) {
-        OverviewTabMobile(viewModel, scrollState)
-    } else {
-        OverviewTabDesktop(viewModel, scrollState)
+    Box(Modifier.fillMaxSize().then(if (viewModel.isEditingNotes) Modifier.hideKeyboardOnTap() else Modifier)) {
+        if (isCompact) {
+            OverviewTabMobile(viewModel, scrollState)
+        } else {
+            OverviewTabDesktop(viewModel, scrollState)
+        }
+        if (viewModel.isEditingNotes) {
+            // the notes are multiline, and the Save / Cancel buttons are at the top, maybe scrolled away
+            HideKeyboardButton(
+                Modifier.align(Alignment.BottomEnd).imePadding().padding(16.dp),
+                floating = true
+            )
+        }
     }
     ScrollToTopIfNeeded(viewModel, scrollState)
 }

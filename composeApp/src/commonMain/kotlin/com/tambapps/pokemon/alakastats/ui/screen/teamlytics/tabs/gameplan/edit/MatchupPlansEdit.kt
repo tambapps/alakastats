@@ -61,6 +61,11 @@ import com.tambapps.pokemon.alakastats.domain.model.MatchupPlan
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
+import com.tambapps.pokemon.alakastats.ui.composables.HideKeyboardButton
+import com.tambapps.pokemon.alakastats.ui.composables.doneKeyboardOptions
+import com.tambapps.pokemon.alakastats.ui.composables.keyboardAwarePadding
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardActions
+import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardOptions
 import com.tambapps.pokemon.alakastats.ui.composables.MyCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokepasteCard
 import com.tambapps.pokemon.alakastats.ui.composables.PokemonFilterChip
@@ -115,7 +120,7 @@ fun MatchupPlansEdit(
         },
     ) { scaffoldPadding ->
         Box(
-            Modifier.fillMaxSize().padding(scaffoldPadding),
+            Modifier.fillMaxSize().keyboardAwarePadding(scaffoldPadding),
             contentAlignment = Alignment.TopCenter
         ) {
             Column(
@@ -201,6 +206,7 @@ private fun ButtonsBar(
     onEdited: (MatchupPlan) -> Unit
 ) {
     Column(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+        HideKeyboardButton(Modifier.align(Alignment.End))
         viewModel.invalidReason?.let { reason ->
             Text(
                 reason,
@@ -388,8 +394,11 @@ private fun SelectReplayExampleDialog(
                         }
                     },
                     placeholder = { Text("Filter by Username") },
-                    maxLines = 1
-                    )
+                    // maxLines = 1 alone let the return key make new lines
+                    singleLine = true,
+                    keyboardOptions = searchKeyboardOptions,
+                    keyboardActions = searchKeyboardActions(),
+                )
                 Spacer(Modifier.height(20.dp))
                 LazyColumn(
                     modifier = Modifier
@@ -544,6 +553,7 @@ private fun NameInput(viewModel: MatchupPlanEditViewModel) {
         placeholder = { Text("e.g. Sun, Trick Room, Kyogre...") },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
+        keyboardOptions = doneKeyboardOptions,
     )
 }
 

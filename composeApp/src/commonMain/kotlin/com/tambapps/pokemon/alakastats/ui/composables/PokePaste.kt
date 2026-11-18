@@ -473,6 +473,11 @@ private fun PokepasteUrlLoadDialog(viewModel: PokepasteEditingViewModel) {
                     label = { Text("URL") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    keyboardOptions = doneKeyboardOptions,
+                    keyboardActions = doneKeyboardActions(
+                        canConfirm = viewModel.isPokepasteUrlValid && !viewModel.isLoadingPokepasteUrl,
+                        onConfirm = viewModel::loadPokepasteFromUrl
+                    ),
                     enabled = !viewModel.isLoadingPokepasteUrl,
                     isError = (url.isNotBlank() && !viewModel.isPokepasteUrlValid) || viewModel.pokepasteUrlError != null,
                     supportingText = when {

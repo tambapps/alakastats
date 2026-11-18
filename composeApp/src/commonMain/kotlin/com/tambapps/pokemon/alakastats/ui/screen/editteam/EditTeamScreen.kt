@@ -46,6 +46,10 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
+import com.tambapps.pokemon.alakastats.ui.composables.HideKeyboardButton
+import com.tambapps.pokemon.alakastats.ui.composables.doneKeyboardActions
+import com.tambapps.pokemon.alakastats.ui.composables.doneKeyboardOptions
+import com.tambapps.pokemon.alakastats.ui.composables.keyboardAwarePadding
 import com.tambapps.pokemon.alakastats.ui.composables.FormatSelector
 import com.tambapps.pokemon.alakastats.ui.composables.PokepasteCard
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
@@ -92,7 +96,7 @@ fun EditTeamScreen(teamId: Uuid?, redirectToTeamlytics: Boolean) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(scaffoldPadding)
+                .keyboardAwarePadding(scaffoldPadding)
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -117,6 +121,7 @@ fun EditTeamScreen(teamId: Uuid?, redirectToTeamlytics: Boolean) {
 
             Spacer(modifier = Modifier.weight(1f))
 
+            HideKeyboardButton(Modifier.align(Alignment.End))
             ButtonBar(viewModel, teamId != null, exitScreen)
         }
     }
@@ -176,6 +181,8 @@ private fun TeamNameInput(viewModel: EditTeamViewModel) {
         placeholder = { Text("Enter a name for your team") },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
+        // not Next: the next field is the format's dropdown
+        keyboardOptions = doneKeyboardOptions,
     )
 }
 
@@ -285,6 +292,8 @@ private fun ShowdownNameDialog(viewModel: EditTeamViewModel) {
                     placeholder = { Text("Enter your Showdown name") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    keyboardOptions = doneKeyboardOptions,
+                    keyboardActions = doneKeyboardActions(isSdNameValid, viewModel::addShowdownName),
                     isError = !isSdNameValid && !newName.isEmpty(),
                     supportingText = {
                         when {

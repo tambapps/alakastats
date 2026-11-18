@@ -43,6 +43,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -735,7 +736,7 @@ private fun StatPointsField(statPoints: Int, onStatPointsChange: (Int) -> Unit) 
         singleLine = true,
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = color, textAlign = TextAlign.End),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
         modifier = Modifier.width(32.dp)
             .onFocusChanged { if (!it.isFocused) text = statPoints.toString() }
             .drawBehind {
