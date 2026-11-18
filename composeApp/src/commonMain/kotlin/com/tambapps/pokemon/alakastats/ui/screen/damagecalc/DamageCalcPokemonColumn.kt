@@ -111,7 +111,7 @@ internal fun DamageCalcPokemonColumn(
                     megaSwitch()
                     Spacer(Modifier.weight(1f))
                 }
-                Text(side.desktopName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                PokemonHeaderTitle(state, side)
                 if (!isAttacker) {
                     Spacer(Modifier.width(8.dp))
                     sprite()
@@ -198,105 +198,181 @@ private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, m
                 Text("From Paste", maxLines = 1, softWrap = false)
             }
         }
-        if (state.availableForms.size > 1 && state.megaFormOfItem == null) {
-            DropdownField(
-                label = "Form",
-                selected = state.form,
-                options = state.availableForms,
-                optionText = { it.pretty },
-                onSelect = { state.selectForm(it) },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        // only for the species having preset sets
-        if (state.presetSets.isNotEmpty()) {
-            DropdownField(
-                label = "Set",
-                selected = state.setChoice,
-                options = state.setChoices,
-                optionText = { it.text },
-                onSelect = { state.chooseSet(it) },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            CatalogTextField(
-                label = "Ability",
-                value = state.ability,
-                catalog = ABILITY_CATALOG,
-                onValueSelected = { state.ability = it },
-                modifier = Modifier.weight(1f),
-            )
-            // only for the abilities the source calculator has an "ability on" toggle for
-            if (state.hasAbilityToggle) {
-                FilterChip(
-                    selected = state.isAbilityActive,
-                    onClick = { state.isAbilityActive = !state.isAbilityActive },
-                    label = { Text("Active", maxLines = 1, softWrap = false) },
-                    // the default selected color barely stands out on the card
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primary,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                    ),
+        // a grid of 2 columns, a field alone on its row taking the whole width
+        FieldPairRow(
+            first = if (state.availableForms.size > 1 && state.megaFormOfItem == null) {
+                { modifier ->
+                    DropdownField(
+                        label = "Form",
+                        selected = state.form,
+                        options = state.availableForms,
+                        optionText = { it.pretty },
+                        onSelect = { state.selectForm(it) },
+                        modifier = modifier,
+                    )
+                }
+            } else null,
+            // only for the species having preset sets
+            second = if (state.presetSets.isNotEmpty()) {
+                { modifier ->
+                    DropdownField(
+                        label = "Set",
+                        selected = state.setChoice,
+                        options = state.setChoices,
+                        optionText = { it.text },
+                        onSelect = { state.chooseSet(it) },
+                        modifier = modifier,
+                    )
+                }
+            } else null,
+        )
+        FieldPairRow(
+            first = { modifier -> AbilityField(state, modifier) },
+            second = { modifier ->
+                CatalogTextField(
+                    label = "Item",
+                    value = state.item,
+                    catalog = ITEM_CATALOG,
+                    onValueSelected = { state.item = it },
+                    leadingIcon = state.item.ifBlank { null }
+                        ?.let { { DamageCalcItemIcon(it, Modifier.size(ITEM_ICON_SIZE)) } },
+                    modifier = modifier,
                 )
+            },
+        )
+        FieldPairRow(
+            first = { modifier ->
+                DropdownField(
+                    label = "Nature",
+                    selected = state.nature,
+                    options = NATURES,
+                    optionText = { it.effectDisplayName() },
+                    onSelect = { state.nature = it },
+                    modifier = modifier,
+                )
+            },
+            second = { modifier ->
+                DropdownField(
+                    label = "Status",
+                    selected = state.status,
+                    options = Status.entries,
+                    optionText = { it.displayName },
+                    onSelect = { state.status = it },
+                    modifier = modifier,
+                )
+            },
+        )
+        // the settings shown for some abilities and statuses only
+        FieldPairRow(
+            // the ability settings the source calculator shows for these abilities only
+            first = when (state.resolvedAbility) {
+                Ability.RIVALRY -> { modifier ->
+                    DropdownField(
+                        label = "Rivalry",
+                        selected = state.rivalry,
+                        options = RivalryRelation.entries,
+                        optionText = { it.displayName },
+                        onSelect = { state.rivalry = it },
+                        modifier = modifier,
+                    )
+                }
+                Ability.SUPREME_OVERLORD -> { modifier ->
+                    DropdownField(
+                        label = "Fainted Allies",
+                        selected = state.faintedAllyCount,
+                        options = FAINTED_ALLY_COUNTS.toList(),
+                        optionText = ::faintedAlliesText,
+                        onSelect = { state.faintedAllyCount = it },
+                        modifier = modifier,
+                    )
+                }
+                else -> null
+            },
+            second = if (state.status == Status.BADLY_POISONED) {
+                { modifier ->
+                    DropdownField(
+                        label = "Toxic Damage",
+                        selected = state.toxicCounter,
+                        options = TOXIC_COUNTERS.toList(),
+                        optionText = ::toxicCounterText,
+                        onSelect = { state.toxicCounter = it },
+                        modifier = modifier,
+                    )
+                }
+            } else null,
+        )
+    }
+}
+
+/**
+ * The side (Pokémon 1/2) as an overline, the pokemon's form and its types. Aligned on the sprite's side
+ */
+@Composable
+private fun PokemonHeaderTitle(state: DamageCalcPokemonState, side: DamageCalcSide) {
+    val species = ChampionsDex.speciesOrNull(state.form)
+    Column(
+        horizontalAlignment = if (side == DamageCalcSide.ATTACKER) Alignment.Start else Alignment.End,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Text(
+            side.desktopName,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(state.form.pretty, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        if (species != null) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                listOfNotNull(species.primaryType, species.secondaryType).forEach {
+                    MoveTypeImage(it, Modifier.size(HEADER_TYPE_ICON_SIZE))
+                }
             }
         }
-        // the ability settings the source calculator shows for these abilities only
-        when (state.resolvedAbility) {
-            Ability.RIVALRY -> DropdownField(
-                label = "Rivalry",
-                selected = state.rivalry,
-                options = RivalryRelation.entries,
-                optionText = { it.displayName },
-                onSelect = { state.rivalry = it },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Ability.SUPREME_OVERLORD -> DropdownField(
-                label = "Fainted Allies",
-                selected = state.faintedAllyCount,
-                options = FAINTED_ALLY_COUNTS.toList(),
-                optionText = ::faintedAlliesText,
-                onSelect = { state.faintedAllyCount = it },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            else -> {}
-        }
+    }
+}
+
+private val HEADER_TYPE_ICON_SIZE = 20.dp
+
+/**
+ * The ability, with its "ability on" toggle for the abilities the source calculator has one for
+ */
+@Composable
+private fun AbilityField(state: DamageCalcPokemonState, modifier: Modifier = Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         CatalogTextField(
-            label = "Item",
-            value = state.item,
-            catalog = ITEM_CATALOG,
-            onValueSelected = { state.item = it },
-            leadingIcon = state.item.ifBlank { null }?.let { { DamageCalcItemIcon(it, Modifier.size(ITEM_ICON_SIZE)) } },
-            modifier = Modifier.fillMaxWidth(),
+            label = "Ability",
+            value = state.ability,
+            catalog = ABILITY_CATALOG,
+            onValueSelected = { state.ability = it },
+            modifier = Modifier.weight(1f),
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            DropdownField(
-                label = "Nature",
-                selected = state.nature,
-                options = NATURES,
-                optionText = { it.effectDisplayName() },
-                onSelect = { state.nature = it },
-                modifier = Modifier.weight(1f),
-            )
-            DropdownField(
-                label = "Status",
-                selected = state.status,
-                options = Status.entries,
-                optionText = { it.displayName },
-                onSelect = { state.status = it },
-                modifier = Modifier.weight(1f),
+        if (state.hasAbilityToggle) {
+            FilterChip(
+                selected = state.isAbilityActive,
+                onClick = { state.isAbilityActive = !state.isAbilityActive },
+                label = { Text("Active", maxLines = 1, softWrap = false) },
+                // the default selected color barely stands out on the card
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                ),
             )
         }
-        if (state.status == Status.BADLY_POISONED) {
-            DropdownField(
-                label = "Toxic Damage",
-                selected = state.toxicCounter,
-                options = TOXIC_COUNTERS.toList(),
-                optionText = ::toxicCounterText,
-                onSelect = { state.toxicCounter = it },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+    }
+}
+
+/**
+ * A row of the set's grid: two fields sharing the width, a single one taking all of it, nothing without fields. Each
+ * field is given the modifier to apply
+ */
+@Composable
+private fun FieldPairRow(
+    first: (@Composable (Modifier) -> Unit)?,
+    second: (@Composable (Modifier) -> Unit)?,
+) {
+    if (first == null && second == null) return
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        first?.invoke(Modifier.weight(1f))
+        second?.invoke(Modifier.weight(1f))
     }
 }
 
