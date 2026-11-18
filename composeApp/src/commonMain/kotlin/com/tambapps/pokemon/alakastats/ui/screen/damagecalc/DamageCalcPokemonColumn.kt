@@ -242,14 +242,7 @@ private fun SetFields(state: DamageCalcPokemonState, onPasteClick: () -> Unit, m
         )
         FieldPairRow(
             first = { modifier ->
-                DropdownField(
-                    label = "Nature",
-                    selected = state.nature,
-                    options = NATURES,
-                    optionText = { it.effectDisplayName() },
-                    onSelect = { state.nature = it },
-                    modifier = modifier,
-                )
+                NatureField(state.nature, onSelect = { state.nature = it }, modifier = modifier)
             },
             second = { modifier ->
                 DropdownField(

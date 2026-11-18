@@ -42,12 +42,12 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.tambapps.pokemon.Nature
 import com.tambapps.pokemon.Stat
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.composables.ExpansionTile
@@ -61,7 +61,6 @@ import com.tambapps.pokemon.champions.data.Ability
 import com.tambapps.pokemon.alakastats.ui.composables.WheelPickerDialog
 import com.tambapps.pokemon.alakastats.ui.composables.elevatedCardGradientColors
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.abbreviation
-import com.tambapps.pokemon.alakastats.ui.screen.quizzes.displayName
 import com.tambapps.pokemon.alakastats.ui.screen.quizzes.shortLabel
 import com.tambapps.pokemon.alakastats.ui.service.FacingDirection
 import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
@@ -166,7 +165,7 @@ internal fun DamageCalcPokemonPanel(
             onClick = { showItemDialog = true },
             leadingIcon = state.item.ifBlank { null }?.let { { DamageCalcItemIcon(it, Modifier.size(ITEM_ICON_SIZE)) } },
         )
-        PropertyRow("Nature", state.nature.effectDisplayName(), onClick = { showNatureDialog = true })
+        PropertyRow("Nature", natureText(state.nature), onClick = { showNatureDialog = true })
         StatPointsTile(state, side, finalSpeed = state.finalSpeed(field, side))
         PropertyRow("Status", state.status.displayName, onClick = { showStatusDialog = true })
         if (state.status == Status.BADLY_POISONED) {
@@ -294,13 +293,9 @@ internal fun DamageCalcPokemonPanel(
         )
     }
     if (showNatureDialog) {
-        WheelPickerDialog(
-            title = "Select Nature",
-            items = NATURES,
-            initialIndex = NATURES.indexOf(state.nature).coerceAtLeast(0),
-            itemToText = { it.effectDisplayName(separator = "\n") },
-            textAlign = TextAlign.Center,
-            onPicked = { state.nature = it },
+        NatureGridDialog(
+            nature = state.nature,
+            onSelect = { state.nature = it },
             onDismissRequest = { showNatureDialog = false },
         )
     }
@@ -422,10 +417,6 @@ private fun EditWithSuggestionsDialog(
     )
 }
 
-internal fun Nature.effectDisplayName(separator: String = " ") =
-    if (isNeutral) "$displayName$separator(Neutral)"
-    else "$displayName$separator+${bonusStat?.abbreviation}/-${malusStat?.abbreviation}"
-
 @Composable
 private fun PokemonButton(state: DamageCalcPokemonState, side: DamageCalcSide, onClick: () -> Unit) {
     MyCard(
@@ -465,6 +456,15 @@ private fun PokemonButton(state: DamageCalcPokemonState, side: DamageCalcSide, o
 private fun PropertyRow(
     label: String,
     value: String,
+    onClick: () -> Unit,
+    trailingContent: (@Composable () -> Unit)? = null,
+    leadingIcon: (@Composable () -> Unit)? = null,
+) = PropertyRow(label, AnnotatedString(value), onClick, trailingContent, leadingIcon)
+
+@Composable
+private fun PropertyRow(
+    label: String,
+    value: AnnotatedString,
     onClick: () -> Unit,
     // optional content displayed after the button, e.g. a move's hit count
     trailingContent: (@Composable () -> Unit)? = null,

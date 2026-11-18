@@ -38,8 +38,6 @@ const val MAX_MOVES = 4
 // the toxic counters the source calculator offers for a badly poisoned pokemon, 1/16 to 15/16
 val TOXIC_COUNTERS = 1..15
 
-// neutral natures all have the same effect, only keep one
-val NATURES = Nature.entries.filter { !it.isNeutral || it == Nature.SERIOUS }
 
 val STATS = listOf(Stat.HP, Stat.ATTACK, Stat.DEFENSE, Stat.SPECIAL_ATTACK, Stat.SPECIAL_DEFENSE, Stat.SPEED)
 
