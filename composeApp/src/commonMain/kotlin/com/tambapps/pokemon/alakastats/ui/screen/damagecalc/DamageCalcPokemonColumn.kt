@@ -75,10 +75,10 @@ internal fun DamageCalcPokemonColumn(
     modifier: Modifier = Modifier,
 ) {
     var showPasteDialog by remember { mutableStateOf(false) }
-    MyCard(modifier = modifier, gradientBackgroundColors = cardGradientColors, border = weatherBorder(field.weather)) {
+    MyCard(modifier = modifier, gradientBackgroundColors = cardGradientColors, border = fieldEffectsBorder(field)) {
         Column(
             Modifier.typeTint(state, side, diagonalLength = TYPE_TINT_LENGTH)
-                .weatherBackground(field.weather)
+                .fieldEffectsBackground(field)
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {

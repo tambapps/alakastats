@@ -103,8 +103,8 @@ internal fun DamageCalcMobile(
                 state = pagerState,
                 userScrollEnabled = pagerSwipeEnabled,
                 verticalAlignment = Alignment.Top,
-                // the weather stays still while swiping between the pages
-                modifier = Modifier.weatherBackground(viewModel.field.weather),
+                // the weather and the terrain stay still while swiping between the pages
+                modifier = Modifier.fieldEffectsBackground(viewModel.field),
             ) { page ->
                 // the bottom padding is part of the pages (not of the list), so that swiping there switches pages
                 val pageModifier = Modifier.fillMaxWidth()
