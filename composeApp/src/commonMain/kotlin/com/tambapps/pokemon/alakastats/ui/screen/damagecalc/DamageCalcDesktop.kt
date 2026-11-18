@@ -113,13 +113,17 @@ private fun DesktopEditors(viewModel: DamageCalcViewModel, team: Teamlytics?) {
             modifier = Modifier.weight(1.15f),
         )
         // no type tint on the field, between the two pokemon
-        MyCard(modifier = Modifier.weight(0.9f), gradientBackgroundColors = cardGradientColors) {
+        MyCard(
+            modifier = Modifier.weight(0.9f),
+            gradientBackgroundColors = cardGradientColors,
+            border = weatherBorder(viewModel.field.weather),
+        ) {
             DamageCalcFieldPanel(
                 field = viewModel.field,
                 onFieldChange = { viewModel.updateField(it) },
                 onReset = { viewModel.resetField() },
                 canReset = viewModel.hasFieldState,
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.weatherBackground(viewModel.field.weather).padding(12.dp),
                 sideName = { it.desktopName },
             )
         }
