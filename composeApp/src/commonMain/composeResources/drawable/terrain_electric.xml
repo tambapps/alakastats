@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <!-- Material Symbols "bolt" (filled), Apache 2.0 -->
+  <group android:translateY="960">
+    <path
+        android:pathData="m320-80 40-280H160l360-520h80l-40 320h240L400-80h-80Z"
+        android:fillColor="#ffffff"/>
+  </group>
+</vector>

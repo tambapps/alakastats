@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -86,8 +87,14 @@ internal fun DamageCalcFieldPanel(
             Text("Reset Field", maxLines = 1, softWrap = false)
         }
         ChoiceSection("Format", BattleFormat.entries, field.format, { it.displayName }) { onFieldChange(field.copy(format = it)) }
-        ChoiceSection("Weather", WEATHERS, field.weather, { it.displayName }) { onFieldChange(field.copy(weather = it)) }
-        ChoiceSection("Terrain", Terrain.entries, field.terrain, { it.displayName }) { onFieldChange(field.copy(terrain = it)) }
+        ChoiceSection(
+            "Weather", WEATHERS, field.weather, { it.displayName },
+            choiceIcon = { WeatherIcon(it, Modifier.size(FilterChipDefaults.IconSize)) },
+        ) { onFieldChange(field.copy(weather = it)) }
+        ChoiceSection(
+            "Terrain", Terrain.entries, field.terrain, { it.displayName },
+            choiceIcon = { TerrainIcon(it, Modifier.size(FilterChipDefaults.IconSize)) },
+        ) { onFieldChange(field.copy(terrain = it)) }
         FieldSection("Global") {
             FilterChip(
                 selected = field.isGravity,
@@ -151,6 +158,8 @@ private fun <T> ChoiceSection(
     choices: List<T>,
     selected: T,
     choiceToText: (T) -> String,
+    // an icon before the text, for the choices having one (e.g. not "None")
+    choiceIcon: (@Composable (T) -> Unit)? = null,
     onSelect: (T) -> Unit
 ) {
     FieldSection(title) {
@@ -158,7 +167,8 @@ private fun <T> ChoiceSection(
             FilterChip(
                 selected = choice == selected,
                 onClick = { onSelect(choice) },
-                label = { Text(choiceToText(choice)) }
+                label = { Text(choiceToText(choice)) },
+                leadingIcon = choiceIcon?.let { { it(choice) } },
             )
         }
     }

@@ -1,6 +1,17 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
+import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.terrain_electric
+import alakastats.composeapp.generated.resources.terrain_grassy
+import alakastats.composeapp.generated.resources.terrain_misty
+import alakastats.composeapp.generated.resources.terrain_psychic
+import alakastats.composeapp.generated.resources.weather_rain
+import alakastats.composeapp.generated.resources.weather_sand
+import alakastats.composeapp.generated.resources.weather_snow
+import alakastats.composeapp.generated.resources.weather_sun
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -28,6 +39,8 @@ import com.tambapps.pokemon.champions.engine.Battlefield
 import com.tambapps.pokemon.champions.engine.Terrain
 import com.tambapps.pokemon.champions.engine.Weather
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.floor
@@ -69,6 +82,42 @@ private fun terrainColor(terrain: Terrain): Color? {
         Terrain.PSYCHIC -> if (dark) Color(0xFFCE93D8) else Color(0xFF8E24AA)
         Terrain.NONE -> null
     }
+}
+
+/**
+ * The weather's icon, in the color of its effect. Nothing without weather
+ */
+@Composable
+internal fun WeatherIcon(weather: Weather, modifier: Modifier = Modifier) {
+    val icon = when (weather) {
+        Weather.SUN -> Res.drawable.weather_sun
+        Weather.RAIN -> Res.drawable.weather_rain
+        Weather.SNOW -> Res.drawable.weather_snow
+        Weather.SAND -> Res.drawable.weather_sand
+        Weather.NONE, Weather.HAIL -> return
+    }
+    FieldEffectIcon(icon, weatherColor(weather), modifier)
+}
+
+/**
+ * The terrain's icon, in the color of its effect. Nothing without terrain
+ */
+@Composable
+internal fun TerrainIcon(terrain: Terrain, modifier: Modifier = Modifier) {
+    val icon = when (terrain) {
+        Terrain.ELECTRIC -> Res.drawable.terrain_electric
+        Terrain.GRASSY -> Res.drawable.terrain_grassy
+        Terrain.MISTY -> Res.drawable.terrain_misty
+        Terrain.PSYCHIC -> Res.drawable.terrain_psychic
+        Terrain.NONE -> return
+    }
+    FieldEffectIcon(icon, terrainColor(terrain), modifier)
+}
+
+@Composable
+private fun FieldEffectIcon(icon: DrawableResource, color: Color?, modifier: Modifier) {
+    // the text next to it names it
+    Icon(painterResource(icon), contentDescription = null, tint = color ?: LocalContentColor.current, modifier = modifier)
 }
 
 /**
