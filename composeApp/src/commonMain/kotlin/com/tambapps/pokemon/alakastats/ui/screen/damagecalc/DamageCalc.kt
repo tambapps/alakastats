@@ -49,6 +49,7 @@ import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.alakastats.ui.theme.LocalIsCompact
 import com.tambapps.pokemon.alakastats.ui.theme.isDarkThemeEnabled
 import com.tambapps.pokemon.alakastats.util.copyToClipboard
+import com.tambapps.pokemon.util.MegaUtils.isMegaStone
 import com.tambapps.pokemon.champions.data.ChampionsDex
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -245,7 +246,8 @@ internal fun DamageCalcItemIcon(item: String, modifier: Modifier = Modifier) {
 }
 
 /**
- * The sprite of the pokemon with its held item's icon in the bottom corner, like in the team previews
+ * The sprite of the pokemon with its held item's icon in the bottom corner, like in the team previews. Not for a mega
+ * stone, the mega switch already showing it
  */
 @Composable
 internal fun DamageCalcPokemonSprite(
@@ -255,7 +257,9 @@ internal fun DamageCalcPokemonSprite(
 ) {
     Box(modifier) {
         PokemonSprite(state.form, Modifier.fillMaxSize(), facingDirection = facingDirection)
-        DamageCalcItemIcon(state.item, Modifier.align(Alignment.BottomEnd).fillMaxSize(0.4f))
+        if (state.item.isNotBlank() && !ItemName(state.item).isMegaStone) {
+            DamageCalcItemIcon(state.item, Modifier.align(Alignment.BottomEnd).fillMaxSize(0.4f))
+        }
     }
 }
 
