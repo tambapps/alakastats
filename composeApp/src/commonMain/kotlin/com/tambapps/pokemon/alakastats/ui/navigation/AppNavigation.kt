@@ -5,6 +5,7 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -47,6 +48,7 @@ import com.tambapps.pokemon.alakastats.ui.screen.quizzes.SpeedStatQuizSetupScree
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsScreen
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.TeamlyticsTab
 import com.tambapps.pokemon.alakastats.ui.screen.teamlytics.detail.PokemonDetailsScreen
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
@@ -206,6 +208,13 @@ fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (Nav
     val backInterceptors = remember { BackInterceptors() }
     CompositionLocalProvider(LocalAppNavigator provides navigator, LocalBackInterceptors provides backInterceptors) {
         backStackEffect(backStack)
+        LaunchedEffect(navigator) {
+            // the shortcut the app was opened with, at launch or while running
+            AppShortcuts.pending.filterNotNull().collect { shortcut ->
+                navigator.navigateToTopLevel(shortcut.route)
+                AppShortcuts.consume(shortcut)
+            }
+        }
         WithAppNavigationDrawer(backStack, navigator) {
             NavDisplay(
                 backStack = backStack,

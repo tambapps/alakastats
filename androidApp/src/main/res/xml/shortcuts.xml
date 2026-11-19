@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The launcher shortcuts (long press on the app's icon, or dragged to the home screen). Their "shortcut" extra is the
+  id of an AppShortcut, read by MainActivity
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="damage-calc"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_damage_calc"
+        android:shortcutShortLabel="@string/shortcut_damage_calc_short"
+        android:shortcutLongLabel="@string/shortcut_damage_calc_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.tambapps.pokemon.alakastats"
+            android:targetClass="com.tambapps.pokemon.alakastats.MainActivity">
+            <extra android:name="shortcut" android:value="damage-calc" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="showdown-replays"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_showdown_replays"
+        android:shortcutShortLabel="@string/shortcut_showdown_replays_short"
+        android:shortcutLongLabel="@string/shortcut_showdown_replays_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.tambapps.pokemon.alakastats"
+            android:targetClass="com.tambapps.pokemon.alakastats.MainActivity">
+            <extra android:name="shortcut" android:value="showdown-replays" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="pokedex"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_pokedex"
+        android:shortcutShortLabel="@string/shortcut_pokedex_short"
+        android:shortcutLongLabel="@string/shortcut_pokedex_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.tambapps.pokemon.alakastats"
+            android:targetClass="com.tambapps.pokemon.alakastats.MainActivity">
+            <extra android:name="shortcut" android:value="pokedex" />
+        </intent>
+    </shortcut>
+</shortcuts>

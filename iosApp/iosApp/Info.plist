@@ -8,5 +8,32 @@
 	<false/>
 	<key>GoogleIosClientId</key>
 	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>damage-calc</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Damage Calc</string>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>plus.forwardslash.minus</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>showdown-replays</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Replays</string>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>play.fill</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemType</key>
+			<string>pokedex</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Pokédex</string>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>book.closed.fill</string>
+		</dict>
+	</array>
 </dict>
 </plist>

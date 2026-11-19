@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- for the launcher shortcuts of xml/shortcuts.xml -->
+<resources>
+    <!-- the app theme's primary color (light) -->
+    <color name="shortcut_background">#6D5E0F</color>
+
+    <string name="shortcut_damage_calc_short">Damage Calc</string>
+    <string name="shortcut_damage_calc_long">Damage calculator</string>
+    <string name="shortcut_showdown_replays_short">Replays</string>
+    <string name="shortcut_showdown_replays_long">Showdown replays</string>
+    <string name="shortcut_pokedex_short">Pokédex</string>
+    <string name="shortcut_pokedex_long">Pokédex</string>
+</resources>

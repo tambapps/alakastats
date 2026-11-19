@@ -1,0 +1,9 @@
+<!-- Android 7.1, without adaptive icons: a round icon. Android 8+ uses the adaptive one of drawable-v26 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/shortcut_background" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/ic_shortcut_showdown_replays_foreground" />
+</layer-list>
