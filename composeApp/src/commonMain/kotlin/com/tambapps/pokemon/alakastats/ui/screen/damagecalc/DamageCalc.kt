@@ -4,6 +4,7 @@ import alakastats.composeapp.generated.resources.Res
 import alakastats.composeapp.generated.resources.arrow_forward
 import alakastats.composeapp.generated.resources.content_copy
 import alakastats.composeapp.generated.resources.swap_horiz
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -84,7 +85,8 @@ internal fun DamageResultHeader(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        colors = resultCardColors(),
+        border = resultCardBorder(),
     ) {
         Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -92,6 +94,7 @@ internal fun DamageResultHeader(
                     calcTitle(viewModel, viewModel.selectedMoveSide),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -157,7 +160,7 @@ internal fun CalcPokemonSprites(viewModel: DamageCalcViewModel) {
         Icon(
             painter = painterResource(Res.drawable.arrow_forward),
             contentDescription = "attacks",
-            tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(14.dp),
         )
         PokemonSprite(target.form, Modifier.size(SMALL_SPRITE_SIZE), facingDirection = FacingDirection.LEFT)
@@ -231,6 +234,19 @@ private fun damageBarColors() = if (isDarkThemeEnabled()) {
 } else {
     DamageBarColors(alwaysLeft = Color(0xFF4CAF50), dependsOnRoll = Color(0xFFFFA726), surelyLost = Color(0xFFC62828))
 }
+
+/**
+ * The background of the result cards (mobile, desktop, compact): neutral in both themes, so that the damage bar's
+ * colors stand out and the card does from the field effects (Sun, Sand, Electric being close to the theme's gold)
+ */
+@Composable
+internal fun resultCardColors() = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+
+/**
+ * The border of the result cards, gold like their title and the selected chips, in both themes
+ */
+@Composable
+internal fun resultCardBorder() = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
 
 internal val MOVE_TYPE_ICON_SIZE = 24.dp
 internal val ITEM_ICON_SIZE = 28.dp

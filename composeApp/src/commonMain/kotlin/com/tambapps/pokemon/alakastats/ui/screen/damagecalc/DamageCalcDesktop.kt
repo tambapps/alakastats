@@ -154,7 +154,8 @@ private fun DesktopCompactResult(viewModel: DamageCalcViewModel) {
     val result = viewModel.result
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = PADDING, vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors = resultCardColors(),
+        border = resultCardBorder(),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Row(
@@ -218,7 +219,8 @@ private fun DesktopCompactResult(viewModel: DamageCalcViewModel) {
 private fun DesktopResultCard(viewModel: DamageCalcViewModel, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        colors = resultCardColors(),
+        border = resultCardBorder(),
     ) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             val result = viewModel.result
@@ -227,6 +229,7 @@ private fun DesktopResultCard(viewModel: DamageCalcViewModel, modifier: Modifier
                     calcTitle(viewModel, viewModel.selectedMoveSide),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -250,7 +253,7 @@ private fun DesktopResultCard(viewModel: DamageCalcViewModel, modifier: Modifier
                 SideMoveResults(viewModel, DamageCalcSide.ATTACKER, Modifier.weight(1f))
                 // separating the two pokemon, like the field's sides
                 VerticalDivider(
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f),
+                    color = MaterialTheme.colorScheme.outlineVariant,
                     modifier = Modifier.padding(horizontal = MOVE_HALVES_SPACING / 2),
                 )
                 SideMoveResults(viewModel, DamageCalcSide.DEFENDER, Modifier.weight(1f))
@@ -270,7 +273,7 @@ private fun SideMoveResults(viewModel: DamageCalcViewModel, side: DamageCalcSide
         Text(
             "${pokemon.form.pretty}'s moves",
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         moveResults.indices.chunked(MOVES_PER_ROW).forEach { indexes ->
             // cards of equal height, even for a move without result (shorter)

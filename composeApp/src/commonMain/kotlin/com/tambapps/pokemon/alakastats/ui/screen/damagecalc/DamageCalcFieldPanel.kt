@@ -176,7 +176,7 @@ private fun <T> ChoiceSection(
 
 /**
  * A chip of the panel, telling the selected ones apart over the field effects drawn behind: opaque when not selected,
- * in the result card's dark gold with a gold border when selected (dark enough for the effects' colored icons)
+ * in the theme's dark gold with a gold border when selected (dark enough for the effects' colored icons)
  */
 @Composable
 private fun FieldChip(
@@ -197,7 +197,7 @@ private fun FieldChip(
 
 /**
  * The colors of the calc's toggle chips (the field panel's, the ability's "Active"): opaque when not selected, in the
- * result card's dark gold when selected
+ * theme's dark gold (primaryContainer) when selected
  */
 @Composable
 internal fun calcChipColors() = FilterChipDefaults.filterChipColors(

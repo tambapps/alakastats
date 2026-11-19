@@ -150,7 +150,8 @@ private fun CompactDamageResult(viewModel: DamageCalcViewModel) {
         Modifier.fillMaxWidth()
             // back to the full result, like clicking the screen's title
             .clickable { viewModel.scrollToTopSignal.emit() }
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            // like the result card, without its border: a line across the whole screen, on top of the pinned header
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(horizontal = 12.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -164,14 +165,14 @@ private fun CompactDamageResult(viewModel: DamageCalcViewModel) {
                         maxLines = 1,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         result.koChanceText,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 is DamageCalcResult.Error -> Text(
@@ -180,7 +181,7 @@ private fun CompactDamageResult(viewModel: DamageCalcViewModel) {
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.error,
                 )
             }
         }

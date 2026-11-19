@@ -546,7 +546,7 @@ private fun PropertyTile(
 
 /**
  * A small pill toggling whether the ability is active, fitting on the line of a tile's label. Styled like the calc's
- * toggle chips (see [calcChipColors]): in the result card's dark gold with a gold border when active
+ * toggle chips (see [calcChipColors]): in the theme's dark gold with a gold border when active
  */
 @Composable
 private fun ActiveToggle(isActive: Boolean, onClick: () -> Unit) {
