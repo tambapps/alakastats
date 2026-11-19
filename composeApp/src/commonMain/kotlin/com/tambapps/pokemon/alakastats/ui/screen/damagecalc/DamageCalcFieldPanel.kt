@@ -96,15 +96,15 @@ internal fun DamageCalcFieldPanel(
             choiceIcon = { TerrainIcon(it, Modifier.size(FilterChipDefaults.IconSize)) },
         ) { onFieldChange(field.copy(terrain = it)) }
         FieldSection("Global") {
-            FilterChip(
+            FieldChip(
                 selected = field.isGravity,
                 onClick = { onFieldChange(field.copy(isGravity = !field.isGravity)) },
-                label = { Text("Gravity") }
+                text = "Gravity",
             )
-            FilterChip(
+            FieldChip(
                 selected = field.isFairyAura,
                 onClick = { onFieldChange(field.copy(isFairyAura = !field.isFairyAura)) },
-                label = { Text("Fairy Aura") }
+                text = "Fairy Aura",
             )
         }
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
@@ -138,16 +138,16 @@ private fun SideConditionsColumn(
     Column(modifier, horizontalAlignment = alignment) {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         SIDE_CONDITION_TOGGLES.forEach { toggle ->
-            FilterChip(
+            FieldChip(
                 selected = toggle.isActive(conditions),
                 onClick = { onConditionsChange(toggle.toggle(conditions)) },
-                label = { Text(toggle.displayName) }
+                text = toggle.displayName,
             )
         }
-        FilterChip(
+        FieldChip(
             selected = conditions.spikesLayers > 0,
             onClick = { onConditionsChange(conditions.withNextSpikesLayer()) },
-            label = { Text(spikesChipText(conditions.spikesLayers)) }
+            text = spikesChipText(conditions.spikesLayers),
         )
     }
 }
@@ -164,14 +164,45 @@ private fun <T> ChoiceSection(
 ) {
     FieldSection(title) {
         choices.forEach { choice ->
-            FilterChip(
+            FieldChip(
                 selected = choice == selected,
                 onClick = { onSelect(choice) },
-                label = { Text(choiceToText(choice)) },
+                text = choiceToText(choice),
                 leadingIcon = choiceIcon?.let { { it(choice) } },
             )
         }
     }
+}
+
+/**
+ * A chip of the panel, telling the selected ones apart over the field effects drawn behind: opaque when not selected,
+ * in the result card's dark gold with a gold border when selected (dark enough for the effects' colored icons)
+ */
+@Composable
+private fun FieldChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    text: String,
+    leadingIcon: (@Composable () -> Unit)? = null,
+) {
+    val colors = MaterialTheme.colorScheme
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(text, fontWeight = if (selected) FontWeight.Bold else null) },
+        leadingIcon = leadingIcon,
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = colors.surface,
+            selectedContainerColor = colors.primaryContainer,
+            selectedLabelColor = colors.onPrimaryContainer,
+        ),
+        border = FilterChipDefaults.filterChipBorder(
+            enabled = true,
+            selected = selected,
+            selectedBorderColor = colors.primary,
+            selectedBorderWidth = 1.dp,
+        ),
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
