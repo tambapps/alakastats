@@ -455,26 +455,35 @@ private fun LayerScope.sand(color: Color, particles: List<Particle>, density: Fl
     val glow = topGlow(color, alpha = 0.10f, heightFraction = 0.6f)
     val count = particleCount(perArea = 80f, max = 90, density)
     val waver = 4 * dp
-    val stroke = 1.5f * dp
     return { seconds ->
         drawRect(haze)
         drawRect(glow)
         for (i in 0 until count) {
             val p = particles[i]
-            val length = (3 + p.size * 7) * dp
-            val width = size.width + length
-            val x = wrap(p.x * width, (160 + p.speed * 180) * dp, seconds, width) - length
+            val isGust = i % SAND_GUST_EVERY == 0
+            // grains: ovals stretched along the wind, the faster the longer (2 to 3.5 times their thickness, the round
+            // caps included). Gusts: long faint streaks, faster, for the storm
+            val thickness = (if (isGust) 1f else 1.5f + p.size * 1.5f) * dp
+            val length = if (isGust) (14 + p.size * 16) * dp else thickness * (1 + p.speed * 1.5f)
+            val speed = (if (isGust) 280 + p.speed * 160 else 160 + p.speed * 180) * dp
+            val alpha = if (isGust) 0.12f + p.size * 0.1f else 0.35f + p.size * 0.35f
+            val extent = length + thickness
+            val width = size.width + extent
+            val x = wrap(p.x * width, speed, seconds, width) - extent + thickness / 2
             val y = p.y * size.height + sin((seconds / (1 + p.phase) + p.phase) * 2 * PI).toFloat() * waver
             drawLine(
-                color.copy(alpha = 0.3f + p.size * 0.3f),
+                color.copy(alpha = alpha),
                 start = Offset(x, y),
                 end = Offset(x + length, y),
-                strokeWidth = stroke,
+                strokeWidth = thickness,
                 cap = StrokeCap.Round,
             )
         }
     }
 }
+
+/** One particle in this many is a gust's streak rather than a grain */
+private const val SAND_GUST_EVERY = 10
 
 // ---------------------------------------------------------------------------------------------------- terrains
 
