@@ -14,15 +14,25 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.CacheDrawScope
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.draw
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -140,41 +150,117 @@ internal fun fieldEffectsBorder(field: Battlefield): BorderStroke? {
 }
 
 /**
- * The weather and the terrain of [field] drawn behind the content. Nothing without weather nor terrain.
- *
- * What doesn't move (gradients, shapes, the number of particles) is only built again when the size changes, each
- * update only placing the particles
+ * The field effects shared by the elements drawing them: one clock and the same particles, so that an element drawing
+ * part of the scene ([fieldEffectsWindow]) continues the one behind it ([fieldEffectsScene]) without a seam
+ */
+@Stable
+internal class FieldEffectsScene(val time: State<Float>) {
+    // different particles for each layer, so that they don't line up
+    internal val weatherParticles = particles(seed = 17)
+    internal val terrainParticles = particles(seed = 4241)
+    // of the element drawing the whole scene, for the windows onto it
+    var size by mutableStateOf(Size.Zero)
+    var positionInRoot by mutableStateOf(Offset.Zero)
+}
+
+/**
+ * The scene a screen draws behind all of the calc (e.g. its top bar too), for the calc not to draw one of its own
+ */
+internal val LocalFieldEffectsScene = staticCompositionLocalOf<FieldEffectsScene?> { null }
+
+/**
+ * The scene of [field]'s effects, its clock only running with weather or terrain
  */
 @Composable
-internal fun Modifier.fieldEffectsBackground(field: Battlefield): Modifier {
+internal fun rememberFieldEffectsScene(field: Battlefield): FieldEffectsScene {
+    val framesPerSecond = when {
+        // the rain's drops, much faster than the other particles, look choppy at a lower rate
+        field.weather == Weather.RAIN -> FAST_FRAMES_PER_SECOND
+        field.weather != Weather.NONE || field.terrain != Terrain.NONE -> FRAMES_PER_SECOND
+        else -> null
+    }
+    val time = rememberElapsedSeconds(framesPerSecond)
+    return remember { FieldEffectsScene(time) }
+}
+
+/**
+ * The weather and the terrain of [field] drawn behind the content, with a scene of its own. Nothing without weather
+ * nor terrain
+ */
+@Composable
+internal fun Modifier.fieldEffectsBackground(field: Battlefield): Modifier =
+    fieldEffectsScene(rememberFieldEffectsScene(field), field)
+
+/**
+ * The whole [scene] drawn behind the content, its size being the scene's
+ */
+@Composable
+internal fun Modifier.fieldEffectsScene(scene: FieldEffectsScene, field: Battlefield): Modifier =
+    onGloballyPositioned {
+        scene.size = it.size.toSize()
+        scene.positionInRoot = it.positionInRoot()
+    }.drawFieldEffects(scene, field, sceneSize = { size }, offset = { Offset.Zero })
+
+/**
+ * The part of [scene] under this element drawn behind its content, for an opaque element over the scene (e.g. a pinned
+ * header hiding what scrolls under it) to show the scene as if it were see-through
+ */
+@Composable
+internal fun Modifier.fieldEffectsWindow(scene: FieldEffectsScene, field: Battlefield): Modifier {
+    var positionInRoot by remember { mutableStateOf(Offset.Zero) }
+    return onGloballyPositioned { positionInRoot = it.positionInRoot() }
+        .drawFieldEffects(scene, field, sceneSize = { scene.size }, offset = { positionInRoot - scene.positionInRoot })
+}
+
+/**
+ * What doesn't move (gradients, shapes, the number of particles) is only built again when the scene's size changes,
+ * each update only placing the particles
+ *
+ * @param sceneSize the size the effects are drawn for, read when building the cache
+ * @param offset where this element is in the scene, read when drawing
+ */
+@Composable
+private fun Modifier.drawFieldEffects(
+    scene: FieldEffectsScene,
+    field: Battlefield,
+    sceneSize: CacheDrawScope.() -> Size,
+    offset: () -> Offset,
+): Modifier {
     val weather = field.weather
     val terrain = field.terrain
     val weatherColor = weatherColor(weather)
     val terrainColor = terrainColor(terrain)
     if (weatherColor == null && terrainColor == null) return this
-    // different particles for each layer, so that they don't line up
-    val weatherParticles = remember { particles(seed = 17) }
-    val terrainParticles = remember { particles(seed = 4241) }
-    // the rain's drops, much faster than the other particles, look choppy at a lower rate
-    val time = rememberElapsedSeconds(
-        framesPerSecond = if (weather == Weather.RAIN) FAST_FRAMES_PER_SECOND else FRAMES_PER_SECOND
-    )
     return drawWithCache {
+        val size = sceneSize()
+        if (size.isEmpty()) return@drawWithCache onDrawBehind {}
+        val layerScope = LayerScope(size, this)
         // fewer particles in each layer when both are on, for the whole to stay readable
         val density = if (weatherColor != null && terrainColor != null) COMBINED_DENSITY else 1f
-        val weatherLayer = weatherColor?.let { weatherLayer(weather, it, weatherParticles, density) }
-        val terrainLayer = terrainColor?.let { terrainLayer(terrain, it, terrainParticles, density) }
+        val weatherLayer = weatherColor?.let { layerScope.weatherLayer(weather, it, scene.weatherParticles, density) }
+        val terrainLayer = terrainColor?.let { layerScope.terrainLayer(terrain, it, scene.terrainParticles, density) }
         onDrawBehind {
-            // read here, so that only the drawing is redone on each update
-            val seconds = time.value
-            // the drops and flakes start above the top
+            // read here, so that only the drawing is redone on each update or move
+            val seconds = scene.time.value
+            val (x, y) = offset()
+            // in this element's bounds only, the drops and flakes starting above the top
             clipRect {
-                terrainLayer?.invoke(this, seconds)
-                weatherLayer?.invoke(this, seconds)
+                translate(-x, -y) {
+                    // drawn as for the whole scene
+                    draw(this, layoutDirection, drawContext.canvas, size) {
+                        terrainLayer?.invoke(this, seconds)
+                        weatherLayer?.invoke(this, seconds)
+                    }
+                }
             }
         }
     }
 }
+
+/**
+ * What the layers are built with: the size of the scene, which can differ from the one of the element drawing them
+ */
+private class LayerScope(val size: Size, density: Density) : Density by density
 
 private const val COMBINED_DENSITY = 0.6f
 
@@ -186,7 +272,7 @@ private typealias Layer = DrawScope.(seconds: Float) -> Unit
 /**
  * A particle's random traits, each between 0 and 1, the layers turning them into positions, speeds and sizes
  */
-private class Particle(random: Random) {
+internal class Particle(random: Random) {
     val x = random.nextFloat()
     val y = random.nextFloat()
     val size = random.nextFloat()
@@ -203,11 +289,13 @@ private const val MAX_PARTICLES = 120
  * every frame, especially on 120 Hz screens. Wrapping every hour to keep the float's precision
  */
 @Composable
-private fun rememberElapsedSeconds(framesPerSecond: Int): State<Float> {
+private fun rememberElapsedSeconds(framesPerSecond: Int?): State<Float> {
     val time = remember { mutableFloatStateOf(0f) }
     // a bit less than a frame's duration, the wait for the next frame making up the rest
-    val delayMillis = (1000L / framesPerSecond - 8).coerceAtLeast(0)
+    val delayMillis = framesPerSecond?.let { (1000L / it - 8).coerceAtLeast(0) }
     LaunchedEffect(delayMillis) {
+        // stopped without anything to animate
+        if (delayMillis == null) return@LaunchedEffect
         val start = withFrameNanos { it }
         while (true) {
             // no frame is asked for while waiting, the screen staying still in between
@@ -226,7 +314,7 @@ private const val FAST_FRAMES_PER_SECOND = 60
  * How many particles for the size, [perArea] being the side (in dp) of the square one particle has, so that big and
  * small cards look as busy
  */
-private fun CacheDrawScope.particleCount(perArea: Float, max: Int, density: Float): Int {
+private fun LayerScope.particleCount(perArea: Float, max: Int, density: Float): Int {
     val side = perArea.dp.toPx()
     return (size.width * size.height / (side * side) * density).toInt().coerceIn(MIN_PARTICLES, max)
 }
@@ -249,7 +337,7 @@ private fun hash(value: Float, n: Int): Float {
 private fun pulse(seconds: Float, period: Float, phase: Float): Float =
     (sin((seconds / period + phase) * 2 * PI).toFloat() + 1f) / 2f
 
-private fun CacheDrawScope.topGlow(color: Color, alpha: Float, heightFraction: Float) = Brush.verticalGradient(
+private fun LayerScope.topGlow(color: Color, alpha: Float, heightFraction: Float) = Brush.verticalGradient(
     listOf(color.copy(alpha = alpha), Color.Transparent),
     startY = 0f,
     endY = size.height * heightFraction,
@@ -257,7 +345,7 @@ private fun CacheDrawScope.topGlow(color: Color, alpha: Float, heightFraction: F
 
 // ---------------------------------------------------------------------------------------------------- weathers
 
-private fun CacheDrawScope.weatherLayer(weather: Weather, color: Color, particles: List<Particle>, density: Float): Layer? =
+private fun LayerScope.weatherLayer(weather: Weather, color: Color, particles: List<Particle>, density: Float): Layer? =
     when (weather) {
         Weather.SUN -> sun(color, particles, density)
         Weather.RAIN -> rain(color, particles, density)
@@ -269,7 +357,7 @@ private fun CacheDrawScope.weatherLayer(weather: Weather, color: Color, particle
 /**
  * A warm glow from the top, slowly turning rays and embers rising
  */
-private fun CacheDrawScope.sun(color: Color, particles: List<Particle>, density: Float): Layer {
+private fun LayerScope.sun(color: Color, particles: List<Particle>, density: Float): Layer {
     val dp = 1.dp.toPx()
     val center = Offset(size.width / 2f, -size.width * 0.1f)
     val radius = maxOf(size.width, size.height) * 0.9f
@@ -315,7 +403,7 @@ private const val SUN_RAY_DEGREES_PER_SECOND = 2f
 /**
  * Drops falling fast, slightly slanted
  */
-private fun CacheDrawScope.rain(color: Color, particles: List<Particle>, density: Float): Layer {
+private fun LayerScope.rain(color: Color, particles: List<Particle>, density: Float): Layer {
     val dp = 1.dp.toPx()
     val glow = topGlow(color, alpha = 0.12f, heightFraction = 0.5f)
     val count = particleCount(perArea = 70f, max = MAX_PARTICLES, density)
@@ -346,7 +434,7 @@ private const val RAIN_SLANT = 0.25f
 /**
  * Flakes of various sizes falling slowly and drifting from side to side
  */
-private fun CacheDrawScope.snow(color: Color, particles: List<Particle>, density: Float): Layer {
+private fun LayerScope.snow(color: Color, particles: List<Particle>, density: Float): Layer {
     val dp = 1.dp.toPx()
     val glow = topGlow(color, alpha = 0.08f, heightFraction = 0.5f)
     val count = particleCount(perArea = 85f, max = 80, density)
@@ -369,7 +457,7 @@ private fun CacheDrawScope.snow(color: Color, particles: List<Particle>, density
 /**
  * Grains blown fast from left to right, wavering a little, in an ochre haze
  */
-private fun CacheDrawScope.sand(color: Color, particles: List<Particle>, density: Float): Layer {
+private fun LayerScope.sand(color: Color, particles: List<Particle>, density: Float): Layer {
     val dp = 1.dp.toPx()
     val haze = color.copy(alpha = 0.06f)
     val glow = topGlow(color, alpha = 0.10f, heightFraction = 0.6f)
@@ -398,7 +486,7 @@ private fun CacheDrawScope.sand(color: Color, particles: List<Particle>, density
 
 // ---------------------------------------------------------------------------------------------------- terrains
 
-private fun CacheDrawScope.terrainLayer(terrain: Terrain, color: Color, particles: List<Particle>, density: Float): Layer? {
+private fun LayerScope.terrainLayer(terrain: Terrain, color: Color, particles: List<Particle>, density: Float): Layer? {
     val glow = bottomCornersGlow(color)
     val layer = when (terrain) {
         Terrain.ELECTRIC -> electric(color, particles, density)
@@ -416,7 +504,7 @@ private fun CacheDrawScope.terrainLayer(terrain: Terrain, color: Color, particle
 /**
  * The terrain's glow, from the two bottom corners
  */
-private fun CacheDrawScope.bottomCornersGlow(color: Color): DrawScope.() -> Unit {
+private fun LayerScope.bottomCornersGlow(color: Color): DrawScope.() -> Unit {
     val radius = size.width * 0.7f
     val colors = listOf(color.copy(alpha = 0.16f), Color.Transparent)
     val left = Brush.radialGradient(colors, Offset(0f, size.height), radius)
@@ -430,7 +518,7 @@ private fun CacheDrawScope.bottomCornersGlow(color: Color): DrawScope.() -> Unit
 /**
  * Small zigzag arcs, each flashing for an instant at a random place, then somewhere else a bit later
  */
-private fun CacheDrawScope.electric(color: Color, particles: List<Particle>, density: Float): Layer {
+private fun LayerScope.electric(color: Color, particles: List<Particle>, density: Float): Layer {
     val dp = 1.dp.toPx()
     val count = particleCount(perArea = 120f, max = 40, density)
     val stroke = 1.5f * dp
@@ -470,7 +558,7 @@ private const val SPARK_SEGMENTS = 4
 /**
  * Leaves floating and twirling slowly, with some pollen rising
  */
-private fun CacheDrawScope.grassy(color: Color, particles: List<Particle>, density: Float): Layer {
+private fun LayerScope.grassy(color: Color, particles: List<Particle>, density: Float): Layer {
     val dp = 1.dp.toPx()
     val leaves = particleCount(perArea = 130f, max = 35, density)
     val pollen = particleCount(perArea = 140f, max = 30, density)
@@ -508,7 +596,7 @@ private fun CacheDrawScope.grassy(color: Color, particles: List<Particle>, densi
 /**
  * Soft patches of mist drifting slowly, with some twinkling glitters
  */
-private fun CacheDrawScope.misty(color: Color, particles: List<Particle>, density: Float): Layer {
+private fun LayerScope.misty(color: Color, particles: List<Particle>, density: Float): Layer {
     val dp = 1.dp.toPx()
     // one gradient for all the patches, scaled to each one's size
     val patchRadius = 100 * dp
@@ -543,7 +631,7 @@ private fun CacheDrawScope.misty(color: Color, particles: List<Particle>, densit
 /**
  * Rings spreading from random places, each fading as it grows, with some motes pulsing in place
  */
-private fun CacheDrawScope.psychic(color: Color, particles: List<Particle>, density: Float): Layer {
+private fun LayerScope.psychic(color: Color, particles: List<Particle>, density: Float): Layer {
     val dp = 1.dp.toPx()
     val ripples = particleCount(perArea = 170f, max = 16, density)
     val motes = particleCount(perArea = 130f, max = 30, density)

@@ -6,12 +6,14 @@ import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -30,12 +32,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.theme.teamlyticsTabPaddingBottom
+import com.tambapps.pokemon.champions.engine.Battlefield
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -71,8 +75,13 @@ internal fun DamageCalcMobile(
         }
     }
 
+    // one scene for the whole screen, staying still while scrolling, so that the effects have no seam between the
+    // pinned header and the rest: the screen's when it draws one behind its top bar too, else this list's
+    val screenFieldEffects = LocalFieldEffectsScene.current
+    val fieldEffects = screenFieldEffects ?: rememberFieldEffectsScene(viewModel.field)
     LazyColumn(
-        modifier.fillMaxSize(),
+        modifier.fillMaxSize()
+            .then(if (screenFieldEffects == null) Modifier.fieldEffectsScene(fieldEffects, viewModel.field) else Modifier),
         state = listState,
     ) {
         item {
@@ -90,21 +99,22 @@ internal fun DamageCalcMobile(
                 Modifier.fillMaxWidth()
                     .onSizeChanged { itemHeights[STICKY_HEADER_ITEM_INDEX] = it.height }
                     .background(MaterialTheme.colorScheme.background)
+                    // opaque to hide what scrolls under it, showing the screen's field effects as if it weren't
+                    .fieldEffectsWindow(fieldEffects, viewModel.field)
             ) {
                 AnimatedVisibility(visible = isResultHeaderScrolledAway) {
                     CompactDamageResult(viewModel)
                 }
                 MoveChips(viewModel, Modifier.padding(horizontal = 8.dp))
-                PageTabRow(pagerState, scope)
+                PageTabRow(pagerState, scope, viewModel.field)
             }
         }
         item {
             HorizontalPager(
                 state = pagerState,
                 userScrollEnabled = pagerSwipeEnabled,
+                // no background: the screen's field effects show through, still while swiping between the pages
                 verticalAlignment = Alignment.Top,
-                // the weather and the terrain stay still while swiping between the pages
-                modifier = Modifier.fieldEffectsBackground(viewModel.field),
             ) { page ->
                 // the bottom padding is part of the pages (not of the list), so that swiping there switches pages
                 val pageModifier = Modifier.fillMaxWidth()
@@ -178,14 +188,30 @@ private fun CompactDamageResult(viewModel: DamageCalcViewModel) {
 }
 
 @Composable
-private fun PageTabRow(pagerState: PagerState, scope: CoroutineScope) {
-    SecondaryTabRow(selectedTabIndex = pagerState.currentPage) {
+private fun PageTabRow(pagerState: PagerState, scope: CoroutineScope, field: Battlefield) {
+    SecondaryTabRow(
+        selectedTabIndex = pagerState.currentPage,
+        // the field effects drawn behind the header showing through. No line in their colors under the tabs: going
+        // from the weather's under Attacker to the terrain's under Defender, it would look like each applies to one side
+        containerColor = Color.Transparent,
+    ) {
         PAGES.forEachIndexed { index, title ->
             Tab(
                 selected = pagerState.currentPage == index,
                 onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                text = { Text(title) }
+                text = {
+                    // the active weather and terrain, seen from any page
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        if (index == FIELD_PAGE) {
+                            WeatherIcon(field.weather, Modifier.size(TAB_ICON_SIZE))
+                            TerrainIcon(field.terrain, Modifier.size(TAB_ICON_SIZE))
+                        }
+                        Text(title, maxLines = 1, softWrap = false)
+                    }
+                }
             )
         }
     }
 }
+
+private val TAB_ICON_SIZE = 18.dp

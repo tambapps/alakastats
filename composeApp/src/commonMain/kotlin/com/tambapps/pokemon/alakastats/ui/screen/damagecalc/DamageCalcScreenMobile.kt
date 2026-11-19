@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -20,9 +21,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun DamageCalcScreenMobile(viewModel: DamageCalcViewModel) {
+    // the field effects behind the whole screen, the top bar and the system bars' area included
+    val fieldEffects = rememberFieldEffectsScene(viewModel.field)
     Column(
         Modifier.fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .fieldEffectsScene(fieldEffects, viewModel.field)
             .systemBarsPadding()
     ) {
         // a compact top bar, to leave room for the calc
@@ -36,6 +40,8 @@ internal fun DamageCalcScreenMobile(viewModel: DamageCalcViewModel) {
             )
         }
         Spacer(Modifier.height(4.dp))
-        DamageCalc(viewModel, Modifier.weight(1f))
+        CompositionLocalProvider(LocalFieldEffectsScene provides fieldEffects) {
+            DamageCalc(viewModel, Modifier.weight(1f))
+        }
     }
 }
