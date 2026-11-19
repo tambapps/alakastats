@@ -159,13 +159,18 @@ private fun ButtonBar(
 
         val snackBar = LocalSnackBar.current
         Button(
-            onClick = { viewModel.saveTeam(onSuccess = {
-                exitScreen()
-                snackBar.show(
-                    if (isEditing) "Updated team successfully"
-                    else "Created team successfully", SnackBar.Severity.SUCCESS
+            onClick = {
+                viewModel.saveTeam(
+                    onSuccess = {
+                        exitScreen()
+                        snackBar.show(
+                            if (isEditing) "Updated team successfully"
+                            else "Created team successfully", SnackBar.Severity.SUCCESS
+                        )
+                    },
+                    onError = { snackBar.show("Error: ${it.message}", SnackBar.Severity.ERROR) },
                 )
-            }) },
+            },
             modifier = Modifier.weight(1f),
             enabled = viewModel.isFormValid,
         ) {

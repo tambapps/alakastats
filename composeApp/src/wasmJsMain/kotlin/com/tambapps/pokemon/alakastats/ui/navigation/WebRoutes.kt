@@ -15,6 +15,8 @@ private const val POKEDEX_MOVES_PATH = "moves"
 private const val POKEDEX_ABILITIES_PATH = "abilities"
 private const val TEAMS_PATH = "teams"
 private const val TEAM_POKEMON_PATH = "pokemon"
+private const val NEW_TEAM_PATH = "new"
+private const val EDIT_TEAM_PATH = "edit"
 private const val SPEED_INTERACTIONS_PATH = "speed-interactions"
 private const val REPLAY_REF_PARAM = "replayRef"
 
@@ -29,6 +31,8 @@ private val BACK_STACK_BY_PATH: Map<String, List<AppRoute>> = mapOf(
     "$POKEDEX_PATH/$POKEDEX_ABILITIES_PATH" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexAbilities),
     "$POKEDEX_PATH/$POKEDEX_MOVES_PATH" to listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves),
     "replays" to listOf(AppRoute.Home, AppRoute.ShowdownReplays),
+    // where the home screen's Create button leads. Not a team id: they're UUIDs
+    "$TEAMS_PATH/$NEW_TEAM_PATH" to listOf(AppRoute.Home, AppRoute.EditTeam()),
     "about" to listOf(AppRoute.Home, AppRoute.About),
     "cloud-sync" to listOf(AppRoute.Home, AppRoute.CloudSync),
     "damage-calc" to listOf(AppRoute.Home, AppRoute.DamageCalc),
@@ -81,6 +85,9 @@ internal object WebRoutes {
      */
     private fun teamBackStackOf(teamId: String, tabPath: String?, query: String): List<AppRoute> {
         val id = Uuid.parseOrNull(teamId) ?: return listOf(AppRoute.Home)
+        // as from the team's menu: in place of the team's screen, going back to it when leaving. It goes back to the
+        // team's screen too if the team can't be edited, which goes back to the home screen if it doesn't exist
+        if (tabPath == EDIT_TEAM_PATH) return listOf(AppRoute.Home, AppRoute.EditTeam(id, redirectToTeamlytics = true))
         val tab = TeamlyticsTab.entries.find { it.path == tabPath } ?: TeamlyticsTab.OVERVIEW
         // only the replays tab has replays to scroll to
         val replayRef = if (tab == TeamlyticsTab.REPLAYS) parseQueryString(query)[REPLAY_REF_PARAM]?.ifEmpty { null } else null
@@ -124,6 +131,8 @@ internal object WebRoutes {
             // the first tab is the team's own URL
             if (route.tab == TeamlyticsTab.OVERVIEW) teamPath else "$teamPath/${route.tab.path}$query"
         }
+        // whether opened from the home screen or from the team's menu
+        is AppRoute.EditTeam -> "$TEAMS_PATH/${route.teamId?.let { "$it/$EDIT_TEAM_PATH" } ?: NEW_TEAM_PATH}"
         // names aren't always URL safe, e.g. Flabébé
         is AppRoute.PokemonDetails -> "$TEAMS_PATH/${route.teamId}/$TEAM_POKEMON_PATH/${route.pokemonName.encodeURLPathPart()}"
         is AppRoute.SpeedInteractionsTeamSetup -> "$TEAMS_PATH/${route.teamId}/${TeamlyticsTab.QUIZZES.path}/$SPEED_INTERACTIONS_PATH"

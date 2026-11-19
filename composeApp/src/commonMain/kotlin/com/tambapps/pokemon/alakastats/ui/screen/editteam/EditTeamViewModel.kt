@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.tambapps.pokemon.alakastats.domain.error.GetTeamlyticsError
 import com.tambapps.pokemon.alakastats.domain.model.Format
 import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.UserName
@@ -85,18 +86,19 @@ class EditTeamViewModel(
         sdNames.remove(name)
     }
 
-    fun saveTeam(onSuccess: () -> Unit) {
+    /** @param onError e.g. the team is shared with the user as a viewer: the screen stays, with what was entered */
+    fun saveTeam(onSuccess: () -> Unit, onError: (GetTeamlyticsError) -> Unit) {
         if (isFormValid) {
             val pokepaste = appliedPokepaste ?: return
             scope.launch {
-                if (editingTeam != null) {
+                val result = if (editingTeam != null) {
                     editTeamlyticsUseCase.edit(
                         editingTeam!!,
                         name = teamName,
                         sdNames = sdNames.map(::UserName),
                         pokePaste = pokepaste,
                         format = format
-                    ).getOrNull()
+                    )
                 } else {
                     editTeamlyticsUseCase.create(
                         name = teamName,
@@ -104,9 +106,12 @@ class EditTeamViewModel(
                         pokePaste = pokepaste,
                         format = format,
                         localOnly = canChooseSync && !syncWithCloud,
-                    ).getOrNull()
+                    )
                 }
-                onSuccess.invoke()
+                // navigating and showing a message from the main thread
+                withContext(Dispatchers.Main) {
+                    result.fold(onError, { onSuccess() })
+                }
             }
         }
     }
@@ -116,7 +121,8 @@ class EditTeamViewModel(
             val either = editTeamlyticsUseCase.get(teamlyticsId)
             withContext(Dispatchers.Main) {
                 val teamlytics = either.getOrNull()
-                if (teamlytics == null) {
+                // a viewer of a shared team has no way here but its URL, and couldn't save it
+                if (teamlytics == null || syncService.isReadOnly(teamlyticsId)) {
                     onFailure.invoke()
                     return@withContext
                 }

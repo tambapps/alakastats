@@ -248,7 +248,24 @@ class WebRoutesTest {
         assertEquals("pokedex/pokemon", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon())))
         assertEquals("pokedex/metagross", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexPokemon(), AppRoute.PokedexPokemon("metagross"))))
         assertEquals("pokedex/moves", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.Pokedex, AppRoute.PokedexMoves)))
-        // no URL for this screen yet
-        assertEquals("", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.EditTeam())))
+        // no URL for this screen
+        assertEquals("", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.ManualReplay(teamId))))
+    }
+
+    @Test
+    fun aTeamIsCreatedAboveTheHomeScreen() {
+        val backStack = listOf(AppRoute.Home, AppRoute.EditTeam())
+        assertEquals(backStack, WebRoutes.backStackOf("teams/new"))
+        assertEquals("teams/new", WebRoutes.pathOf(backStack))
+    }
+
+    @Test
+    fun aTeamIsEditedInPlaceOfItsScreen() {
+        val backStack = listOf(AppRoute.Home, AppRoute.EditTeam(teamId, redirectToTeamlytics = true))
+        assertEquals(backStack, WebRoutes.backStackOf("teams/$teamId/edit"))
+        assertEquals("teams/$teamId/edit", WebRoutes.pathOf(backStack))
+        // opened from the home screen, going back to it
+        assertEquals("teams/$teamId/edit", WebRoutes.pathOf(listOf(AppRoute.Home, AppRoute.EditTeam(teamId))))
+        assertEquals(listOf(AppRoute.Home), WebRoutes.backStackOf("teams/not-an-id/edit"))
     }
 }

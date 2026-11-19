@@ -67,7 +67,7 @@ class BackStackHistorySyncTest {
     private val pokemonSearch = AppRoute.PokedexPokemon()
     private val metagross = AppRoute.PokedexPokemon("metagross")
     // a screen without URL
-    private val createTeam = AppRoute.EditTeam()
+    private val manualReplay = AppRoute.ManualReplay(Uuid.random())
 
     private fun sync(
         history: WebHistory,
@@ -127,7 +127,7 @@ class BackStackHistorySyncTest {
     fun twoQuickPopsDontBringTheScreensBack() {
         val history = FakeHistory()
         val (sync, backStack) = sync(history, home)
-        sync.navigate(backStack) { add(createTeam) }
+        sync.navigate(backStack) { add(manualReplay) }
         sync.navigate(backStack) { add(pokedex) }
         sync.navigate(backStack) { removeLast() }
         sync.navigate(backStack) { removeLast() }
@@ -160,7 +160,7 @@ class BackStackHistorySyncTest {
     fun aScreenWithoutUrlIsAnEntryWithItsParentsUrlAndComesBackForward() {
         val history = FakeHistory()
         val (sync, backStack) = sync(history, home)
-        sync.navigate(backStack) { add(createTeam) }
+        sync.navigate(backStack) { add(manualReplay) }
         assertEquals("", history.path)
         assertEquals(2, history.entries.size)
 
@@ -168,7 +168,7 @@ class BackStackHistorySyncTest {
         assertEquals(listOf<NavKey>(home), backStack)
 
         history.pressForward(sync)
-        assertEquals(listOf<NavKey>(home, createTeam), backStack)
+        assertEquals(listOf<NavKey>(home, manualReplay), backStack)
     }
 
     @Test
@@ -227,9 +227,9 @@ class BackStackHistorySyncTest {
         history.pressBack(sync)
         sync.onBackStackChanged(backStack.toList())
 
-        sync.navigate(backStack) { add(createTeam) }
+        sync.navigate(backStack) { add(manualReplay) }
         assertEquals(2, history.entries.size)
-        assertEquals(listOf<NavKey>(home, createTeam), backStack)
+        assertEquals(listOf<NavKey>(home, manualReplay), backStack)
     }
 
     @Test
