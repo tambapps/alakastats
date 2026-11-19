@@ -521,12 +521,12 @@ private fun LayerScope.bottomCornersGlow(color: Color): DrawScope.() -> Unit {
  */
 private fun LayerScope.electric(color: Color, particles: List<Particle>, density: Float): Layer {
     val dp = 1.dp.toPx()
-    val count = particleCount(perArea = 120f, max = 40, density)
+    val count = particleCount(perArea = 100f, max = 55, density)
     val stroke = 1.5f * dp
     return { seconds ->
         for (i in 0 until count) {
             val p = particles[i]
-            val period = 1.5f + p.speed * 2.5f
+            val period = 1.2f + p.speed * 2f
             val cycle = (seconds + p.phase * period) / period
             val progress = cycle - floor(cycle)
             if (progress >= SPARK_DURATION) continue
@@ -561,8 +561,8 @@ private const val SPARK_SEGMENTS = 4
  */
 private fun LayerScope.grassy(color: Color, particles: List<Particle>, density: Float): Layer {
     val dp = 1.dp.toPx()
-    val leaves = particleCount(perArea = 130f, max = 35, density)
-    val pollen = particleCount(perArea = 140f, max = 30, density)
+    val leaves = particleCount(perArea = 115f, max = 45, density)
+    val pollen = particleCount(perArea = 120f, max = 40, density)
     val sway = 12 * dp
     return { seconds ->
         for (i in 0 until leaves) {
@@ -602,8 +602,8 @@ private fun LayerScope.misty(color: Color, particles: List<Particle>, density: F
     // one gradient for all the patches, scaled to each one's size
     val patchRadius = 100 * dp
     val patchBrush = Brush.radialGradient(listOf(color.copy(alpha = 0.12f), Color.Transparent), Offset.Zero, patchRadius)
-    val patches = particleCount(perArea = 220f, max = 12, density)
-    val glitters = particleCount(perArea = 120f, max = 35, density)
+    val patches = particleCount(perArea = 200f, max = 14, density)
+    val glitters = particleCount(perArea = 100f, max = 45, density)
     return { seconds ->
         for (i in 0 until patches) {
             val p = particles[i]
@@ -634,13 +634,13 @@ private fun LayerScope.misty(color: Color, particles: List<Particle>, density: F
  */
 private fun LayerScope.psychic(color: Color, particles: List<Particle>, density: Float): Layer {
     val dp = 1.dp.toPx()
-    val ripples = particleCount(perArea = 170f, max = 16, density)
-    val motes = particleCount(perArea = 130f, max = 30, density)
+    val ripples = particleCount(perArea = 150f, max = 20, density)
+    val motes = particleCount(perArea = 115f, max = 40, density)
     val stroke = Stroke(width = 1.5f * dp)
     return { seconds ->
         for (i in 0 until ripples) {
             val p = particles[i]
-            val period = 3f + p.speed * 2f
+            val period = 2.5f + p.speed * 2f
             val cycle = (seconds + p.phase * period) / period
             val n = cycle.toInt()
             val center = Offset(hash(p.x, n) * size.width, hash(p.y, n) * size.height)
