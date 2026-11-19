@@ -51,6 +51,7 @@ import com.tambapps.pokemon.alakastats.ui.service.PokemonSprite
 import com.tambapps.pokemon.champions.data.Ability
 import com.tambapps.pokemon.champions.data.ChampionsDex
 import com.tambapps.pokemon.champions.engine.Battlefield
+import com.tambapps.pokemon.champions.engine.SideConditions
 import com.tambapps.pokemon.champions.engine.Status
 import com.tambapps.pokemon.champions.engine.returnsDefenderMove
 import org.jetbrains.compose.resources.painterResource
@@ -71,6 +72,8 @@ internal fun DamageCalcPokemonColumn(
     team: Teamlytics?,
     opponent: DamageCalcPokemonState,
     field: Battlefield,
+    // changes the conditions of this pokemon's side of the field
+    onSideConditionsChange: (SideConditions) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showPasteDialog by remember { mutableStateOf(false) }
@@ -120,6 +123,14 @@ internal fun DamageCalcPokemonColumn(
                     megaSwitch()
                 }
             }
+            // the conditions on for this pokemon's side of the field, seen with it at all times. A click removes one
+            val sideConditions = if (isAttacker) field.attackerSide else field.defenderSide
+            SideConditionBadges(
+                conditions = sideConditions,
+                onClick = { onSideConditionsChange(it.remove(sideConditions)) },
+                alignment = if (isAttacker) Alignment.Start else Alignment.End,
+                modifier = Modifier.fillMaxWidth(),
+            )
             // the team next to the set's fields, to switch between its pokemon in one click. On the side of the field
             // (right of the attacker, left of the defender), mirrored like the header. The stats and the HP are next to
             // it too, the team being taller than the set's fields alone

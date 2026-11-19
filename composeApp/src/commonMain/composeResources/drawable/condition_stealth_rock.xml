@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <!-- Material Symbols "landslide" (filled), Apache 2.0 -->
+  <group android:translateY="960">
+    <path
+        android:pathData="M80-80v-170l160 52 441-147L880-80H80Zm160-202L80-336v-74l160 52 276-92 102 41-378 127Zm500-118 180-80v-160l-180-40-100 80v120l100 80Zm-500-42L80-496v-144h240l103 137-183 61Zm240-198 200-80v-200l-200-40-120 80v160l120 80Z"
+        android:fillColor="#ffffff"/>
+  </group>
+</vector>

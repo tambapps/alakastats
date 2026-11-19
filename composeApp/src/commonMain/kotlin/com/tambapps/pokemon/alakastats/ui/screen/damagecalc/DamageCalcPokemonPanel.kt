@@ -93,6 +93,8 @@ internal fun DamageCalcPokemonPanel(
     opponent: DamageCalcPokemonState,
     // the field of the calc, for the final speed
     field: Battlefield,
+    // what clicking one of the badges of this side's conditions does, e.g. going to the field's page
+    onSideConditionClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showPokemonDialog by remember { mutableStateOf(false) }
@@ -123,6 +125,14 @@ internal fun DamageCalcPokemonPanel(
                 MegaSwitch(state.isMegaEvolved, onCheckedChange = { state.setMegaEvolved(it) })
             }
         }
+        // the conditions on for this pokemon's side of the field, on its side like its sprite. A tap goes to the field's
+        // page to change them, a badge being too small to remove one without mistakes
+        SideConditionBadges(
+            conditions = if (side == DamageCalcSide.ATTACKER) field.attackerSide else field.defenderSide,
+            onClick = { onSideConditionClick() },
+            alignment = if (side == DamageCalcSide.ATTACKER) Alignment.Start else Alignment.End,
+            modifier = Modifier.fillMaxWidth(),
+        )
         // the team's pokemon, to fill one in a single tap, sharing the width equally
         if (team != null) {
             Row(horizontalArrangement = Arrangement.spacedBy(TEAM_BUTTONS_SPACING)) {

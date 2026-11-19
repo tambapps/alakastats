@@ -44,7 +44,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 private val PAGES = listOf("Attacker", "Field", "Defender")
+private const val ATTACKER_PAGE = 0
 private const val FIELD_PAGE = 1
+private const val DEFENDER_PAGE = 2
 private const val RESULT_HEADER_ITEM_INDEX = 0
 private const val STICKY_HEADER_ITEM_INDEX = 1
 private const val SCROLL_TO_TOP_DURATION_MILLIS = 300
@@ -122,7 +124,9 @@ internal fun DamageCalcMobile(
                     .padding(bottom = teamlyticsTabPaddingBottom)
                 when (page) {
                     0 -> DamageCalcPokemonPanel(
-                        viewModel.attacker, DamageCalcSide.ATTACKER, team, viewModel.defender, viewModel.field, pageModifier
+                        viewModel.attacker, DamageCalcSide.ATTACKER, team, viewModel.defender, viewModel.field,
+                        onSideConditionClick = { scope.launch { pagerState.animateScrollToPage(FIELD_PAGE) } },
+                        modifier = pageModifier,
                     )
                     FIELD_PAGE -> DamageCalcFieldPanel(
                         field = viewModel.field,
@@ -132,7 +136,9 @@ internal fun DamageCalcMobile(
                         modifier = pageModifier
                     )
                     2 -> DamageCalcPokemonPanel(
-                        viewModel.defender, DamageCalcSide.DEFENDER, team, viewModel.attacker, viewModel.field, pageModifier
+                        viewModel.defender, DamageCalcSide.DEFENDER, team, viewModel.attacker, viewModel.field,
+                        onSideConditionClick = { scope.launch { pagerState.animateScrollToPage(FIELD_PAGE) } },
+                        modifier = pageModifier,
                     )
                 }
             }
@@ -207,7 +213,11 @@ private fun PageTabRow(pagerState: PagerState, scope: CoroutineScope, field: Bat
                             WeatherIcon(field.weather, Modifier.size(TAB_ICON_SIZE))
                             TerrainIcon(field.terrain, Modifier.size(TAB_ICON_SIZE))
                         }
+                        // the conditions on for each side, one dot per category, on the side of the field: after the
+                        // attacker's name, before the defender's
+                        if (index == DEFENDER_PAGE) SideConditionDots(field.defenderSide)
                         Text(title, maxLines = 1, softWrap = false)
+                        if (index == ATTACKER_PAGE) SideConditionDots(field.attackerSide)
                     }
                 }
             )

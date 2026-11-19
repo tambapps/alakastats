@@ -1,6 +1,24 @@
 package com.tambapps.pokemon.alakastats.ui.screen.damagecalc
 
 import alakastats.composeapp.generated.resources.Res
+import alakastats.composeapp.generated.resources.condition_aqua_ring
+import alakastats.composeapp.generated.resources.condition_aurora_veil
+import alakastats.composeapp.generated.resources.condition_battery
+import alakastats.composeapp.generated.resources.condition_binding
+import alakastats.composeapp.generated.resources.condition_charge
+import alakastats.composeapp.generated.resources.condition_curse
+import alakastats.composeapp.generated.resources.condition_friend_guard
+import alakastats.composeapp.generated.resources.condition_helping_hand
+import alakastats.composeapp.generated.resources.condition_ingrain
+import alakastats.composeapp.generated.resources.condition_leech_seed
+import alakastats.composeapp.generated.resources.condition_light_screen
+import alakastats.composeapp.generated.resources.condition_power_spot
+import alakastats.composeapp.generated.resources.condition_protect
+import alakastats.composeapp.generated.resources.condition_reflect
+import alakastats.composeapp.generated.resources.condition_salt_cure
+import alakastats.composeapp.generated.resources.condition_stealth_rock
+import alakastats.composeapp.generated.resources.condition_steely_spirit
+import alakastats.composeapp.generated.resources.condition_tailwind
 import alakastats.composeapp.generated.resources.restart_alt
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,35 +48,74 @@ import com.tambapps.pokemon.champions.engine.BattleFormat
 import com.tambapps.pokemon.champions.engine.Battlefield
 import com.tambapps.pokemon.champions.engine.SideConditions
 import com.tambapps.pokemon.champions.engine.Terrain
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
-private class SideConditionToggle(
+internal class SideConditionToggle(
     val displayName: String,
+    val icon: DrawableResource,
+    val category: SideConditionCategory,
     val isActive: (SideConditions) -> Boolean,
     val toggle: (SideConditions) -> SideConditions,
 )
 
 // only the conditions the damage engine takes into account. Hazards and end-of-turn effects count in the KO chance
-private val SIDE_CONDITION_TOGGLES = listOf(
-    SideConditionToggle("Protect", { it.isProtected }) { it.copy(isProtected = !it.isProtected) },
-    SideConditionToggle("Helping Hand", { it.hasHelpingHand }) { it.copy(hasHelpingHand = !it.hasHelpingHand) },
-    SideConditionToggle("Aurora Veil", { it.hasAuroraVeil }) { it.copy(hasAuroraVeil = !it.hasAuroraVeil) },
-    SideConditionToggle("Reflect", { it.hasReflect }) { it.copy(hasReflect = !it.hasReflect) },
-    SideConditionToggle("Light Screen", { it.hasLightScreen }) { it.copy(hasLightScreen = !it.hasLightScreen) },
-    SideConditionToggle("Tailwind", { it.hasTailwind }) { it.copy(hasTailwind = !it.hasTailwind) },
-    SideConditionToggle("Friend Guard", { it.hasFriendGuard }) { it.copy(hasFriendGuard = !it.hasFriendGuard) },
-    SideConditionToggle("Steely Spirit", { it.hasAllySteelySpirit }) { it.copy(hasAllySteelySpirit = !it.hasAllySteelySpirit) },
-    SideConditionToggle("Battery", { it.hasBattery }) { it.copy(hasBattery = !it.hasBattery) },
-    SideConditionToggle("Power Spot", { it.hasPowerSpot }) { it.copy(hasPowerSpot = !it.hasPowerSpot) },
-    SideConditionToggle("Stealth Rock", { it.hasStealthRock }) { it.copy(hasStealthRock = !it.hasStealthRock) },
-    SideConditionToggle("Leech Seed", { it.isLeechSeeded }) { it.copy(isLeechSeeded = !it.isLeechSeeded) },
-    SideConditionToggle("Salt Cure", { it.isSaltCured }) { it.copy(isSaltCured = !it.isSaltCured) },
-    SideConditionToggle("Curse", { it.isCursed }) { it.copy(isCursed = !it.isCursed) },
-    SideConditionToggle("Binding", { it.isBound }) { it.copy(isBound = !it.isBound) },
+internal val SIDE_CONDITION_TOGGLES = listOf(
+    SideConditionToggle("Protect", Res.drawable.condition_protect, SideConditionCategory.PROTECTION, { it.isProtected }) {
+        it.copy(isProtected = !it.isProtected)
+    },
+    SideConditionToggle("Helping Hand", Res.drawable.condition_helping_hand, SideConditionCategory.BOOST, { it.hasHelpingHand }) {
+        it.copy(hasHelpingHand = !it.hasHelpingHand)
+    },
+    SideConditionToggle("Aurora Veil", Res.drawable.condition_aurora_veil, SideConditionCategory.PROTECTION, { it.hasAuroraVeil }) {
+        it.copy(hasAuroraVeil = !it.hasAuroraVeil)
+    },
+    SideConditionToggle("Reflect", Res.drawable.condition_reflect, SideConditionCategory.PROTECTION, { it.hasReflect }) {
+        it.copy(hasReflect = !it.hasReflect)
+    },
+    SideConditionToggle("Light Screen", Res.drawable.condition_light_screen, SideConditionCategory.PROTECTION, { it.hasLightScreen }) {
+        it.copy(hasLightScreen = !it.hasLightScreen)
+    },
+    SideConditionToggle("Tailwind", Res.drawable.condition_tailwind, SideConditionCategory.SPEED, { it.hasTailwind }) {
+        it.copy(hasTailwind = !it.hasTailwind)
+    },
+    SideConditionToggle("Friend Guard", Res.drawable.condition_friend_guard, SideConditionCategory.PROTECTION, { it.hasFriendGuard }) {
+        it.copy(hasFriendGuard = !it.hasFriendGuard)
+    },
+    SideConditionToggle("Steely Spirit", Res.drawable.condition_steely_spirit, SideConditionCategory.BOOST, { it.hasAllySteelySpirit }) {
+        it.copy(hasAllySteelySpirit = !it.hasAllySteelySpirit)
+    },
+    SideConditionToggle("Battery", Res.drawable.condition_battery, SideConditionCategory.BOOST, { it.hasBattery }) {
+        it.copy(hasBattery = !it.hasBattery)
+    },
+    SideConditionToggle("Power Spot", Res.drawable.condition_power_spot, SideConditionCategory.BOOST, { it.hasPowerSpot }) {
+        it.copy(hasPowerSpot = !it.hasPowerSpot)
+    },
+    SideConditionToggle("Stealth Rock", Res.drawable.condition_stealth_rock, SideConditionCategory.RESIDUAL, { it.hasStealthRock }) {
+        it.copy(hasStealthRock = !it.hasStealthRock)
+    },
+    SideConditionToggle("Leech Seed", Res.drawable.condition_leech_seed, SideConditionCategory.RESIDUAL, { it.isLeechSeeded }) {
+        it.copy(isLeechSeeded = !it.isLeechSeeded)
+    },
+    SideConditionToggle("Salt Cure", Res.drawable.condition_salt_cure, SideConditionCategory.RESIDUAL, { it.isSaltCured }) {
+        it.copy(isSaltCured = !it.isSaltCured)
+    },
+    SideConditionToggle("Curse", Res.drawable.condition_curse, SideConditionCategory.RESIDUAL, { it.isCursed }) {
+        it.copy(isCursed = !it.isCursed)
+    },
+    SideConditionToggle("Binding", Res.drawable.condition_binding, SideConditionCategory.RESIDUAL, { it.isBound }) {
+        it.copy(isBound = !it.isBound)
+    },
     // this side's pokemon used Charge, like in the source calculator it only boosts that side's Electric moves
-    SideConditionToggle("Charge", { it.isCharged }) { it.copy(isCharged = !it.isCharged) },
-    SideConditionToggle("Aqua Ring", { it.hasAquaRing }) { it.copy(hasAquaRing = !it.hasAquaRing) },
-    SideConditionToggle("Ingrain", { it.isIngrained }) { it.copy(isIngrained = !it.isIngrained) },
+    SideConditionToggle("Charge", Res.drawable.condition_charge, SideConditionCategory.BOOST, { it.isCharged }) {
+        it.copy(isCharged = !it.isCharged)
+    },
+    SideConditionToggle("Aqua Ring", Res.drawable.condition_aqua_ring, SideConditionCategory.RECOVERY, { it.hasAquaRing }) {
+        it.copy(hasAquaRing = !it.hasAquaRing)
+    },
+    SideConditionToggle("Ingrain", Res.drawable.condition_ingrain, SideConditionCategory.RECOVERY, { it.isIngrained }) {
+        it.copy(isIngrained = !it.isIngrained)
+    },
 )
 
 // Spikes stack up to 3 layers: its chip cycles through 0 to 3

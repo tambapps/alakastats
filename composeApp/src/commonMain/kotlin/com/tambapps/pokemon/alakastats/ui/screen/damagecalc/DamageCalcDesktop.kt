@@ -117,6 +117,7 @@ private fun DesktopEditors(viewModel: DamageCalcViewModel, team: Teamlytics?, fi
             team = team,
             opponent = viewModel.defender,
             field = viewModel.field,
+            onSideConditionsChange = { viewModel.updateField(viewModel.field.copy(attackerSide = it)) },
             modifier = Modifier.weight(1.15f),
         )
         // no type tint on the field, between the two pokemon
@@ -141,6 +142,7 @@ private fun DesktopEditors(viewModel: DamageCalcViewModel, team: Teamlytics?, fi
             team = team,
             opponent = viewModel.attacker,
             field = viewModel.field,
+            onSideConditionsChange = { viewModel.updateField(viewModel.field.copy(defenderSide = it)) },
             modifier = Modifier.weight(1.15f),
         )
     }
