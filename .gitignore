@@ -2,6 +2,9 @@
 .kotlin
 .gradle
 **/build/
+# the isolated builds (-PisolatedBuild, see settings.gradle.kts)
+**/build-isolated/
+.gradle-isolated
 xcuserdata
 !src/**/build/
 local.properties
