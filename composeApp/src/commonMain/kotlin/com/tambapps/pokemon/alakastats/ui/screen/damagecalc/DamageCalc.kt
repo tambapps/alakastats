@@ -316,6 +316,8 @@ internal fun MoveChips(viewModel: DamageCalcViewModel, modifier: Modifier = Modi
                 onClick = { viewModel.selectMove(DamageCalcSide.ATTACKER, index) },
                 label = { Text(if (hits > 1) "$move ×$hits" else move) },
                 leadingIcon = moveType?.let { { MoveTypeImage(it, Modifier.size(FilterChipDefaults.IconSize)) } },
+                // opaque like the pages' tiles, the field effects being drawn behind
+                colors = FilterChipDefaults.filterChipColors(containerColor = MaterialTheme.colorScheme.surface),
             )
         }
     }
