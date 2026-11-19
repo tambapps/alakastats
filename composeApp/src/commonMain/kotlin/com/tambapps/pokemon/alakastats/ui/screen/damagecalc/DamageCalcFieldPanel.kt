@@ -185,25 +185,37 @@ private fun FieldChip(
     text: String,
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
-    val colors = MaterialTheme.colorScheme
     FilterChip(
         selected = selected,
         onClick = onClick,
         label = { Text(text, fontWeight = if (selected) FontWeight.Bold else null) },
         leadingIcon = leadingIcon,
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = colors.surface,
-            selectedContainerColor = colors.primaryContainer,
-            selectedLabelColor = colors.onPrimaryContainer,
-        ),
-        border = FilterChipDefaults.filterChipBorder(
-            enabled = true,
-            selected = selected,
-            selectedBorderColor = colors.primary,
-            selectedBorderWidth = 1.dp,
-        ),
+        colors = calcChipColors(),
+        border = calcChipBorder(selected),
     )
 }
+
+/**
+ * The colors of the calc's toggle chips (the field panel's, the ability's "Active"): opaque when not selected, in the
+ * result card's dark gold when selected
+ */
+@Composable
+internal fun calcChipColors() = FilterChipDefaults.filterChipColors(
+    containerColor = MaterialTheme.colorScheme.surface,
+    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+)
+
+/**
+ * The border of the calc's toggle chips, see [calcChipColors]: gold when selected
+ */
+@Composable
+internal fun calcChipBorder(selected: Boolean) = FilterChipDefaults.filterChipBorder(
+    enabled = true,
+    selected = selected,
+    selectedBorderColor = MaterialTheme.colorScheme.primary,
+    selectedBorderWidth = 1.dp,
+)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

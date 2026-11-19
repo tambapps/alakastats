@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -331,12 +330,17 @@ private fun AbilityField(state: DamageCalcPokemonState, modifier: Modifier = Mod
             FilterChip(
                 selected = state.isAbilityActive,
                 onClick = { state.isAbilityActive = !state.isAbilityActive },
-                label = { Text("Active", maxLines = 1, softWrap = false) },
-                // the default selected color barely stands out on the card
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-                ),
+                label = {
+                    Text(
+                        "Active",
+                        fontWeight = if (state.isAbilityActive) FontWeight.Bold else null,
+                        maxLines = 1,
+                        softWrap = false,
+                    )
+                },
+                // like the field panel's chips, the default selected color barely standing out on the card
+                colors = calcChipColors(),
+                border = calcChipBorder(state.isAbilityActive),
             )
         }
     }
