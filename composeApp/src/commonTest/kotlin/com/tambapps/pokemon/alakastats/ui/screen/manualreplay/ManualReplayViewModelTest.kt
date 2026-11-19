@@ -87,6 +87,33 @@ class ManualReplayViewModelTest {
     }
 
     @Test
+    fun aNewReplayHasChangesOnceSomethingIsEntered() {
+        val viewModel = viewModel()
+        assertFalse(viewModel.hasChanges)
+        viewModel.addOpponentPokemon(PokemonName("Garchomp"))
+        assertTrue(viewModel.hasChanges)
+        viewModel.removeOpponentPokemon(viewModel.opponentPokemonStates.single())
+        assertFalse(viewModel.hasChanges)
+        viewModel.updateNotes("lost to Trick Room")
+        assertTrue(viewModel.hasChanges)
+    }
+
+    @Test
+    fun anEditedReplayHasNoChangesUntilOneIsMade() {
+        val creation = viewModel()
+        creation.addOpponentPokemon(PokemonName("Garchomp"))
+        creation.updateWon(true)
+        creation.updateNotes("notes")
+        val replay = creation.buildReplayAnalytics()
+
+        val edition = viewModel()
+        edition.prepareEdition(replay)
+        assertFalse(edition.hasChanges)
+        edition.updateWon(false)
+        assertTrue(edition.hasChanges)
+    }
+
+    @Test
     fun blankLinkIsNoLink() {
         val viewModel = viewModel()
         viewModel.updateLink(" ")

@@ -46,6 +46,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
+import com.tambapps.pokemon.alakastats.ui.composables.rememberDiscardChangesGuard
 import com.tambapps.pokemon.alakastats.ui.composables.HideKeyboardButton
 import com.tambapps.pokemon.alakastats.ui.composables.doneKeyboardActions
 import com.tambapps.pokemon.alakastats.ui.composables.doneKeyboardOptions
@@ -80,13 +81,20 @@ fun EditTeamScreen(teamId: Uuid?, redirectToTeamlytics: Boolean) {
         }
     }
     val isCompact = LocalIsCompact.current
+    // the back and cancel buttons, and the system's and browser's back. Not leaving once saved, which has no changes
+    // left to lose
+    val onLeave = rememberDiscardChangesGuard(
+        hasChanges = { viewModel.hasChanges },
+        message = "This team has unsaved changes. Leave without saving them?",
+        onLeave = exitScreen,
+    )
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(if (teamId != null) "Edit Team" else "Create Team") },
                 navigationIcon = {
-                    BackIconButton(onClick = exitScreen)
+                    BackIconButton(onClick = onLeave)
                 }
             )
         }
@@ -122,7 +130,7 @@ fun EditTeamScreen(teamId: Uuid?, redirectToTeamlytics: Boolean) {
             Spacer(modifier = Modifier.weight(1f))
 
             HideKeyboardButton(Modifier.align(Alignment.End))
-            ButtonBar(viewModel, teamId != null, exitScreen)
+            ButtonBar(viewModel, teamId != null, onCancel = onLeave, exitScreen = exitScreen)
         }
     }
 
@@ -135,6 +143,7 @@ fun EditTeamScreen(teamId: Uuid?, redirectToTeamlytics: Boolean) {
 private fun ButtonBar(
     viewModel: EditTeamViewModel,
     isEditing: Boolean,
+    onCancel: () -> Unit,
     exitScreen: () -> Unit,
 ) {
     Row(
@@ -142,7 +151,7 @@ private fun ButtonBar(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         OutlinedButton(
-            onClick = exitScreen,
+            onClick = onCancel,
             modifier = Modifier.weight(1f)
         ) {
             Text("Cancel")

@@ -90,6 +90,23 @@ class ManualReplayViewModel(
     // the replay being edited, if we're not creating a new one
     private var editedReplay: ReplayAnalytics? = null
 
+    /** What the user entered, to tell whether they changed it. The megas are in the names shown */
+    private fun formState() = listOf(
+        youPokemonStates.map { it.displayedName },
+        youSelection.map { it.displayedName },
+        opponentPokemonStates.map { it.displayedName },
+        opponentSelection.map { it.displayedName },
+        won,
+        notes,
+        link,
+    )
+
+    // the empty form, or the replay being edited once restored
+    private var initialFormState = formState()
+
+    /** Whether leaving would lose what the user entered */
+    val hasChanges get() = formState() != initialFormState
+
     // restores the state of an already entered replay, so that it can be edited
     fun prepareEdition(replay: ReplayAnalytics) {
         if (editedReplay != null) {
@@ -108,6 +125,7 @@ class ManualReplayViewModel(
         restoreSelection(opponentPlayer, opponentPokemonStates, opponentSelection)
         restoreMega(youPlayer, youPokemonStates)
         restoreMega(opponentPlayer, opponentPokemonStates)
+        initialFormState = formState()
     }
 
     private fun restoreSelection(

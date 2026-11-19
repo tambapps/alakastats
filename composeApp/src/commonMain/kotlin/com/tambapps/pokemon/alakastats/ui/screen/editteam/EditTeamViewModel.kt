@@ -44,6 +44,15 @@ class EditTeamViewModel(
     var newSdNameInput by mutableStateOf("")
         private set
 
+    /** What the user entered, to tell whether they changed it. The paste as typed, even if not applied yet */
+    private fun formState() = listOf(teamName, format, sdNames.toList(), pokepaste)
+
+    // the empty form, or the team being edited once loaded
+    private var initialFormState = formState()
+
+    /** Whether leaving would lose what the user entered */
+    val hasChanges get() = formState() != initialFormState
+
     val isFormValid: Boolean
         get() = teamName.isNotBlank() && appliedPokepaste != null && sdNames.isNotEmpty()
 
@@ -117,6 +126,7 @@ class EditTeamViewModel(
                 format = teamlytics.format
                 sdNames.clear()
                 sdNames.addAll(teamlytics.sdNames.map { it.value })
+                initialFormState = formState()
             }
         }
     }

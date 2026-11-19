@@ -27,6 +27,9 @@ internal interface WebHistory {
     fun replace(index: Int, path: String)
 
     fun back()
+
+    /** Moves in the history by [delta] entries, asynchronously as [back] */
+    fun go(delta: Int)
 }
 
 internal class BrowserHistory : WebHistory {
@@ -42,22 +45,28 @@ internal class BrowserHistory : WebHistory {
     override fun replace(index: Int, path: String) = window.history.replaceState(index.toJsNumber(), "", rootPath + path)
 
     override fun back() = window.history.back()
+
+    override fun go(delta: Int) = window.history.go(delta)
 }
 
 /**
  * Keeps the back stack and the browser's history in sync, each going where the other one went
+ *
+ * @param interceptBack gives the browser's back (or forward) to the screen that took it over, if any (e.g. to ask
+ * before discarding changes): the history then goes back to where it was. Returns whether one did
  */
 internal class BackStackHistorySync(
     private val history: WebHistory,
     private val backStack: MutableList<NavKey>,
+    private val interceptBack: () -> Boolean = { false },
 ) {
     private var currentIndex = history.index ?: 0
 
     // what each history entry shows. The ones from before a reload aren't known: they're found from their URL
     private val backStackByIndex = mutableMapOf(currentIndex to backStack.toList())
 
-    // the history goes back asynchronously: what the browser then tells about it is already taken into account
-    private var pendingBacks = 0
+    // the history moves asynchronously: what the browser then tells about it is already taken into account
+    private var pendingMoves = 0
 
     init {
         // the URL may be replaced: it may not be known, or not written as the app does
@@ -78,7 +87,7 @@ internal class BackStackHistorySync(
             }
             newBackStack.size < currentBackStack.size && backStackByIndex[currentIndex - 1] == newBackStack -> {
                 currentIndex--
-                pendingBacks++
+                pendingMoves++
                 history.back()
             }
             else -> {
@@ -92,11 +101,19 @@ internal class BackStackHistorySync(
 
     /** The browser navigated, with its back or forward button */
     fun onHistoryChanged() {
-        if (pendingBacks > 0) {
-            pendingBacks--
+        if (pendingMoves > 0) {
+            pendingMoves--
             return
         }
-        currentIndex = history.index ?: currentIndex
+        val index = history.index
+        // an entry that isn't ours can't be undone: its distance to the current one isn't known
+        if (index != null && index != currentIndex && interceptBack()) {
+            // back to the entry the browser left, keeping the ones after it (unlike pushing it again)
+            pendingMoves++
+            history.go(currentIndex - index)
+            return
+        }
+        currentIndex = index ?: currentIndex
         val target = backStackByIndex.getOrPut(currentIndex) { WebRoutes.backStackOf(history.path) }
         Snapshot.withMutableSnapshot {
             // the screens in common aren't touched: they keep their state
@@ -109,7 +126,8 @@ internal class BackStackHistorySync(
 
 @Composable
 internal fun BrowserNavigationSync(backStack: MutableList<NavKey>, history: WebHistory) {
-    val sync = remember(backStack) { BackStackHistorySync(history, backStack) }
+    val backInterceptors = LocalBackInterceptors.current
+    val sync = remember(backStack) { BackStackHistorySync(history, backStack, backInterceptors::intercept) }
     LaunchedEffect(sync) {
         snapshotFlow { backStack.toList() }.collect(sync::onBackStackChanged)
     }

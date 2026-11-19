@@ -62,6 +62,7 @@ import com.tambapps.pokemon.alakastats.domain.model.Teamlytics
 import com.tambapps.pokemon.alakastats.domain.model.withContext
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
 import com.tambapps.pokemon.alakastats.ui.composables.HideKeyboardButton
+import com.tambapps.pokemon.alakastats.ui.composables.rememberDiscardChangesGuard
 import com.tambapps.pokemon.alakastats.ui.composables.doneKeyboardOptions
 import com.tambapps.pokemon.alakastats.ui.composables.keyboardAwarePadding
 import com.tambapps.pokemon.alakastats.ui.composables.searchKeyboardActions
@@ -106,8 +107,13 @@ fun MatchupPlansEdit(
             scrollToGamePlan = null
         }
     }
-    var showDiscardDialog by remember { mutableStateOf(false) }
-    val onLeave = { if (viewModel.hasChanges) showDiscardDialog = true else onCancel() }
+    // the editor isn't a screen of its own: without its back taken over, a back (the system's or the browser's) would
+    // leave the team, losing the changes without asking
+    val onLeave = rememberDiscardChangesGuard(
+        hasChanges = { viewModel.hasChanges },
+        message = "This matchup has unsaved changes. Leave without saving them?",
+        onLeave = onCancel,
+    )
 
     Scaffold(
         topBar = {
@@ -193,9 +199,6 @@ fun MatchupPlansEdit(
     viewModel.compositionDialogFor?.let { AddToCompositionDialog(viewModel, team, it) }
     viewModel.addReplayDialogFor?.let { SelectReplayExampleDialog(viewModel, team, it) }
     viewModel.gamePlanToDelete?.let { DeleteGamePlanDialog(viewModel, it) }
-    if (showDiscardDialog) {
-        DiscardChangesDialog(onDismiss = { showDiscardDialog = false }, onDiscard = onCancel)
-    }
 }
 
 @Composable
@@ -317,33 +320,6 @@ private fun DeleteGamePlanDialog(viewModel: MatchupPlanEditViewModel, gamePlanSt
         dismissButton = {
             TextButton(onClick = { viewModel.gamePlanToDelete = null }) {
                 Text("Cancel")
-            }
-        }
-    )
-}
-
-@Composable
-private fun DiscardChangesDialog(onDismiss: () -> Unit, onDiscard: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Discard Changes") },
-        text = {
-            Text(
-                "This matchup has unsaved changes. Leave without saving them?",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                onDismiss()
-                onDiscard()
-            }) {
-                Text("Discard", color = Color.Red)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Keep Editing")
             }
         }
     )

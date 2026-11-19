@@ -203,8 +203,9 @@ val appRouteSavedStateConfiguration = SavedStateConfiguration {
 fun AppNavDisplay(startRoutes: List<AppRoute>, backStackEffect: @Composable (NavBackStack<NavKey>) -> Unit) {
     val backStack = rememberNavBackStack(appRouteSavedStateConfiguration, *startRoutes.toTypedArray())
     val navigator = remember(backStack) { AppNavigator(backStack) }
-    backStackEffect(backStack)
-    CompositionLocalProvider(LocalAppNavigator provides navigator) {
+    val backInterceptors = remember { BackInterceptors() }
+    CompositionLocalProvider(LocalAppNavigator provides navigator, LocalBackInterceptors provides backInterceptors) {
+        backStackEffect(backStack)
         WithAppNavigationDrawer(backStack, navigator) {
             NavDisplay(
                 backStack = backStack,

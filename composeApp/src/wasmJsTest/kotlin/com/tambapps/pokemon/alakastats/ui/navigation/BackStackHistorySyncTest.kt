@@ -31,6 +31,17 @@ private class FakeHistory(path: String = "", initialIndex: Int? = null) : WebHis
         pendingBacks++
     }
 
+    val pendingGoes = mutableListOf<Int>()
+
+    override fun go(delta: Int) {
+        pendingGoes += delta
+    }
+
+    fun deliverPendingGo(sync: BackStackHistorySync) {
+        position += pendingGoes.removeFirst()
+        sync.onHistoryChanged()
+    }
+
     fun deliverPendingBack(sync: BackStackHistorySync) {
         pendingBacks--
         position--
@@ -58,9 +69,13 @@ class BackStackHistorySyncTest {
     // a screen without URL
     private val createTeam = AppRoute.EditTeam()
 
-    private fun sync(history: WebHistory, vararg routes: NavKey): Pair<BackStackHistorySync, MutableList<NavKey>> {
+    private fun sync(
+        history: WebHistory,
+        vararg routes: NavKey,
+        interceptBack: () -> Boolean = { false },
+    ): Pair<BackStackHistorySync, MutableList<NavKey>> {
         val backStack = routes.toMutableList()
-        return BackStackHistorySync(history, backStack) to backStack
+        return BackStackHistorySync(history, backStack, interceptBack) to backStack
     }
 
     private fun BackStackHistorySync.navigate(backStack: MutableList<NavKey>, change: MutableList<NavKey>.() -> Unit) {
@@ -215,6 +230,48 @@ class BackStackHistorySyncTest {
         sync.navigate(backStack) { add(createTeam) }
         assertEquals(2, history.entries.size)
         assertEquals(listOf<NavKey>(home, createTeam), backStack)
+    }
+
+    @Test
+    fun anInterceptedBackStaysOnTheScreenAndKeepsTheHistory() {
+        val history = FakeHistory()
+        var interceptions = 0
+        val (sync, backStack) = sync(history, home, interceptBack = { interceptions++; true })
+        sync.navigate(backStack) { add(pokedex) }
+
+        history.pressBack(sync)
+        assertEquals(1, interceptions)
+        assertEquals(listOf<NavKey>(home, pokedex), backStack)
+        assertEquals(listOf(1), history.pendingGoes)
+
+        // the browser coming back to the entry it left isn't another back
+        history.deliverPendingGo(sync)
+        assertEquals(1, interceptions)
+        assertEquals(listOf<NavKey>(home, pokedex), backStack)
+        assertEquals("pokedex", history.path)
+        assertEquals(2, history.entries.size)
+
+        // still in sync: a back in the app goes back in the history
+        sync.navigate(backStack) { removeLast() }
+        assertEquals(1, history.pendingBacks)
+    }
+
+    @Test
+    fun anInterceptedForwardStaysOnTheScreen() {
+        val history = FakeHistory()
+        var intercepting = false
+        val (sync, backStack) = sync(history, home, interceptBack = { intercepting })
+        sync.navigate(backStack) { add(pokedex) }
+        history.pressBack(sync)
+        sync.onBackStackChanged(backStack.toList())
+
+        intercepting = true
+        history.pressForward(sync)
+        assertEquals(listOf<NavKey>(home), backStack)
+        assertEquals(listOf(-1), history.pendingGoes)
+        history.deliverPendingGo(sync)
+        assertEquals(listOf<NavKey>(home), backStack)
+        assertEquals("", history.path)
     }
 
     @Test

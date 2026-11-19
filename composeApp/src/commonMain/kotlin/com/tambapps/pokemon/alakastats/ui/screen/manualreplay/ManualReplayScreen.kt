@@ -55,6 +55,7 @@ import com.tambapps.pokemon.alakastats.ui.LocalSnackBar
 import com.tambapps.pokemon.alakastats.ui.navigation.LocalAppNavigator
 import com.tambapps.pokemon.alakastats.ui.SnackBar
 import com.tambapps.pokemon.alakastats.ui.composables.BackIconButton
+import com.tambapps.pokemon.alakastats.ui.composables.rememberDiscardChangesGuard
 import com.tambapps.pokemon.alakastats.ui.composables.FabLayout
 import com.tambapps.pokemon.alakastats.ui.composables.HideKeyboardButton
 import com.tambapps.pokemon.alakastats.ui.composables.keyboardAwarePadding
@@ -114,12 +115,18 @@ private fun ManualReplayForm(viewModel: ManualReplayViewModel, replayToEdit: Rep
             viewModel.prepareEdition(replayToEdit)
         }
     }
+    // the back button, and the system's and browser's back. Not Done, which keeps what was entered
+    val onLeave = rememberDiscardChangesGuard(
+        hasChanges = { viewModel.hasChanges },
+        message = "This replay has unsaved changes. Leave without saving them?",
+        onLeave = navigator::pop,
+    )
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(if (replayToEdit != null) "Edit Replay" else "Add Replay Manually") },
-                navigationIcon = { BackIconButton(navigator) }
+                navigationIcon = { BackIconButton(onClick = onLeave) }
             )
         }
     ) { scaffoldPadding ->
