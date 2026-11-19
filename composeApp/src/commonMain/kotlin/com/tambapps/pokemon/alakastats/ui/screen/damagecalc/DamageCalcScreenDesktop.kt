@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -17,9 +18,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun DamageCalcScreenDesktop(viewModel: DamageCalcViewModel) {
+    // the field effects behind the whole screen, the title included, the field card showing its part of them
+    val fieldEffects = rememberFieldEffectsScene(viewModel.field)
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
+            .fieldEffectsScene(fieldEffects, viewModel.field)
             .padding(all = 16.dp)
             .fillMaxSize(),
     ) {
@@ -32,6 +36,8 @@ internal fun DamageCalcScreenDesktop(viewModel: DamageCalcViewModel) {
                     .clickable { viewModel.scrollToTopSignal.emit() }
             )
         }
-        DamageCalc(viewModel, Modifier.weight(1f))
+        CompositionLocalProvider(LocalFieldEffectsScene provides fieldEffects) {
+            DamageCalc(viewModel, Modifier.weight(1f))
+        }
     }
 }

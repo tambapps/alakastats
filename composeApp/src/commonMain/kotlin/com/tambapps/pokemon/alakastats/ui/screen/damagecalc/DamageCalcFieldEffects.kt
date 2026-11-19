@@ -184,14 +184,6 @@ internal fun rememberFieldEffectsScene(field: Battlefield): FieldEffectsScene {
 }
 
 /**
- * The weather and the terrain of [field] drawn behind the content, with a scene of its own. Nothing without weather
- * nor terrain
- */
-@Composable
-internal fun Modifier.fieldEffectsBackground(field: Battlefield): Modifier =
-    fieldEffectsScene(rememberFieldEffectsScene(field), field)
-
-/**
  * The whole [scene] drawn behind the content, its size being the scene's
  */
 @Composable

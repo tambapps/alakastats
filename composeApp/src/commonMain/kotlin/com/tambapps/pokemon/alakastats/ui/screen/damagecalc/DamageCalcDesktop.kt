@@ -78,7 +78,14 @@ internal fun DamageCalcDesktop(
     val isResultCardScrolledAway by remember {
         derivedStateOf { resultCardHeight > 0 && scrollState.value > paddingPx + resultCardHeight }
     }
-    Box(modifier.fillMaxSize()) {
+    // the field effects behind the whole calc, still while scrolling: the screen's when it draws them behind its title
+    // too, else this box's
+    val screenFieldEffects = LocalFieldEffectsScene.current
+    val fieldEffects = screenFieldEffects ?: rememberFieldEffectsScene(viewModel.field)
+    Box(
+        modifier.fillMaxSize()
+            .then(if (screenFieldEffects == null) Modifier.fieldEffectsScene(fieldEffects, viewModel.field) else Modifier)
+    ) {
         Column(
             Modifier.fillMaxSize()
                 .verticalScroll(scrollState)
@@ -87,7 +94,7 @@ internal fun DamageCalcDesktop(
             verticalArrangement = Arrangement.spacedBy(PADDING)
         ) {
             DesktopResultCard(viewModel, Modifier.onSizeChanged { resultCardHeight = it.height })
-            DesktopEditors(viewModel, team)
+            DesktopEditors(viewModel, team, fieldEffects)
         }
         // pinned while editing what's under the result card, to see the result change
         AnimatedVisibility(
@@ -102,7 +109,7 @@ internal fun DamageCalcDesktop(
 }
 
 @Composable
-private fun DesktopEditors(viewModel: DamageCalcViewModel, team: Teamlytics?) {
+private fun DesktopEditors(viewModel: DamageCalcViewModel, team: Teamlytics?, fieldEffects: FieldEffectsScene) {
     Row(horizontalArrangement = Arrangement.spacedBy(PADDING), verticalAlignment = Alignment.Top) {
         DamageCalcPokemonColumn(
             state = viewModel.attacker,
@@ -123,7 +130,8 @@ private fun DesktopEditors(viewModel: DamageCalcViewModel, team: Teamlytics?) {
                 onFieldChange = { viewModel.updateField(it) },
                 onReset = { viewModel.resetField() },
                 canReset = viewModel.hasFieldState,
-                modifier = Modifier.fieldEffectsBackground(viewModel.field).padding(12.dp),
+                // its part of the effects behind the calc, as if the card were see-through: no seam with its margins
+                modifier = Modifier.fieldEffectsWindow(fieldEffects, viewModel.field).padding(12.dp),
                 sideName = { it.desktopName },
             )
         }
